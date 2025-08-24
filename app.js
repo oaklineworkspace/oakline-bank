@@ -1,8 +1,9 @@
 // Replace these with your Supabase project credentials
 const SUPABASE_URL = "https://nrjdmgltshosdqccaymr.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5yamRtZ2x0c2hvc2RxY2NheW1yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwMzYyMjAsImV4cCI6MjA3MTYxMjIyMH0.b9H553W2PCsSNvr8HyyINl4nTSrldHN_QMQ3TVwt6qk";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5yamRtZ2x0c2RxY2NheW1yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwMzYyMjAsImV4cCI6MjA3MTYxMjIyMH0.b9H553W2PCsSNvr8HyyINl4nTSrldHN_QMQ3TVwt6qk";
 
-const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+// Initialize Supabase client
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const signupForm = document.getElementById("signupForm");
 const messageDiv = document.getElementById("message");
@@ -29,6 +30,9 @@ signupForm.addEventListener("submit", async (e) => {
   const country = document.getElementById("country").value.trim();
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value;
+
+  // profile_picture_url set to null to avoid affecting account creation
+  const profile_picture_url = null;
 
   // Get selected account types
   const accountTypes = Array.from(document.querySelectorAll(".accountType:checked")).map(cb => cb.value);
@@ -59,6 +63,7 @@ signupForm.addEventListener("submit", async (e) => {
           ssn_or_id,
           phone,
           date_of_birth,
+          profile_picture_url,   // Always null
           street_address,
           city,
           state,
