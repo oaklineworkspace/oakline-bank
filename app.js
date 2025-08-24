@@ -74,3 +74,56 @@ signupForm.addEventListener("submit", async (e) => {
 function generateAccountNumber() {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
+
+// Ensure user is logged in and show dashboard
+async function loadDashboard() {
+  const user = supabase.auth.user();
+  if (!user) {
+    window.location.href = "login.html"; // Redirect if not logged in
+    return;
+  }
+
+  // Display basic user info
+  const { data: accounts, error } = await supabase
+    .from("accounts")
+    .select("*")
+    .eq("user_id", user.id);
+
+  if (error) {
+    console.error("Error fetching accounts:", error);
+    return;
+  }
+
+  const userInfoDiv = document.getElementById("userInfo");
+  userInfoDiv.innerHTML = `
+    <p>Hello, ${accounts[0].first_name} ${accounts[0].last_name} from ${accounts[0].country}</p>
+  `;
+
+  // Populate accounts table
+  const tbody = document.getElementById("accountsTable").querySelector("tbody");
+  tbody.innerHTML = "";
+  accounts.forEach(account => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${account.account_type}</td>
+      <td>${account.account_number}</td>
+      <td>${account.routing_number}</td>
+      <td>$${parseFloat(account.balance).toFixed(2)}</td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+
+// Call loadDashboard if on dashboard.html
+if (document.getElementById("accountsTable")) {
+  loadDashboard();
+}
+
+// Logout functionality
+const logoutBtn = document.getElementById("logoutBtn");
+if (logoutBtn) {
+  logoutBtn.addEventListener("click", async () => {
+    await supabase.auth.signOut();
+    window.location.href = "login.html";
+  });
+}
