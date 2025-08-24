@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard - Oakline Bank</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Welcome, <span id="user-email"></span></h1>
+    <p>Account Number: <span id="account-number"></span></p>
+    <p>Account Type: <span id="account-type-display"></span></p>
+    <p>Routing Number: <span id="routing-number"></span></p>
+    <p>Account Balance: $<span id="balance">0</span></p>
+
+    <input type="number" id="amount" placeholder="Amount">
+    <button id="deposit">Deposit</button>
+    <button id="withdraw">Withdraw</button>
+    <button id="logout">Logout</button>
+  </div>
+
+<script src="app.js"></script>
+</body>
+</html>
