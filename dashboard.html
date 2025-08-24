@@ -1,25 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard - Oakline Bank</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Oakline Bank - Dashboard</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="container">
-    <h1>Welcome, <span id="user-email"></span></h1>
-    <p>Account Number: <span id="account-number"></span></p>
-    <p>Account Type: <span id="account-type-display"></span></p>
-    <p>Routing Number: <span id="routing-number"></span></p>
-    <p>Account Balance: $<span id="balance">0</span></p>
+  <h1>Welcome to Oakline Bank Dashboard</h1>
+  <div id="userInfo"></div>
+  <h2>Your Accounts</h2>
+  <table id="accountsTable" border="1">
+    <thead>
+      <tr>
+        <th>Account Type</th>
+        <th>Account Number</th>
+        <th>Routing Number</th>
+        <th>Balance</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Accounts will be loaded here -->
+    </tbody>
+  </table>
 
-    <input type="number" id="amount" placeholder="Amount">
-    <button id="deposit">Deposit</button>
-    <button id="withdraw">Withdraw</button>
-    <button id="logout">Logout</button>
-  </div>
+  <button id="logoutBtn">Logout</button>
 
-<script src="app.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
