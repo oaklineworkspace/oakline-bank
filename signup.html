@@ -5,31 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Oakline Bank - Signup</title>
   <link rel="stylesheet" href="style.css">
-  <style>
-    body { font-family: Arial, sans-serif; padding: 20px; background: #f5f6fa; }
-    h1 { text-align: center; margin-bottom: 20px; }
-    form { max-width: 500px; margin: auto; background: #fff; padding: 20px; border-radius: 10px; }
-    h3 { margin-top: 20px; }
-    input[type=text], input[type=email], input[type=password], input[type=date] { width: 100%; padding: 8px; margin: 5px 0; border-radius: 5px; border: 1px solid #ccc; }
-    label { display: block; margin: 5px 0; }
-    button { padding: 10px 20px; margin-top: 20px; width: 100%; background: #2d89ef; color: #fff; border: none; border-radius: 5px; font-size: 16px; }
-    button:hover { background: #1b5dab; cursor: pointer; }
-    #message { text-align: center; margin-top: 15px; color: green; font-weight: bold; }
-  </style>
 </head>
 <body>
   <h1>Oakline Bank Signup</h1>
   <form id="signupForm">
+    
+    <!-- Full Name -->
     <h3>Full Name</h3>
     <input type="text" id="firstName" placeholder="First Name" required />
     <input type="text" id="middleName" placeholder="Middle Name" />
     <input type="text" id="lastName" placeholder="Last Name" required />
 
+    <!-- Identification -->
     <h3>Identification</h3>
     <input type="text" id="ssnOrId" placeholder="SSN or ID Number" required />
     <input type="text" id="phone" placeholder="Phone Number" />
     <input type="date" id="dob" placeholder="Date of Birth" />
 
+    <!-- Address -->
     <h3>Address</h3>
     <input type="text" id="street" placeholder="Street Address" required />
     <input type="text" id="city" placeholder="City" required />
@@ -37,20 +30,25 @@
     <input type="text" id="zip" placeholder="ZIP / Postal Code" required />
     <input type="text" id="country" placeholder="Country" required />
 
+    <!-- Account Types -->
     <h3>Account Types</h3>
     <label><input type="checkbox" value="Checking" class="accountType" /> Checking</label>
     <label><input type="checkbox" value="Saving" class="accountType" /> Saving</label>
     <label><input type="checkbox" value="Business" class="accountType" /> Business</label>
 
+    <!-- Login Credentials -->
     <h3>Login Credentials</h3>
     <input type="email" id="email" placeholder="Email" required />
     <input type="password" id="password" placeholder="Password" required />
 
+    <!-- Submit -->
     <button type="submit">Sign Up</button>
   </form>
 
+  <!-- Message display -->
   <div id="message"></div>
 
+  <!-- Link to app.js -->
   <script src="app.js"></script>
 </body>
 </html>
