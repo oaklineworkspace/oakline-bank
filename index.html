@@ -5,32 +5,104 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Oakline Bank</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f5f7fa;
+      color: #333;
+    }
+
+    header {
+      background: #004aad;
+      color: white;
+      padding: 1.5rem;
+      text-align: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 2rem;
+    }
+
+    nav {
+      margin-top: 1rem;
+    }
+
+    nav a {
+      color: white;
+      margin: 0 1rem;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    main {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 1rem;
+      text-align: center;
+    }
+
+    main h2 {
+      font-size: 1.8rem;
+      margin-bottom: 1rem;
+    }
+
+    main p {
+      max-width: 600px;
+      margin-bottom: 2rem;
+    }
+
+    .buttons a {
+      display: inline-block;
+      margin: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      background: #004aad;
+      color: white;
+      border-radius: 5px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: background 0.3s;
+    }
+
+    .buttons a:hover {
+      background: #003580;
+    }
+
+    footer {
+      background: #f1f1f1;
+      padding: 1rem;
+      text-align: center;
+      font-size: 0.9rem;
+      color: #666;
+      margin-top: 2rem;
+    }
+  </style>
 </head>
 <body>
   <header>
-    <h1>Welcome to Oakline Bank</h1>
-    <p>Your modern demo bank for seamless banking experience</p>
+    <h1>Oakline Bank</h1>
+    <nav>
+      <a href="signup.html">Sign Up</a>
+      <a href="login.html">Login</a>
+      <a href="dashboard.html">Dashboard</a>
+    </nav>
   </header>
 
   <main>
+    <h2>Welcome to Oakline Bank</h2>
+    <p>Your modern online bank. Secure, fast, and easy to use. Open accounts, manage funds, and access your banking services from any device.</p>
     <div class="buttons">
-      <a href="signup.html"><button>Sign Up</button></a>
-      <a href="login.html"><button>Login</button></a>
+      <a href="signup.html">Open an Account</a>
+      <a href="login.html">Login</a>
     </div>
-
-    <section>
-      <h2>Why Oakline Bank?</h2>
-      <ul>
-        <li>Modern, secure banking experience</li>
-        <li>Create Checking, Saving, or Business accounts</li>
-        <li>Access your dashboard and track balances</li>
-        <li>Works on any device, anywhere</li>
-      </ul>
-    </section>
   </main>
 
   <footer>
-    <p>&copy; 2025 Oakline Bank. All rights reserved.</p>
+    &copy; 2025 Oakline Bank. All rights reserved.
   </footer>
 </body>
 </html>
