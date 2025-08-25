@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Oakline Bank - Sign Up (Debug)</title>
+  <title>Oakline Bank - Sign Up</title>
   <style>
     body { font-family: Arial, sans-serif; padding: 2rem; }
     input { display: block; margin: 0.5rem 0; padding: 0.5rem; width: 300px; }
     button { padding: 0.5rem 1rem; }
-    #message { margin-top: 1rem; color: red; }
+    #message { margin-top: 1rem; color: red; white-space: pre-wrap; }
   </style>
 </head>
 <body>
@@ -29,11 +29,10 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.28.0/dist/supabase.min.js"></script>
 
   <script>
-    // Replace these with your Vercel environment variables when deployed
-    const SUPABASE_URL = 'https://nrjdmgltshosdqccaymr.supabase.co';       
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5yamRtZ2x0c2hvc2RxY2NheW1yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwMzYyMjAsImV4cCI6MjA3MTYxMjIyMH0.b9H553W2PCsSNvr8HyyINl4nTSrldHN_QMQ3TVwt6qk'; 
+    // Use Vercel environment variables
+    const SUPABASE_URL = window.env?.NEXT_PUBLIC_SUPABASE_URL || '%%REPLACE%%';
+    const SUPABASE_ANON_KEY = window.env?.NEXT_PUBLIC_SUPABASE_ANON_KEY || '%%REPLACE%%';
 
-    // Initialize Supabase client
     const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     const signupForm = document.getElementById("signupForm");
@@ -49,12 +48,12 @@
       const password = document.getElementById("password").value;
 
       messageDiv.style.color = 'red';
-      messageDiv.textContent = 'Signing up...';
+      messageDiv.textContent = 'Signing up...\nCheck browser console for details...';
 
       try {
-        console.log("Starting signup for:", email);
+        console.log("Signing up user:", email);
 
-        // Supabase Auth signup
+        // 1️⃣ Sign up with Supabase Auth
         const { data, error: signupError } = await supabase.auth.signUp({
           email,
           password,
@@ -65,31 +64,37 @@
 
         if (signupError) {
           console.error("Signup Error:", signupError);
-          messageDiv.textContent = "Signup Error: " + signupError.message;
+          messageDiv.textContent = "Signup Error:\n" + JSON.stringify(signupError, null, 2);
+          return;
+        }
+
+        if (!data || !data.user) {
+          console.error("No user returned after signup", data);
+          messageDiv.textContent = "Signup failed: No user returned.\nCheck Supabase Auth settings.";
           return;
         }
 
         console.log("Signup successful, user ID:", data.user.id);
 
-        // Insert profile
+        // 2️⃣ Insert profile into `profiles` table
         const { error: profileError } = await supabase
           .from("profiles")
           .insert([{ id: data.user.id, first_name, middle_name, last_name, email }]);
 
         if (profileError) {
           console.error("Profile Insert Error:", profileError);
-          messageDiv.textContent = "Profile Insert Error: " + profileError.message;
+          messageDiv.textContent = "Profile Insert Error:\n" + JSON.stringify(profileError, null, 2);
           return;
         }
 
-        console.log("Profile created successfully!");
+        console.log("Profile inserted successfully!");
         messageDiv.style.color = 'green';
         messageDiv.textContent = "Signup successful! Check your email to confirm your account.";
 
         signupForm.reset();
       } catch (err) {
         console.error("Unexpected Error:", err);
-        messageDiv.textContent = "Unexpected Error: " + err.message;
+        messageDiv.textContent = "Unexpected Error:\n" + err.message;
       }
     });
   </script>
