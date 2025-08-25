@@ -4,61 +4,95 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Oakline Bank - Dashboard</title>
-  <link rel="stylesheet" href="style.css">
+  <style>
+    body { font-family: Arial, sans-serif; padding: 2rem; }
+    h1 { color: #2c3e50; }
+    #profile, #accounts { margin-top: 2rem; }
+    table { border-collapse: collapse; width: 100%; max-width: 600px; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background-color: #f2f2f2; }
+    #logout { margin-top: 1rem; padding: 0.5rem 1rem; }
+  </style>
 </head>
 <body>
-  <h1>Dashboard</h1>
-  <p>Welcome, <span id="userName"></span></p>
-  <button id="openAccountBtn">Open New Account</button>
-  <button id="logoutBtn">Logout</button>
-
-  <div id="message" style="margin-top: 1rem; color:red;"></div>
+  <h1>Welcome to Oakline Bank</h1>
+  <div id="profile">
+    <h2>Your Profile</h2>
+    <p id="profileInfo">Loading...</p>
+  </div>
+  <div id="accounts">
+    <h2>Your Accounts</h2>
+    <table id="accountsTable">
+      <thead>
+        <tr>
+          <th>Account Type</th>
+          <th>Account Number</th>
+          <th>Balance</th>
+          <th>Routing Number</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <button id="logout">Logout</button>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.28.0/dist/supabase.min.js"></script>
-
   <script>
-    const SUPABASE_URL = '%%SUPABASE_URL%%';
-    const SUPABASE_ANON_KEY = '%%SUPABASE_ANON_KEY%%';
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const supabase = supabase.createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    );
 
-    const userNameSpan = document.getElementById('userName');
-    const messageDiv = document.getElementById('message');
-    const openAccountBtn = document.getElementById('openAccountBtn');
-    const logoutBtn = document.getElementById('logoutBtn');
+    const profileInfo = document.getElementById('profileInfo');
+    const accountsTableBody = document.querySelector('#accountsTable tbody');
+    const logoutBtn = document.getElementById('logout');
 
-    async function loadUser() {
-      const { data: { user } } = await supabase.auth.getUser();
+    async function loadDashboard() {
+      const user = supabase.auth.getUser ? (await supabase.auth.getUser()).data.user : null;
       if (!user) {
-        window.location.href = 'login.html';
+        window.location.href = '/login.html';
         return;
       }
 
-      const { data: profile, error } = await supabase
+      // Fetch profile
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', user.id)
         .single();
 
-      if (error) {
-        console.error("Profile Error:", error);
-        messageDiv.textContent = "Error loading profile: " + error.message;
-        return;
+      if (profileError) {
+        profileInfo.textContent = "Error loading profile: " + profileError.message;
+      } else {
+        profileInfo.textContent = `Name: ${profile.first_name} ${profile.middle_name || ''} ${profile.last_name}\nEmail: ${profile.email}`;
       }
 
-      userNameSpan.textContent = profile.first_name + " " + profile.last_name;
-    }
+      // Fetch accounts
+      const { data: accounts, error: accountsError } = await supabase
+        .from('accounts')
+        .select('*')
+        .eq('user_id', user.id);
 
-    openAccountBtn.addEventListener('click', () => {
-      // Redirect to account creation page
-      window.location.href = 'create_account.html';
-    });
+      if (accountsError) {
+        accountsTableBody.innerHTML = `<tr><td colspan="4">Error loading accounts: ${accountsError.message}</td></tr>`;
+      } else {
+        accountsTableBody.innerHTML = accounts.map(acc => `
+          <tr>
+            <td>${acc.account_type}</td>
+            <td>${acc.account_number}</td>
+            <td>${acc.balance.toFixed(2)}</td>
+            <td>${acc.routing_number}</td>
+          </tr>
+        `).join('');
+      }
+    }
 
     logoutBtn.addEventListener('click', async () => {
       await supabase.auth.signOut();
-      window.location.href = 'login.html';
+      window.location.href = '/login.html';
     });
 
-    loadUser();
+    loadDashboard();
   </script>
 </body>
 </html>
