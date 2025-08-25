@@ -1,71 +1,50 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Oakline Bank - Sign Up</title>
-  <style>
-    body { font-family: Arial, sans-serif; padding: 2rem; }
-    input { display: block; margin: 0.5rem 0; padding: 0.5rem; width: 300px; }
-    button { padding: 0.5rem 1rem; }
-    #message { margin-top: 1rem; color: red; white-space: pre-wrap; }
-  </style>
-</head>
-<body>
-  <h1>Sign Up</h1>
+<form id="signupForm">
+  <input type="text" id="firstName" placeholder="First Name" required />
+  <input type="text" id="middleName" placeholder="Middle Name" />
+  <input type="text" id="lastName" placeholder="Last Name" required />
+  <input type="email" id="email" placeholder="Email" required />
+  <input type="password" id="password" placeholder="Password" required />
+  <button type="submit">Sign Up</button>
+</form>
 
-  <form id="signupForm">
-    <input type="text" id="firstName" placeholder="First Name" required />
-    <input type="text" id="middleName" placeholder="Middle Name" />
-    <input type="text" id="lastName" placeholder="Last Name" required />
-    <input type="email" id="email" placeholder="Email" required />
-    <input type="password" id="password" placeholder="Password" required />
-    <button type="submit">Sign Up</button>
-  </form>
+<div id="message"></div>
 
-  <div id="message"></div>
+<script>
+const signupForm = document.getElementById("signupForm");
+const messageDiv = document.getElementById("message");
 
-  <script>
-    const signupForm = document.getElementById("signupForm");
-    const messageDiv = document.getElementById("message");
+signupForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-    signupForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
+  const first_name = document.getElementById("firstName").value.trim();
+  const middle_name = document.getElementById("middleName").value.trim();
+  const last_name = document.getElementById("lastName").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
 
-      const first_name = document.getElementById("firstName").value.trim();
-      const middle_name = document.getElementById("middleName").value.trim();
-      const last_name = document.getElementById("lastName").value.trim();
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value;
+  messageDiv.style.color = 'red';
+  messageDiv.textContent = 'Signing up...';
 
-      messageDiv.style.color = 'red';
-      messageDiv.textContent = 'Signing up...';
-
-      try {
-        const response = await fetch('/api/signup', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ first_name, middle_name, last_name, email, password })
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          messageDiv.textContent = "Error: " + (data.error || "Unknown error");
-          console.error("Signup error:", data);
-          return;
-        }
-
-        messageDiv.style.color = 'green';
-        messageDiv.textContent = `Signup successful! User ID: ${data.user_id}\nCheck your email to confirm the account.`;
-        signupForm.reset();
-        console.log("Signup successful:", data);
-
-      } catch (err) {
-        messageDiv.textContent = "Unexpected error: " + err.message;
-        console.error("Unexpected error:", err);
-      }
+  try {
+    const response = await fetch('/api/signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ first_name, middle_name, last_name, email, password })
     });
-  </script>
-</body>
-</html>
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      messageDiv.textContent = "Error: " + (data.error || "Unknown error");
+      return;
+    }
+
+    messageDiv.style.color = 'green';
+    messageDiv.textContent = "Signup successful! Check your email to confirm your account.";
+    signupForm.reset();
+
+  } catch (err) {
+    messageDiv.textContent = "Unexpected error: " + err.message;
+  }
+});
+</script>
