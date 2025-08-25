@@ -1,87 +1,189 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Oakline Bank - Dashboard</title>
-  <style>
-    body { font-family: Arial, sans-serif; padding: 2rem; }
-    h1 { margin-bottom: 1rem; }
-    #userInfo, #accounts { margin-top: 1rem; }
-    table { border-collapse: collapse; width: 100%; margin-top: 1rem; }
-    th, td { border: 1px solid #ccc; padding: 0.5rem; text-align: left; }
-  </style>
+<meta charset="UTF-8">
+<title>Demo Bank Dashboard</title>
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+const supabase = createClient(
+  'https://nrjdmgltshosdqccaymr.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5yamRtZ2x0c2RxY2NheW1yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwMzYyMjAsImV4cCI6MjA3MTYxMjIyMH0.b9H553W2PCsSNvr8HyyINl4nTSrldHN_QMQ3TVwt6qk'
+);
+
+window.userId = null;
+
+// Utility functions
+function formatTransactionId(){ return Math.random().toString(36).substring(2,10).toUpperCase(); }
+function randomAmount(min=20,max=200){ return (Math.random()*(max-min)+min).toFixed(2); }
+function randomPastDate(hoursAgoMin=1,hoursAgoMax=72){ const now=new Date(); const past=now-Math.floor(Math.random()*(hoursAgoMax-hoursAgoMin)+hoursAgoMin)*3600000; return new Date(past); }
+function randomStatus(){ return Math.random()<0.8?"Completed":"Pending"; }
+
+async function loadHistory(){
+  if(!window.userId) return;
+
+  let { data, error } = await supabase.from('deposits').select('*').eq('user_id',window.userId).order('created_at',{ascending:false});
+  if(error) return alert("Error loading history: "+error.message);
+
+  if(data.length===0){
+    const demoDeposits = [
+      {user_id:window.userId, amount:randomAmount(), method:'zelle', status:randomStatus(), type:'deposit', created_at:randomPastDate()},
+      {user_id:window.userId, amount:randomAmount(), method:'chime', status:randomStatus(), type:'deposit', created_at:randomPastDate()},
+      {user_id:window.userId, amount:randomAmount(), method:'one', status:randomStatus(), type:'deposit', created_at:randomPastDate()},
+      {user_id:window.userId, amount:randomAmount(), method:'paypal', status:randomStatus(), type:'deposit', created_at:randomPastDate()},
+      {user_id:window.userId, amount:randomAmount(), method:'card', status:randomStatus(), type:'deposit', created_at:randomPastDate()}
+    ];
+    await supabase.from('deposits').insert(demoDeposits);
+    ({ data, error } = await supabase.from('deposits').select('*').eq('user_id',window.userId).order('created_at',{ascending:false}));
+  }
+
+  const total = data.reduce((sum,d)=> sum + parseFloat(d.amount)*(d.type==='deposit'?1:-1), 0);
+  document.getElementById("total-balance").textContent = `$${total.toFixed(2)}`;
+
+  const table=document.getElementById("history-table");
+  table.innerHTML="";
+  data.forEach(d=>{
+    let txId=d.transaction_id||"TX-"+formatTransactionId();
+    let status=d.status.charAt(0).toUpperCase()+d.status.slice(1);
+    const colorMap={card:'#007bff',paypal:'#6f42c1',zelle:'#28a745',chime:'#20c997',one:'#fd7e14'};
+    const color=colorMap[d.method]||'#6c757d';
+    const typeSign=d.type==='withdrawal'?'-':'';
+    const row=document.createElement("tr");
+    row.innerHTML=`
+      <td>${txId}</td>
+      <td>${typeSign}$${parseFloat(d.amount).toFixed(2)}</td>
+      <td style="color:${color}; font-weight:bold;">${d.method.charAt(0).toUpperCase()+d.method.slice(1)}</td>
+      <td>${status}</td>
+      <td>${new Date(d.created_at).toLocaleString()}</td>
+    `;
+    table.appendChild(row);
+  });
+}
+
+// Login/Register
+document.getElementById("login-btn").addEventListener("click", async () => {
+  const username = document.getElementById("username").value.trim();
+  if(!username) return alert("Enter a username.");
+
+  let { data: users } = await supabase.from('demo_users').select('*').eq('username', username);
+  if(users.length===0){
+    const { data: newUser, error } = await supabase.from('demo_users').insert([{username}]).select().single();
+    if(error) return alert("Error creating user: " + error.message);
+    window.userId = newUser.id;
+  } else {
+    window.userId = users[0].id;
+  }
+  alert("Logged in as: " + username);
+  loadHistory();
+});
+
+// Deposit
+document.getElementById("deposit-btn").addEventListener("click", async () => {
+  const method = document.getElementById("payment-method").value;
+  const amount = parseFloat(document.getElementById("amount").value);
+  if(!window.userId) return alert("Login first.");
+  await supabase.from('deposits').insert([{
+    user_id:window.userId, amount, method, type:"deposit", status:"Completed",
+    transaction_id:"TX-"+formatTransactionId()
+  }]);
+  loadHistory();
+});
+</script>
+
+<style>
+body{font-family:Arial,sans-serif;background:#f8f8f8;padding:20px;}
+h2{text-align:center;margin-bottom:20px;}
+.section{background:#fff;padding:20px;border-radius:10px;margin-bottom:20px;box-shadow:0 2px 6px rgba(0,0,0,0.1);}
+label{display:block;margin-top:10px;}
+input,select,button{width:100%;padding:10px;margin-top:10px;border-radius:5px;border:1px solid #ccc;}
+button{color:#fff;border:none;cursor:pointer;transition:0.2s;}
+button:hover{opacity:0.9;}
+#login-btn{background:#28a745;}
+#deposit-btn{background:#007bff;}
+table{width:100%;border-collapse:collapse;}
+th,td{padding:12px;text-align:left;border-bottom:1px solid #eee;}
+th{background:#4CAF50;color:white;}
+tr:hover{background:#f1f1f1;}
+</style>
 </head>
 <body>
-  <h1>Welcome to Oakline Bank</h1>
-  <div id="userInfo">Loading your profile...</div>
-  <div id="accounts">Loading accounts...</div>
 
-  <!-- Supabase JS -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.28.0/dist/supabase.min.js"></script>
+<!-- Login/Register -->
+<div class="section" style="text-align:center;">
+  <h2>Demo User Login</h2>
+  <input type="text" id="username" placeholder="Enter your username" style="width:50%;margin-bottom:10px;">
+  <button id="login-btn">Login / Register</button>
+</div>
 
-  <script>
-    const SUPABASE_URL = '<?=process.env.NEXT_PUBLIC_SUPABASE_URL?>';
-    const SUPABASE_ANON_KEY = '<?=process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?>';
+<!-- Total Balance -->
+<div class="section" style="text-align:center;">
+  <h2>Total Balance</h2>
+  <p id="total-balance" style="font-size:24px;font-weight:bold;color:#007bff;">$0.00</p>
+</div>
 
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+<!-- Deposit Section -->
+<div class="section">
+  <h2>Deposit Funds</h2>
+  <label>Amount ($)</label>
+  <input type="number" id="amount" min="1" step="0.01" value="50">
+  <label>Select Payment Method</label>
+  <select id="payment-method">
+    <option value="card">Card (Demo)</option>
+    <option value="paypal">PayPal / Venmo (Demo)</option>
+    <option value="zelle">Zelle (Demo)</option>
+    <option value="chime">Chime (Demo)</option>
+    <option value="one">One / Chime (Demo)</option>
+  </select>
+  <button id="deposit-btn">Deposit</button>
+</div>
+<!-- Withdraw Section -->
+<div class="section">
+  <h2>Withdraw Funds</h2>
+  <label>Amount ($)</label>
+  <input type="number" id="withdraw-amount" min="1" step="0.01" value="20">
+  <button id="withdraw-btn">Withdraw</button>
+</div>
 
-    async function loadDashboard() {
-      // Get the current user
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      const userInfoDiv = document.getElementById('userInfo');
-      const accountsDiv = document.getElementById('accounts');
+<!-- Transfer Section -->
+<div class="section">
+  <h2>Transfer Funds</h2>
+  <label>Amount ($)</label>
+  <input type="number" id="transfer-amount" min="1" step="0.01" value="10">
+  <label>From Method</label>
+  <select id="transfer-from">
+    <option value="card">Card</option>
+    <option value="paypal">PayPal / Venmo</option>
+    <option value="zelle">Zelle</option>
+    <option value="chime">Chime</option>
+    <option value="one">One / Chime</option>
+  </select>
+  <label>To Method</label>
+  <select id="transfer-to">
+    <option value="card">Card</option>
+    <option value="paypal">PayPal / Venmo</option>
+    <option value="zelle">Zelle</option>
+    <option value="chime">Chime</option>
+    <option value="one">One / Chime</option>
+  </select>
+  <button id="transfer-btn">Transfer</button>
+</div>
 
-      if (userError || !user) {
-        userInfoDiv.textContent = 'Error loading user: ' + (userError?.message || 'No user logged in');
-        return;
-      }
+<!-- Transaction History -->
+<div class="section">
+  <h2>Transaction History</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Transaction ID</th>
+        <th>Amount</th>
+        <th>Method</th>
+        <th>Status</th>
+        <th>Date</th>
+      </tr>
+    </thead>
+    <tbody id="history-table"></tbody>
+  </table>
+</div>
 
-      userInfoDiv.innerHTML = `<strong>Name:</strong> ${user.user_metadata?.first_name || ''} ${user.user_metadata?.last_name || ''}<br>
-                               <strong>Email:</strong> ${user.email}`;
-
-      // Fetch profile from `profiles` table
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
-
-      if (profileError) {
-        userInfoDiv.innerHTML += `<br>Error fetching profile: ${profileError.message}`;
-      } else {
-        userInfoDiv.innerHTML += `<br><strong>Full Name:</strong> ${profile.first_name} ${profile.middle_name || ''} ${profile.last_name}`;
-      }
-
-      // Fetch accounts
-      const { data: accounts, error: accountsError } = await supabase
-        .from('accounts')
-        .select('*')
-        .eq('user_id', user.id);
-
-      if (accountsError) {
-        accountsDiv.textContent = 'Error fetching accounts: ' + accountsError.message;
-        return;
-      }
-
-      if (!accounts || accounts.length === 0) {
-        accountsDiv.textContent = 'No accounts found.';
-        return;
-      }
-
-      let tableHTML = '<h2>Your Accounts</h2><table><tr><th>Account Number</th><th>Type</th><th>Balance</th></tr>';
-      accounts.forEach(acc => {
-        tableHTML += `<tr>
-                        <td>${acc.account_number}</td>
-                        <td>${acc.account_type}</td>
-                        <td>$${acc.balance.toFixed(2)}</td>
-                      </tr>`;
-      });
-      tableHTML += '</table>';
-      accountsDiv.innerHTML = tableHTML;
-    }
-
-    loadDashboard();
-  </script>
 </body>
 </html>
