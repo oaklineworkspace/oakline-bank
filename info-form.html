@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>User Information Form</title>
+</head>
+<body>
+  <h1>Enter Your Information</h1>
+  <form action="/api/submit" method="POST">
+    <label>Full Name:</label><br>
+    <input type="text" name="name" required><br><br>
+
+    <label>Email:</label><br>
+    <input type="email" name="email" required><br><br>
+
+    <label>Phone:</label><br>
+    <input type="tel" name="phone" required><br><br>
+
+    <label>Address:</label><br>
+    <input type="text" name="address" required><br><br>
+
+    <button type="submit">Submit</button>
+  </form>
+</body>
+</html>
