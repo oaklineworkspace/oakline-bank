@@ -1,2 +1,2 @@
 # oakline-bank
-Bank project – Oakline Bank
+Bank project – Oakline Bank.
