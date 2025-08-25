@@ -1,9 +1,10 @@
 // /api/login.js
 import { createClient } from "@supabase/supabase-js";
 
+// Client-side login uses ANON key
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY // anon key for client login
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 
 export default async function handler(req, res) {
