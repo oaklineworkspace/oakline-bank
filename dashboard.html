@@ -6,55 +6,41 @@
   <title>Oakline Bank - Dashboard</title>
   <style>
     body { font-family: Arial, sans-serif; padding: 2rem; }
-    h1 { color: #2c3e50; }
-    #profile, #accounts { margin-top: 2rem; }
-    table { border-collapse: collapse; width: 100%; max-width: 600px; }
-    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-    th { background-color: #f2f2f2; }
-    #logout { margin-top: 1rem; padding: 0.5rem 1rem; }
+    h1 { margin-bottom: 1rem; }
+    #userInfo, #accounts { margin-top: 1rem; }
+    table { border-collapse: collapse; width: 100%; margin-top: 1rem; }
+    th, td { border: 1px solid #ccc; padding: 0.5rem; text-align: left; }
   </style>
 </head>
 <body>
   <h1>Welcome to Oakline Bank</h1>
-  <div id="profile">
-    <h2>Your Profile</h2>
-    <p id="profileInfo">Loading...</p>
-  </div>
-  <div id="accounts">
-    <h2>Your Accounts</h2>
-    <table id="accountsTable">
-      <thead>
-        <tr>
-          <th>Account Type</th>
-          <th>Account Number</th>
-          <th>Balance</th>
-          <th>Routing Number</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
-  <button id="logout">Logout</button>
+  <div id="userInfo">Loading your profile...</div>
+  <div id="accounts">Loading accounts...</div>
 
+  <!-- Supabase JS -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.28.0/dist/supabase.min.js"></script>
-  <script>
-    const supabase = supabase.createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-    );
 
-    const profileInfo = document.getElementById('profileInfo');
-    const accountsTableBody = document.querySelector('#accountsTable tbody');
-    const logoutBtn = document.getElementById('logout');
+  <script>
+    const SUPABASE_URL = '<?=process.env.NEXT_PUBLIC_SUPABASE_URL?>';
+    const SUPABASE_ANON_KEY = '<?=process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?>';
+
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     async function loadDashboard() {
-      const user = supabase.auth.getUser ? (await supabase.auth.getUser()).data.user : null;
-      if (!user) {
-        window.location.href = '/login.html';
+      // Get the current user
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      const userInfoDiv = document.getElementById('userInfo');
+      const accountsDiv = document.getElementById('accounts');
+
+      if (userError || !user) {
+        userInfoDiv.textContent = 'Error loading user: ' + (userError?.message || 'No user logged in');
         return;
       }
 
-      // Fetch profile
+      userInfoDiv.innerHTML = `<strong>Name:</strong> ${user.user_metadata?.first_name || ''} ${user.user_metadata?.last_name || ''}<br>
+                               <strong>Email:</strong> ${user.email}`;
+
+      // Fetch profile from `profiles` table
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('*')
@@ -62,9 +48,9 @@
         .single();
 
       if (profileError) {
-        profileInfo.textContent = "Error loading profile: " + profileError.message;
+        userInfoDiv.innerHTML += `<br>Error fetching profile: ${profileError.message}`;
       } else {
-        profileInfo.textContent = `Name: ${profile.first_name} ${profile.middle_name || ''} ${profile.last_name}\nEmail: ${profile.email}`;
+        userInfoDiv.innerHTML += `<br><strong>Full Name:</strong> ${profile.first_name} ${profile.middle_name || ''} ${profile.last_name}`;
       }
 
       // Fetch accounts
@@ -74,23 +60,26 @@
         .eq('user_id', user.id);
 
       if (accountsError) {
-        accountsTableBody.innerHTML = `<tr><td colspan="4">Error loading accounts: ${accountsError.message}</td></tr>`;
-      } else {
-        accountsTableBody.innerHTML = accounts.map(acc => `
-          <tr>
-            <td>${acc.account_type}</td>
-            <td>${acc.account_number}</td>
-            <td>${acc.balance.toFixed(2)}</td>
-            <td>${acc.routing_number}</td>
-          </tr>
-        `).join('');
+        accountsDiv.textContent = 'Error fetching accounts: ' + accountsError.message;
+        return;
       }
-    }
 
-    logoutBtn.addEventListener('click', async () => {
-      await supabase.auth.signOut();
-      window.location.href = '/login.html';
-    });
+      if (!accounts || accounts.length === 0) {
+        accountsDiv.textContent = 'No accounts found.';
+        return;
+      }
+
+      let tableHTML = '<h2>Your Accounts</h2><table><tr><th>Account Number</th><th>Type</th><th>Balance</th></tr>';
+      accounts.forEach(acc => {
+        tableHTML += `<tr>
+                        <td>${acc.account_number}</td>
+                        <td>${acc.account_type}</td>
+                        <td>$${acc.balance.toFixed(2)}</td>
+                      </tr>`;
+      });
+      tableHTML += '</table>';
+      accountsDiv.innerHTML = tableHTML;
+    }
 
     loadDashboard();
   </script>
