@@ -4,59 +4,96 @@
   <meta charset="UTF-8">
   <title>Applications Dashboard</title>
   <script src="https://unpkg.com/@supabase/supabase-js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
+    th { background: #f4f4f4; }
+  </style>
 </head>
 <body>
-  <h1>📋 Applications</h1>
-  <table border="1" cellpadding="8">
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Email</th>
-        <th>Phone</th>
-        <th>Address</th>
-        <th>Created At</th>
-      </tr>
-    </thead>
-    <tbody id="apps-table">
-      <!-- Data will load here -->
-    </tbody>
-  </table>
+  <h1>📋 Applications Dashboard</h1>
+
+  <!-- Password Gate -->
+  <div id="login-screen">
+    <p>Enter password to view applications:</p>
+    <input type="password" id="passwordInput" placeholder="Password">
+    <button onclick="checkPassword()">Login</button>
+    <p id="error" style="color:red;"></p>
+  </div>
+
+  <!-- Dashboard Table (hidden until login) -->
+  <div id="dashboard" style="display:none;">
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Address</th>
+          <th>Created At</th>
+        </tr>
+      </thead>
+      <tbody id="apps-table"></tbody>
+    </table>
+  </div>
 
   <script>
-    // ✅ Initialize Supabase client with anon key (safe for frontend)
-    const supabaseUrl = "https://https://nrjdmgltshosdqccaymr.supabase.co.supabase.co"; // replace
-    const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5yamRtZ2x0c2hvc2RxY2NheW1yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwMzYyMjAsImV4cCI6MjA3MTYxMjIyMH0.b9H553W2PCsSNvr8HyyINl4nTSrldHN_QMQ3TVwt6qk"; // replace
+    // 🔑 Your secret dashboard password (change this!)
+    const DASHBOARD_PASSWORD = "oakline123";
+
+    function checkPassword() {
+      const input = document.getElementById("passwordInput").value;
+      if (input === DASHBOARD_PASSWORD) {
+        document.getElementById("login-screen").style.display = "none";
+        document.getElementById("dashboard").style.display = "block";
+        loadApplications();
+      } else {
+        document.getElementById("error").innerText = "❌ Incorrect password!";
+      }
+    }
+
+    // ✅ Supabase setup (your project URL + anon key)
+    const supabaseUrl = "https://nrjdmgltshosdqccaymr.supabase.co";
+    const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5yamRtZ2x0c2hvc2RxY2NheW1yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwMzYyMjAsImV4cCI6MjA3MTYxMjIyMH0.b9H553W2PCsSNvr8HyyINl4nTSrldHN_QMQ3TVwt6qk";
+
     const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
 
     async function loadApplications() {
       let { data, error } = await supabase
-        .from("applications")
+        .from("applications")   // 👈 must match your table name
         .select("*")
         .order("created_at", { ascending: false });
 
       if (error) {
         console.error("❌ Error loading data:", error);
+        document.getElementById("apps-table").innerHTML = `<tr><td colspan="5">Error loading data</td></tr>`;
         return;
       }
+
+      console.log("📥 Loaded applications:", data); // debug log
 
       const table = document.getElementById("apps-table");
       table.innerHTML = "";
 
+      if (!data || data.length === 0) {
+        table.innerHTML = `<tr><td colspan="5">No applications found</td></tr>`;
+        return;
+      }
+
       data.forEach(app => {
         let row = `
           <tr>
-            <td>${app.name}</td>
-            <td>${app.email}</td>
-            <td>${app.phone || ""}</td>
-            <td>${app.address || ""}</td>
-            <td>${new Date(app.created_at).toLocaleString()}</td>
+            <td>${app.name || "-"}</td>
+            <td>${app.email || "-"}</td>
+            <td>${app.phone || "-"}</td>
+            <td>${app.address || "-"}</td>
+            <td>${app.created_at ? new Date(app.created_at).toLocaleString() : "-"}</td>
           </tr>
         `;
         table.innerHTML += row;
       });
     }
-
-    loadApplications();
   </script>
 </body>
 </html>
