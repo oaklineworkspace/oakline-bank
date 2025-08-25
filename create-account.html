@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Oakline Bank - Open Account</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Open New Account</h1>
+
+  <form id="accountForm">
+    <h3>Select Account Types</h3>
+    <label><input type="checkbox" value="Checking" class="accountType" /> Checking</label>
+    <label><input type="checkbox" value="Saving" class="accountType" /> Saving</label>
+    <label><input type="checkbox" value="Business" class="accountType" /> Business</label>
+
+    <button type="submit">Open Accounts</button>
+  </form>
+
+  <div id="message" style="margin-top:1rem;color:red;"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.28.0/dist/supabase.min.js"></script>
+  <script>
+    const SUPABASE_URL = '%%SUPABASE_URL%%';
+    const SUPABASE_ANON_KEY = '%%SUPABASE_ANON_KEY%%';
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const accountForm = document.getElementById('accountForm');
+    const messageDiv = document.getElementById('message');
+
+    function generateAccountNumber() {
+      return 'ACCT' + Math.floor(100000000 + Math.random() * 900000000);
+    }
+
+    accountForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      const accountTypes = Array.from(document.querySelectorAll(".accountType:checked")).map(cb => cb.value);
+      if (accountTypes.length === 0) {
+        messageDiv.textContent = "Please select at least one account type.";
+        return;
+      }
+
+      try {
+        for (const type of accountTypes) {
+          const { error } = await supabase.from('accounts').insert([{
+            user_id: user.id,
+            account_type: type,
+            account_number: generateAccountNumber(),
+            balance: 0,
+            routing_number: '075915826'
+          }]);
+
+          if (error) {
+            console.error("Account Insert Error:", error);
+            messageDiv.textContent = "Error creating " + type + " account: " + error.message;
+            return;
+          }
+        }
+
+        messageDiv.style.color = 'green';
+        messageDiv.textContent = "Accounts created successfully!";
+      } catch (err) {
+        console.error("Unexpected Error:", err);
+        messageDiv.textContent = "Unexpected Error: " + err.message;
+      }
+    });
+  </script>
+</body>
+</html>
