@@ -8,11 +8,12 @@
     body { font-family: Arial, sans-serif; padding: 2rem; }
     input { display: block; margin: 0.5rem 0; padding: 0.5rem; width: 300px; }
     button { padding: 0.5rem 1rem; }
-    #message { margin-top: 1rem; color:red; white-space: pre-wrap; }
+    #message { margin-top: 1rem; color: red; white-space: pre-wrap; }
   </style>
 </head>
 <body>
   <h1>Sign Up</h1>
+
   <form id="signupForm">
     <input type="text" id="firstName" placeholder="First Name" required />
     <input type="text" id="middleName" placeholder="Middle Name" />
@@ -21,6 +22,7 @@
     <input type="password" id="password" placeholder="Password" required />
     <button type="submit">Sign Up</button>
   </form>
+
   <div id="message"></div>
 
   <script>
@@ -50,15 +52,18 @@
 
         if (!response.ok) {
           messageDiv.textContent = "Error: " + (data.error || "Unknown error");
+          console.error("Signup error:", data);
           return;
         }
 
         messageDiv.style.color = 'green';
-        messageDiv.textContent = "Signup successful! User ID: " + data.user_id + "\nCheck your email to confirm the account.";
+        messageDiv.textContent = `Signup successful! User ID: ${data.user_id}\nCheck your email to confirm the account.`;
         signupForm.reset();
+        console.log("Signup successful:", data);
 
       } catch (err) {
         messageDiv.textContent = "Unexpected error: " + err.message;
+        console.error("Unexpected error:", err);
       }
     });
   </script>
