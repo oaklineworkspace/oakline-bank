@@ -8,18 +8,16 @@
     body { font-family: Arial, sans-serif; padding: 2rem; }
     input { display: block; margin: 0.5rem 0; padding: 0.5rem; width: 300px; }
     button { padding: 0.5rem 1rem; }
-    #message { margin-top: 1rem; color: red; white-space: pre-wrap; }
+    #message { margin-top: 1rem; color:red; white-space: pre-wrap; }
   </style>
 </head>
 <body>
-  <h1>Login</h1>
-
+  <h1>Login to Oakline Bank</h1>
   <form id="loginForm">
     <input type="email" id="email" placeholder="Email" required />
     <input type="password" id="password" placeholder="Password" required />
     <button type="submit">Login</button>
   </form>
-
   <div id="message"></div>
 
   <script>
@@ -45,16 +43,16 @@
         const data = await response.json();
 
         if (!response.ok) {
-          messageDiv.textContent = "Login Error: " + (data.error || "Unknown error");
+          messageDiv.textContent = "Login failed: " + (data.error || "Unknown error");
           return;
         }
 
         messageDiv.style.color = 'green';
-        messageDiv.textContent = "Login successful! Welcome, " + data.user.email;
+        messageDiv.textContent = "Login successful! Welcome, " + email;
         loginForm.reset();
 
-        // Redirect to dashboard
-        window.location.href = '/dashboard.html';
+        // Redirect to dashboard after successful login
+        window.location.href = "/dashboard.html";
 
       } catch (err) {
         messageDiv.textContent = "Unexpected error: " + err.message;
