@@ -1,0 +1,8 @@
+{
+  "name": "oakline-bank",
+  "version": "1.0.0",
+  "main": "index.js",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.28.0"
+  }
+}
