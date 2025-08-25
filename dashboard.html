@@ -1,189 +1,158 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Demo Bank Dashboard</title>
-<script type="module">
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-
-const supabase = createClient(
-  'https://nrjdmgltshosdqccaymr.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5yamRtZ2x0c2RxY2NheW1yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwMzYyMjAsImV4cCI6MjA3MTYxMjIyMH0.b9H553W2PCsSNvr8HyyINl4nTSrldHN_QMQ3TVwt6qk'
-);
-
-window.userId = null;
-
-// Utility functions
-function formatTransactionId(){ return Math.random().toString(36).substring(2,10).toUpperCase(); }
-function randomAmount(min=20,max=200){ return (Math.random()*(max-min)+min).toFixed(2); }
-function randomPastDate(hoursAgoMin=1,hoursAgoMax=72){ const now=new Date(); const past=now-Math.floor(Math.random()*(hoursAgoMax-hoursAgoMin)+hoursAgoMin)*3600000; return new Date(past); }
-function randomStatus(){ return Math.random()<0.8?"Completed":"Pending"; }
-
-async function loadHistory(){
-  if(!window.userId) return;
-
-  let { data, error } = await supabase.from('deposits').select('*').eq('user_id',window.userId).order('created_at',{ascending:false});
-  if(error) return alert("Error loading history: "+error.message);
-
-  if(data.length===0){
-    const demoDeposits = [
-      {user_id:window.userId, amount:randomAmount(), method:'zelle', status:randomStatus(), type:'deposit', created_at:randomPastDate()},
-      {user_id:window.userId, amount:randomAmount(), method:'chime', status:randomStatus(), type:'deposit', created_at:randomPastDate()},
-      {user_id:window.userId, amount:randomAmount(), method:'one', status:randomStatus(), type:'deposit', created_at:randomPastDate()},
-      {user_id:window.userId, amount:randomAmount(), method:'paypal', status:randomStatus(), type:'deposit', created_at:randomPastDate()},
-      {user_id:window.userId, amount:randomAmount(), method:'card', status:randomStatus(), type:'deposit', created_at:randomPastDate()}
-    ];
-    await supabase.from('deposits').insert(demoDeposits);
-    ({ data, error } = await supabase.from('deposits').select('*').eq('user_id',window.userId).order('created_at',{ascending:false}));
-  }
-
-  const total = data.reduce((sum,d)=> sum + parseFloat(d.amount)*(d.type==='deposit'?1:-1), 0);
-  document.getElementById("total-balance").textContent = `$${total.toFixed(2)}`;
-
-  const table=document.getElementById("history-table");
-  table.innerHTML="";
-  data.forEach(d=>{
-    let txId=d.transaction_id||"TX-"+formatTransactionId();
-    let status=d.status.charAt(0).toUpperCase()+d.status.slice(1);
-    const colorMap={card:'#007bff',paypal:'#6f42c1',zelle:'#28a745',chime:'#20c997',one:'#fd7e14'};
-    const color=colorMap[d.method]||'#6c757d';
-    const typeSign=d.type==='withdrawal'?'-':'';
-    const row=document.createElement("tr");
-    row.innerHTML=`
-      <td>${txId}</td>
-      <td>${typeSign}$${parseFloat(d.amount).toFixed(2)}</td>
-      <td style="color:${color}; font-weight:bold;">${d.method.charAt(0).toUpperCase()+d.method.slice(1)}</td>
-      <td>${status}</td>
-      <td>${new Date(d.created_at).toLocaleString()}</td>
-    `;
-    table.appendChild(row);
-  });
-}
-
-// Login/Register
-document.getElementById("login-btn").addEventListener("click", async () => {
-  const username = document.getElementById("username").value.trim();
-  if(!username) return alert("Enter a username.");
-
-  let { data: users } = await supabase.from('demo_users').select('*').eq('username', username);
-  if(users.length===0){
-    const { data: newUser, error } = await supabase.from('demo_users').insert([{username}]).select().single();
-    if(error) return alert("Error creating user: " + error.message);
-    window.userId = newUser.id;
-  } else {
-    window.userId = users[0].id;
-  }
-  alert("Logged in as: " + username);
-  loadHistory();
-});
-
-// Deposit
-document.getElementById("deposit-btn").addEventListener("click", async () => {
-  const method = document.getElementById("payment-method").value;
-  const amount = parseFloat(document.getElementById("amount").value);
-  if(!window.userId) return alert("Login first.");
-  await supabase.from('deposits').insert([{
-    user_id:window.userId, amount, method, type:"deposit", status:"Completed",
-    transaction_id:"TX-"+formatTransactionId()
-  }]);
-  loadHistory();
-});
-</script>
-
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Oakline Bank Dashboard</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
 <style>
-body{font-family:Arial,sans-serif;background:#f8f8f8;padding:20px;}
-h2{text-align:center;margin-bottom:20px;}
-.section{background:#fff;padding:20px;border-radius:10px;margin-bottom:20px;box-shadow:0 2px 6px rgba(0,0,0,0.1);}
-label{display:block;margin-top:10px;}
-input,select,button{width:100%;padding:10px;margin-top:10px;border-radius:5px;border:1px solid #ccc;}
-button{color:#fff;border:none;cursor:pointer;transition:0.2s;}
-button:hover{opacity:0.9;}
-#login-btn{background:#28a745;}
-#deposit-btn{background:#007bff;}
-table{width:100%;border-collapse:collapse;}
-th,td{padding:12px;text-align:left;border-bottom:1px solid #eee;}
-th{background:#4CAF50;color:white;}
-tr:hover{background:#f1f1f1;}
+body { font-family: 'Segoe UI', sans-serif; background: #f4f6f9; margin:0; padding-bottom:40px; }
+.dark-mode { background:#121212; color:#eee; }
+.dark-mode .card, .dark-mode .balance-card { background:#1e1e1e; color:#fff; }
+.header-container { max-width:960px; margin:1rem auto; display:flex; align-items:center; gap:1.5rem; }
+.logo-placeholder { width:70px; height:70px; background:#004080; border-radius:12px; }
+.bank-name { font-weight:800; font-size:2.5rem; color:#004080; }
+.marquee-banner { background:#004080; color:#fff; font-size:0.95rem; font-weight:500; padding:6px 0; text-align:center; overflow:hidden; white-space:nowrap; }
+.marquee-text { display:inline-block; padding-left:100%; animation: marquee 15s linear infinite; }
+@keyframes marquee { 0% { transform:translateX(0%);} 100% { transform:translateX(-100%);} }
+.top-controls-left, .top-controls-right { position:fixed; top:10px; display:flex; gap:0.5rem; align-items:center; z-index:1000; }
+.top-controls-left { left:10px; } .top-controls-right { right:10px; }
+.hero { background:#004080; color:#fff; padding:2rem; margin:1.5rem auto; border-radius:10px; display:flex; justify-content:space-between; align-items:center; max-width:960px; font-size:22px; font-weight:600; }
+.balances { display:flex; gap:1rem; flex-wrap:wrap; margin-bottom:1.5rem; max-width:960px; margin:auto; }
+.balance-card { flex:1; background:#fff; border-radius:8px; padding:1rem; box-shadow:0 1px 3px rgba(0,0,0,0.1); text-align:center; min-width:140px; }
+.balance-card h6 { font-size:14.3px; margin-bottom:0.25rem; color:#666; }
+.balance-card .amount { font-size:22.05px; font-weight:600; color:#004080; }
+.animated-balance { transition: all 0.4s ease-in-out; transform: scale(1.05); color:#28a745; }
 </style>
 </head>
 <body>
 
-<!-- Login/Register -->
-<div class="section" style="text-align:center;">
-  <h2>Demo User Login</h2>
-  <input type="text" id="username" placeholder="Enter your username" style="width:50%;margin-bottom:10px;">
-  <button id="login-btn">Login / Register</button>
+<!-- Top Left: Dark Mode -->
+<div class="top-controls-left">
+  <button id="darkModeBtn" class="btn btn-outline-dark btn-sm" aria-label="Toggle dark mode">
+    <i class="fas fa-moon"></i>
+  </button>
 </div>
 
-<!-- Total Balance -->
-<div class="section" style="text-align:center;">
-  <h2>Total Balance</h2>
-  <p id="total-balance" style="font-size:24px;font-weight:bold;color:#007bff;">$0.00</p>
+<!-- Top Right: Logout -->
+<div class="top-controls-right">
+  <button id="logoutBtn" class="btn btn-danger btn-sm">Logout</button>
 </div>
 
-<!-- Deposit Section -->
-<div class="section">
-  <h2>Deposit Funds</h2>
-  <label>Amount ($)</label>
-  <input type="number" id="amount" min="1" step="0.01" value="50">
-  <label>Select Payment Method</label>
-  <select id="payment-method">
-    <option value="card">Card (Demo)</option>
-    <option value="paypal">PayPal / Venmo (Demo)</option>
-    <option value="zelle">Zelle (Demo)</option>
-    <option value="chime">Chime (Demo)</option>
-    <option value="one">One / Chime (Demo)</option>
-  </select>
-  <button id="deposit-btn">Deposit</button>
-</div>
-<!-- Withdraw Section -->
-<div class="section">
-  <h2>Withdraw Funds</h2>
-  <label>Amount ($)</label>
-  <input type="number" id="withdraw-amount" min="1" step="0.01" value="20">
-  <button id="withdraw-btn">Withdraw</button>
+<!-- Header -->
+<div class="header-container">
+  <div class="logo-placeholder"></div>
+  <span class="bank-name">Oakline Bank</span>
 </div>
 
-<!-- Transfer Section -->
-<div class="section">
-  <h2>Transfer Funds</h2>
-  <label>Amount ($)</label>
-  <input type="number" id="transfer-amount" min="1" step="0.01" value="10">
-  <label>From Method</label>
-  <select id="transfer-from">
-    <option value="card">Card</option>
-    <option value="paypal">PayPal / Venmo</option>
-    <option value="zelle">Zelle</option>
-    <option value="chime">Chime</option>
-    <option value="one">One / Chime</option>
-  </select>
-  <label>To Method</label>
-  <select id="transfer-to">
-    <option value="card">Card</option>
-    <option value="paypal">PayPal / Venmo</option>
-    <option value="zelle">Zelle</option>
-    <option value="chime">Chime</option>
-    <option value="one">One / Chime</option>
-  </select>
-  <button id="transfer-btn">Transfer</button>
+<!-- Banner -->
+<div class="marquee-banner">
+  <div class="marquee-text">🔐 Welcome to Oakline Bank — Your Finances. Our Priority. 💼</div>
 </div>
 
-<!-- Transaction History -->
-<div class="section">
-  <h2>Transaction History</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>Transaction ID</th>
-        <th>Amount</th>
-        <th>Method</th>
-        <th>Status</th>
-        <th>Date</th>
-      </tr>
-    </thead>
-    <tbody id="history-table"></tbody>
-  </table>
+<!-- Hero -->
+<div class="hero">
+  <div class="d-flex align-items-center gap-3">
+    <img src="https://via.placeholder.com/48" class="rounded-circle" />
+    <div>
+      <h5>Welcome, <span id="userWelcome">User</span></h5>
+      <small>Last login: <span id="lastLogin">Just now</span></small>
+    </div>
+  </div>
 </div>
 
+<!-- Refresh -->
+<div class="text-center my-3">
+  <button class="btn btn-outline-primary btn-sm" onclick="refreshDashboardData()">
+    <i class="fas fa-sync-alt me-1"></i> Refresh Dashboard
+  </button>
+</div>
+
+<!-- Balances -->
+<div class="balances">
+  <div class="balance-card">
+    <h6>Checking Account</h6>
+    <div id="checkingBalance" class="amount">$0.00</div>
+  </div>
+  <div class="balance-card">
+    <h6>Savings Account</h6>
+    <div id="savingsBalance" class="amount">$0.00</div>
+  </div>
+</div>
+
+<!-- Recent Transactions -->
+<div class="container mt-4" style="max-width:960px;">
+  <h5>Recent Transactions</h5>
+  <ul id="recentTransactions" class="list-group">
+    <li class="list-group-item">Loading transactions...</li>
+  </ul>
+</div>
+
+<script type="module">
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+
+const supabaseUrl = 'https://nrjdmgltshosdqccaymr.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5yamRtZ2x0c2Rxc2F5b3VyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwMzYyMjAsImV4cCI6MjA3MTYxMjIyMH0.b9H553W2PCsSNvr8HyyINl4nTSrldHN_QMQ3TVwt6qk';
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+const username = localStorage.getItem("loggedInUser");
+if(!username){ alert("Login required"); window.location.href="login.html"; }
+
+let userId = null;
+
+async function getUserId() {
+  const { data, error } = await supabase.from('demo_users').select('id').eq('username', username).single();
+  if(error || !data){ alert("User not found"); return null; }
+  userId = data.id;
+}
+
+await getUserId();
+
+// Dark Mode Toggle
+document.getElementById("darkModeBtn").addEventListener("click", ()=>{
+  document.body.classList.toggle("dark-mode");
+});
+
+// Logout
+document.getElementById("logoutBtn").addEventListener("click", ()=>{
+  localStorage.removeItem("loggedInUser");
+  window.location.href="login.html";
+});
+
+// Load Dashboard
+async function refreshDashboardData(){
+  if(!userId) return;
+
+  // Balances from localStorage
+  const userData = JSON.parse(localStorage.getItem("user_" + username)) || {balances:{checking:0,savings:0}, transactions:[]};
+
+  document.getElementById("userWelcome").textContent = username;
+  document.getElementById("checkingBalance").textContent = "$" + userData.balances.checking.toFixed(2);
+  document.getElementById("savingsBalance").textContent = "$" + userData.balances.savings.toFixed(2);
+
+  // Transactions
+  const { data: deposits } = await supabase.from('deposits').select('*').eq('user_id', userId).order('created_at',{ascending:false}).limit(10);
+  const txList = document.getElementById("recentTransactions");
+  txList.innerHTML = "";
+  if(!deposits || deposits.length===0){
+    txList.innerHTML = "<li class='list-group-item'>No transactions yet.</li>";
+    return;
+  }
+  deposits.forEach(tx=>{
+    const li = document.createElement("li");
+    li.className = "list-group-item d-flex justify-content-between align-items-center";
+    li.innerHTML = `
+      <div>${tx.method.charAt(0).toUpperCase() + tx.method.slice(1)} Deposit</div>
+      <div class="text-success">+$${parseFloat(tx.amount).toFixed(2)}</div>
+    `;
+    txList.appendChild(li);
+  });
+}
+
+refreshDashboardData();
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
