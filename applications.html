@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Applications Dashboard</title>
+  <script src="https://unpkg.com/@supabase/supabase-js"></script>
+</head>
+<body>
+  <h1>📋 Applications</h1>
+  <table border="1" cellpadding="8">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Phone</th>
+        <th>Address</th>
+        <th>Created At</th>
+      </tr>
+    </thead>
+    <tbody id="apps-table">
+      <!-- Data will load here -->
+    </tbody>
+  </table>
+
+  <script>
+    // ✅ Initialize Supabase client with anon key (safe for frontend)
+    const supabaseUrl = "https://https://nrjdmgltshosdqccaymr.supabase.co.supabase.co"; // replace
+    const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5yamRtZ2x0c2hvc2RxY2NheW1yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwMzYyMjAsImV4cCI6MjA3MTYxMjIyMH0.b9H553W2PCsSNvr8HyyINl4nTSrldHN_QMQ3TVwt6qk"; // replace
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+
+    async function loadApplications() {
+      let { data, error } = await supabase
+        .from("applications")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("❌ Error loading data:", error);
+        return;
+      }
+
+      const table = document.getElementById("apps-table");
+      table.innerHTML = "";
+
+      data.forEach(app => {
+        let row = `
+          <tr>
+            <td>${app.name}</td>
+            <td>${app.email}</td>
+            <td>${app.phone || ""}</td>
+            <td>${app.address || ""}</td>
+            <td>${new Date(app.created_at).toLocaleString()}</td>
+          </tr>
+        `;
+        table.innerHTML += row;
+      });
+    }
+
+    loadApplications();
+  </script>
+</body>
+</html>
