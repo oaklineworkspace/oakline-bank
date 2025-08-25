@@ -7,25 +7,58 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Welcome to Oakline Bank Dashboard</h1>
-  <div id="userInfo"></div>
-  <h2>Your Accounts</h2>
-  <table id="accountsTable" border="1">
-    <thead>
-      <tr>
-        <th>Account Type</th>
-        <th>Account Number</th>
-        <th>Routing Number</th>
-        <th>Balance</th>
-      </tr>
-    </thead>
-    <tbody>
-      <!-- Accounts will be loaded here -->
-    </tbody>
-  </table>
-
+  <h1>Dashboard</h1>
+  <p>Welcome, <span id="userName"></span></p>
+  <button id="openAccountBtn">Open New Account</button>
   <button id="logoutBtn">Logout</button>
 
-  <script src="app.js"></script>
+  <div id="message" style="margin-top: 1rem; color:red;"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.28.0/dist/supabase.min.js"></script>
+
+  <script>
+    const SUPABASE_URL = '%%SUPABASE_URL%%';
+    const SUPABASE_ANON_KEY = '%%SUPABASE_ANON_KEY%%';
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const userNameSpan = document.getElementById('userName');
+    const messageDiv = document.getElementById('message');
+    const openAccountBtn = document.getElementById('openAccountBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    async function loadUser() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      if (error) {
+        console.error("Profile Error:", error);
+        messageDiv.textContent = "Error loading profile: " + error.message;
+        return;
+      }
+
+      userNameSpan.textContent = profile.first_name + " " + profile.last_name;
+    }
+
+    openAccountBtn.addEventListener('click', () => {
+      // Redirect to account creation page
+      window.location.href = 'create_account.html';
+    });
+
+    logoutBtn.addEventListener('click', async () => {
+      await supabase.auth.signOut();
+      window.location.href = 'login.html';
+    });
+
+    loadUser();
+  </script>
 </body>
 </html>
