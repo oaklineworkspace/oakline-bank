@@ -8,12 +8,11 @@
     body { font-family: Arial, sans-serif; padding: 2rem; }
     input { display: block; margin: 0.5rem 0; padding: 0.5rem; width: 300px; }
     button { padding: 0.5rem 1rem; }
-    #message { margin-top: 1rem; color: red; white-space: pre-wrap; }
+    #message { margin-top: 1rem; color:red; white-space: pre-wrap; }
   </style>
 </head>
 <body>
   <h1>Sign Up</h1>
-
   <form id="signupForm">
     <input type="text" id="firstName" placeholder="First Name" required />
     <input type="text" id="middleName" placeholder="Middle Name" />
@@ -22,19 +21,9 @@
     <input type="password" id="password" placeholder="Password" required />
     <button type="submit">Sign Up</button>
   </form>
-
   <div id="message"></div>
 
-  <!-- Supabase JS -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.28.0/dist/supabase.min.js"></script>
-
   <script>
-    // Use Vercel environment variables
-    const SUPABASE_URL = window.env?.NEXT_PUBLIC_SUPABASE_URL || '%%REPLACE%%';
-    const SUPABASE_ANON_KEY = window.env?.NEXT_PUBLIC_SUPABASE_ANON_KEY || '%%REPLACE%%';
-
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
     const signupForm = document.getElementById("signupForm");
     const messageDiv = document.getElementById("message");
 
@@ -48,53 +37,28 @@
       const password = document.getElementById("password").value;
 
       messageDiv.style.color = 'red';
-      messageDiv.textContent = 'Signing up...\nCheck browser console for details...';
+      messageDiv.textContent = 'Signing up...';
 
       try {
-        console.log("Signing up user:", email);
-
-        // 1️⃣ Sign up with Supabase Auth
-        const { data, error: signupError } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: window.location.origin + '/dashboard.html'
-          }
+        const response = await fetch('/api/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ first_name, middle_name, last_name, email, password })
         });
 
-        if (signupError) {
-          console.error("Signup Error:", signupError);
-          messageDiv.textContent = "Signup Error:\n" + JSON.stringify(signupError, null, 2);
+        const data = await response.json();
+
+        if (!response.ok) {
+          messageDiv.textContent = "Error: " + (data.error || "Unknown error");
           return;
         }
 
-        if (!data || !data.user) {
-          console.error("No user returned after signup", data);
-          messageDiv.textContent = "Signup failed: No user returned.\nCheck Supabase Auth settings.";
-          return;
-        }
-
-        console.log("Signup successful, user ID:", data.user.id);
-
-        // 2️⃣ Insert profile into `profiles` table
-        const { error: profileError } = await supabase
-          .from("profiles")
-          .insert([{ id: data.user.id, first_name, middle_name, last_name, email }]);
-
-        if (profileError) {
-          console.error("Profile Insert Error:", profileError);
-          messageDiv.textContent = "Profile Insert Error:\n" + JSON.stringify(profileError, null, 2);
-          return;
-        }
-
-        console.log("Profile inserted successfully!");
         messageDiv.style.color = 'green';
-        messageDiv.textContent = "Signup successful! Check your email to confirm your account.";
-
+        messageDiv.textContent = "Signup successful! User ID: " + data.user_id + "\nCheck your email to confirm the account.";
         signupForm.reset();
+
       } catch (err) {
-        console.error("Unexpected Error:", err);
-        messageDiv.textContent = "Unexpected Error:\n" + err.message;
+        messageDiv.textContent = "Unexpected error: " + err.message;
       }
     });
   </script>
