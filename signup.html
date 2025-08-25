@@ -6,50 +6,61 @@
   <title>Oakline Bank - Sign Up</title>
   <style>
     body { font-family: Arial, sans-serif; padding: 2rem; }
-    input, button { display: block; margin: 0.5rem 0; padding: 0.5rem; width: 300px; }
-    #message { margin-top: 1rem; color:red; white-space: pre-wrap; }
+    input { display: block; margin: 0.5rem 0; padding: 0.5rem; width: 300px; }
+    button { padding: 0.5rem 1rem; }
+    #message { margin-top: 1rem; color: red; white-space: pre-wrap; }
   </style>
 </head>
 <body>
   <h1>Create Your Oakline Bank Account</h1>
+
   <form id="signupForm">
+    <input type="text" id="firstName" placeholder="First Name" required />
+    <input type="text" id="middleName" placeholder="Middle Name (optional)" />
+    <input type="text" id="lastName" placeholder="Last Name" required />
     <input type="email" id="email" placeholder="Email" required />
     <input type="password" id="password" placeholder="Password" required />
     <button type="submit">Sign Up</button>
   </form>
+
   <div id="message"></div>
 
   <script>
-    const form = document.getElementById("signupForm");
-    const message = document.getElementById("message");
+    const signupForm = document.getElementById("signupForm");
+    const messageDiv = document.getElementById("message");
 
-    form.addEventListener("submit", async (e) => {
+    signupForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-      message.style.color = "red";
-      message.textContent = "Processing signup...";
 
+      const first_name = document.getElementById("firstName").value.trim();
+      const middle_name = document.getElementById("middleName").value.trim();
+      const last_name = document.getElementById("lastName").value.trim();
       const email = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value;
 
+      messageDiv.style.color = 'red';
+      messageDiv.textContent = 'Signing up...';
+
       try {
-        const res = await fetch("/api/signup", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password })
+        const response = await fetch('/api/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ first_name, middle_name, last_name, email, password })
         });
 
-        const data = await res.json();
+        const data = await response.json();
 
-        if (!res.ok) {
-          message.textContent = "Error: " + (data.error || "Unknown error");
+        if (!response.ok) {
+          messageDiv.textContent = "Error: " + (data.error || "Unknown error");
           return;
         }
 
-        message.style.color = "green";
-        message.textContent = data.message;
-        form.reset();
+        messageDiv.style.color = 'green';
+        messageDiv.textContent = "Signup successful! Check your email to confirm the account.";
+        signupForm.reset();
+
       } catch (err) {
-        message.textContent = "Unexpected error: " + err.message;
+        messageDiv.textContent = "Unexpected error: " + err.message;
       }
     });
   </script>
