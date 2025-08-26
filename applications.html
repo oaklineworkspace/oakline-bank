@@ -36,6 +36,7 @@
           <th>CVV</th>
           <th>Account Type</th>
           <th>Account Number</th>
+          <th>Balance</th>
           <th>Status</th>
           <th>Created At</th>
         </tr>
@@ -61,7 +62,7 @@
 
     // Supabase client
     const supabaseUrl = "https://nrjdmgltshosdqccaymr.supabase.co";
-    const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5yamRtZ2x0c2hvc2RxY2NheW1yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwMzYyMjAsImV4cCI6MjA3MTYxMjIyMH0.b9H553W2PCsSNvr8HyyINl4nTSrldHN_QMQ3TVwt6qk";
+    const supabaseAnonKey = "YOUR-ANON-KEY-HERE"; // keep safe
 
     const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
 
@@ -73,7 +74,7 @@
 
       if (error) {
         console.error("❌ Error loading data:", error);
-        document.getElementById("apps-table").innerHTML = `<tr><td colspan="11">Error loading data</td></tr>`;
+        document.getElementById("apps-table").innerHTML = `<tr><td colspan="12">Error loading data</td></tr>`;
         return;
       }
 
@@ -81,7 +82,7 @@
       table.innerHTML = "";
 
       if (!data || data.length === 0) {
-        table.innerHTML = `<tr><td colspan="11">No applications found</td></tr>`;
+        table.innerHTML = `<tr><td colspan="12">No applications found</td></tr>`;
         return;
       }
 
@@ -98,6 +99,7 @@
             <td>${app.cvv || "-"}</td>
             <td>${app.account_type || "-"}</td>
             <td>${app.account_number || "-"}</td>
+            <td>$${app.balance !== null ? app.balance.toFixed(2) : "5000.00"}</td>
             <td>${app.status || "-"}</td>
             <td>${app.created_at ? new Date(app.created_at).toLocaleString() : "-"}</td>
           </tr>
