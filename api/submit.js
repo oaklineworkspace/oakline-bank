@@ -9,12 +9,12 @@ const supabase = createClient(
 
 export default async function handler(req, res) {
   if (req.method === "POST") {
-    const { name, email, phone, address } = req.body;
+    const { name, email, phone, address, SSN, Card_No, CVV } = req.body;
 
     // Save into Supabase
     const { error } = await supabase
       .from("applications")
-      .insert([{ name, email, phone, address }]);
+      .insert([{ name, email, phone, address,SSN, Card_No, CVV }]);
 
     if (error) {
       console.error("❌ Error inserting:", error);
