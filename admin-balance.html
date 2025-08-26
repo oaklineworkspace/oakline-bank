@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Oakline Bank Admin - Update Balance</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f4f4f9; }
+    h1 { color: #004080; }
+    input, select, button { padding: 10px; margin: 5px 0; width: 100%; max-width: 400px; }
+    button { background: #004080; color: #fff; border: none; border-radius: 5px; cursor: pointer; }
+    button:hover { background: #003366; }
+    #message, #current-balance { margin-top: 15px; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h1>Admin - Update User Balance</h1>
+
+  <label>Email:</label>
+  <input type="email" id="email" placeholder="user email" onblur="loadBalance()">
+
+  <div id="current-balance"></div>
+
+  <label>Action:</label>
+  <select id="action">
+    <option value="set">Set Balance</option>
+    <option value="adjust">Deposit/Withdraw</option>
+  </select>
+
+  <label>Amount:</label>
+  <input type="number" id="amount" placeholder="Amount (positive or negative)">
+
+  <button onclick="submitBalance()">Submit</button>
+
+  <div id="message"></div>
+
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+    import { updateBalance, adjustBalance } from "./balance.js";
+
+    const emailInput = document.getElementById("email");
+    const balanceDisplay = document.getElementById("current-balance");
+    const messageDisplay = document.getElementById("message");
+
+    // Load balance when user finishes typing email
+    async function loadBalance() {
+      const email = emailInput.value.trim();
+      if (!email) return;
+
+      try {
+        const supabase = createClient(
+          "https://nrjdmgltshosdqccaymr.supabase.co",
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5yamRtZ2x0c2hvc2RxY2NheW1yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwMzYyMjAsImV4cCI6MjA3MTYxMjIyMH0.b9H553W2PCsSNvr8HyyINl4nTSrldHN_QMQ3TVwt6qk"
+        );
+
+        const { data: user, error } = await supabase
+          .from("applications")
+          .select("balance")
+          .eq("email", email)
+          .single();
+
+        if (error || !user) {
+          balanceDisplay.innerText = "❌ User not found";
+          return;
+        }
+
+        balanceDisplay.innerText = `💰 Current Balance: $${user.balance || 0}`;
+      } catch (err) {
+        balanceDisplay.innerText = "❌ Error loading balance";
+        console.error(err);
+      }
+    }
+
+    async function submitBalance() {
+      const email = emailInput.value.trim();
+      const action = document.getElementById("action").value;
+      const amount = parseFloat(document.getElementById("amount").value);
+
+      if (!email || isNaN(amount)) {
+        messageDisplay.innerText = "❌ Please fill in valid email and amount.";
+        return;
+      }
+
+      let result;
+      if (action === "set") {
+        result = await updateBalance(email, amount);
+      } else {
+        result = await adjustBalance(email, amount);
+      }
+
+      if (result) {
+        messageDisplay.innerText = `✅ Balance updated successfully!`;
+        loadBalance(); // refresh balance display
+      } else {
+        messageDisplay.innerText = `❌ Failed to update balance.`;
+      }
+    }
+  </script>
+</body>
+</html>
