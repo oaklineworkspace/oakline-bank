@@ -33,7 +33,7 @@
 
   <div id="message"></div>
 
-  <script type="module">
+  <script>
     const emailInput = document.getElementById("email");
     const balanceDisplay = document.getElementById("current-balance");
     const messageDisplay = document.getElementById("message");
@@ -44,7 +44,7 @@
       if (!email) return;
 
       try {
-        const response = await fetch(`/api/update-balance?email=${encodeURIComponent(email)}&action=load`);
+        const response = await fetch(`/api/update-balance?email=${encodeURIComponent(email)}`);
         const result = await response.json();
 
         if (response.ok) {
@@ -79,7 +79,7 @@
         const result = await response.json();
 
         if (response.ok) {
-          messageDisplay.innerText = `✅ Balance updated successfully! New Balance: $${result.user.balance}`;
+          messageDisplay.innerText = `✅ Balance updated! New Balance: $${result.user.balance}`;
           loadBalance(); // refresh displayed balance
         } else {
           messageDisplay.innerText = `❌ ${result.message || "Failed to update balance."}`;
