@@ -77,12 +77,36 @@
     .feature-card h4 { margin-bottom: 10px; color: #003366; }
     .feature-card p { font-size: 0.95rem; }
 
+    /* ======= TESTIMONIALS ======= */
+    #testimonials { padding:80px 20px; background-color:#E6F0FF; text-align:center; }
+    .testimonial-cards { display:flex; flex-wrap:wrap; justify-content:center; gap:30px; }
+    .testimonial-card {
+      background:white; padding:20px; border-radius:10px; width:250px; box-shadow:0 4px 12px rgba(0,0,0,0.08);
+      transition: transform 0.3s;
+    }
+    .testimonial-card:hover { transform: translateY(-5px); box-shadow:0 10px 20px rgba(0,0,0,0.15); }
+    .testimonial-card img { border-radius:50%; margin-bottom:15px; width:60px; height:60px; }
+
+    /* ======= LOAN CALCULATOR ======= */
+    .calculator { padding:80px 20px; text-align:center; }
+    .calculator input { padding:10px; margin:5px; border:1px solid #003366; border-radius:5px; }
+    .calculator button { background-color:#FFB81C; color:#003366; border:none; padding:12px 25px; margin-top:10px; border-radius:6px; font-weight:bold; transition:0.3s; }
+    .calculator button:hover { background-color:#FFD633; cursor:pointer; }
+
+    /* ======= FOOTER ======= */
+    footer.footer { background-color:#003366; color:white; padding:40px 20px; }
+    .footer-container { display:flex; flex-wrap:wrap; justify-content:space-between; gap:30px; }
+    .footer-container h3, .footer-container h4 { color:white; }
+    .footer-container a { color:#FFB81C; text-decoration:none; }
+    .footer-container a:hover { text-decoration:underline; }
+
     @media(max-width:768px){
       .nav-links{display:none;flex-direction:column;position:absolute;top:60px;right:0;width:200px;padding:20px;background-color:#003366;}
       .nav-links.active{display:flex;}
       .menu-toggle{display:block;}
       .hero h1{font-size:2rem;}
       .feature-card{max-width:100%;}
+      .testimonial-card{width:100%;}
     }
   </style>
 </head>
@@ -141,41 +165,40 @@
     </div>
   </section>
 
-    <!-- ======= TESTIMONIALS ======= -->
-  <section id="testimonials" class="testimonials" style="padding:80px 20px; background-color:#E6F0FF; text-align:center;">
+  <!-- ======= TESTIMONIALS ======= -->
+  <section id="testimonials">
     <h2>What Our Customers Say</h2>
-    <div class="testimonial-cards" style="display:flex; flex-wrap:wrap; justify-content:center; gap:30px;">
-      <div class="testimonial-card" style="background:white; padding:20px; border-radius:10px; width:250px; box-shadow:0 4px 12px rgba(0,0,0,0.08);">
-        <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="John D" style="border-radius:50%; margin-bottom:15px; width:60px; height:60px;">
+    <div class="testimonial-cards">
+      <div class="testimonial-card">
+        <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="John D">
         <p>"Oakline Bank makes my finances easy and transparent!"</p>
         <div class="name">John D.</div>
       </div>
-      <div class="testimonial-card" style="background:white; padding:20px; border-radius:10px; width:250px; box-shadow:0 4px 12px rgba(0,0,0,0.08);">
-        <img src="https://randomuser.me/api/portraits/women/45.jpg" alt="Sarah K" style="border-radius:50%; margin-bottom:15px; width:60px; height:60px;">
+      <div class="testimonial-card">
+        <img src="https://randomuser.me/api/portraits/women/45.jpg" alt="Sarah K">
         <p>"Fast support and amazing online services."</p>
         <div class="name">Sarah K.</div>
       </div>
-      <div class="testimonial-card" style="background:white; padding:20px; border-radius:10px; width:250px; box-shadow:0 4px 12px rgba(0,0,0,0.08);">
-        <img src="https://randomuser.me/api/portraits/men/56.jpg" alt="Mike L" style="border-radius:50%; margin-bottom:15px; width:60px; height:60px;">
+      <div class="testimonial-card">
+        <img src="https://randomuser.me/api/portraits/men/56.jpg" alt="Mike L">
         <p>"I love using the Oakline crypto wallet."</p>
         <div class="name">Mike L.</div>
       </div>
     </div>
   </section>
-
-  <!-- ======= LOAN CALCULATOR ======= -->
-  <section class="calculator" style="padding:80px 20px; text-align:center;">
+    <!-- ======= LOAN CALCULATOR ======= -->
+  <section class="calculator">
     <h2>Loan Calculator</h2>
-    <input type="number" id="loanAmount" placeholder="Loan Amount ($)" style="padding:10px; margin:5px; border:1px solid #003366; border-radius:5px;">
-    <input type="number" id="loanInterest" placeholder="Interest Rate (%)" style="padding:10px; margin:5px; border:1px solid #003366; border-radius:5px;">
-    <input type="number" id="loanYears" placeholder="Years" style="padding:10px; margin:5px; border:1px solid #003366; border-radius:5px;">
-    <button onclick="calculateLoan()" style="background-color:#FFB81C; color:#003366; border:none; padding:12px 25px; margin-top:10px; border-radius:6px; font-weight:bold; transition:0.3s;">Calculate</button>
+    <input type="number" id="loanAmount" placeholder="Loan Amount ($)">
+    <input type="number" id="loanInterest" placeholder="Interest Rate (%)">
+    <input type="number" id="loanYears" placeholder="Years">
+    <button onclick="calculateLoan()">Calculate</button>
     <p id="loanResult"></p>
   </section>
 
   <!-- ======= FOOTER ======= -->
-  <footer class="footer" style="background-color:#003366; color:white; padding:40px 20px;">
-    <div class="footer-container" style="display:flex; flex-wrap:wrap; justify-content:space-between; gap:30px;">
+  <footer class="footer">
+    <div class="footer-container">
       <div>
         <h3>Oakline Bank</h3>
         <p>Modern Banking for Everyday Life</p>
@@ -184,10 +207,10 @@
       <div>
         <h4>Quick Links</h4>
         <ul style="list-style:none; padding:0;">
-          <li><a href="index.html" style="color:#FFB81C;">Home</a></li>
-          <li><a href="login.html" id="footerLoginLink" style="color:#FFB81C;">Login</a></li>
-          <li><a href="contact.html" style="color:#FFB81C;">Contact</a></li>
-          <li><a href="#features" style="color:#FFB81C;">Services</a></li>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="login.html" id="footerLoginLink">Login</a></li>
+          <li><a href="contact.html">Contact</a></li>
+          <li><a href="#features">Services</a></li>
         </ul>
       </div>
       <div>
@@ -261,171 +284,137 @@
 
     updateNavLinks();
   </script>
+
   <!-- ======= Floating Side Footers ======= -->
-<div id="floating-footer-container">
-  <div class="floating-footer" id="ad1">
-    <p>💳 Special Offer: Get 2% cashback with Oakline Card!</p>
-    <button onclick="closeAd('ad1')">✖</button>
+  <div id="floating-footer-container">
+    <div class="floating-footer" id="ad1">
+      <p>💳 Special Offer: Get 2% cashback with Oakline Card!</p>
+      <button onclick="closeAd('ad1')">✖</button>
+    </div>
+    <div class="floating-footer" id="ad2">
+      <p>🏦 Open a Savings Account Today and Earn Bonus Interest!</p>
+      <button onclick="closeAd('ad2')">✖</button>
+    </div>
+    <div class="floating-footer" id="ad3">
+      <p>📱 Download Our App and Manage Your Finances Anywhere!</p>
+      <button onclick="closeAd('ad3')">✖</button>
+    </div>
   </div>
-  <div class="floating-footer" id="ad2">
-    <p>🏦 Open a Savings Account Today and Earn Bonus Interest!</p>
-    <button onclick="closeAd('ad2')">✖</button>
+
+  <!-- ======= Bottom Carousel Footer ======= -->
+  <div id="footer-carousel-container">
+    <div class="carousel-footer" id="carouselAd1">💳 Special Offer: Get 2% cashback with Oakline Card!</div>
+    <div class="carousel-footer" id="carouselAd2">🏦 Open a Savings Account Today and Earn Bonus Interest!</div>
+    <div class="carousel-footer" id="carouselAd3">📱 Download Our App and Manage Your Finances Anywhere!</div>
   </div>
-  <div class="floating-footer" id="ad3">
-    <p>📱 Download Our App and Manage Your Finances Anywhere!</p>
-    <button onclick="closeAd('ad3')">✖</button>
-  </div>
-</div>
 
-<!-- ======= Bottom Carousel Footer ======= -->
-<div id="footer-carousel-container">
-  <div class="carousel-footer" id="carouselAd1">💳 Special Offer: Get 2% cashback with Oakline Card!</div>
-  <div class="carousel-footer" id="carouselAd2">🏦 Open a Savings Account Today and Earn Bonus Interest!</div>
-  <div class="carousel-footer" id="carouselAd3">📱 Download Our App and Manage Your Finances Anywhere!</div>
-</div>
+  <style>
+    /* ===== Side Floating Footers ===== */
+    #floating-footer-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 2000;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    .floating-footer {
+      background-color: #FFB81C; /* Gold accent */
+      color: #003366; /* Deep blue */
+      padding: 15px 20px;
+      border-radius: 8px;
+      min-width: 250px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      opacity: 0;
+      transform: translateX(100%);
+      animation: flyIn 0.8s forwards, floatUpDown 3s ease-in-out infinite alternate;
+      transition: all 0.3s ease;
+    }
+    .floating-footer:hover {
+      animation: hoverBounce 0.6s ease forwards;
+      box-shadow: 0 12px 25px rgba(0,0,0,0.35);
+    }
+    @keyframes flyIn { to { opacity: 1; transform: translateX(0); } }
+    @keyframes floatUpDown { 0% { transform: translateX(0) translateY(0); } 50% { transform: translateX(0) translateY(-10px); } 100% { transform: translateX(0) translateY(0); } }
+    @keyframes hoverBounce { 0% { transform: translateX(0) translateY(0); } 50% { transform: translateX(0) translateY(-8px); } 100% { transform: translateX(0) translateY(0); } }
+    .floating-footer button { background: transparent; border: none; font-size: 1rem; cursor: pointer; color: #003366; font-weight: bold; }
 
-<style>
-/* ===== Side Floating Footers ===== */
-#floating-footer-container {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  z-index: 2000;
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
+    /* ===== Bottom Carousel Footers ===== */
+    #footer-carousel-container {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      z-index: 2000;
+      display: flex;
+      justify-content: center;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .carousel-footer {
+      background-color: #003366; /* Deep blue */
+      color: #FFB81C; /* Gold text */
+      padding: 15px 30px;
+      min-width: 300px;
+      text-align: center;
+      box-shadow: 0 -4px 15px rgba(0,0,0,0.3);
+      position: absolute;
+      transform: translateY(100%);
+      opacity: 0;
+      font-weight: bold;
+      transition: transform 0.8s ease, opacity 0.8s ease, box-shadow 0.3s;
+      pointer-events: auto;
+    }
+    .carousel-footer:hover { animation: carouselHover 0.6s ease forwards; box-shadow: 0 -8px 20px rgba(0,0,0,0.35); }
+    @keyframes carouselHover { 0% { transform: translateY(0); } 50% { transform: translateY(-6px); } 100% { transform: translateY(0); } }
 
-.floating-footer {
-  background-color: #FFB81C; /* Gold accent */
-  color: #003366; /* Deep blue */
-  padding: 15px 20px;
-  border-radius: 8px;
-  min-width: 250px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  opacity: 0;
-  transform: translateX(100%);
-  animation: flyIn 0.8s forwards, floatUpDown 3s ease-in-out infinite alternate;
-  transition: all 0.3s ease;
-}
+    /* ===== Mobile-Friendly Adjustments ===== */
+    @media(max-width:768px){
+      #floating-footer-container { display: none; } /* hide side footers */
+      .carousel-footer { min-width: 200px; font-size: 0.9rem; }
+    }
+  </style>
 
-.floating-footer:hover {
-  animation: hoverBounce 0.6s ease forwards;
-  box-shadow: 0 12px 25px rgba(0,0,0,0.35);
-}
+  <script>
+    // ===== Side Floating Footers Animation =====
+    window.addEventListener('DOMContentLoaded', () => {
+      const ads = document.querySelectorAll('.floating-footer');
+      ads.forEach((ad, index) => {
+        setTimeout(() => {
+          ad.style.animationDelay = '0s';
+          ad.style.animationName = 'flyIn, floatUpDown';
+        }, index * 1500);
+      });
+    });
 
-@keyframes flyIn {
-  to { opacity: 1; transform: translateX(0); }
-}
+    function closeAd(id){
+      const ad = document.getElementById(id);
+      ad.style.transition = "all 0.5s ease";
+      ad.style.opacity = 0;
+      ad.style.transform = "translateX(120%)";
+      setTimeout(() => ad.remove(), 500);
+    }
 
-@keyframes floatUpDown {
-  0% { transform: translateX(0) translateY(0); }
-  50% { transform: translateX(0) translateY(-10px); }
-  100% { transform: translateX(0) translateY(0); }
-}
+    // ===== Bottom Carousel Footer Rotation =====
+    const carouselAds = document.querySelectorAll('.carousel-footer');
+    let currentAd = 0;
 
-@keyframes hoverBounce {
-  0% { transform: translateX(0) translateY(0); }
-  50% { transform: translateX(0) translateY(-8px); }
-  100% { transform: translateX(0) translateY(0); }
-}
+    function showCarouselAd() {
+      carouselAds.forEach(ad => {
+        ad.style.transform = "translateY(100%)";
+        ad.style.opacity = 0;
+      });
+      carouselAds[currentAd].style.transform = "translateY(0)";
+      carouselAds[currentAd].style.opacity = 1;
+      currentAd = (currentAd + 1) % carouselAds.length;
+    }
 
-.floating-footer button {
-  background: transparent;
-  border: none;
-  font-size: 1rem;
-  cursor: pointer;
-  color: #003366;
-  font-weight: bold;
-}
-
-/* ===== Bottom Carousel Footers ===== */
-#footer-carousel-container {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  z-index: 2000;
-  display: flex;
-  justify-content: center;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.carousel-footer {
-  background-color: #003366; /* Deep blue */
-  color: #FFB81C; /* Gold text */
-  padding: 15px 30px;
-  min-width: 300px;
-  text-align: center;
-  box-shadow: 0 -4px 15px rgba(0,0,0,0.3);
-  position: absolute;
-  transform: translateY(100%);
-  opacity: 0;
-  font-weight: bold;
-  transition: transform 0.8s ease, opacity 0.8s ease, box-shadow 0.3s;
-  pointer-events: auto;
-}
-
-.carousel-footer:hover {
-  animation: carouselHover 0.6s ease forwards;
-  box-shadow: 0 -8px 20px rgba(0,0,0,0.35);
-}
-
-@keyframes carouselHover {
-  0% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
-  100% { transform: translateY(0); }
-}
-
-/* ===== Mobile-Friendly Adjustments ===== */
-@media(max-width:768px){
-  #floating-footer-container { display: none; } /* hide side footers */
-  .carousel-footer { min-width: 200px; font-size: 0.9rem; }
-}
-</style>
-
-<script>
-// ===== Side Floating Footers Animation =====
-window.addEventListener('DOMContentLoaded', () => {
-  const ads = document.querySelectorAll('.floating-footer');
-  ads.forEach((ad, index) => {
-    setTimeout(() => {
-      ad.style.animationDelay = '0s';
-      ad.style.animationName = 'flyIn, floatUpDown';
-    }, index * 1500);
-  });
-});
-
-function closeAd(id){
-  const ad = document.getElementById(id);
-  ad.style.transition = "all 0.5s ease";
-  ad.style.opacity = 0;
-  ad.style.transform = "translateX(120%)";
-  setTimeout(() => ad.remove(), 500);
-}
-
-// ===== Bottom Carousel Footer Rotation =====
-const carouselAds = document.querySelectorAll('.carousel-footer');
-let currentAd = 0;
-
-function showCarouselAd() {
-  carouselAds.forEach(ad => {
-    ad.style.transform = "translateY(100%)";
-    ad.style.opacity = 0;
-  });
-  
-  carouselAds[currentAd].style.transform = "translateY(0)";
-  carouselAds[currentAd].style.opacity = 1;
-
-  currentAd = (currentAd + 1) % carouselAds.length;
-}
-
-showCarouselAd();
-setInterval(showCarouselAd, 4000);
-</script>
+    showCarouselAd();
+    setInterval(showCarouselAd, 4000);
+  </script>
 </body>
 </html>
