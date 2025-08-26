@@ -15,25 +15,51 @@
 <body>
   <h1>Admin - Update User Balance</h1>
 
-  <label>Email:</label>
-  <input type="email" id="email" placeholder="user email" onblur="loadBalance()">
+  <!-- Password Gate -->
+  <div id="login-screen">
+    <p>Enter password to access admin panel:</p>
+    <input type="password" id="adminPassword" placeholder="Password">
+    <button onclick="checkPassword()">Login</button>
+    <p id="error" style="color:red;"></p>
+  </div>
 
-  <div id="current-balance"></div>
+  <!-- Admin Panel (hidden until login) -->
+  <div id="admin-panel" style="display:none;">
+    <label>Email:</label>
+    <input type="email" id="email" placeholder="user email" onblur="loadBalance()">
 
-  <label>Action:</label>
-  <select id="action">
-    <option value="set">Set Balance</option>
-    <option value="adjust">Deposit/Withdraw</option>
-  </select>
+    <div id="current-balance"></div>
 
-  <label>Amount:</label>
-  <input type="number" id="amount" placeholder="Amount (positive or negative)">
+    <label>Action:</label>
+    <select id="action">
+      <option value="set">Set Balance</option>
+      <option value="adjust">Deposit/Withdraw</option>
+    </select>
 
-  <button onclick="submitBalance()">Submit</button>
+    <label>Amount:</label>
+    <input type="number" id="amount" placeholder="Amount (positive or negative)">
 
-  <div id="message"></div>
+    <button onclick="submitBalance()">Submit</button>
+
+    <div id="message"></div>
+  </div>
 
   <script>
+    const DASHBOARD_PASSWORD = "oakline123";
+    const loginScreen = document.getElementById("login-screen");
+    const adminPanel = document.getElementById("admin-panel");
+    const errorMsg = document.getElementById("error");
+
+    function checkPassword() {
+      const password = document.getElementById("adminPassword").value;
+      if(password === DASHBOARD_PASSWORD){
+        loginScreen.style.display = "none";
+        adminPanel.style.display = "block";
+      } else {
+        errorMsg.innerText = "❌ Incorrect password!";
+      }
+    }
+
     const emailInput = document.getElementById("email");
     const balanceDisplay = document.getElementById("current-balance");
     const messageDisplay = document.getElementById("message");
@@ -78,9 +104,9 @@
 
         const result = await response.json();
 
-        if (response.ok) {
+        if (response.ok && result.user) {
           messageDisplay.innerText = `✅ Balance updated! New Balance: $${result.user.balance}`;
-          loadBalance(); // refresh displayed balance
+          loadBalance();
         } else {
           messageDisplay.innerText = `❌ ${result.message || "Failed to update balance."}`;
         }
