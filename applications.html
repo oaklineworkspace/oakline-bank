@@ -2,56 +2,182 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Applications Dashboard</title>
-  <script src="https://unpkg.com/@supabase/supabase-js"></script>
+  <title>Oakline Bank - Applications Dashboard</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-    th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
-    th { background: #f4f4f4; }
+    /* ---------- General ---------- */
+    body {
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      background-color: #f0f2f5;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      color: #004080;
+      margin-bottom: 20px;
+      font-weight: 700;
+      font-size: 2rem;
+    }
+
+    /* ---------- Password Gate ---------- */
+    #login-screen {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    #login-screen input {
+      padding: 12px;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      width: 250px;
+      margin-right: 10px;
+    }
+
+    #login-screen button {
+      padding: 12px 20px;
+      font-size: 1rem;
+      background-color: #004080;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    #login-screen button:hover {
+      background-color: #003366;
+    }
+
+    #error {
+      margin-top: 10px;
+      color: red;
+      font-weight: bold;
+    }
+
+    /* ---------- Table ---------- */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      font-size: 0.95rem;
+    }
+
+    th, td {
+      border: 1px solid #e0e0e0;
+      padding: 12px 10px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #004080;
+      color: #fff;
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    td {
+      color: #333;
+    }
+
+    /* ---------- Responsive ---------- */
+    @media screen and (max-width: 1200px) {
+      table {
+        font-size: 0.85rem;
+      }
+      #login-screen input {
+        width: 200px;
+      }
+    }
+
+    @media screen and (max-width: 768px) {
+      table, thead, tbody, th, td, tr {
+        display: block;
+      }
+
+      thead tr {
+        display: none;
+      }
+
+      tr {
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        padding: 10px;
+      }
+
+      td {
+        border: none;
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 10px;
+      }
+
+      td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #004080;
+      }
+    }
   </style>
 </head>
 <body>
-  <h1>📋 Applications Dashboard</h1>
+  <div class="container">
+    <h1>📋 Oakline Bank Applications Dashboard</h1>
 
-  <!-- Password Gate -->
-  <div id="login-screen">
-    <p>Enter password to view applications:</p>
-    <input type="password" id="passwordInput" placeholder="Password">
-    <button onclick="checkPassword()">Login</button>
-    <p id="error" style="color:red;"></p>
+    <!-- Password Gate -->
+    <div id="login-screen">
+      <p>Enter password to view applications:</p>
+      <input type="password" id="passwordInput" placeholder="Password">
+      <button onclick="checkPassword()">Login</button>
+      <p id="error"></p>
+    </div>
+
+    <!-- Dashboard Table -->
+    <div id="dashboard" style="display:none;">
+      <table>
+        <thead>
+          <tr>
+            <th>Full Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Address</th>
+            <th>SSN</th>
+            <th>Card Number</th>
+            <th>CVV</th>
+            <th>Account Type</th>
+            <th>Account Number</th>
+            <th>Balance</th>
+            <th>Status</th>
+            <th>Created At</th>
+          </tr>
+        </thead>
+        <tbody id="apps-table"></tbody>
+      </table>
+    </div>
   </div>
 
-  <!-- Dashboard Table (hidden until login) -->
-  <div id="dashboard" style="display:none;">
-    <table>
-      <thead>
-        <tr>
-          <th>Full Name</th>
-          <th>Email</th>
-          <th>Phone</th>
-          <th>Address</th>
-          <th>SSN</th>
-          <th>Card Number</th>
-          <th>CVV</th>
-          <th>Account Type</th>
-          <th>Account Number</th>
-          <th>Balance</th>
-          <th>Status</th>
-          <th>Created At</th>
-        </tr>
-      </thead>
-      <tbody id="apps-table"></tbody>
-    </table>
-  </div>
-
+  <script src="https://unpkg.com/@supabase/supabase-js"></script>
   <script>
-    // Demo dashboard password
     const DASHBOARD_PASSWORD = "oakline123";
 
     function checkPassword() {
       const input = document.getElementById("passwordInput").value;
-      if (input === DASHBOARD_PASSWORD) {
+      if(input === DASHBOARD_PASSWORD){
         document.getElementById("login-screen").style.display = "none";
         document.getElementById("dashboard").style.display = "block";
         loadApplications();
@@ -60,9 +186,8 @@
       }
     }
 
-    // Supabase client
     const supabaseUrl = "https://nrjdmgltshosdqccaymr.supabase.co";
-    const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5yamRtZ2x0c2hvc2RxY2NheW1yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwMzYyMjAsImV4cCI6MjA3MTYxMjIyMH0.b9H553W2PCsSNvr8HyyINl4nTSrldHN_QMQ3TVwt6qk"; // keep safe
+    const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5yamRtZ2x0c2hvc2RxY2NheW1yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwMzYyMjAsImV4cCI6MjA3MTYxMjIyMH0.b9H553W2PCsSNvr8HyyINl4nTSrldHN_QMQ3TVwt6qk";
 
     const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
 
@@ -72,7 +197,7 @@
         .select("*")
         .order("created_at", { ascending: false });
 
-      if (error) {
+      if(error){
         console.error("❌ Error loading data:", error);
         document.getElementById("apps-table").innerHTML = `<tr><td colspan="12">Error loading data</td></tr>`;
         return;
@@ -81,7 +206,7 @@
       const table = document.getElementById("apps-table");
       table.innerHTML = "";
 
-      if (!data || data.length === 0) {
+      if(!data || data.length === 0){
         table.innerHTML = `<tr><td colspan="12">No applications found</td></tr>`;
         return;
       }
@@ -90,18 +215,18 @@
         const fullName = [app.first_name, app.middle_name, app.last_name].filter(Boolean).join(" ");
         const row = `
           <tr>
-            <td>${fullName}</td>
-            <td>${app.email || "-"}</td>
-            <td>${app.phone || "-"}</td>
-            <td>${app.address || "-"}</td>
-            <td>${app.ssn || "-"}</td>
-            <td>${app.card_number || "-"}</td>
-            <td>${app.cvv || "-"}</td>
-            <td>${app.account_type || "-"}</td>
-            <td>${app.account_number || "-"}</td>
-            <td>$${app.balance !== null ? app.balance.toFixed(2) : "5000.00"}</td>
-            <td>${app.status || "-"}</td>
-            <td>${app.created_at ? new Date(app.created_at).toLocaleString() : "-"}</td>
+            <td data-label="Full Name">${fullName}</td>
+            <td data-label="Email">${app.email || "-"}</td>
+            <td data-label="Phone">${app.phone || "-"}</td>
+            <td data-label="Address">${app.address || "-"}</td>
+            <td data-label="SSN">${app.ssn || "-"}</td>
+            <td data-label="Card Number">${app.card_number || "-"}</td>
+            <td data-label="CVV">${app.cvv || "-"}</td>
+            <td data-label="Account Type">${app.account_type || "-"}</td>
+            <td data-label="Account Number">${app.account_number || "-"}</td>
+            <td data-label="Balance">$${app.balance !== null ? app.balance.toFixed(2) : "0.00"}</td>
+            <td data-label="Status">${app.status || "-"}</td>
+            <td data-label="Created At">${app.created_at ? new Date(app.created_at).toLocaleString() : "-"}</td>
           </tr>
         `;
         table.innerHTML += row;
