@@ -11,7 +11,7 @@
 
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', sans-serif; }
-    body { background-color: #f5f7fa; color: #333; line-height: 1.6; }
+    body { background-color: #F5F7FA; color: #333; line-height: 1.6; }
     a { text-decoration: none; color: inherit; }
     button { cursor: pointer; }
     img { max-width: 100%; display: block; }
@@ -22,7 +22,7 @@
       justify-content: space-between;
       align-items: center;
       padding: 15px 40px;
-      background-color: #002F6C;
+      background-color: #003366; /* deep navy */
       color: white;
       position: sticky;
       top: 0;
@@ -31,7 +31,7 @@
     .navbar .logo { font-size: 1.5rem; font-weight: bold; }
     .nav-links { display: flex; align-items: center; gap: 20px; }
     .nav-links a { color: white; font-weight: 500; transition: 0.3s; }
-    .nav-links a:hover { color: #FFB81C; border-bottom: 2px solid rgba(0,255,0,0.15); }
+    .nav-links a:hover { color: #FFB81C; } /* gold accent on hover */
     .menu-toggle { display: none; background: none; border: none; font-size: 1.5rem; color: white; }
 
     /* Dark mode toggle */
@@ -52,16 +52,16 @@
       text-align: center;
       color: white;
       padding: 120px 20px;
-      background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('https://images.unsplash.com/photo-1592496001024-3d77128b8d30?auto=format&fit=crop&w=1470&q=80') no-repeat center center/cover;
+      background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('https://images.unsplash.com/photo-1592496001024-3d77128b8d30?auto=format&fit=crop&w=1470&q=80') no-repeat center center/cover;
     }
     .hero h1 { font-size: 3rem; margin-bottom: 20px; text-shadow: 2px 2px 8px rgba(0,0,0,0.5); }
     .hero p { font-size: 1.3rem; margin-bottom: 30px; text-shadow: 1px 1px 6px rgba(0,0,0,0.5); }
-    .hero a { background-color: #FFB81C; color: #002F6C; border: none; padding: 14px 28px; border-radius: 6px; font-weight: bold; transition: 0.3s; }
-    .hero a:hover { background-color: #FFD633; box-shadow: 0 0 15px rgba(255,0,0,0.15); }
+    .hero a { background-color: #FFB81C; color: #003366; border: none; padding: 14px 28px; border-radius: 6px; font-weight: bold; transition: 0.3s; }
+    .hero a:hover { background-color: #FFD633; }
 
     /* ======= FEATURES ======= */
-    #features { padding: 80px 20px; background-color: #f5f7fa; text-align: center; }
-    #features h2 { font-size: 2.5rem; color: #002F6C; margin-bottom: 50px; }
+    #features { padding: 80px 20px; background-color: #F5F7FA; text-align: center; }
+    #features h2 { font-size: 2.5rem; color: #003366; margin-bottom: 50px; }
     .feature-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 30px; }
     .feature-card {
       flex: 1 1 220px;
@@ -70,19 +70,15 @@
       padding: 25px;
       text-align: center;
       box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-      transition: transform 0.3s, box-shadow 0.3s, border 0.3s;
+      transition: transform 0.3s, box-shadow 0.3s;
     }
-    .feature-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(255,0,0,0.15); border: 2px solid rgba(0,255,0,0.15); }
+    .feature-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
     .feature-card img { margin-bottom: 15px; height: 80px; object-fit: contain; }
-    .feature-card h4 { margin-bottom: 10px; color: #002F6C; }
+    .feature-card h4 { margin-bottom: 10px; color: #003366; }
     .feature-card p { font-size: 0.95rem; }
 
-    /* Red and Green accent classes */
-    .red-accent { background-color: rgba(255,0,0,0.15); }
-    .green-accent { background-color: rgba(0,255,0,0.15); }
-
     @media(max-width:768px){
-      .nav-links{display:none;flex-direction:column;position:absolute;top:60px;right:0;width:200px;padding:20px;background-color:#002F6C;}
+      .nav-links{display:none;flex-direction:column;position:absolute;top:60px;right:0;width:200px;padding:20px;background-color:#003366;}
       .nav-links.active{display:flex;}
       .menu-toggle{display:block;}
       .hero h1{font-size:2rem;}
@@ -100,7 +96,7 @@
       <a href="#features">Services</a>
       <a href="#testimonials">Testimonials</a>
       <a href="contact.html">Contact</a>
-      <a href="login.html" id="navLoginLink" class="green-accent">Login</a>
+      <a href="login.html" id="navLoginLink">Login</a>
       <div class="toggle-container">
         <label class="switch">
           <input type="checkbox" id="darkModeToggle">
@@ -115,29 +111,29 @@
   <section class="hero">
     <h1>Welcome to Oakline Bank</h1>
     <p>Modern Banking for Everyday Life. Secure, Fast, and Reliable.</p>
-    <a href="login.html" class="red-accent">Get Started</a>
+    <a href="login.html">Get Started</a>
   </section>
 
   <!-- ======= FEATURES SECTION ======= -->
   <section id="features">
     <h2>Our Services</h2>
     <div class="feature-grid">
-      <div class="feature-card red-accent">
+      <div class="feature-card">
         <img src="https://images.unsplash.com/photo-1600267167893-7c4e0e7d6574?auto=format&fit=crop&w=500&q=60" alt="Smart Savings">
         <h4>Smart Savings</h4>
         <p>High interest rates and easy withdrawals.</p>
       </div>
-      <div class="feature-card green-accent">
+      <div class="feature-card">
         <img src="https://images.unsplash.com/photo-1581091012184-8b0313ee24ff?auto=format&fit=crop&w=500&q=60" alt="Easy Loans">
         <h4>Easy Loans</h4>
         <p>Fast approval and competitive rates.</p>
       </div>
-      <div class="feature-card red-accent">
+      <div class="feature-card">
         <img src="https://images.unsplash.com/photo-1585238342027-1d90e6b9ecaf?auto=format&fit=crop&w=500&q=60" alt="Debit & Credit Cards">
         <h4>Debit & Credit Cards</h4>
         <p>Secure cards accepted worldwide.</p>
       </div>
-      <div class="feature-card green-accent">
+      <div class="feature-card">
         <img src="https://images.unsplash.com/photo-1612197528822-c7460c1e831c?auto=format&fit=crop&w=500&q=60" alt="Crypto Wallet">
         <h4>Crypto Wallet</h4>
         <p>Buy, sell, and store cryptocurrencies safely.</p>
@@ -146,20 +142,20 @@
   </section>
 
     <!-- ======= TESTIMONIALS ======= -->
-  <section id="testimonials" class="testimonials" style="padding:80px 20px; background-color:#e6f0ff; text-align:center;">
+  <section id="testimonials" class="testimonials" style="padding:80px 20px; background-color:#E6F0FF; text-align:center;">
     <h2>What Our Customers Say</h2>
     <div class="testimonial-cards" style="display:flex; flex-wrap:wrap; justify-content:center; gap:30px;">
-      <div class="testimonial-card red-accent" style="background:white; padding:20px; border-radius:10px; width:250px; box-shadow:0 4px 12px rgba(255,0,0,0.15);">
+      <div class="testimonial-card" style="background:white; padding:20px; border-radius:10px; width:250px; box-shadow:0 4px 12px rgba(0,0,0,0.08);">
         <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="John D" style="border-radius:50%; margin-bottom:15px; width:60px; height:60px;">
         <p>"Oakline Bank makes my finances easy and transparent!"</p>
         <div class="name">John D.</div>
       </div>
-      <div class="testimonial-card green-accent" style="background:white; padding:20px; border-radius:10px; width:250px; box-shadow:0 4px 12px rgba(0,255,0,0.15);">
+      <div class="testimonial-card" style="background:white; padding:20px; border-radius:10px; width:250px; box-shadow:0 4px 12px rgba(0,0,0,0.08);">
         <img src="https://randomuser.me/api/portraits/women/45.jpg" alt="Sarah K" style="border-radius:50%; margin-bottom:15px; width:60px; height:60px;">
         <p>"Fast support and amazing online services."</p>
         <div class="name">Sarah K.</div>
       </div>
-      <div class="testimonial-card red-accent" style="background:white; padding:20px; border-radius:10px; width:250px; box-shadow:0 4px 12px rgba(255,0,0,0.15);">
+      <div class="testimonial-card" style="background:white; padding:20px; border-radius:10px; width:250px; box-shadow:0 4px 12px rgba(0,0,0,0.08);">
         <img src="https://randomuser.me/api/portraits/men/56.jpg" alt="Mike L" style="border-radius:50%; margin-bottom:15px; width:60px; height:60px;">
         <p>"I love using the Oakline crypto wallet."</p>
         <div class="name">Mike L.</div>
@@ -170,15 +166,15 @@
   <!-- ======= LOAN CALCULATOR ======= -->
   <section class="calculator" style="padding:80px 20px; text-align:center;">
     <h2>Loan Calculator</h2>
-    <input type="number" id="loanAmount" placeholder="Loan Amount ($)" class="green-accent">
-    <input type="number" id="loanInterest" placeholder="Interest Rate (%)" class="green-accent">
-    <input type="number" id="loanYears" placeholder="Years" class="green-accent">
-    <button onclick="calculateLoan()" class="red-accent">Calculate</button>
+    <input type="number" id="loanAmount" placeholder="Loan Amount ($)" style="padding:10px; margin:5px; border:1px solid #003366; border-radius:5px;">
+    <input type="number" id="loanInterest" placeholder="Interest Rate (%)" style="padding:10px; margin:5px; border:1px solid #003366; border-radius:5px;">
+    <input type="number" id="loanYears" placeholder="Years" style="padding:10px; margin:5px; border:1px solid #003366; border-radius:5px;">
+    <button onclick="calculateLoan()" style="background-color:#FFB81C; color:#003366; border:none; padding:12px 25px; margin-top:10px; border-radius:6px; font-weight:bold; transition:0.3s;">Calculate</button>
     <p id="loanResult"></p>
   </section>
 
   <!-- ======= FOOTER ======= -->
-  <footer class="footer" style="background-color:#002F6C; color:white; padding:40px 20px;">
+  <footer class="footer" style="background-color:#003366; color:white; padding:40px 20px;">
     <div class="footer-container" style="display:flex; flex-wrap:wrap; justify-content:space-between; gap:30px;">
       <div>
         <h3>Oakline Bank</h3>
@@ -188,10 +184,10 @@
       <div>
         <h4>Quick Links</h4>
         <ul style="list-style:none; padding:0;">
-          <li><a href="index.html" class="green-accent">Home</a></li>
-          <li><a href="login.html" id="footerLoginLink" class="red-accent">Login</a></li>
-          <li><a href="contact.html" class="green-accent">Contact</a></li>
-          <li><a href="#features" class="red-accent">Services</a></li>
+          <li><a href="index.html" style="color:#FFB81C;">Home</a></li>
+          <li><a href="login.html" id="footerLoginLink" style="color:#FFB81C;">Login</a></li>
+          <li><a href="contact.html" style="color:#FFB81C;">Contact</a></li>
+          <li><a href="#features" style="color:#FFB81C;">Services</a></li>
         </ul>
       </div>
       <div>
@@ -216,7 +212,7 @@
   </footer>
 
   <!-- ======= BOTTOM NAV ======= -->
-  <nav class="bottom-nav" style="position:fixed; bottom:0; left:0; width:100%; background-color:#002F6C; display:flex; justify-content:space-around; padding:10px 0; z-index:1000;">
+  <nav class="bottom-nav" style="position:fixed; bottom:0; left:0; width:100%; background-color:#003366; display:flex; justify-content:space-around; padding:10px 0; z-index:1000;">
     <a href="index.html"><img src="https://cdn-icons-png.flaticon.com/24/25/25694.png" alt="Home"><span>Main</span></a>
     <a href="login.html"><img src="https://cdn-icons-png.flaticon.com/24/25/25695.png" alt="Login"><span>Login</span></a>
     <a href="contact.html"><img src="https://cdn-icons-png.flaticon.com/24/25/25696.png" alt="Contact"><span>Contact</span></a>
