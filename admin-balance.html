@@ -34,42 +34,31 @@
   <div id="message"></div>
 
   <script type="module">
-    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
-    import { updateBalance, adjustBalance } from "./balance.js";
-
     const emailInput = document.getElementById("email");
     const balanceDisplay = document.getElementById("current-balance");
     const messageDisplay = document.getElementById("message");
 
-    // Load balance when user finishes typing email
+    // Load current balance
     async function loadBalance() {
       const email = emailInput.value.trim();
       if (!email) return;
 
       try {
-        const supabase = createClient(
-          "https://nrjdmgltshosdqccaymr.supabase.co",
-          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5yamRtZ2x0c2hvc2RxY2NheW1yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwMzYyMjAsImV4cCI6MjA3MTYxMjIyMH0.b9H553W2PCsSNvr8HyyINl4nTSrldHN_QMQ3TVwt6qk"
-        );
+        const response = await fetch(`/api/update-balance?email=${encodeURIComponent(email)}&action=load`);
+        const result = await response.json();
 
-        const { data: user, error } = await supabase
-          .from("applications")
-          .select("balance")
-          .eq("email", email)
-          .single();
-
-        if (error || !user) {
-          balanceDisplay.innerText = "❌ User not found";
-          return;
+        if (response.ok) {
+          balanceDisplay.innerText = `💰 Current Balance: $${result.balance || 0}`;
+        } else {
+          balanceDisplay.innerText = `❌ ${result.message || "User not found"}`;
         }
-
-        balanceDisplay.innerText = `💰 Current Balance: $${user.balance || 0}`;
       } catch (err) {
         balanceDisplay.innerText = "❌ Error loading balance";
         console.error(err);
       }
     }
 
+    // Submit balance update
     async function submitBalance() {
       const email = emailInput.value.trim();
       const action = document.getElementById("action").value;
@@ -80,18 +69,24 @@
         return;
       }
 
-      let result;
-      if (action === "set") {
-        result = await updateBalance(email, amount);
-      } else {
-        result = await adjustBalance(email, amount);
-      }
+      try {
+        const response = await fetch("/api/update-balance", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, action, amount })
+        });
 
-      if (result) {
-        messageDisplay.innerText = `✅ Balance updated successfully!`;
-        loadBalance(); // refresh balance display
-      } else {
-        messageDisplay.innerText = `❌ Failed to update balance.`;
+        const result = await response.json();
+
+        if (response.ok) {
+          messageDisplay.innerText = `✅ Balance updated successfully! New Balance: $${result.user.balance}`;
+          loadBalance(); // refresh displayed balance
+        } else {
+          messageDisplay.innerText = `❌ ${result.message || "Failed to update balance."}`;
+        }
+      } catch (err) {
+        console.error(err);
+        messageDisplay.innerText = "❌ Error updating balance.";
       }
     }
   </script>
