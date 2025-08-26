@@ -1,14 +1,13 @@
 
-// api/submit.js
 import { createClient } from "@supabase/supabase-js";
 
-// Initialize Supabase with service key for inserts
+// Supabase client with service key
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.SUPABASE_SERVICE_KEY
 );
 
-// Simple account number generator
+// Simple random account number generator
 function generateAccountNumber() {
   const prefix = "AC";
   const number = Math.floor(10000000 + Math.random() * 90000000);
@@ -16,12 +15,9 @@ function generateAccountNumber() {
 }
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ message: "Method not allowed" });
-  }
+  if (req.method !== "POST") return res.status(405).json({ message: "Method not allowed" });
 
   try {
-    // Destructure all expected fields from frontend
     const {
       first_name,
       middle_name,
@@ -41,7 +37,6 @@ export default async function handler(req, res) {
 
     const account_number = generateAccountNumber();
 
-    // Insert into Supabase
     const { data, error } = await supabase
       .from("applications")
       .insert([
@@ -69,7 +64,6 @@ export default async function handler(req, res) {
 
     if (error) throw error;
 
-    // Return JSON response with confirmation
     return res.status(200).json({
       message: "Application submitted successfully!",
       account_number: data[0].account_number
