@@ -1,5 +1,5 @@
 /* =========================
-   RESET & BASE STYLES
+   GENERAL RESET & BASE
 ========================= */
 * {
   margin: 0;
@@ -8,179 +8,290 @@
 }
 
 body {
-  font-family: "Segoe UI", Arial, sans-serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   line-height: 1.6;
-  background: #ffffff; /* White 45% */
   color: #333;
-  overflow-x: hidden;
+  background-color: rgba(255, 255, 255, 0.45); /* 45% white */
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.3s ease;
+}
+
+a:hover {
+  color: #28a745; /* green accent */
 }
 
 /* =========================
-   COLORS (Balanced Theme)
+   HEADER
 ========================= */
-:root {
-  --white: #ffffff;     /* 45% */
-  --blue: #003366;      /* 40% dark navy blue */
-  --green: #28a745;     /* 15% accent */
-  --light-blue: #004080;
-  --gray: #f4f4f4;
-}
-
-/* =========================
-   NAVIGATION
-========================= */
-nav {
-  background: var(--blue);
-  padding: 15px 20px;
+header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  position: sticky;
-  top: 0;
-  z-index: 1000;
+  padding: 15px 30px;
+  background: rgba(0, 38, 102, 0.4); /* 40% dark blue */
+  color: white;
 }
 
-nav .logo {
-  color: var(--white);
-  font-size: 1.5rem;
+header .logo {
+  font-size: 1.8rem;
   font-weight: bold;
 }
 
 nav ul {
   list-style: none;
   display: flex;
-  gap: 20px;
+  flex-wrap: wrap;
+  gap: 15px;
 }
 
 nav ul li a {
-  color: var(--white);
-  text-decoration: none;
-  transition: 0.3s;
+  font-weight: 500;
+  color: white;
 }
 
 nav ul li a:hover {
-  color: var(--green);
+  color: #28a745;
 }
 
 /* =========================
    HERO SECTION
 ========================= */
 .hero {
-  height: 100vh;
-  background: linear-gradient(
-      rgba(0, 51, 102, 0.6),
-      rgba(0, 51, 102, 0.6)
-    ),
-    url("images/hero-bg.jpg") center/cover no-repeat;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  color: var(--white);
   text-align: center;
-  padding: 20px;
+  padding: 120px 20px 80px;
+  background: linear-gradient(
+      rgba(0,0,0,0.1), 
+      rgba(0,0,0,0.1)
+    ),
+    url('https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=1400&q=80') 
+    no-repeat center/cover;
+  color: white;
 }
 
 .hero h1 {
-  font-size: 2.5rem;
+  font-size: 3rem;
   margin-bottom: 20px;
 }
 
 .hero p {
   font-size: 1.2rem;
-  max-width: 600px;
   margin-bottom: 30px;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .hero .btn {
-  padding: 12px 30px;
-  background: var(--green);
-  border: none;
-  color: var(--white);
-  font-size: 1rem;
+  background: #28a745; /* green */
+  color: white;
+  padding: 15px 35px;
+  border-radius: 6px;
+  font-size: 1.05rem;
   cursor: pointer;
-  transition: 0.3s;
-  border-radius: 5px;
 }
 
 .hero .btn:hover {
-  background: #1e7a38;
+  background: #218838;
 }
 
 /* =========================
-   SERVICES / FEATURES
+   SECTION BASE
 ========================= */
-.services {
-  padding: 80px 20px;
-  background: var(--white);
+section {
+  padding: 70px 20px;
   text-align: center;
 }
 
-.services h2 {
-  color: var(--blue);
-  margin-bottom: 40px;
-  font-size: 2rem;
+section h2 {
+  font-size: 2.2rem;
+  margin-bottom: 20px;
+  color: rgba(0, 38, 102, 0.9); /* dark blue */
 }
 
-.service-grid {
+section p {
+  max-width: 850px;
+  margin: 0 auto 40px;
+  font-size: 1.1rem;
+  color: #555;
+}
+
+/* =========================
+   GRID / BOXES
+========================= */
+.grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 30px;
+  margin-top: 40px;
 }
 
-.service-card {
-  background: var(--gray);
+.grid .box {
+  background: rgba(0, 38, 102, 0.1); /* 10% black overlay on blue */
+  border-radius: 12px;
   padding: 25px;
-  border-radius: 10px;
-  transition: 0.3s;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+  transition: transform 0.3s, box-shadow 0.3s;
 }
 
-.service-card:hover {
-  background: var(--blue);
-  color: var(--white);
-  transform: translateY(-5px);
+.grid .box:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+}
+
+.grid .box h3 {
+  margin-top: 0;
+  color: rgba(0, 38, 102, 1); /* dark blue */
+}
+
+.grid .box p {
+  color: #222;
 }
 
 /* =========================
    TESTIMONIALS
 ========================= */
-.testimonials {
-  background: var(--light-blue);
-  padding: 80px 20px;
-  color: var(--white);
-  text-align: center;
-}
-
 .testimonial-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
+  gap: 30px;
+  justify-items: center;
+  max-width: 1200px;
+  margin: auto;
 }
 
 .testimonial {
-  background: var(--white);
-  color: #333;
-  padding: 20px;
+  background: rgba(255,255,255,0.45);
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  text-align: center;
+}
+
+.testimonial img {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 15px;
+}
+
+.testimonial h3 {
+  margin: 10px 0 5px;
+  color: rgba(0, 38, 102, 0.9);
+}
+
+.testimonial p {
+  font-size: 14px;
+  color: #555;
+}
+
+/* =========================
+   CONTACT FORM
+========================= */
+.contact-form input,
+.contact-form textarea,
+.newsletter-form input {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+}
+
+.contact-form button,
+.newsletter-form button {
+  padding: 12px 25px;
+  background: #28a745;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.contact-form button:hover,
+.newsletter-form button:hover {
+  background: #218838;
+}
+
+/* =========================
+   APP DOWNLOAD BUTTONS
+========================= */
+#app-download .btn {
+  display: inline-block;
+  background: #28a745;
+  color: white;
+  padding: 15px 25px;
+  border-radius: 6px;
+  margin: 10px;
+  font-size: 1rem;
+}
+
+/* =========================
+   MAP
+========================= */
+.map-container iframe {
+  width: 100%;
+  height: 350px;
+  border: 0;
   border-radius: 10px;
 }
 
 /* =========================
-   FOOTER
+   FOOTERS
 ========================= */
 .footer {
-  background: var(--blue);
-  color: var(--white);
+  background: rgba(0,38,102,0.4);
+  color: white;
   padding: 40px 20px;
   text-align: center;
+  margin-top: 20px;
+}
+
+.footer h3 {
+  margin-bottom: 15px;
+}
+
+.footer ul {
+  list-style: none;
+  padding: 0;
+}
+
+.footer ul li {
+  margin-bottom: 10px;
 }
 
 .footer a {
-  color: var(--green);
-  text-decoration: none;
+  color: white;
 }
 
 .footer a:hover {
-  text-decoration: underline;
+  color: #28a745;
+}
+
+/* =========================
+   COUNTER
+========================= */
+.counter-box {
+  background: rgba(255,255,255,0.45);
+  padding: 30px;
+  border-radius: 12px;
+  width: 180px;
+  margin: 50px auto;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.counter-box h3 {
+  font-size: 2.5rem;
+  color: rgba(0, 38, 102, 0.9);
 }
 
 /* =========================
@@ -189,25 +300,26 @@ nav ul li a:hover {
 @media (max-width: 768px) {
   nav ul {
     flex-direction: column;
-    background: var(--blue);
-    position: absolute;
-    top: 60px;
-    left: -100%;
-    width: 100%;
-    text-align: center;
-    transition: 0.3s;
-    padding: 20px 0;
-  }
-
-  nav ul.show {
-    left: 0;
+    gap: 10px;
   }
 
   .hero h1 {
-    font-size: 2rem;
+    font-size: 2.2rem;
   }
 
   .hero p {
     font-size: 1rem;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .testimonial-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .map-container iframe {
+    height: 250px;
   }
 }
