@@ -1,46 +1,43 @@
-// ===== COUNTER ANIMATION =====
-const counters = document.querySelectorAll('.counter');
-counters.forEach(counter => {
-  counter.innerText = '0';
-  const updateCounter = () => {
-    const target = +counter.getAttribute('data-target');
-    const current = +counter.innerText;
-    const increment = target / 200; // speed
-    if(current < target){
-      counter.innerText = `${Math.ceil(current + increment)}`;
-      setTimeout(updateCounter, 20);
-    } else {
-      counter.innerText = target;
-    }
-  };
-  updateCounter();
+// ===== MOBILE MENU TOGGLE =====
+const menuToggle = document.querySelector('header nav ul');
+const toggleButton = document.createElement('div');
+toggleButton.classList.add('menu-toggle');
+toggleButton.innerHTML = '&#9776;'; // hamburger icon
+document.querySelector('header').appendChild(toggleButton);
+
+toggleButton.addEventListener('click', () => {
+  menuToggle.classList.toggle('show');
 });
 
-// ===== SCROLL REVEAL / POP-UP ANIMATION =====
-const popUps = document.querySelectorAll('.pop-up');
+// ===== SCROLL ANIMATIONS =====
+const animatedElements = document.querySelectorAll('.fade-up, .fade-left, .fade-right, .pop-up');
 
-const revealOnScroll = () => {
-  const triggerBottom = window.innerHeight * 0.85;
-  popUps.forEach(box => {
-    const boxTop = box.getBoundingClientRect().top;
-    if(boxTop < triggerBottom){
-      box.classList.add('active');
-    } else {
-      box.classList.remove('active');
+function isInViewport(el) {
+  const rect = el.getBoundingClientRect();
+  return (
+    rect.top <= (window.innerHeight || document.documentElement.clientHeight) - 50
+  );
+}
+
+function animateOnScroll() {
+  animatedElements.forEach(el => {
+    if (isInViewport(el)) {
+      el.style.animationPlayState = 'running';
     }
   });
-};
+}
 
-window.addEventListener('scroll', revealOnScroll);
-window.addEventListener('load', revealOnScroll);
+window.addEventListener('scroll', animateOnScroll);
+window.addEventListener('load', animateOnScroll);
 
-// ===== MOBILE NAV TOGGLE =====
-const nav = document.querySelector('nav ul');
-const navToggle = document.createElement('div');
-navToggle.classList.add('nav-toggle');
-navToggle.innerHTML = '<i class="fas fa-bars"></i>';
-document.querySelector('header').appendChild(navToggle);
-
-navToggle.addEventListener('click', () => {
-  nav.classList.toggle('active');
+// ===== OPTIONAL: SMOOTH SCROLL FOR ANCHORS =====
+const links = document.querySelectorAll('a[href^="#"]');
+links.forEach(link => {
+  link.addEventListener('click', e => {
+    e.preventDefault();
+    const target = document.querySelector(link.getAttribute('href'));
+    if(target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
 });
