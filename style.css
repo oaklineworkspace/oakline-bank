@@ -1,78 +1,89 @@
-/* =========================
-   GENERAL RESET & BASE
-========================= */
+/* ===== GENERAL ===== */
 * {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
 }
 
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   line-height: 1.6;
+  background: linear-gradient(45deg, rgba(255,255,255,0.45) 45%, rgba(0,51,102,0.4) 40%, rgba(40,167,69,0.15) 15%);
   color: #333;
-  background-color: rgba(255, 255, 255, 0.45); /* 45% white */
+  overflow-x: hidden;
 }
 
+/* ===== LINKS ===== */
 a {
   text-decoration: none;
-  color: inherit;
+  color: #001f3f;
   transition: all 0.3s ease;
 }
-
 a:hover {
-  color: #28a745; /* green accent */
+  color: #28a745;
 }
 
-/* =========================
-   HEADER
-========================= */
+/* ===== HEADER ===== */
 header {
   position: sticky;
   top: 0;
-  z-index: 100;
+  width: 100%;
+  background-color: #001f3f;
+  color: white;
+  padding: 20px 40px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px 30px;
-  background: rgba(0, 38, 102, 0.4); /* 40% dark blue */
-  color: white;
+  z-index: 1000;
 }
 
 header .logo {
-  font-size: 1.8rem;
+  font-size: 1.6rem;
   font-weight: bold;
 }
 
 nav ul {
-  list-style: none;
   display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
+  gap: 25px;
+  list-style: none;
 }
 
 nav ul li a {
-  font-weight: 500;
   color: white;
+  font-weight: 500;
 }
 
 nav ul li a:hover {
   color: #28a745;
 }
 
-/* =========================
-   HERO SECTION
-========================= */
-.hero {
-  text-align: center;
-  padding: 120px 20px 80px;
-  background: linear-gradient(
-      rgba(0,0,0,0.1), 
-      rgba(0,0,0,0.1)
-    ),
-    url('https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=1400&q=80') 
-    no-repeat center/cover;
+/* ===== MOBILE NAVIGATION ===== */
+.nav-toggle {
+  display: none;
+  font-size: 1.6rem;
+  cursor: pointer;
   color: white;
+}
+
+nav ul.active {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  position: absolute;
+  top: 70px;
+  right: 20px;
+  background: #001f3f;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+/* ===== HERO SECTION ===== */
+.hero {
+  background: url('https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=1400&q=80') no-repeat center/cover;
+  text-align: center;
+  color: white;
+  padding: 140px 20px;
+  position: relative;
 }
 
 .hero h1 {
@@ -89,21 +100,19 @@ nav ul li a:hover {
 }
 
 .hero .btn {
-  background: #28a745; /* green */
+  background: #28a745;
   color: white;
   padding: 15px 35px;
   border-radius: 6px;
   font-size: 1.05rem;
-  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 .hero .btn:hover {
   background: #218838;
 }
 
-/* =========================
-   SECTION BASE
-========================= */
+/* ===== SECTIONS ===== */
 section {
   padding: 70px 20px;
   text-align: center;
@@ -111,20 +120,18 @@ section {
 
 section h2 {
   font-size: 2.2rem;
+  color: #001f3f;
   margin-bottom: 20px;
-  color: rgba(0, 38, 102, 0.9); /* dark blue */
 }
 
 section p {
   max-width: 850px;
   margin: 0 auto 40px;
-  font-size: 1.1rem;
   color: #555;
+  font-size: 1.1rem;
 }
 
-/* =========================
-   GRID / BOXES
-========================= */
+/* ===== GRID BOXES ===== */
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -132,194 +139,171 @@ section p {
   margin-top: 40px;
 }
 
-.grid .box {
-  background: rgba(0, 38, 102, 0.1); /* 10% black overlay on blue */
+.box {
+  background: rgba(255,255,255,0.9);
   border-radius: 12px;
   padding: 25px;
   box-shadow: 0 6px 15px rgba(0,0,0,0.08);
   transition: transform 0.3s, box-shadow 0.3s;
+  opacity: 0;
+  transform: translateY(30px);
 }
 
-.grid .box:hover {
+.box.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.box:hover {
   transform: translateY(-10px);
   box-shadow: 0 10px 25px rgba(0,0,0,0.12);
 }
 
-.grid .box h3 {
+.box h3 {
   margin-top: 0;
-  color: rgba(0, 38, 102, 1); /* dark blue */
+  color: #001f3f;
 }
 
-.grid .box p {
-  color: #222;
+/* ===== COUNTER ===== */
+.counter-box {
+  background: rgba(0,51,102,0.4);
+  color: white;
+  padding: 30px 20px;
+  border-radius: 12px;
+  width: 250px;
+  margin: 50px auto;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.6s ease;
 }
 
-/* =========================
-   TESTIMONIALS
-========================= */
+.counter-box.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.counter {
+  font-size: 2.5rem;
+  color: #28a745;
+  margin-bottom: 10px;
+}
+
+/* ===== TESTIMONIALS ===== */
 .testimonial-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(250px,1fr));
   gap: 30px;
-  justify-items: center;
   max-width: 1200px;
   margin: auto;
 }
 
 .testimonial {
-  background: rgba(255,255,255,0.45);
-  padding: 30px;
+  background: rgba(255,255,255,0.9);
+  padding: 25px;
   border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-  text-align: center;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.6s ease;
+}
+
+.testimonial.active {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .testimonial img {
-  width: 90px;
-  height: 90px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
   object-fit: cover;
   margin-bottom: 15px;
 }
 
-.testimonial h3 {
-  margin: 10px 0 5px;
-  color: rgba(0, 38, 102, 0.9);
-}
-
-.testimonial p {
-  font-size: 14px;
-  color: #555;
-}
-
-/* =========================
-   CONTACT FORM
-========================= */
-.contact-form input,
-.contact-form textarea,
-.newsletter-form input {
+/* ===== FORMS ===== */
+form input,
+form textarea {
   width: 100%;
   padding: 12px;
   margin: 10px 0;
   border-radius: 6px;
   border: 1px solid #ccc;
-  font-size: 1rem;
 }
 
-.contact-form button,
-.newsletter-form button {
+form button {
   padding: 12px 25px;
   background: #28a745;
   color: white;
   border: none;
   border-radius: 6px;
   cursor: pointer;
+  transition: all 0.3s ease;
 }
 
-.contact-form button:hover,
-.newsletter-form button:hover {
+form button:hover {
   background: #218838;
 }
 
-/* =========================
-   APP DOWNLOAD BUTTONS
-========================= */
-#app-download .btn {
+/* ===== BUTTONS ===== */
+.btn {
   display: inline-block;
   background: #28a745;
   color: white;
-  padding: 15px 25px;
+  padding: 12px 30px;
   border-radius: 6px;
-  margin: 10px;
   font-size: 1rem;
+  transition: all 0.3s ease;
 }
 
-/* =========================
-   MAP
-========================= */
+.btn:hover {
+  background: #218838;
+}
+
+/* ===== MAP ===== */
 .map-container iframe {
   width: 100%;
   height: 350px;
   border: 0;
-  border-radius: 10px;
+  border-radius: 8px;
 }
 
-/* =========================
-   FOOTERS
-========================= */
-.footer {
-  background: rgba(0,38,102,0.4);
+/* ===== FOOTERS ===== */
+footer.footer {
+  padding: 50px 20px;
+  background: #001f3f;
   color: white;
-  padding: 40px 20px;
   text-align: center;
-  margin-top: 20px;
+  margin-top: 30px;
 }
 
-.footer h3 {
+footer.footer h3 {
   margin-bottom: 15px;
 }
 
-.footer ul {
-  list-style: none;
-  padding: 0;
-}
-
-.footer ul li {
-  margin-bottom: 10px;
-}
-
-.footer a {
-  color: white;
-}
-
-.footer a:hover {
+footer.footer a {
   color: #28a745;
 }
 
-/* =========================
-   COUNTER
-========================= */
-.counter-box {
-  background: rgba(255,255,255,0.45);
-  padding: 30px;
-  border-radius: 12px;
-  width: 180px;
-  margin: 50px auto;
-  text-align: center;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+/* ===== POP-UP ANIMATION ===== */
+.pop-up {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.6s ease;
 }
 
-.counter-box h3 {
-  font-size: 2.5rem;
-  color: rgba(0, 38, 102, 0.9);
+.pop-up.active {
+  opacity: 1;
+  transform: translateY(0);
 }
 
-/* =========================
-   RESPONSIVE
-========================= */
+/* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
   nav ul {
+    display: none;
     flex-direction: column;
-    gap: 10px;
+    gap: 15px;
   }
-
-  .hero h1 {
-    font-size: 2.2rem;
-  }
-
-  .hero p {
-    font-size: 1rem;
-  }
-
-  .grid {
-    grid-template-columns: 1fr;
-  }
-
-  .testimonial-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .map-container iframe {
-    height: 250px;
+  .nav-toggle {
+    display: block;
   }
 }
