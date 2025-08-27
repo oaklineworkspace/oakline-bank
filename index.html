@@ -4,8 +4,90 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Oakline Bank - Modern Banking</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f6f8;
+      color: #333;
+    }
+    a { text-decoration: none; transition: all 0.3s; }
+    a:hover { opacity: 0.8; }
+
+    /* ===== HEADER ===== */
+    header {
+      background-color: #001f3f;
+      color: white;
+      padding: 20px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    header .logo {
+      font-size: 1.6rem;
+      font-weight: bold;
+    }
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 25px;
+      margin: 0;
+      padding: 0;
+    }
+    nav ul li a {
+      color: white;
+      font-weight: 500;
+    }
+    nav ul li a:hover { color: #28a745; }
+
+    /* ===== HERO SECTION ===== */
+    .hero {
+      background: url('https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=1400&q=80') no-repeat center/cover;
+      color: white;
+      text-align: center;
+      padding: 140px 20px;
+      position: relative;
+    }
+    .hero h1 { font-size: 3rem; margin-bottom: 20px; }
+    .hero p { font-size: 1.2rem; margin-bottom: 30px; max-width: 700px; margin-left:auto; margin-right:auto; }
+    .hero .btn {
+      background: #28a745;
+      color: white;
+      padding: 15px 35px;
+      border-radius: 6px;
+      font-size: 1.05rem;
+      cursor: pointer;
+    }
+    .hero .btn:hover { background: #218838; }
+
+    /* ===== SECTION STYLES ===== */
+    section { padding: 70px 20px; text-align: center; }
+    section h2 { font-size: 2.2rem; margin-bottom: 20px; color: #001f3f; }
+    section p { max-width: 850px; margin: 0 auto 40px; font-size: 1.1rem; color: #555; }
+
+    /* ===== GRID STYLES ===== */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 30px;
+      margin-top: 40px;
+    }
+    .grid .box {
+      background: white;
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .grid .box:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+    }
+    .grid .box h3 { margin-top: 0; color: #001f3f; }
+  </style>
 </head>
 <body>
 
@@ -17,11 +99,6 @@
         <li><a href="#home">Home</a></li>
         <li><a href="#services">Services</a></li>
         <li><a href="#features">Features</a></li>
-        <li><a href="#loans">Loans</a></li>
-        <li><a href="#business">Business</a></li>
-        <li><a href="#crypto">Crypto</a></li>
-        <li><a href="#security">Security</a></li>
-        <li><a href="#investments">Investments</a></li>
         <li><a href="#testimonials">Testimonials</a></li>
         <li><a href="#contact">Contact</a></li>
         <li><a href="login.html">Login</a></li>
@@ -31,348 +108,264 @@
   </header>
 
   <!-- ===== HERO SECTION ===== -->
-  <section class="hero-section section-blue" id="home">
-    <div class="container">
-      <h1>Welcome to Oakline Bank</h1>
-      <p>Smart, secure, and modern banking solutions for individuals and businesses.</p>
-      <a href="signup.html" class="btn-primary">Open an Account</a>
-    </div>
+  <section class="hero" id="home">
+    <h1>Welcome to Oakline Bank</h1>
+    <p>Smart, secure, and modern banking solutions for your everyday life. Join thousands who trust Oakline Bank to manage their finances with ease and safety.</p>
+    <a href="signup.html" class="btn">Open an Account</a>
   </section>
 
-  <!-- ===== SERVICES ===== -->
-  <section id="services" class="section-white pop-up">
-    <div class="container">
-      <h2>Our Services</h2>
-      <p>Comprehensive banking services to manage your finances efficiently.</p>
-      <div class="grid">
-        <div class="box">
-          <i class="fas fa-wallet" style="font-size:2rem;color:#28a745;"></i>
-          <h3>Checking Accounts</h3>
-          <p>Flexible access and features for daily transactions.</p>
-        </div>
-        <div class="box">
-          <i class="fas fa-piggy-bank" style="font-size:2rem;color:#28a745;"></i>
-          <h3>Savings Accounts</h3>
-          <p>Earn more with high-interest savings solutions.</p>
-        </div>
-        <div class="box">
-          <i class="fas fa-hand-holding-usd" style="font-size:2rem;color:#28a745;"></i>
-          <h3>Loans & Credit</h3>
-          <p>Fast approvals with competitive rates and transparent terms.</p>
-        </div>
-        <div class="box">
-          <i class="fas fa-mobile-alt" style="font-size:2rem;color:#28a745;"></i>
-          <h3>Mobile Banking</h3>
-          <p>Bank anywhere using our secure mobile app.</p>
-        </div>
+  <!-- ===== SERVICES SECTION ===== -->
+  <section id="services">
+    <h2>Our Services</h2>
+    <p>We provide a complete suite of digital banking services designed to grow with your financial needs.</p>
+    <div class="grid">
+      <div class="box">
+        <h3>Checking Accounts</h3>
+        <p>Access your funds anytime with seamless online and mobile banking tools.</p>
+      </div>
+      <div class="box">
+        <h3>Savings Accounts</h3>
+        <p>Competitive interest rates that help your savings grow faster.</p>
+      </div>
+      <div class="box">
+        <h3>Loans & Credit</h3>
+        <p>Flexible options with transparent terms and quick approvals.</p>
+      </div>
+      <div class="box">
+        <h3>Mobile Banking</h3>
+        <p>Bank securely on the go with our intuitive mobile app.</p>
       </div>
     </div>
   </section>
 
-  <!-- ===== FEATURES ===== -->
-  <section id="features" class="section-blue pop-up">
-    <div class="container">
-      <h2>Banking Features</h2>
-      <div class="grid">
-        <div class="box">
-          <i class="fas fa-exchange-alt" style="font-size:2rem;color:#fff;"></i>
-          <h3>Instant Transfers</h3>
-          <p>Send and receive funds globally in real-time.</p>
-        </div>
-        <div class="box">
-          <i class="fas fa-headset" style="font-size:2rem;color:#fff;"></i>
-          <h3>24/7 Support</h3>
-          <p>Expert support anytime you need it.</p>
-        </div>
-        <div class="box">
-          <i class="fas fa-shield-alt" style="font-size:2rem;color:#fff;"></i>
-          <h3>Secure Transactions</h3>
-          <p>Top-level encryption protects every transaction.</p>
-        </div>
-        <div class="box">
-          <i class="fas fa-bell" style="font-size:2rem;color:#fff;"></i>
-          <h3>Smart Notifications</h3>
-          <p>Stay updated with alerts and reminders.</p>
-        </div>
+    <!-- ===== FEATURES SECTION ===== -->
+  <section id="features">
+    <h2>Banking Features</h2>
+    <p>Oakline Bank delivers modern features that simplify your financial life and give you complete control over your money.</p>
+    <div class="grid">
+      <div class="box">
+        <h3>Instant Transfers</h3>
+        <p>Send and receive money globally in real-time with no delays.</p>
+      </div>
+      <div class="box">
+        <h3>24/7 Support</h3>
+        <p>Our customer support team is always available to help, day or night.</p>
+      </div>
+      <div class="box">
+        <h3>Secure Transactions</h3>
+        <p>Top-level encryption keeps all your transactions safe and confidential.</p>
+      </div>
+      <div class="box">
+        <h3>Crypto Wallet Integration</h3>
+        <p>Manage your traditional and digital assets together in one secure platform.</p>
+      </div>
+      <div class="box">
+        <h3>Smart Notifications</h3>
+        <p>Receive alerts and reminders for transactions, savings goals, and payments.</p>
+      </div>
+      <div class="box">
+        <h3>Automated Savings</h3>
+        <p>Set goals and let Oakline Bank help you save automatically.</p>
       </div>
     </div>
   </section>
 
-  <!-- ===== LOANS ===== -->
-  <section id="loans" class="section-white pop-up">
-    <div class="container">
-      <h2>Loans</h2>
-      <div class="grid">
-        <div class="box">
-          <h3>Personal Loans</h3>
-          <p>Get instant approvals and flexible repayment options.</p>
-        </div>
-        <div class="box">
-          <h3>Home Loans</h3>
-          <p>Competitive rates to make your dream home a reality.</p>
-        </div>
-        <div class="box">
-          <h3>Auto Loans</h3>
-          <p>Fast financing for your next vehicle purchase.</p>
-        </div>
-        <div class="box">
-          <h3>Education Loans</h3>
-          <p>Invest in your future with student-friendly plans.</p>
-        </div>
+  <!-- ===== TESTIMONIALS SECTION ===== -->
+  <section id="testimonials" style="padding:80px 20px;background:#f8f8f8;text-align:center;">
+    <h2 style="font-size:32px;margin-bottom:40px;">What Our Clients Say</h2>
+    
+    <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:40px;max-width:1100px;margin:auto;">
+      
+      <!-- Testimonial 1 -->
+      <div style="background:white;padding:30px;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.1);width:300px;">
+        <img src="https://randomuser.me/api/portraits/men/32.jpg" 
+             alt="Client 1" 
+             style="width:90px;height:90px;border-radius:50%;object-fit:cover;margin-bottom:15px;">
+        <h3 style="margin:10px 0 5px;">James Carter</h3>
+        <p style="font-size:14px;color:#777;margin-bottom:15px;">Small Business Owner</p>
+        <p style="font-style:italic;">“Oakline Bank helped me secure a business loan quickly, and their team supported me at every step.”</p>
       </div>
-    </div>
-  </section>
-
-  <!-- ===== BUSINESS ACCOUNTS ===== -->
-  <section id="business" class="section-green pop-up">
-    <div class="container">
-      <h2>Business Banking</h2>
-      <div class="grid">
-        <div class="box">
-          <h3>Business Checking</h3>
-          <p>Efficient management for your company’s daily operations.</p>
-        </div>
-        <div class="box">
-          <h3>Corporate Savings</h3>
-          <p>Maximize profits with tailored savings solutions.</p>
-        </div>
-        <div class="box">
-          <h3>Merchant Services</h3>
-          <p>Accept payments seamlessly with integrated solutions.</p>
-        </div>
-        <div class="box">
-          <h3>Business Loans</h3>
-          <p>Grow your business with fast and flexible funding.</p>
-        </div>
+      
+      <!-- Testimonial 2 -->
+      <div style="background:white;padding:30px;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.1);width:300px;">
+        <img src="https://randomuser.me/api/portraits/women/45.jpg" 
+             alt="Client 2" 
+             style="width:90px;height:90px;border-radius:50%;object-fit:cover;margin-bottom:15px;">
+        <h3 style="margin:10px 0 5px;">Sophia Martinez</h3>
+        <p style="font-size:14px;color:#777;margin-bottom:15px;">Freelance Designer</p>
+        <p style="font-style:italic;">“I love the mobile app – easy transfers, savings goals, and even crypto integration.”</p>
       </div>
-    </div>
-  </section>
-
-  <!-- ===== CRYPTO WALLET ===== -->
-  <section id="crypto" class="section-blue pop-up">
-    <div class="container">
-      <h2>Crypto Integration</h2>
-      <p>Manage both traditional and digital currencies in one secure place.</p>
-      <div class="grid">
-        <div class="box">
-          <h3>Bitcoin Wallet</h3>
-          <p>Store and manage your BTC securely.</p>
-        </div>
-        <div class="box">
-          <h3>Ethereum Wallet</h3>
-          <p>Track your ETH investments easily.</p>
-        </div>
-        <div class="box">
-          <h3>Altcoin Support</h3>
-          <p>Supports multiple altcoins for diverse portfolios.</p>
-        </div>
-        <div class="box">
-          <h3>Instant Conversion</h3>
-          <p>Swap currencies seamlessly within your account.</p>
-        </div>
+      
+      <!-- Testimonial 3 -->
+      <div style="background:white;padding:30px;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.1);width:300px;">
+        <img src="https://randomuser.me/api/portraits/men/85.jpg" 
+             alt="Client 3" 
+             style="width:90px;height:90px;border-radius:50%;object-fit:cover;margin-bottom:15px;">
+        <h3 style="margin:10px 0 5px;">Daniel Kim</h3>
+        <p style="font-size:14px;color:#777;margin-bottom:15px;">Software Engineer</p>
+        <p style="font-style:italic;">“The dashboard makes managing my accounts effortless, and I trust Oakline with my investments.”</p>
       </div>
-    </div>
-  </section>
-
-  <!-- ===== COUNTER ===== -->
-  <section class="section-white pop-up">
-    <div class="container">
-      <div class="counter-box">
-        <h3 class="counter" data-target="1500">0</h3>
-        <p>Happy Clients</p>
+      
+      <!-- Testimonial 4 -->
+      <div style="background:white;padding:30px;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.1);width:300px;">
+        <img src="https://randomuser.me/api/portraits/women/68.jpg" 
+             alt="Client 4" 
+             style="width:90px;height:90px;border-radius:50%;object-fit:cover;margin-bottom:15px;">
+        <h3 style="margin:10px 0 5px;">Emma Johnson</h3>
+        <p style="font-size:14px;color:#777;margin-bottom:15px;">Entrepreneur</p>
+        <p style="font-style:italic;">“I appreciate the secure transactions and instant notifications. Oakline Bank keeps me informed at all times.”</p>
       </div>
+
+    </div>
+  </section>
+  <!-- ===== CONTACT SECTION ===== -->
+  <section id="contact" style="padding:80px 20px;background:#fff;text-align:center;">
+    <h2>Contact Us</h2>
+    <p>Have questions? Our team is ready to assist you anytime.</p>
+    <form style="max-width:600px;margin:auto;text-align:left;">
+      <label for="name">Full Name</label><br>
+      <input type="text" id="name" name="name" required style="width:100%;padding:12px;margin:10px 0;border-radius:5px;border:1px solid #ccc;"><br>
+      <label for="email">Email Address</label><br>
+      <input type="email" id="email" name="email" required style="width:100%;padding:12px;margin:10px 0;border-radius:5px;border:1px solid #ccc;"><br>
+      <label for="message">Message</label><br>
+      <textarea id="message" name="message" rows="5" required style="width:100%;padding:12px;margin:10px 0;border-radius:5px;border:1px solid #ccc;"></textarea><br>
+      <button type="submit" style="padding:12px 25px;background:#28a745;color:white;border:none;border-radius:5px;cursor:pointer;">Send Message</button>
+    </form>
+  </section>
+
+  <!-- ===== APP DOWNLOAD SECTION ===== -->
+  <section id="app-download" style="padding:80px 20px;background:#f0f0f0;text-align:center;">
+    <h2>Get Our Mobile App</h2>
+    <p>Bank anywhere, anytime with Oakline Bank’s mobile app.</p>
+    <div style="display:flex;justify-content:center;flex-wrap:wrap;gap:20px;margin-top:30px;">
+      <a href="app.html" style="display:inline-block;background:#28a745;color:white;padding:15px 25px;border-radius:5px;text-decoration:none;font-size:16px;">📱 Download for iOS</a>
+      <a href="app.html" style="display:inline-block;background:#28a745;color:white;padding:15px 25px;border-radius:5px;text-decoration:none;font-size:16px;">📱 Download for Android</a>
     </div>
   </section>
 
-  <!-- ===== SECURITY ===== -->
-  <section id="security" class="section-green pop-up">
-    <div class="container">
-      <h2>Secure Banking</h2>
-      <p>Advanced security protocols to protect your funds and data.</p>
+  <!-- ===== MAP SECTION ===== -->
+  <section id="map" style="padding:80px 20px;background:#fff;text-align:center;">
+    <h2>Find Us</h2>
+    <p>Visit our headquarters or nearest branch.</p>
+    <div style="max-width:800px;margin:auto;margin-top:30px;">
+      <iframe 
+        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3153.291947590799!2d-122.41941548468057!3d37.7749292797599!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x80858064dcd5c9c9%3A0xb2a0f3c3b6b8d6a6!2sSan+Francisco!5e0!3m2!1sen!2sus!4v1615178572646!5m2!1sen!2sus" 
+        width="100%" height="350" style="border:0;border-radius:8px;" allowfullscreen="" loading="lazy">
+      </iframe>
     </div>
   </section>
 
-  <!-- ===== INVESTMENTS ===== -->
-  <section id="investments" class="section-white pop-up">
-    <div class="container">
-      <h2>Investment Plans</h2>
-      <p>Grow your wealth with our carefully designed investment portfolios.</p>
+  <!-- ===== FOOTER 1: About & Story ===== -->
+<footer style="background:#111;color:#eee;padding:60px 20px;text-align:center;">
+  <div style="max-width:1000px;margin:auto;">
+    <h2>About Oakline Bank</h2>
+    <p style="margin:20px 0;line-height:1.6;">
+      Oakline Bank was founded with a mission to empower individuals and businesses with smart, secure, and innovative banking solutions. Our customers' trust and success are the heart of everything we do. From digital banking to crypto management, we are redefining modern finance.
+    </p>
+    <div style="display:flex;justify-content:center;flex-wrap:wrap;gap:30px;margin-top:30px;">
+      <img src="https://randomuser.me/api/portraits/men/12.jpg" alt="CEO" style="width:100px;height:100px;border-radius:50%;object-fit:cover;">
+      <img src="https://randomuser.me/api/portraits/women/22.jpg" alt="Team Lead" style="width:100px;height:100px;border-radius:50%;object-fit:cover;">
+      <img src="https://randomuser.me/api/portraits/men/45.jpg" alt="Customer Support" style="width:100px;height:100px;border-radius:50%;object-fit:cover;">
     </div>
-  </section>
+  </div>
+</footer>
 
-  <!-- ===== ADDITIONAL SECTIONS 11-20 ===== -->
-  <section id="savings-goals" class="section-blue pop-up">
-    <div class="container">
-      <h2>Automated Savings</h2>
-      <p>Set financial goals and let Oakline Bank help you save automatically.</p>
-    </div>
-  </section>
-
-  <section id="awards" class="section-white pop-up">
-    <div class="container">
-      <h2>Awards & Recognition</h2>
-      <p>We are recognized for excellence in banking and customer service.</p>
-    </div>
-  </section>
-
-  <section id="careers" class="section-green pop-up">
-    <div class="container">
-      <h2>Careers at Oakline</h2>
-      <p>Join our team of passionate banking professionals.</p>
-    </div>
-  </section>
-
-  <section id="faq" class="section-white pop-up">
-    <div class="container">
-      <h2>Frequently Asked Questions</h2>
-      <p>Find answers to common questions about our services.</p>
-    </div>
-  </section>
-
-  <section id="promotions" class="section-blue pop-up">
-    <div class="container">
-      <h2>Current Promotions</h2>
-      <p>Check out our latest offers and bonus programs.</p>
-    </div>
-  </section>
-
-  <section id="feedback" class="section-white pop-up">
-    <div class="container">
-      <h2>Customer Feedback</h2>
-      <p>We value your suggestions to improve our services.</p>
-    </div>
-  </section>
-
-  <section id="community" class="section-green pop-up">
-    <div class="container">
-      <h2>Community Initiatives</h2>
-      <p>Supporting local communities and social programs worldwide.</p>
-    </div>
-  </section>
-
-  <section id="newsletter" class="section-white pop-up">
-    <div class="container">
-      <h2>Subscribe to Newsletter</h2>
-      <form class="newsletter-form">
-        <input type="email" placeholder="Enter your email" required>
-        <button type="submit">Subscribe</button>
-      </form>
-    </div>
-  </section>
-
-  <!-- ===== TESTIMONIALS ===== -->
-  <section id="testimonials" class="section-blue pop-up">
-    <div class="container">
-      <h2>What Our Clients Say</h2>
-      <div class="testimonial-grid">
-        <div class="testimonial">
-          <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="James Carter">
-          <h3>James Carter</h3>
-          <p>Small Business Owner</p>
-          <p>“Oakline Bank helped me secure a business loan quickly.”</p>
-        </div>
-        <div class="testimonial">
-          <img src="https://randomuser.me/api/portraits/women/45.jpg" alt="Sophia Martinez">
-          <h3>Sophia Martinez</h3>
-          <p>Freelance Designer</p>
-          <p>“I love the mobile app – easy transfers, savings goals, and crypto integration.”</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== CONTACT ===== -->
-  <section id="contact" class="section-white pop-up">
-    <div class="container">
-      <h2>Contact Us</h2>
-      <form class="contact-form">
-        <input type="text" name="name" placeholder="Full Name" required>
-        <input type="email" name="email" placeholder="Email Address" required>
-        <textarea name="message" rows="5" placeholder="Message" required></textarea>
-        <button type="submit">Send Message</button>
-      </form>
-    </div>
-  </section>
-
-  <!-- ===== FOOTERS ===== -->
-  <footer class="footer">
-    <div class="container">
-      <h3>About Oakline Bank</h3>
-      <p>Providing secure, modern banking solutions for everyone.</p>
-    </div>
-  </footer>
-
-  <footer class="footer">
-    <div class="container">
-      <h3>Services</h3>
-      <ul>
-        <li><a href="#services">Accounts</a></li>
-        <li><a href="#loans">Loans</a></li>
-        <li><a href="#crypto">Crypto</a></li>
-        <li><a href="#business">Business</a></li>
+<!-- ===== FOOTER 2: Services & Links ===== -->
+<footer style="background:#222;color:#ccc;padding:50px 20px;text-align:center;">
+  <div style="max-width:1100px;margin:auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:40px;">
+    
+    <div>
+      <h4>Our Services</h4>
+      <ul style="list-style:none;padding:0;margin-top:15px;">
+        <li><a href="savings.html" style="color:#ccc;text-decoration:none;">Savings Accounts</a></li>
+        <li><a href="loans.html" style="color:#ccc;text-decoration:none;">Loans & Credit</a></li>
+        <li><a href="crypto.html" style="color:#ccc;text-decoration:none;">Crypto Wallet</a></li>
+        <li><a href="invest.html" style="color:#ccc;text-decoration:none;">Investments</a></li>
       </ul>
     </div>
-  </footer>
 
-  <footer class="footer">
-    <div class="container">
-      <h3>Contact & Support</h3>
-      <p>Email: support@oaklinebank.com | Phone: +1 800 555 1234</p>
+    <div>
+      <h4>Quick Links</h4>
+      <ul style="list-style:none;padding:0;margin-top:15px;">
+        <li><a href="#home" style="color:#ccc;text-decoration:none;">Home</a></li>
+        <li><a href="#features" style="color:#ccc;text-decoration:none;">Features</a></li>
+        <li><a href="#contact" style="color:#ccc;text-decoration:none;">Contact</a></li>
+        <li><a href="login.html" style="color:#ccc;text-decoration:none;">Login</a></li>
+      </ul>
     </div>
-  </footer>
 
-  <footer class="footer">
-    <div class="container">
-      <h3>Follow Us</h3>
-      <p><a href="#">Facebook</a> | <a href="#">Twitter</a> | <a href="#">LinkedIn</a></p>
+    <div>
+      <h4>Community & Social</h4>
+      <p style="margin-top:15px;">
+        <a href="https://facebook.com" style="color:#ccc;margin:0 5px;">Facebook</a> | 
+        <a href="https://twitter.com" style="color:#ccc;margin:0 5px;">Twitter</a> | 
+        <a href="https://linkedin.com" style="color:#ccc;margin:0 5px;">LinkedIn</a>
+      </p>
+      <p style="margin-top:10px;">Join our online community and get the latest updates.</p>
     </div>
-  </footer>
 
-  <footer class="footer">
-    <div class="container">
-      <h3>Legal</h3>
-      <p><a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
-    </div>
-  </footer>
-
-  <footer class="footer">
-    <div class="container">
-      <h3>Partners</h3>
-      <p>Trusted by leading financial institutions worldwide.</p>
-    </div>
-  </footer>
-
-  <footer class="footer">
-    <div class="container">
-      <h3>Careers</h3>
-      <p>Join our team and grow with us.</p>
-    </div>
-  </footer>
-
-  <footer class="footer">
-    <div class="container">
-      <h3>Newsletter</h3>
+    <div>
+      <h4>Newsletter</h4>
+      <p>Subscribe to get updates about new features, offers, and more.</p>
       <form>
-        <input type="email" placeholder="Enter your email">
-        <button type="submit">Subscribe</button>
+        <input type="email" placeholder="Your email" style="padding:10px;width:80%;border-radius:5px;border:none;margin-top:10px;">
+        <button type="submit" style="padding:10px 15px;margin-top:10px;background:#28a745;color:white;border:none;border-radius:5px;">Subscribe</button>
       </form>
     </div>
-  </footer>
 
-  <footer class="footer">
-    <div class="container">
-      <h3>FAQ</h3>
-      <p>Find answers to common questions about Oakline Bank.</p>
+  </div>
+</footer>
+
+ <!-- ===== FOOTER 3: Partners & Security ===== -->
+<footer style="background:#f8f8f8;color:#333;padding:50px 20px;text-align:center;">
+  <h3 style="margin-bottom:30px;">Trusted by Our Partners</h3>
+  <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:40px;align-items:center;">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/0/0e/Visa_2021.svg" alt="Visa" style="height:50px;">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/0/04/Mastercard-logo.png" alt="Mastercard" style="height:50px;">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/FDIC_wordmark.svg" alt="FDIC" style="height:50px;">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/5/51/Apple_logo_black.svg" alt="Apple" style="height:50px;">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/d/d1/Google_Play_Arrow_logo.svg" alt="Google Play" style="height:50px;">
+  </div>
+  <p style="margin-top:30px;font-size:14px;color:#555;">Secured & Certified Banking Solutions Worldwide</p>
+</footer>
+
+<!-- ===== FOOTER 4: Legal & Policies ===== -->
+<footer style="background:#111;color:#bbb;padding:40px 20px;text-align:center;font-size:14px;">
+  <p>
+    <a href="privacy.html" style="color:#bbb;margin:0 10px;">Privacy Policy</a> |
+    <a href="terms.html" style="color:#bbb;margin:0 10px;">Terms of Service</a> |
+    <a href="security.html" style="color:#bbb;margin:0 10px;">Security</a>
+  </p>
+  <p style="margin-top:15px;">© 2025 Oakline Bank. All Rights Reserved. Oakline Bank is a fictional demo project for learning purposes only.</p>
+</footer>
+
+<!-- ===== FOOTER 5: Testimonials & Community ===== -->
+<footer style="background:#222;color:white;padding:50px 20px;text-align:center;">
+  <h3>Our Happy Customers</h3>
+  <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:30px;margin-top:30px;">
+    <div style="width:250px;background:#111;padding:20px;border-radius:10px;">
+      <img src="https://randomuser.me/api/portraits/men/55.jpg" alt="Client 1" style="width:70px;height:70px;border-radius:50%;margin-bottom:10px;">
+      <p style="font-style:italic;">“Oakline Bank made banking effortless. I love their mobile app!”</p>
+      <h4>- John M.</h4>
     </div>
-  </footer>
-
-  <footer class="footer">
-    <div class="container">
-      <h3>© 2025 Oakline Bank</h3>
-      <p>All Rights Reserved</p>
+    <div style="width:250px;background:#111;padding:20px;border-radius:10px;">
+      <img src="https://randomuser.me/api/portraits/women/33.jpg" alt="Client 2" style="width:70px;height:70px;border-radius:50%;margin-bottom:10px;">
+      <p style="font-style:italic;">“Fast, reliable, and secure – Oakline has my trust.”</p>
+      <h4>- Emily R.</h4>
     </div>
-  </footer>
+    <div style="width:250px;background:#111;padding:20px;border-radius:10px;">
+      <img src="https://randomuser.me/api/portraits/men/70.jpg" alt="Client 3" style="width:70px;height:70px;border-radius:50%;margin-bottom:10px;">
+      <p style="font-style:italic;">“Their support team is amazing! Highly recommend Oakline Bank.”</p>
+      <h4>- Michael K.</h4>
+    </div>
+  </div>
+</footer>
 
-  <script src="script.js"></script>
-</body>
+<!-- ===== FOOTER 6: Final Copyright Bar ===== -->
+<footer style="background:#000;color:#bbb;padding:20px;text-align:center;font-size:13px;">
+  <p>© 2025 Oakline Bank. All Rights Reserved.</p>
+  <p>Designed with ❤️ for demonstration purposes only.</p>
+</footer>
+  </body>
 </html>
+  
