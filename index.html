@@ -355,6 +355,34 @@
 
   <!-- SCRIPTS -->
   <script>
+/* Reset default margins and prevent horizontal scroll */
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+/* Make all elements include padding/border in width calculation */
+*, *::before, *::after {
+  box-sizing: inherit;
+}
+
+/* Ensure images and videos are responsive */
+img, video {
+  max-width: 100%;
+  height: auto;
+  display: block; /* prevents small gaps under images */
+}
+
+/* Ensure main containers don’t overflow */
+.container, .wrapper, .section {
+  max-width: 100%;
+  overflow-x: hidden;
+  margin: 0 auto; /* center container if needed */
+  padding: 0 15px; /* optional: small padding inside container */
+}
+    
     // DARK MODE TOGGLE
     const darkModeBtn = document.getElementById('darkModeBtn');
     darkModeBtn.addEventListener('click', () => {
