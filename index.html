@@ -375,10 +375,54 @@
     </div>
   </footer>
 
-  <!-- ===== FOOTER 6: Final Copyright Bar ===== -->
-  <footer style="background:#000;color:#bbb;padding:20px;text-align:center;font-size:13px;">
-    <p>© 2025 Oakline Bank. All Rights Reserved.</p>
-    <p>Designed with ❤️ for demonstration purposes only.</p>
-  </footer>
+<!-- ===== FOOTER 6: Final Copyright & Licenses ===== -->
+<footer style="background:#000;color:#bbb;padding:25px 20px;text-align:center;font-size:13px;line-height:1.6;">
+  <p>© 2025 Oakline Bank. All Rights Reserved.</p>
+
+  <!-- License & Certification Logos (Responsive Grid) -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(50px,1fr));gap:15px;justify-items:center;align-items:center;margin:15px 0; max-width:750px; margin-left:auto; margin-right:auto;">
+    <a href="#" title="FDIC Insured">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/FDIC_wordmark.svg" alt="FDIC" style="height:25px;transition: transform 0.3s, box-shadow 0.3s;">
+    </a>
+    <a href="#" title="PCI DSS Compliant">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/5/5f/PCI_DSS_Logo.svg" alt="PCI DSS" style="height:25px;transition: transform 0.3s, box-shadow 0.3s;">
+    </a>
+    <a href="#" title="ISO 27001 Certified">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/0/0b/ISO_27001_Logo.svg" alt="ISO 27001" style="height:25px;transition: transform 0.3s, box-shadow 0.3s;">
+    </a>
+    <a href="#" title="SOC 2 Certified">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/3/3b/SOC_2_logo.svg" alt="SOC 2" style="height:25px;transition: transform 0.3s, box-shadow 0.3s;">
+    </a>
+    <a href="#" title="SEC Registered">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/7/7a/SEC_logo.svg" alt="SEC Registered" style="height:25px;transition: transform 0.3s, box-shadow 0.3s;">
+    </a>
+    <a href="#" title="Member of Federal Reserve">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/9/99/Federal_Reserve_Seal.svg" alt="Federal Reserve" style="height:25px;transition: transform 0.3s, box-shadow 0.3s;">
+    </a>
+    <a href="#" title="OCC Chartered">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/OCC_Seal.svg" alt="OCC" style="height:25px;transition: transform 0.3s, box-shadow 0.3s;">
+    </a>
+  </div>
+
+  <!-- Text Licenses & Compliance -->
+  <p style="margin:10px 0; display:flex; flex-wrap:wrap; justify-content:center; gap:12px; align-items:center; font-size:12px;">
+    Licensed & Regulated | Member of Federal Reserve | OCC Chartered | FINRA Member | SIPC Protected | KYC & AML Compliant
+  </p>
+</footer>
+
+<script>
+  // Hover effects for logos
+  const logos = document.querySelectorAll('footer img');
+  logos.forEach(logo => {
+    logo.addEventListener('mouseenter', () => {
+      logo.style.transform = 'scale(1.3)';
+      logo.style.boxShadow = '0 4px 15px rgba(0,0,0,0.3)';
+    });
+    logo.addEventListener('mouseleave', () => {
+      logo.style.transform = 'scale(1)';
+      logo.style.boxShadow = 'none';
+    });
+  });
+</script>
 </body>
 </html>
