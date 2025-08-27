@@ -12,16 +12,15 @@
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
   <style>
-    /* GLOBAL VARIABLES */
     :root {
       --brand:#001f3f;
-      --accent:#28a745; /* Green accent */
+      --accent:#28a745;
       --text:#333;
       --bg:#f4f6f8;
       --card:#fff;
       --muted:#777;
       --footer:#000;
-      --overlay-black: rgba(0,0,0,0.1); /* 10% black overlay */
+      --overlay-black: rgba(0,0,0,0.1);
     }
     [data-theme="dark"]{
       --brand:#0a2347;
@@ -34,36 +33,59 @@
       --overlay-black: rgba(0,0,0,0.1);
     }
 
-    html, body {
-      margin:0;
-      padding:0;
-      font-family:system-ui,-apple-system,"Segoe UI",Roboto,Ubuntu,"Helvetica Neue",Arial;
-      background:var(--bg);
-      color:var(--text);
-      overflow-x:hidden; /* Prevent horizontal scroll */
-    }
+    html, body {margin:0;padding:0;overflow-x:hidden;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Ubuntu,"Helvetica Neue",Arial;background:var(--bg);color:var(--text);}
     a {color:inherit;text-decoration:none;transition:.2s}
     a:hover {opacity:.85;}
     * {box-sizing:border-box;}
 
+    /* MARQUEE */
+    .marquee-banner {
+      width: 100%; overflow:hidden; white-space:nowrap;
+      background:rgba(0,40,90,.85); color:#fff;
+      padding:8px 0; position:fixed; top:0; left:0; z-index:1500;
+    }
+    .marquee-text {
+      display:inline-block;
+      padding-left:100%;
+      animation:marquee 15s linear infinite;
+      font-weight:700;
+    }
+    @keyframes marquee {0%{transform:translateX(0)}100%{transform:translateX(-100%)}}
+
     /* HEADER */
     header {
-      position:sticky;
-      top:0;
+      position:sticky; top:36px; /* below marquee */
       z-index:1000;
       background:var(--brand);
       color:#fff;
       padding:14px 18px;
-      display:flex;
-      align-items:center;
-      gap:14px;
+      display:flex; align-items:center; gap:14px;
     }
-    .brand {font-weight:800;letter-spacing:.3px}
-    .nav-links {margin-left:auto}
-    .nav-links ul {display:flex;gap:22px;list-style:none;margin:0;padding:0}
-    .nav-links a {color:#fff;font-weight:600}
+    .brand {font-weight:800;letter-spacing:.3px; display:flex; align-items:center; gap:8px;}
+    .nav-links {margin-left:auto;}
+    .nav-links ul {display:flex;gap:22px;list-style:none;margin:0;padding:0;}
+    .nav-links a {color:#fff;font-weight:600;}
 
-    /* TOP CONTROLS */
+    /* DROPDOWN */
+    .dropdown {position:relative; display:inline-block;}
+    .dropdown-panel {
+      display:none; position:absolute; right:0; top:44px;
+      min-width:240px; max-width:90vw;
+      background:var(--card); color:var(--text);
+      border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,.18);
+      border:1px solid #e8e8e8; overflow:hidden; z-index:2000;
+    }
+    .dropdown.open .dropdown-panel {display:block;}
+    .dropdown ul {list-style:none;margin:0;padding:6px;}
+    .dropdown li a {
+      display:flex; align-items:center; gap:10px;
+      padding:10px 12px; border-radius:8px;
+      color:#222; font-weight:600;
+    }
+    .dropdown li a:hover {background:#f3f5f8;}
+    .dropdown .divider {height:1px;background:#eee;margin:6px 8px;}
+
+    /* ICON BUTTONS */
     .top-controls {display:flex;align-items:center;gap:10px;margin-left:10px}
     .icon-btn {
       display:inline-grid; place-items:center;
@@ -75,37 +97,6 @@
       cursor:pointer;
     }
     .icon-btn:hover {background:rgba(255,255,255,.06)}
-
-    /* DROPDOWN */
-    .dropdown {position:relative;}
-    .dropdown-panel {
-      display:none;
-      position:absolute;
-      right:10px;
-      top:44px;
-      min-width:240px;
-      max-width:90vw;
-      background:var(--card);
-      color:var(--text);
-      border-radius:12px;
-      box-shadow:0 10px 30px rgba(0,0,0,.18);
-      border:1px solid #e8e8e8;
-      overflow:hidden;
-      z-index:2000;
-    }
-    .dropdown.open .dropdown-panel {display:block;}
-    .dropdown ul {list-style:none;margin:0;padding:6px;}
-    .dropdown li a {
-      display:flex; align-items:center; gap:10px;
-      padding:10px 12px; border-radius:8px;
-      color:#222; font-weight:600;
-    }
-    .dropdown li a:hover {background:#f3f5f8}
-    .dropdown .divider {height:1px;background:#eee;margin:6px 8px}
-
-    /* PUBLIC vs AUTH */
-    .public-only {display:block}
-    .auth-only {display:none}
 
     /* HERO */
     .hero {
@@ -124,25 +115,6 @@
       z-index:0;
     }
     .hero * {position:relative; z-index:1;}
-
-    /* MARQUEE */
-    .marquee-banner {
-      position:absolute;
-      top:0; left:0; right:0;
-      background:rgba(0,40,90,.85);
-      color:#fff;
-      padding:8px 0;
-      white-space:nowrap;
-      overflow:hidden;
-    }
-    .marquee-text {
-      display:inline-block;
-      padding-left:100%;
-      animation:marquee 15s linear infinite;
-      font-weight:700;
-    }
-    @keyframes marquee {0%{transform:translateX(0)}100%{transform:translateX(-100%)}}
-
     .hero h1 {font-size:clamp(2rem,5vw,3.2rem);margin:10px 0 14px;}
     .hero p {max-width:760px;margin:0 auto 26px;font-size:1.08rem;}
     .btn {
@@ -156,98 +128,49 @@
     }
     .btn:hover {transform:translateY(-1px);}
     .btn-ghost {background:rgba(255,255,255,.12);border:1px dashed rgba(255,255,255,.35);}
-    /* Section Cards */
-    .card{
-      background:var(--card);padding:20px;border-radius:12px;width:260px;
-      box-shadow:0 5px 15px rgba(0,0,0,.1);text-align:center;
-    }
-    .card i{color:var(--accent)}
-    .card h3{margin-top:14px;margin-bottom:8px;font-size:1.2rem}
-    .card p{margin:0;font-size:0.95rem;color:var(--muted)}
-    .cards-container{display:flex;flex-wrap:wrap;gap:20px;justify-content:center;margin-top:40px}
-
   </style>
 </head>
 <body>
+  <!-- SCROLLING MARQUEE -->
+  <div class="marquee-banner">
+    <div class="marquee-text">🔐 Welcome to Oakline Bank — secure personal & business banking, competitive rates, and 24/7 support.</div>
+  </div>
+
   <!-- HEADER -->
   <header>
-    <div class="brand">Oakline Bank</div>
+    <div class="brand">
+      Oakline Bank
+      <div class="dropdown" id="mainDropdown">
+        <button class="icon-btn" id="menuBtn" aria-haspopup="true" aria-expanded="false" aria-label="Open menu">
+          <i class="fas fa-bars"></i>
+        </button>
+        <div class="dropdown-panel" id="dropdownContent">
+          <!-- Dropdown links will go here via JS depending on auth -->
+        </div>
+      </div>
+    </div>
 
     <nav class="nav-links public-only" id="nav-public">
       <ul>
         <li><a href="#home">Home</a></li>
-        <li><a href="#personal">Personal</a></li>
-        <li><a href="#business">Business</a></li>
-        <!-- PUBLIC MENU -->
-        <div class="dropdown-panel public-only" id="menu-public" role="menu" aria-label="Main menu (public)">
-          <ul>
-            <li><a href="signup.html"><i class="fa-solid fa-user-plus"></i> Open an Account</a></li>
-            <li><a href="checking.html"><i class="fa-solid fa-credit-card"></i> Checking Accounts</a></li>
-            <li><a href="savings.html"><i class="fa-solid fa-piggy-bank"></i> Savings Accounts</a></li>
-            <li><a href="loans.html"><i class="fa-solid fa-hand-holding-dollar"></i> Loans & Credit</a></li>
-            <li><a href="mortgages.html"><i class="fa-solid fa-house"></i> Mortgages</a></li>
-            <li><a href="invest.html"><i class="fa-solid fa-chart-line"></i> Investments & Wealth</a></li>
-            <li><a href="business.html"><i class="fa-solid fa-briefcase"></i> Business Banking</a></li>
-            <li><a href="rates.html"><i class="fa-solid fa-percent"></i> Rates</a></li>
-            <li><a href="branches.html"><i class="fa-solid fa-location-dot"></i> Branch & ATM Locator</a></li>
-            <!-- AUTH MENU -->
-        <div class="dropdown-panel auth-only" id="menu-auth" role="menu" aria-label="Main menu (authenticated)">
-          <ul>
-            <li><a href="dashboard.html"><i class="fa-solid fa-gauge"></i> Dashboard</a></li>
-            <li><a href="profile.html"><i class="fa-solid fa-id-badge"></i> Profile</a></li>
-            <li><a href="transfer.html"><i class="fa-solid fa-arrow-right-arrow-left"></i> Transfer</a></li>
-            <li><a href="deposit.html"><i class="fa-solid fa-circle-arrow-down"></i> Deposit</a></li>
-            <li><a href="withdrawal.html"><i class="fa-solid fa-circle-arrow-up"></i> Withdrawal</a></li>
-            <li><a href="transactions.html"><i class="fa-solid fa-receipt"></i> Transactions</a></li>
-            <li><a href="settings.html"><i class="fa-solid fa-gear"></i> Settings</a></li>
-            <li class="divider"></li>
-            <li><a href="#" id="logoutLink" class="text-danger"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </header>
-            <li class="divider"></li>
-            <li><a href="login.html"><i class="fa-solid fa-right-to-bracket"></i> Log in</a></li>
-            <li><a href="signup.html"><i class="fa-solid fa-user-plus"></i> Create Account</a></li>
-          </ul>
-        </div>
-        <li><a href="#rates">Rates</a></li>
-        <li><a href="#contact">Support</a></li>
+        <li><a href="#personal">Services</a></li>
+        <li><a href="#features">Features</a></li>
+        <li><a href="#testimonials">Testimonials</a></li>
+        <li><a href="#contact">Contact</a></li>
         <li><a href="login.html">Log in</a></li>
-        <li><a href="signup.html">Open Account</a></li>
-      </ul>
-    </nav>
-
-    <nav class="nav-links auth-only" id="nav-auth">
-      <ul>
-        <li><a href="#home">Home</a></li>
-        <li><a href="dashboard.html">My Accounts</a></li>
-        <li><a href="transactions.html">Transactions</a></li>
-        <li><a href="transfer.html">Transfer</a></li>
-        <li><a href="settings.html">Settings</a></li>
+        <li><a href="signup.html">Sign Up</a></li>
       </ul>
     </nav>
 
     <div class="top-controls">
       <button class="icon-btn" id="darkModeBtn" aria-label="Toggle dark mode"><i class="fas fa-moon"></i></button>
-      <div class="dropdown" id="mainDropdown">
-        <button class="icon-btn" id="menuBtn" aria-haspopup="true" aria-expanded="false" aria-label="Open menu">
-          <i class="fas fa-bars"></i>
-        </button>
-
-        
-
-        
+    </div>
+  </header>
 
   <!-- HERO -->
   <section class="hero" id="home">
-    <div class="marquee-banner">
-      <div class="marquee-text">🔐 Welcome to Oakline Bank — secure personal & business banking, competitive rates, and 24/7 support.</div>
-    </div>
     <h1>Banking that puts you first</h1>
     <p>Open an account in minutes, move money instantly, and manage everything from a single, secure place.</p>
-
     <div class="public-only">
       <a href="signup.html" class="btn">Open an Account</a>
       <a href="login.html" class="btn btn-ghost" style="margin-left:8px;border-radius:10px;color:#fff;">Log in</a>
@@ -257,8 +180,7 @@
       <a href="transactions.html" class="btn btn-ghost" style="margin-left:8px;border-radius:10px;color:#fff;">View Transactions</a>
     </div>
   </section>
-
-  <!-- PERSONAL BANKING -->
+    <!-- PERSONAL BANKING -->
   <section id="personal" style="padding:80px 20px;background:var(--bg);text-align:center">
     <h2>Personal Banking</h2>
     <p>Checking, savings, loans, and investment solutions to manage your finances easily.</p>
@@ -304,7 +226,7 @@
     </div>
   </section>
 
-    <!-- FEATURES -->
+  <!-- FEATURES -->
   <section id="features" style="padding:80px 20px;background:#e8f5e9;text-align:center">
     <h2>Why Choose Oakline Bank?</h2>
     <p>We combine modern banking technology with personalized support to help you achieve financial success.</p>
@@ -369,8 +291,7 @@
       </div>
     </div>
   </section>
-
-  <!-- CONTACT -->
+    <!-- CONTACT -->
   <section id="contact" style="padding:80px 20px;text-align:center">
     <h2>Contact Us</h2>
     <p>Our team is here to help you. Get in touch or visit a branch near you.</p>
@@ -398,12 +319,19 @@
     </div>
   </section>
 
-    <!-- FOOTER - LICENSE & CONTACT -->
+  <!-- FOOTER - LICENSE & CONTACT -->
   <footer style="background:#001f3f;color:#fff;padding:40px 20px;text-align:center">
     <div style="display:flex;flex-wrap:wrap;gap:40px;justify-content:center;align-items:flex-start">
       <div>
         <h3>License</h3>
         <p>© 2025 Oakline Bank. All rights reserved. Oakline Bank is a registered financial institution. Terms and conditions apply.</p>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">
+          <img src="https://via.placeholder.com/60x40?text=Cert1" alt="Certificate 1" style="border-radius:6px">
+          <img src="https://via.placeholder.com/60x40?text=Cert2" alt="Certificate 2" style="border-radius:6px">
+          <img src="https://via.placeholder.com/60x40?text=Cert3" alt="Certificate 3" style="border-radius:6px">
+          <img src="https://via.placeholder.com/60x40?text=Cert4" alt="Certificate 4" style="border-radius:6px">
+          <img src="https://via.placeholder.com/60x40?text=Cert5" alt="Certificate 5" style="border-radius:6px">
+        </div>
       </div>
       <div>
         <h3>Contact</h3>
@@ -447,14 +375,14 @@
       }
     });
 
-   window.addEventListener('resize', () => {
-  mainDropdown.classList.remove('open');
-}); 
+    window.addEventListener('resize', () => {
+      mainDropdown.classList.remove('open');
+    });
 
-    // SUPABASE INIT (from your Vercel environment variables)
-    const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // SUPABASE INIT
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    const supabase = supabase.createClient(supabaseUrl, supabaseAnonKey);
 
     // LOGOUT LINK
     const logoutLink = document.getElementById('logoutLink');
