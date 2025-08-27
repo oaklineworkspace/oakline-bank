@@ -1,194 +1,142 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Oakline Bank - Modern Banking</title>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Oakline Bank - Modern Banking</title>
 
-<!-- Font Awesome -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 
-<!-- Supabase JS -->
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <!-- Supabase JS -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
-<style>
-  /* VARIABLES */
-  :root {
-    --brand:#001f3f;
-    --accent:#28a745; /* Green accent */
-    --text:#333;
-    --bg:#f4f6f8;
-    --card:#fff;
-    --muted:#777;
-    --footer:#000;
-    --overlay-black: rgba(0,0,0,0.1);
-    --darkbrown: rgba(77, 38, 0, 0.15);
-  }
-  [data-theme="dark"]{
-    --brand:#0a2347;
-    --accent:#34c759;
-    --text:#ddd;
-    --bg:#0f1420;
-    --card:#121a2b;
-    --muted:#aab;
-    --footer:#000;
-    --overlay-black: rgba(0,0,0,0.1);
-    --darkbrown: rgba(77, 38, 0, 0.15);
-  }
+  <style>
+    :root {
+      --brand:#001f3f;
+      --accent:#28a745;
+      --accent-dark:#4a382b; /* 15% dark brown accent */
+      --text:#333;
+      --bg:#f4f6f8;
+      --card:#fff;
+      --muted:#777;
+      --footer:#000;
+      --overlay-black: rgba(0,0,0,0.1);
+    }
+    [data-theme="dark"]{
+      --brand:#0a2347;
+      --accent:#34c759;
+      --text:#ddd;
+      --bg:#0f1420;
+      --card:#121a2b;
+      --muted:#aab;
+      --footer:#000;
+      --overlay-black: rgba(0,0,0,0.1);
+    }
 
-  html, body {
-    margin:0;
-    padding:0;
-    font-family:system-ui,-apple-system,"Segoe UI",Roboto,Ubuntu,"Helvetica Neue",Arial;
-    background:var(--bg);
-    color:var(--text);
-    overflow-x:hidden;
-  }
-  a {color:inherit;text-decoration:none;transition:.2s;}
-  a:hover {opacity:.85;}
-  * {box-sizing:border-box;}
+    html, body {
+      margin:0; padding:0;
+      font-family:system-ui,-apple-system,"Segoe UI",Roboto,Ubuntu,"Helvetica Neue",Arial;
+      background:var(--bg);
+      color:var(--text);
+      overflow-x:hidden;
+    }
+    a {color:inherit;text-decoration:none;transition:.2s}
+    a:hover {opacity:.85;}
+    * {box-sizing:border-box;}
 
-  /* SCROLLING WELCOME */
-  .marquee-banner {
-    position:sticky;
-    top:0; left:0; right:0;
-    background:var(--darkbrown);
-    color:#fff;
-    padding:8px 0;
-    white-space:nowrap;
-    overflow:hidden;
-    z-index:1500;
-  }
-  .marquee-text {
-    display:inline-block;
-    padding-left:100%;
-    animation:marquee 20s linear infinite;
-    font-weight:700;
-  }
-  @keyframes marquee {0%{transform:translateX(0)}100%{transform:translateX(-100%)}}
+    /* SCROLLING WELCOME BANNER */
+    .marquee-banner {
+      width:100%;
+      background:rgba(0,40,90,.85);
+      color:#fff;
+      overflow:hidden;
+      white-space:nowrap;
+      padding:6px 0;
+      font-weight:700;
+      position:sticky;
+      top:0;
+      z-index:1001;
+    }
+    .marquee-text {
+      display:inline-block;
+      padding-left:100%;
+      animation:marquee 15s linear infinite;
+    }
+    @keyframes marquee {0%{transform:translateX(0)}100%{transform:translateX(-100%)}}
 
-  /* HEADER */
-  header {
-    position:sticky;
-    top:0;
-    z-index:1000;
-    background:var(--brand);
-    color:#fff;
-    padding:14px 18px;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:14px;
-  }
-  .brand {font-weight:800;letter-spacing:.3px; font-size:1.4rem; display:flex; align-items:center; gap:12px;}
-  .nav-links ul {display:flex; gap:22px; list-style:none; margin:0; padding:0;}
-  .nav-links a {color:#fff; font-weight:600;}
+    /* HEADER */
+    header {
+      position:sticky;
+      top:30px; /* below marquee */
+      z-index:1000;
+      background:var(--brand);
+      color:#fff;
+      padding:14px 18px;
+      display:flex;
+      align-items:center;
+      gap:14px;
+      justify-content:space-between;
+    }
+    .brand {font-weight:800;letter-spacing:.3px;font-size:1.5rem; display:flex; align-items:center; gap:10px;}
+    .nav-links ul {display:flex;gap:22px;list-style:none;margin:0;padding:0}
+    .nav-links a {color:#fff;font-weight:600;}
 
-  /* TOP CONTROLS */
-  .top-controls {display:flex; align-items:center; gap:10px;}
-  .icon-btn {
-    display:inline-grid; place-items:center;
-    width:36px; height:36px;
-    border:1px solid rgba(255,255,255,.25);
-    border-radius:10px;
-    background:transparent;
-    color:#fff;
-    cursor:pointer;
-  }
-  .icon-btn:hover {background:rgba(255,255,255,.06)}
+    /* DROPDOWN */
+    .dropdown {position:relative;}
+    .dropdown-panel {
+      display:none;
+      position:absolute;
+      right:0;
+      top:44px;
+      min-width:240px;
+      max-width:90vw;
+      background:var(--card);
+      color:var(--text);
+      border-radius:12px;
+      box-shadow:0 10px 30px rgba(0,0,0,.18);
+      border:1px solid #e8e8e8;
+      overflow:hidden;
+      z-index:2000;
+    }
+    .dropdown.open .dropdown-panel {display:block;}
+    .dropdown-panel ul {list-style:none;margin:0;padding:6px;}
+    .dropdown-panel li a {
+      display:flex; align-items:center; gap:10px;
+      padding:10px 12px; border-radius:8px;
+      color:#222; font-weight:600;
+    }
+    .dropdown-panel li a:hover {background:#f3f5f8}
+    .dropdown-panel .divider {height:1px;background:#eee;margin:6px 8px;}
 
-  /* DROPDOWN */
-  .dropdown {position:relative;}
-  .dropdown-panel {
-    display:none;
-    position:absolute;
-    right:0;
-    top:44px;
-    min-width:220px;
-    max-width:90vw;
-    background:var(--card);
-    color:var(--text);
-    border-radius:12px;
-    box-shadow:0 10px 30px rgba(0,0,0,.18);
-    border:1px solid #e8e8e8;
-    overflow:hidden;
-    z-index:2000;
-  }
-  .dropdown.open .dropdown-panel {display:block;}
-  .dropdown-panel ul {list-style:none; margin:0; padding:6px;}
-  .dropdown-panel li a {
-    display:flex; align-items:center; gap:10px;
-    padding:10px 12px; border-radius:8px;
-    color:#222; font-weight:600;
-  }
-  .dropdown-panel li a:hover {background:#f3f5f8;}
-  .dropdown-panel .divider {height:1px; background:#eee; margin:6px 8px;}
-
-  /* HERO */
-  .hero {
-    position:relative;
-    overflow:hidden;
-    text-align:center;
-    color:#fff;
-    padding:150px 20px 120px;
-    background:url('https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;
-  }
-  .hero::before {
-    content:"";
-    position:absolute;
-    inset:0;
-    background:var(--overlay-black);
-    z-index:0;
-  }
-  .hero * {position:relative; z-index:1;}
-  .hero h1 {font-size:clamp(2rem,5vw,3.2rem); margin:10px 0 14px;}
-  .hero p {max-width:760px; margin:0 auto 26px; font-size:1.08rem;}
-  .btn {
-    display:inline-block;
-    padding:14px 26px;
-    border-radius:10px;
-    background:var(--accent);
-    color:#fff;
-    font-weight:800;
-    letter-spacing:.3px;
-    transition:.2s;
-  }
-  .btn:hover {transform:translateY(-1px);}
-  .btn-ghost {background:rgba(255,255,255,.12);border:1px dashed rgba(255,255,255,.35);}
-
-  /* PUBLIC / AUTH BUTTONS BESIDE HERO */
-  .hero-actions {
-    display:flex;
-    justify-content:center;
-    gap:12px;
-    margin-top:24px;
-  }
-  .hero-actions .auth-only,
-  .hero-actions .public-only {
-    display:flex;
-    gap:12px;
-  }
-
-</style>
+    /* TOP CONTROLS */
+    .icon-btn {
+      display:inline-grid; place-items:center;
+      width:36px; height:36px;
+      border:1px solid rgba(255,255,255,.25);
+      border-radius:10px;
+      background:transparent;
+      color:#fff;
+      cursor:pointer;
+    }
+    .icon-btn:hover {background:rgba(255,255,255,.06)}
+  </style>
 </head>
 <body>
 
-<!-- SCROLLING WELCOME -->
-<div class="marquee-banner">
-  <div class="marquee-text">🔐 Welcome to Oakline Bank — secure personal & business banking, competitive rates, and 24/7 support.</div>
-</div>
+  <!-- SCROLLING WELCOME -->
+  <div class="marquee-banner">
+    <div class="marquee-text">🔐 Welcome to Oakline Bank — secure personal & business banking, competitive rates, and 24/7 support.</div>
+  </div>
 
-<!-- HEADER -->
-<header>
-  <div class="brand">Oakline Bank</div>
+  <!-- HEADER -->
+  <header>
+    <div class="brand">Oakline Bank</div>
 
-  <div class="top-controls">
-    <!-- Public Dropdown -->
-    <div class="dropdown" id="publicDropdown">
-      <button class="icon-btn" aria-haspopup="true" aria-expanded="false">
-        <i class="fas fa-bars"></i>
-      </button>
-      <div class="dropdown-panel">
+    <!-- DROPDOWN PUBLIC -->
+    <div class="dropdown" id="dropdownPublic">
+      <button class="icon-btn" aria-haspopup="true" aria-expanded="false"><i class="fas fa-bars"></i></button>
+      <div class="dropdown-panel" id="panelPublic">
         <ul class="public-only">
           <li><a href="#home">Home</a></li>
           <li><a href="#services">Services</a></li>
@@ -204,227 +152,267 @@
       </div>
     </div>
 
-    <!-- Auth Dropdown -->
-    <div class="dropdown" id="authDropdown">
-      <button class="icon-btn" aria-haspopup="true" aria-expanded="false">
-        <i class="fas fa-user-circle"></i>
-      </button>
-      <div class="dropdown-panel">
+    <!-- DROPDOWN AUTH -->
+    <div class="dropdown" id="dropdownAuth">
+      <button class="icon-btn" aria-haspopup="true" aria-expanded="false"><i class="fas fa-user-circle"></i></button>
+      <div class="dropdown-panel" id="panelAuth">
         <ul class="auth-only">
           <li><a href="#home">Home</a></li>
           <li><a href="#services">Services</a></li>
           <li><a href="#features">Features</a></li>
           <li><a href="#testimonials">Testimonials</a></li>
           <li><a href="#contact">Contact</a></li>
-          <li><a href="dashboard.html">Dashboard</a></li>
-          <li><a href="#" id="logoutLink">Logout</a></li>
           <li class="divider"></li>
+          <li><a href="dashboard.html" style="color:var(--accent)">Dashboard</a></li>
+          <li><a href="transactions.html" style="color:var(--accent)">View Transactions</a></li>
           <li><a href="transfer.html">Transfer</a></li>
           <li><a href="settings.html">Settings</a></li>
+          <li class="divider"></li>
+          <li><a href="#" id="logoutLink" style="color:red">Logout</a></li>
         </ul>
       </div>
     </div>
 
-    <!-- Dark Mode -->
     <button class="icon-btn" id="darkModeBtn" aria-label="Toggle dark mode"><i class="fas fa-moon"></i></button>
-  </div>
-</header>
+  </header>
 
-<!-- HERO -->
-<section class="hero" id="home">
-  <h1>Banking that puts you first</h1>
-  <p>Open an account in minutes, move money instantly, and manage everything from a single, secure place.</p>
-
-  <!-- Buttons beside hero -->
-  <div class="hero-actions">
-    <div class="public-only">
-      <a href="signup.html" class="btn">Open an Account</a>
-      <a href="login.html" class="btn" style="background:var(--accent)">Log in</a>
-    </div>
-    <div class="auth-only">
-      <a href="dashboard.html" class="btn" style="background:var(--accent)">Go to Dashboard</a>
-      <a href="transactions.html" class="btn" style="background:var(--accent)">View Transactions</a>
-    </div>
-  </div>
-</section>
-
-<!-- ABOUT / LONG NOTE -->
-<section id="about" style="padding:80px 20px; background:#fff4e5; text-align:center;">
-  <h2 style="font-size:2.5rem; margin-bottom:20px; color:#3b2e2e;">About Oakline Bank</h2>
-  <p style="max-width:900px; margin:0 auto; font-size:1.15rem; line-height:1.8; color:#4a3b3b;">
-    Oakline Bank was founded with a single vision: to create a banking experience that combines modern technology with a human touch. 
-    Our mission is to empower our customers to manage their finances efficiently, safely, and transparently. From personal checking 
-    and savings accounts to complex investment solutions and business banking, we provide tailored services to meet every financial need. 
-    We pride ourselves on our innovative digital platform, which allows instant transfers, seamless account management, and real-time 
-    support — all while maintaining the highest security standards. With Oakline Bank, banking is not just about transactions; it’s about 
-    building relationships, growing wealth, and creating opportunities for our clients to succeed.
-  </p>
-  <p style="max-width:900px; margin:20px auto 0; font-size:1rem; color:#3b2e2e;">
-    Join Oakline Bank today and experience a new level of personalized banking, where technology meets trust, and every customer is valued.
-  </p>
-</section>
-<!-- PERSONAL & BUSINESS BANKING -->
-<section id="services" style="padding:80px 20px; background:var(--bg); text-align:center;">
-  <h2 style="font-size:2.2rem; margin-bottom:40px; color:var(--brand);">Our Banking Services</h2>
-  <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:24px;">
-    <!-- Personal Banking -->
-    <div style="flex:1 1 260px; background:var(--card); padding:28px; border-radius:16px; box-shadow:0 6px 18px rgba(0,0,0,.08);">
-      <h3>Personal Banking</h3>
-      <p>Checking, Savings, Credit Cards, Mortgages, and Loans to help you manage daily finances and plan for your future.</p>
-      <a href="#personal" class="btn btn-ghost">Learn More</a>
-    </div>
-    <!-- Business Banking -->
-    <div style="flex:1 1 260px; background:var(--card); padding:28px; border-radius:16px; box-shadow:0 6px 18px rgba(0,0,0,.08);">
-      <h3>Business Banking</h3>
-      <p>Corporate accounts, merchant services, loans, payroll, and investment solutions tailored to your business needs.</p>
-      <a href="#business" class="btn btn-ghost">Learn More</a>
-    </div>
-    <!-- Investment & Wealth -->
-    <div style="flex:1 1 260px; background:var(--card); padding:28px; border-radius:16px; box-shadow:0 6px 18px rgba(0,0,0,.08);">
-      <h3>Investments & Wealth</h3>
-      <p>Grow your wealth with our advisory services, retirement planning, and investment portfolios customized for you.</p>
-      <a href="#invest" class="btn btn-ghost">Learn More</a>
-    </div>
-  </div>
-</section>
-
-<!-- FEATURES -->
-<section id="features" style="padding:80px 20px; background:#fff; text-align:center;">
-  <h2 style="font-size:2.2rem; margin-bottom:40px; color:var(--brand);">Features That Make Banking Easy</h2>
-  <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:24px;">
-    <div style="flex:1 1 260px; background:var(--bg); padding:28px; border-radius:16px; box-shadow:0 6px 18px rgba(0,0,0,.08); transition:.3s; cursor:pointer;">
-      <i class="fas fa-mobile-alt" style="font-size:2rem; color:var(--accent); margin-bottom:14px;"></i>
-      <h3>Mobile Banking</h3>
-      <p>Bank anytime, anywhere with our secure mobile app for instant transfers and account management.</p>
-    </div>
-    <div style="flex:1 1 260px; background:var(--bg); padding:28px; border-radius:16px; box-shadow:0 6px 18px rgba(0,0,0,.08); transition:.3s; cursor:pointer;">
-      <i class="fas fa-shield-alt" style="font-size:2rem; color:var(--accent); margin-bottom:14px;"></i>
-      <h3>Advanced Security</h3>
-      <p>Two-factor authentication, fraud alerts, and encryption ensure your data and money are always protected.</p>
-    </div>
-    <div style="flex:1 1 260px; background:var(--bg); padding:28px; border-radius:16px; box-shadow:0 6px 18px rgba(0,0,0,.08); transition:.3s; cursor:pointer;">
-      <i class="fas fa-bolt" style="font-size:2rem; color:var(--accent); margin-bottom:14px;"></i>
-      <h3>Instant Transfers</h3>
-      <p>Move money between accounts and to friends or businesses instantly, with zero hassle.</p>
-    </div>
-    <div style="flex:1 1 260px; background:var(--bg); padding:28px; border-radius:16px; box-shadow:0 6px 18px rgba(0,0,0,.08); transition:.3s; cursor:pointer;">
-      <i class="fas fa-chart-line" style="font-size:2rem; color:var(--accent); margin-bottom:14px;"></i>
-      <h3>Investment Insights</h3>
-      <p>Access tailored advice and real-time market updates to grow your portfolio effectively.</p>
-    </div>
-  </div>
-</section>
-
-<!-- TESTIMONIALS -->
-<section id="testimonials" style="padding:80px 20px; background:var(--bg); text-align:center;">
-  <h2 style="font-size:2.2rem; margin-bottom:40px; color:var(--brand);">What Our Clients Say</h2>
-  <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:24px;">
-    <div style="flex:1 1 300px; background:var(--card); padding:28px; border-radius:16px; box-shadow:0 6px 18px rgba(0,0,0,.08);">
-      <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Client 1" style="width:60px; height:60px; border-radius:50%; margin-bottom:12px;">
-      <h4>Maria Johnson</h4>
-      <p style="font-style:italic;">“Oakline Bank has completely changed how I manage my finances. The mobile app is seamless and the customer service is outstanding.”</p>
-    </div>
-    <div style="flex:1 1 300px; background:var(--card); padding:28px; border-radius:16px; box-shadow:0 6px 18px rgba(0,0,0,.08);">
-      <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Client 2" style="width:60px; height:60px; border-radius:50%; margin-bottom:12px;">
-      <h4>James Smith</h4>
-      <p style="font-style:italic;">“The security features and instant transfers make banking effortless. I feel confident that my money is safe and accessible anytime.”</p>
-    </div>
-    <div style="flex:1 1 300px; background:var(--card); padding:28px; border-radius:16px; box-shadow:0 6px 18px rgba(0,0,0,.08);">
-      <img src="https://randomuser.me/api/portraits/women/65.jpg" alt="Client 3" style="width:60px; height:60px; border-radius:50%; margin-bottom:12px;">
-      <h4>Linda Wong</h4>
-      <p style="font-style:italic;">“I love how easy it is to open accounts and manage investments. Oakline Bank truly cares about customer success.”</p>
-    </div>
-  </div>
-</section>
-<!-- CERTIFICATES -->
-<section id="certificates" style="padding:80px 20px; background:#fff; text-align:center;">
-  <h2 style="font-size:2.2rem; margin-bottom:40px; color:var(--brand);">Our Licensed Certificates</h2>
-  <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:24px;">
-    <div style="flex:1 1 180px; text-align:center;">
-      <img src="cert1.png" alt="FDIC Insurance Certificate" style="width:120px; margin-bottom:12px;">
-      <p>FDIC Insurance Certificate</p>
-    </div>
-    <div style="flex:1 1 180px; text-align:center;">
-      <img src="cert2.png" alt="National Banking License" style="width:120px; margin-bottom:12px;">
-      <p>National Banking License</p>
-    </div>
-    <div style="flex:1 1 180px; text-align:center;">
-      <img src="cert3.png" alt="Investment Compliance Certificate" style="width:120px; margin-bottom:12px;">
-      <p>Investment Compliance Certificate</p>
-    </div>
-    <div style="flex:1 1 180px; text-align:center;">
-      <img src="cert4.png" alt="PCI DSS Certification" style="width:120px; margin-bottom:12px;">
-      <p>PCI DSS Certification</p>
-    </div>
-    <div style="flex:1 1 180px; text-align:center;">
-      <img src="cert5.png" alt="AML Compliance Certificate" style="width:120px; margin-bottom:12px;">
-      <p>AML Compliance Certificate</p>
-    </div>
-  </div>
-</section>
-
-<!-- FOOTER -->
-<footer style="padding:40px 20px; background:var(--brand); color:#fff;">
-  <div style="display:flex; flex-wrap:wrap; justify-content:space-between; gap:24px;">
-    <div style="flex:1 1 200px;">
-      <h3>About Oakline Bank</h3>
-      <p>Your trusted partner for personal and business banking, investments, and financial growth. We prioritize security, accessibility, and customer success.</p>
-    </div>
-    <div style="flex:1 1 200px;">
-      <h3>Quick Links</h3>
-      <ul style="list-style:none; padding:0; line-height:1.8;">
-        <li><a href="#services" style="color:#fff;">Services</a></li>
-        <li><a href="#features" style="color:#fff;">Features</a></li>
-        <li><a href="#testimonials" style="color:#fff;">Testimonials</a></li>
-        <li><a href="#contact" style="color:#fff;">Contact</a></li>
-        <li><a href="dashboard.html" style="color:#fff;">Dashboard</a></li>
-      </ul>
-    </div>
-    <div style="flex:1 1 200px;">
-      <h3>Contact Us</h3>
-      <p>Email: support@oaklinebank.com</p>
-      <p>Phone: +1 (555) 123-4567</p>
-      <p>Address: 123 Finance Blvd, New York, NY</p>
-    </div>
-    <div style="flex:1 1 200px;">
-      <h3>Follow Us</h3>
-      <a href="#" style="color:#fff; margin-right:8px;"><i class="fab fa-facebook-f"></i></a>
-      <a href="#" style="color:#fff; margin-right:8px;"><i class="fab fa-twitter"></i></a>
-      <a href="#" style="color:#fff; margin-right:8px;"><i class="fab fa-linkedin-in"></i></a>
-      <a href="#" style="color:#fff;"><i class="fab fa-instagram"></i></a>
-    </div>
-  </div>
-  <p style="text-align:center; margin-top:24px;">&copy; 2025 Oakline Bank. All rights reserved.</p>
-</footer>
-
-<!-- SCRIPTS -->
-<script src="https://unpkg.com/@supabase/supabase-js"></script>
-<script>
-  const supabaseUrl = "https://nrjdmgltshosdqccaymr.supabase.co";
-  const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5yamRtZ2x0c2hvc2RxY2NheW1yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwMzYyMjAsImV4cCI6MjA3MTYxMjIyMH0.b9H553W2PCsSNvr8HyyINl4nTSrldHN_QMQ3TVwt6qk";
-  const supabase = supabase.createClient(supabaseUrl, supabaseAnonKey);
-
-  // DROPDOWN
-  document.querySelectorAll(".dropdown-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const panel = btn.nextElementSibling;
-      panel.style.display = panel.style.display === "block" ? "none" : "block";
+  <script>
+    // Dark mode
+    const darkModeBtn = document.getElementById('darkModeBtn');
+    darkModeBtn.addEventListener('click', ()=> {
+      document.documentElement.toggleAttribute('data-theme','dark');
     });
-  });
 
-  // SHOW/HIDE PUBLIC & AUTH BUTTONS
-  async function checkUser() {
-    const { data: { user } } = await supabase.auth.getUser();
-    document.querySelectorAll(".public-only").forEach(el => el.style.display = user ? "none" : "block");
-    document.querySelectorAll(".auth-only").forEach(el => el.style.display = user ? "flex" : "none");
-  }
-  checkUser();
+    // Dropdown toggles
+    const dropdownPublic = document.getElementById('dropdownPublic');
+    const panelPublic = document.getElementById('panelPublic');
+    const dropdownAuth = document.getElementById('dropdownAuth');
+    const panelAuth = document.getElementById('panelAuth');
 
-  // DARK MODE TOGGLE
-  const darkToggle = document.getElementById("darkToggle");
-  if (darkToggle) {
-    darkToggle.addEventListener("click", () => {
-      document.body.classList.toggle("dark-mode");
+    dropdownPublic.querySelector('button').addEventListener('click', e=>{
+      panelPublic.style.display = panelPublic.style.display === 'block'? 'none':'block';
+      panelAuth.style.display = 'none';
     });
-  }
-</script>
+    dropdownAuth.querySelector('button').addEventListener('click', e=>{
+      panelAuth.style.display = panelAuth.style.display === 'block'? 'none':'block';
+      panelPublic.style.display = 'none';
+    });
+
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', e=>{
+      if(!dropdownPublic.contains(e.target)) panelPublic.style.display='none';
+      if(!dropdownAuth.contains(e.target)) panelAuth.style.display='none';
+    });
+  </script>
+    <!-- HERO SECTION -->
+  <section id="home" style="padding:80px 20px 40px 20px;display:flex;align-items:center;justify-content:center;flex-direction:column;background:var(--brand);color:#fff;text-align:center;">
+    <h1 style="font-size:2.8rem;max-width:900px;margin:0 auto;">Welcome to Oakline Bank</h1>
+    <p style="margin-top:12px;font-size:1.1rem;max-width:700px;">Your trusted partner in personal and business banking. Secure, reliable, and innovative solutions for your financial growth.</p>
+    <div style="display:flex;gap:12px;margin-top:24px;">
+      <a href="#services" class="btn" style="background:var(--accent);color:#fff;padding:10px 18px;border-radius:8px;">Explore Services</a>
+      <a href="#features" class="btn" style="background:var(--accent-dark);color:#fff;padding:10px 18px;border-radius:8px;">Discover Features</a>
+    </div>
+  </section>
+
+  <!-- SERVICES SECTION -->
+  <section id="services" style="padding:60px 20px;background:var(--bg);text-align:center;">
+    <h2>Our Services</h2>
+    <p style="max-width:700px;margin:12px auto 40px auto;color:var(--muted);">We offer a wide range of financial services tailored to meet your needs.</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:24px;max-width:1200px;margin:0 auto;">
+      <div style="background:var(--card);padding:20px;border-radius:12px;box-shadow:0 5px 20px var(--overlay-black);">
+        <i class="fas fa-wallet" style="font-size:2rem;color:var(--accent)"></i>
+        <h3>Checking & Savings</h3>
+        <p>Secure accounts with competitive rates and easy online access.</p>
+      </div>
+      <div style="background:var(--card);padding:20px;border-radius:12px;box-shadow:0 5px 20px var(--overlay-black);">
+        <i class="fas fa-piggy-bank" style="font-size:2rem;color:var(--accent)"></i>
+        <h3>Loans & Mortgages</h3>
+        <p>Flexible borrowing solutions for personal and business needs.</p>
+      </div>
+      <div style="background:var(--card);padding:20px;border-radius:12px;box-shadow:0 5px 20px var(--overlay-black);">
+        <i class="fas fa-chart-line" style="font-size:2rem;color:var(--accent)"></i>
+        <h3>Investments</h3>
+        <p>Grow your wealth with our safe and diversified investment options.</p>
+      </div>
+      <div style="background:var(--card);padding:20px;border-radius:12px;box-shadow:0 5px 20px var(--overlay-black);">
+        <i class="fas fa-mobile-alt" style="font-size:2rem;color:var(--accent)"></i>
+        <h3>Mobile Banking</h3>
+        <p>Manage your accounts anytime, anywhere, with our secure mobile app.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES SECTION -->
+  <section id="features" style="padding:60px 20px;text-align:center;">
+    <h2>Banking Features</h2>
+    <p style="max-width:700px;margin:12px auto 40px auto;color:var(--muted);">We bring the latest technology to provide a seamless banking experience.</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:24px;max-width:1200px;margin:0 auto;">
+      <div style="background:var(--card);padding:20px;border-radius:12px;box-shadow:0 5px 20px var(--overlay-black);transition:0.3s;">
+        <i class="fas fa-shield-alt" style="font-size:2rem;color:var(--accent)"></i>
+        <h3>Secure Transactions</h3>
+        <p>Advanced encryption ensures your funds and data are safe.</p>
+      </div>
+      <div style="background:var(--card);padding:20px;border-radius:12px;box-shadow:0 5px 20px var(--overlay-black);transition:0.3s;">
+        <i class="fas fa-bolt" style="font-size:2rem;color:var(--accent)"></i>
+        <h3>Instant Transfers</h3>
+        <p>Move money between accounts quickly with real-time notifications.</p>
+      </div>
+      <div style="background:var(--card);padding:20px;border-radius:12px;box-shadow:0 5px 20px var(--overlay-black);transition:0.3s;">
+        <i class="fas fa-file-invoice-dollar" style="font-size:2rem;color:var(--accent)"></i>
+        <h3>Loan Management</h3>
+        <p>Track your loans, payments, and interest in one place.</p>
+      </div>
+      <div style="background:var(--card);padding:20px;border-radius:12px;box-shadow:0 5px 20px var(--overlay-black);transition:0.3s;">
+        <i class="fas fa-cogs" style="font-size:2rem;color:var(--accent)"></i>
+        <h3>Account Settings</h3>
+        <p>Customize your profile, notifications, and security preferences.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIALS -->
+  <section id="testimonials" style="padding:60px 20px;background:var(--bg);text-align:center;">
+    <h2>What Our Customers Say</h2>
+    <p style="max-width:700px;margin:12px auto 40px auto;color:var(--muted);">Real experiences from our satisfied clients.</p>
+    <div style="display:flex;flex-wrap:wrap;gap:24px;justify-content:center;max-width:1200px;margin:0 auto;">
+      <div style="background:var(--card);padding:20px;border-radius:12px;width:280px;box-shadow:0 5px 20px var(--overlay-black);">
+        <img src="images/user1.jpg" alt="Client 1" style="width:60px;height:60px;border-radius:50%;object-fit:cover;margin-bottom:12px;">
+        <h4>John Doe</h4>
+        <p>"Oakline Bank helped me manage my finances effortlessly. The mobile app is intuitive and fast!"</p>
+      </div>
+      <div style="background:var(--card);padding:20px;border-radius:12px;width:280px;box-shadow:0 5px 20px var(--overlay-black);">
+        <img src="images/user2.jpg" alt="Client 2" style="width:60px;height:60px;border-radius:50%;object-fit:cover;margin-bottom:12px;">
+        <h4>Mary Smith</h4>
+        <p>"Their customer support is top-notch. I feel safe and confident banking here."</p>
+      </div>
+      <div style="background:var(--card);padding:20px;border-radius:12px;width:280px;box-shadow:0 5px 20px var(--overlay-black);">
+        <img src="images/user3.jpg" alt="Client 3" style="width:60px;height:60px;border-radius:50%;object-fit:cover;margin-bottom:12px;">
+        <h4>Michael Brown</h4>
+        <p>"Loans and investment options are simple to understand and very competitive."</p>
+      </div>
+    </div>
+  </section>
+    <!-- ABOUT SECTION -->
+  <section id="about" style="padding:60px 20px;text-align:center;background:var(--bg-light);">
+    <h2>About Oakline Bank</h2>
+    <p style="max-width:900px;margin:20px auto;color:var(--muted);line-height:1.7rem;font-size:1.05rem;">
+      Oakline Bank has been a trusted financial institution for over a decade, providing personalized banking services to individuals, families, and businesses. We combine traditional banking values with modern technology to deliver secure, efficient, and accessible financial solutions. Our mission is to empower our clients to achieve their financial goals while ensuring transparency, trust, and unmatched customer service. Whether you're opening your first checking account, investing for the future, or planning a business loan, Oakline Bank is your reliable partner at every step of your financial journey. With a focus on innovation, integrity, and inclusivity, we strive to make banking simple, secure, and rewarding for everyone.
+    </p>
+  </section>
+
+  <!-- CERTIFICATES SECTION -->
+  <section id="certificates" style="padding:60px 20px;text-align:center;">
+    <h2>Our Licensed Certificates</h2>
+    <p style="max-width:700px;margin:12px auto 40px auto;color:var(--muted);">We are fully certified and licensed to operate with excellence and compliance.</p>
+    <div style="display:flex;flex-wrap:wrap;gap:20px;justify-content:center;align-items:center;">
+      <img src="images/certificate1.jpg" alt="FDIC Insurance Certificate" style="width:180px;border-radius:8px;">
+      <img src="images/certificate2.jpg" alt="State Banking License" style="width:180px;border-radius:8px;">
+      <img src="images/certificate3.jpg" alt="ISO Security Certificate" style="width:180px;border-radius:8px;">
+      <img src="images/certificate4.jpg" alt="Consumer Protection Certificate" style="width:180px;border-radius:8px;">
+      <img src="images/certificate5.jpg" alt="Investment Licensing Certificate" style="width:180px;border-radius:8px;">
+      <img src="images/certificate6.jpg" alt="Compliance & Risk Certificate" style="width:180px;border-radius:8px;">
+    </div>
+  </section>
+
+  <!-- FOOTER SECTION -->
+  <footer style="padding:40px 20px;background:var(--brand-dark);color:#fff;text-align:center;">
+    <div style="max-width:1200px;margin:0 auto;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:20px;">
+      <div style="flex:1;min-width:220px;">
+        <h4>About Oakline</h4>
+        <p>Oakline Bank is dedicated to providing secure, innovative, and customer-focused financial services. We help our clients reach their goals with trust and reliability.</p>
+      </div>
+      <div style="flex:1;min-width:220px;">
+        <h4>Quick Links</h4>
+        <ul style="list-style:none;padding:0;">
+          <li><a href="#home" style="color:#fff;">Home</a></li>
+          <li><a href="#services" style="color:#fff;">Services</a></li>
+          <li><a href="#features" style="color:#fff;">Features</a></li>
+          <li><a href="#testimonials" style="color:#fff;">Testimonials</a></li>
+          <li><a href="#contact" style="color:#fff;">Contact</a></li>
+        </ul>
+      </div>
+      <div style="flex:1;min-width:220px;">
+        <h4>Contact</h4>
+        <p>Email: support@oaklinebank.com</p>
+        <p>Phone: +1 555 123 4567</p>
+        <p>Address: 123 Main St, SomeCity, CA 90001</p>
+      </div>
+      <div style="flex:1;min-width:220px;">
+        <h4>Follow Us</h4>
+        <p>
+          <a href="#" style="color:#fff;margin-right:12px;">Facebook</a>
+          <a href="#" style="color:#fff;margin-right:12px;">Twitter</a>
+          <a href="#" style="color:#fff;">LinkedIn</a>
+        </p>
+      </div>
+    </div>
+    <p style="margin-top:24px;font-size:0.85rem;">&copy; 2025 Oakline Bank. All rights reserved.</p>
+  </footer>
+
+  <!-- SCRIPTS -->
+  <script>
+    // DROPDOWN TOGGLE FOR PUBLIC USERS
+    const publicDropdownBtn = document.getElementById('publicDropdownBtn');
+    const publicPanel = document.getElementById('publicMenuPanel');
+    publicDropdownBtn?.addEventListener('click', () => {
+      publicPanel?.classList.toggle('show');
+    });
+
+    // DROPDOWN TOGGLE FOR AUTH USERS
+    const authDropdownBtn = document.getElementById('authDropdownBtn');
+    const authPanel = document.getElementById('authMenuPanel');
+    authDropdownBtn?.addEventListener('click', () => {
+      authPanel?.classList.toggle('show');
+    });
+
+    // HIDE DROPDOWN WHEN CLICK OUTSIDE
+    window.addEventListener('click', function(e) {
+      if (!publicDropdownBtn.contains(e.target) && !publicPanel.contains(e.target)) {
+        publicPanel.classList.remove('show');
+      }
+      if (!authDropdownBtn.contains(e.target) && !authPanel.contains(e.target)) {
+        authPanel.classList.remove('show');
+      }
+    });
+
+    // SHOW/HIDE BUTTONS BASED ON LOGIN STATE (replace with Supabase auth logic)
+    const isLoggedIn = false; // placeholder, replace with Supabase user check
+    document.querySelectorAll('.public-only').forEach(el => el.style.display = isLoggedIn ? 'none' : 'block');
+    document.querySelectorAll('.auth-only').forEach(el => el.style.display = isLoggedIn ? 'block' : 'none');
+  </script>
+
+  <style>
+    .dropdown-panel {
+      display:none;
+      position:absolute;
+      background:#fff;
+      min-width:180px;
+      box-shadow:0 8px 16px rgba(0,0,0,0.2);
+      z-index:1000;
+      border-radius:8px;
+      padding:10px 0;
+    }
+    .dropdown-panel.show {
+      display:block;
+    }
+    .dropdown-panel ul {
+      list-style:none;
+      padding:0;
+      margin:0;
+    }
+    .dropdown-panel ul li {
+      padding:8px 16px;
+    }
+    .dropdown-panel ul li a {
+      text-decoration:none;
+      color:#333;
+      display:block;
+    }
+    .dropdown-panel ul li.divider {
+      height:1px;
+      background:#eee;
+      margin:6px 0;
+    }
+  </style>
+</body>
+</html>
