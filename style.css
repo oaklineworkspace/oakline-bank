@@ -1,6 +1,4 @@
-/* =========================
-   Basic Reset
-========================= */
+/* ===== BASIC RESET ===== */
 * {
   margin: 0;
   padding: 0;
@@ -8,33 +6,63 @@
 }
 
 body {
-  font-family: 'Arial', sans-serif;
-  line-height: 1.6;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f4f6f8;
   color: #333;
-  background: #f4f4f4;
+  scroll-behavior: smooth;
 }
 
-/* =========================
-   Hero Section
-========================= */
-.hero {
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  background: url('images/hero-bg.jpg') center/cover no-repeat;
+a {
+  text-decoration: none;
+  transition: all 0.3s;
+}
+a:hover {
+  opacity: 0.8;
+}
+
+/* ===== HEADER ===== */
+header {
+  background-color: #002366; /* Deep Blue */
   color: white;
+  padding: 20px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+header .logo {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #28a745; /* Green accent */
+}
+
+nav ul {
+  list-style: none;
+  display: flex;
+  gap: 25px;
+}
+
+nav ul li a {
+  color: white;
+  font-weight: 500;
+}
+nav ul li a:hover {
+  color: #28a745;
+}
+
+/* ===== HERO SECTION ===== */
+.hero {
+  background: url('https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=1400&q=80') center/cover no-repeat;
+  color: white;
+  text-align: center;
+  padding: 140px 20px;
   position: relative;
   opacity: 0;
   transform: translateY(50px);
   transition: all 0.8s ease-in-out;
-}
-
-.hero .logo {
-  max-width: 120px;
-  margin-bottom: 20px;
 }
 
 .hero h1 {
@@ -43,115 +71,73 @@ body {
 }
 
 .hero p {
-  font-size: 1.3rem;
+  font-size: 1.2rem;
+  margin-bottom: 30px;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-/* =========================
-   Generic Section Styling
-========================= */
+.hero .btn {
+  background: #28a745; /* Green */
+  color: white;
+  padding: 15px 35px;
+  border-radius: 6px;
+  font-size: 1.05rem;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.hero .btn:hover {
+  background: #218838;
+}
+
+/* ===== SECTIONS ===== */
 section {
-  padding: 80px 20px;
+  padding: 70px 20px;
   text-align: center;
-  opacity: 0; /* for pop-up animation */
+  opacity: 0;
   transform: translateY(50px);
   transition: all 0.8s ease-in-out;
 }
 
 section h2 {
-  font-size: 2.5rem;
-  margin-bottom: 40px;
+  font-size: 2.2rem;
+  margin-bottom: 20px;
+  color: #002366; /* Blue */
 }
 
 section p {
-  max-width: 700px;
-  margin: 0 auto 20px auto;
+  max-width: 850px;
+  margin: 0 auto 40px;
+  font-size: 1.1rem;
+  color: #555;
 }
 
-/* =========================
-   Services Section
-========================= */
-.services {
-  background: #f9f9f9;
+/* ===== GRID LAYOUT ===== */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 30px;
+  margin-top: 40px;
 }
 
-.services .service-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  justify-content: center;
-}
-
-.service-card {
-  max-width: 300px;
+.grid .box {
   background: white;
-  padding: 20px;
-  border-radius: 10px;
-  text-align: center;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+.grid .box:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+}
+.grid .box h3 {
+  margin-top: 0;
+  color: #002366;
 }
 
-.service-card img {
-  width: 100%;
-  border-radius: 10px;
-  margin-bottom: 15px;
-}
-
-/* =========================
-   Loans Section
-========================= */
-.loans {
-  background: #eef6ff;
-}
-
-.loan-card {
-  max-width: 300px;
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  margin: 0 auto 20px auto;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-/* =========================
-   Business Accounts Section
-========================= */
-.business-accounts {
-  background: #f0fff4;
-}
-
-.business-card {
-  max-width: 300px;
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  margin: 0 auto 20px auto;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-/* =========================
-   Features Section
-========================= */
-.features {
-  background: #fff4e6;
-}
-
-.feature-card {
-  max-width: 300px;
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  margin: 0 auto 20px auto;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-/* =========================
-   Testimonials Section
-========================= */
-.testimonials {
-  padding: 80px 20px;
-  background: #f7f7f7;
-}
-
+/* ===== TESTIMONIALS ===== */
 .testimonial-grid {
   display: flex;
   flex-wrap: wrap;
@@ -165,89 +151,125 @@ section p {
   padding: 20px;
   text-align: center;
   border-radius: 10px;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.08);
   opacity: 0;
   transform: translateY(50px);
   transition: all 0.8s ease-in-out;
 }
 
 .testimonial img {
-  width: 80px;
-  height: 80px;
+  width: 90px;
+  height: 90px;
   border-radius: 50%;
-  margin-bottom: 10px;
+  object-fit: cover;
+  margin-bottom: 15px;
 }
 
-/* =========================
-   Pop-Up Animation
-========================= */
-.pop-up.active {
-  opacity: 1 !important;
-  transform: translateY(0) !important;
+/* ===== FORMS ===== */
+form input,
+form textarea {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border-radius: 5px;
+  border: 1px solid #ccc;
 }
 
-/* =========================
-   Footer Sections (3 examples)
-========================= */
-.footer {
-  background: #333;
+form button {
+  padding: 12px 25px;
+  background: #28a745;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+form button:hover {
+  background: #218838;
+}
+
+/* ===== FOOTERS ===== */
+footer.footer {
+  background: #002366;
   color: white;
   padding: 40px 20px;
   text-align: center;
 }
 
-.footer a {
-  color: #fff;
-  text-decoration: none;
-  margin: 0 10px;
+footer.footer h3 {
+  margin-bottom: 15px;
+  color: #28a745;
 }
 
-.footer a:hover {
-  text-decoration: underline;
+footer.footer a {
+  color: white;
+  margin: 0 5px;
+}
+footer.footer a:hover {
+  color: #28a745;
 }
 
-/* Footer variations */
-.footer-alt {
-  background: #222;
-  padding: 30px 20px;
+/* ===== POP-UP ANIMATIONS ===== */
+.pop-up.active,
+.hero.active,
+.testimonial.active {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
 }
 
-.footer-alt a {
-  color: #f4f4f4;
+/* ===== MAP ===== */
+.map-container iframe {
+  width: 100%;
+  height: 350px;
+  border: 0;
+  border-radius: 8px;
+}
+/* Counter Style */
+.counter-box {
+  background: #fff;
+  padding: 25px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+}
+.counter {
+  font-size: 2.5rem;
+  color: #28a745;
 }
 
-.footer-alt a:hover {
-  text-decoration: underline;
+.pop-left {
+  transform: translateX(-50px);
+  opacity: 0;
+  transition: all 0.8s ease-in-out;
+}
+.pop-left.active {
+  transform: translateX(0);
+  opacity: 1;
 }
 
-.footer-social {
-  background: #111;
-  padding: 30px 20px;
+.pop-right {
+  transform: translateX(50px);
+  opacity: 0;
+  transition: all 0.8s ease-in-out;
+}
+.pop-right.active {
+  transform: translateX(0);
+  opacity: 1;
+}
+.cta-btn {
+  position: fixed;
+  bottom: 25px;
+  right: 25px;
+  background: #28a745;
+  color: white;
+  padding: 15px 25px;
+  border-radius: 50px;
+  font-weight: bold;
+  z-index: 1000;
+  transition: 0.3s;
+}
+.cta-btn:hover {
+  background: #218838;
 }
 
-.footer-social a {
-  color: #f4f4f4;
-  margin: 0 10px;
-  font-size: 1.2rem;
-}
 
-.footer-social a:hover {
-  color: #00bfff;
-}
-
-/* =========================
-   Responsive
-========================= */
-@media(max-width:768px){
-  .service-grid, .testimonial-grid {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .hero h1 {
-    font-size: 2.2rem;
-  }
-
-  section h2 {
-    font-size: 2rem;
-  }
-}
