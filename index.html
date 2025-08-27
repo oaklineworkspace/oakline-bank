@@ -3,214 +3,374 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Oakline Bank</title>
+  <title>Oakline Bank - Modern Banking</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Hero Section -->
-  <section class="hero pop-up" style="background-image: url('https://images.unsplash.com/photo-1573164574237-92e9c6a83f60?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxfDB8MXxyYW5kb218MHx8YmxhY2stYmFja2dyb3VuZHxlbnwwfHx8fDE2OTMxMzQ1MTc&ixlib=rb-4.0.3&q=80&w=1080');">
-    <div class="hero-content">
-      <img src="https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxfDB8MXxyYW5kb218MHx8bG9nby1iYW5rfGVufDB8fHx8MTY5MzEzNDUxNw&ixlib=rb-4.0.3&q=80&w=200" alt="Oakline Bank Logo" class="logo">
-      <h1>Welcome to Oakline Bank</h1>
-      <p>Your trusted partner for personal, business, and digital banking.</p>
-      <a href="#services" class="btn">Explore Services</a>
-    </div>
+
+  <!-- ===== HEADER ===== -->
+  <header>
+    <div class="logo">Oakline Bank</div>
+    <nav>
+      <ul>
+        <li><a href="#home">Home</a></li>
+        <li><a href="#services">Services</a></li>
+        <li><a href="#features">Features</a></li>
+        <li><a href="#loans">Loans</a></li>
+        <li><a href="#business">Business</a></li>
+        <li><a href="#crypto">Crypto</a></li>
+        <li><a href="#testimonials">Testimonials</a></li>
+        <li><a href="#contact">Contact</a></li>
+        <li><a href="login.html">Login</a></li>
+        <li><a href="signup.html">Sign Up</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- ===== HERO SECTION ===== -->
+  <section class="hero" id="home">
+    <h1>Welcome to Oakline Bank</h1>
+    <p>Smart, secure, and modern banking solutions for individuals and businesses.</p>
+    <a href="signup.html" class="btn">Open an Account</a>
   </section>
 
-  <!-- Services Section -->
-  <section class="services pop-up" id="services">
+  <!-- ===== SERVICES ===== -->
+  <section id="services" class="pop-up">
     <h2>Our Services</h2>
-    <div class="service-grid">
-      <div class="service-card">
-        <img src="https://images.unsplash.com/photo-1603791440384-56cd371ee9a7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=300" alt="Personal Banking">
-        <h3>Personal Banking</h3>
-        <p>Checking, savings, and personal accounts tailored for you.</p>
+    <p>Comprehensive banking services to manage your finances efficiently.</p>
+    <div class="grid">
+      <div class="box">
+        <h3>Checking Accounts</h3>
+        <p>Flexible access and features for daily transactions.</p>
       </div>
-      <div class="service-card">
-        <img src="https://images.unsplash.com/photo-1588776814546-7d1b5dc5ec9e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=300" alt="Business Banking">
-        <h3>Business Banking</h3>
-        <p>Accounts and financial solutions for your growing business.</p>
+      <div class="box">
+        <h3>Savings Accounts</h3>
+        <p>Earn more with high-interest savings solutions.</p>
       </div>
-      <div class="service-card">
-        <img src="https://images.unsplash.com/photo-1607746882042-944635dfe10e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=300" alt="Loans & Mortgages">
-        <h3>Loans & Mortgages</h3>
-        <p>Flexible personal and business loan solutions.</p>
+      <div class="box">
+        <h3>Loans & Credit</h3>
+        <p>Fast approvals with competitive rates and transparent terms.</p>
       </div>
-    </div>
-  </section>
-
-  <!-- Features Section -->
-  <section class="features pop-up">
-    <h2>Why Choose Us</h2>
-    <div class="service-grid">
-      <div class="service-card">
-        <img src="https://images.unsplash.com/photo-1581090700227-7c091594c3fc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=300" alt="Mobile App">
-        <h3>Mobile App</h3>
-        <p>Manage your accounts anywhere, anytime with our intuitive app.</p>
-      </div>
-      <div class="service-card">
-        <img src="https://images.unsplash.com/photo-1612831810086-485d414a7875?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=300" alt="Security">
-        <h3>Security</h3>
-        <p>State-of-the-art security measures keep your finances safe.</p>
-      </div>
-      <div class="service-card">
-        <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=300" alt="Rewards">
-        <h3>Rewards</h3>
-        <p>Earn rewards and benefits with every transaction.</p>
+      <div class="box">
+        <h3>Mobile Banking</h3>
+        <p>Bank anywhere using our secure mobile app.</p>
       </div>
     </div>
   </section>
 
-  <!-- Loans Section -->
-  <section class="loans pop-up">
-    <h2>Loans & Mortgages</h2>
-    <p>Flexible loan plans to help you achieve your personal and business goals.</p>
-    <div class="service-grid">
-      <div class="service-card">
-        <img src="https://images.unsplash.com/photo-1573164574237-92e9c6a83f60?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=300" alt="Home Loan">
-        <h3>Home Loan</h3>
+  <!-- ===== FEATURES ===== -->
+  <section id="features" class="pop-up">
+    <h2>Banking Features</h2>
+    <div class="grid">
+      <div class="box">
+        <h3>Instant Transfers</h3>
+        <p>Send and receive funds globally in real-time.</p>
       </div>
-      <div class="service-card">
-        <img src="https://images.unsplash.com/photo-1560448071-1a5b8e4881de?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=300" alt="Business Loan">
-        <h3>Business Loan</h3>
+      <div class="box">
+        <h3>24/7 Support</h3>
+        <p>Expert support anytime you need it.</p>
       </div>
-      <div class="service-card">
-        <img src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=300" alt="Personal Loan">
-        <h3>Personal Loan</h3>
+      <div class="box">
+        <h3>Secure Transactions</h3>
+        <p>Top-level encryption protects every transaction.</p>
       </div>
-    </div>
-  </section>
-
-  <!-- Business Accounts Section -->
-  <section class="business pop-up">
-    <h2>Business Accounts</h2>
-    <p>Customized financial solutions for your company.</p>
-    <div class="service-grid">
-      <div class="service-card">
-        <img src="https://images.unsplash.com/photo-1554224154-22dec7ec8818?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=300" alt="Small Business">
-        <h3>Small Business</h3>
-      </div>
-      <div class="service-card">
-        <img src="https://images.unsplash.com/photo-1554224154-22dec7ec8818?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=300" alt="Corporate">
-        <h3>Corporate Accounts</h3>
+      <div class="box">
+        <h3>Smart Notifications</h3>
+        <p>Stay updated with alerts and reminders.</p>
       </div>
     </div>
   </section>
 
-  <!-- Testimonials Section -->
-  <section class="testimonials pop-up">
+  <!-- ===== LOANS ===== -->
+  <section id="loans" class="pop-up">
+    <h2>Loans</h2>
+    <div class="grid">
+      <div class="box">
+        <h3>Personal Loans</h3>
+        <p>Get instant approvals and flexible repayment options.</p>
+      </div>
+      <div class="box">
+        <h3>Home Loans</h3>
+        <p>Competitive rates to make your dream home a reality.</p>
+      </div>
+      <div class="box">
+        <h3>Auto Loans</h3>
+        <p>Fast financing for your next vehicle purchase.</p>
+      </div>
+      <div class="box">
+        <h3>Education Loans</h3>
+        <p>Invest in your future with student-friendly plans.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== BUSINESS ACCOUNTS ===== -->
+  <section id="business" class="pop-up">
+    <h2>Business Banking</h2>
+    <div class="grid">
+      <div class="box">
+        <h3>Business Checking</h3>
+        <p>Efficient management for your company’s daily operations.</p>
+      </div>
+      <div class="box">
+        <h3>Corporate Savings</h3>
+        <p>Maximize profits with tailored savings solutions.</p>
+      </div>
+      <div class="box">
+        <h3>Merchant Services</h3>
+        <p>Accept payments seamlessly with integrated solutions.</p>
+      </div>
+      <div class="box">
+        <h3>Business Loans</h3>
+        <p>Grow your business with fast and flexible funding.</p>
+      </div>
+    </div>
+  </section>
+<div class="grid">
+  <div class="box">
+    <h3>Instant Transfers</h3>
+    <p>Send and receive money globally in real-time.</p>
+  </div>
+
+  <div class="box pop-up">
+    <i class="fas fa-wallet" style="font-size:2rem;color:#28a745;"></i>
+    <h3>Crypto Wallet Integration</h3>
+    <p>Manage traditional and digital assets securely.</p>
+  </div>
+
+  <div class="box">
+    <h3>24/7 Support</h3>
+    <p>Our customer support team is always available.</p>
+  </div>
+</div>
+  <!-- ===== CRYPTO WALLET ===== -->
+  <section id="crypto" class="pop-up">
+    <h2>Crypto Integration</h2>
+    <p>Manage both traditional and digital currencies in one secure place.</p>
+    <div class="grid">
+      <div class="box">
+        <h3>Bitcoin Wallet</h3>
+        <p>Store and manage your BTC securely.</p>
+      </div>
+      <div class="box">
+        <h3>Ethereum Wallet</h3>
+        <p>Track your ETH investments easily.</p>
+      </div>
+      <div class="box">
+        <h3>Altcoin Support</h3>
+        <p>Supports multiple altcoins for diverse portfolios.</p>
+      </div>
+      <div class="box">
+        <h3>Instant Conversion</h3>
+        <p>Swap currencies seamlessly within your account.</p>
+      </div>
+    </div>
+  </section>
+<!-- Example Counter -->
+<div class="counter-box pop-up">
+  <h3 class="counter" data-target="1500">0</h3>
+  <p>Happy Clients</p>
+</div>
+  <!-- ===== TESTIMONIALS ===== -->
+  <section id="testimonials" class="pop-up">
     <h2>What Our Clients Say</h2>
     <div class="testimonial-grid">
       <div class="testimonial">
-        <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="John Doe">
-        <h3>John Doe</h3>
+        <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="James Carter">
+        <h3>James Carter</h3>
+        <p>Small Business Owner</p>
+        <p>“Oakline Bank helped me secure a business loan quickly.”</p>
+      </div>
+      <div class="testimonial">
+        <img src="https://randomuser.me/api/portraits/women/45.jpg" alt="Sophia Martinez">
+        <h3>Sophia Martinez</h3>
+        <p>Freelance Designer</p>
+        <p>“I love the mobile app – easy transfers, savings goals, and crypto integration.”</p>
+      </div>
+      <div class="testimonial">
+        <img src="https://randomuser.me/api/portraits/men/85.jpg" alt="Daniel Kim">
+        <h3>Daniel Kim</h3>
         <p>Software Engineer</p>
-        <p>"Oakline Bank has made managing my finances so easy and convenient!"</p>
+        <p>“The dashboard makes managing my accounts effortless.”</p>
       </div>
       <div class="testimonial">
-        <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Jane Smith">
-        <h3>Jane Smith</h3>
+        <img src="https://randomuser.me/api/portraits/women/68.jpg" alt="Emma Johnson">
+        <h3>Emma Johnson</h3>
         <p>Entrepreneur</p>
-        <p>"The business account services are top-notch and professional."</p>
+        <p>“I appreciate the secure transactions and instant notifications.”</p>
       </div>
       <div class="testimonial">
-        <img src="https://randomuser.me/api/portraits/men/45.jpg" alt="Michael Brown">
-        <h3>Michael Brown</h3>
-        <p>Marketing Manager</p>
-        <p>"Loans and mortgage options were clear and easy to understand."</p>
-      </div>
-      <div class="testimonial">
-        <img src="https://randomuser.me/api/portraits/women/55.jpg" alt="Lisa White">
-        <h3>Lisa White</h3>
-        <p>Designer</p>
-        <p>"The mobile app is sleek, fast, and very user-friendly."</p>
-      </div>
-      <div class="testimonial">
-        <img src="https://randomuser.me/api/portraits/men/60.jpg" alt="David Johnson">
-        <h3>David Johnson</h3>
+        <img src="https://randomuser.me/api/portraits/men/50.jpg" alt="Michael Lee">
+        <h3>Michael Lee</h3>
         <p>Consultant</p>
-        <p>"Customer support is responsive and helpful every single time."</p>
+        <p>“Oakline Bank's support team is amazing!”</p>
       </div>
     </div>
   </section>
 
-  <!-- Contact Section -->
-  <section class="contact pop-up">
+  <!-- ===== CONTACT ===== -->
+  <section id="contact" class="pop-up">
     <h2>Contact Us</h2>
-    <p>Email: support@oaklinebank.com | Phone: 1-800-OAKLINE</p>
-    <p>Address: 123 Finance St, New York, NY 10001</p>
-    <div id="map" style="width:100%;height:300px;background:#eee;">Map Placeholder</div>
+    <form class="contact-form">
+      <input type="text" name="name" placeholder="Full Name" required>
+      <input type="email" name="email" placeholder="Email Address" required>
+      <textarea name="message" rows="5" placeholder="Message" required></textarea>
+      <button type="submit">Send Message</button>
+    </form>
   </section>
 
-  <!-- Footer Sections -->
+  <!-- ===== APP DOWNLOAD ===== -->
+  <section id="app-download" class="pop-up">
+    <h2>Get Our Mobile App</h2>
+    <p>Bank anywhere, anytime with Oakline Bank’s mobile app.</p>
+    <div class="grid">
+      <a href="app.html" class="btn">📱 Download for iOS</a>
+      <a href="app.html" class="btn">📱 Download for Android</a>
+    </div>
+  </section>
+
+  <!-- ===== MAP ===== -->
+  <section id="map" class="pop-up">
+    <h2>Find Us</h2>
+    <div class="map-container">
+      <iframe src="https://www.google.com/maps/embed?pb=!1m18!..." allowfullscreen></iframe>
+    </div>
+  </section>
+
+  <!-- ===== ADDITIONAL 10 SECTIONS ===== -->
+  <!-- Section 11: Security -->
+  <section id="security" class="pop-up">
+    <h2>Secure Banking</h2>
+    <p>Advanced security protocols to protect your funds and data.</p>
+  </section>
+
+  <!-- Section 12: Investments -->
+  <section id="investments" class="pop-up">
+    <h2>Investment Plans</h2>
+    <p>Grow your wealth with our carefully designed investment portfolios.</p>
+  </section>
+
+  <!-- Section 13: Savings Goals -->
+  <section id="savings-goals" class="pop-up">
+    <h2>Automated Savings</h2>
+    <p>Set financial goals and let Oakline Bank help you save automatically.</p>
+  </section>
+
+  <!-- Section 14: Awards -->
+  <section id="awards" class="pop-up">
+    <h2>Awards & Recognition</h2>
+    <p>We are recognized for excellence in banking and customer service.</p>
+  </section>
+
+  <!-- Section 15: Careers -->
+  <section id="careers" class="pop-up">
+    <h2>Careers at Oakline</h2>
+    <p>Join our team of passionate banking professionals.</p>
+  </section>
+
+  <!-- Section 16: FAQ -->
+  <section id="faq" class="pop-up">
+    <h2>Frequently Asked Questions</h2>
+    <p>Find answers to common questions about our services.</p>
+  </section>
+
+  <!-- Section 17: Promotions -->
+  <section id="promotions" class="pop-up">
+    <h2>Current Promotions</h2>
+    <p>Check out our latest offers and bonus programs.</p>
+  </section>
+
+  <!-- Section 18: Feedback -->
+  <section id="feedback" class="pop-up">
+    <h2>Customer Feedback</h2>
+    <p>We value your suggestions to improve our services.</p>
+  </section>
+
+  <!-- Section 19: Community -->
+  <section id="community" class="pop-up">
+    <h2>Community Initiatives</h2>
+    <p>Supporting local communities and social programs worldwide.</p>
+  </section>
+
+  <!-- Section 20: Newsletter -->
+  <section id="newsletter" class="pop-up">
+    <h2>Subscribe to Newsletter</h2>
+    <p>Get the latest news and offers from Oakline Bank.</p>
+    <form class="newsletter-form">
+      <input type="email" placeholder="Enter your email" required>
+      <button type="submit">Subscribe</button>
+    </form>
+  </section>
+
+  <!-- ===== FOOTERS (10) ===== -->
+  <!-- Footer 1 -->
   <footer class="footer">
-    <p>&copy; 2025 Oakline Bank. All rights reserved.</p>
-    <p>Follow us: 
-      <a href="#">Facebook</a> | 
-      <a href="#">Twitter</a> | 
-      <a href="#">LinkedIn</a>
-    </p>
+    <h3>About Oakline Bank</h3>
+    <p>Providing secure, modern banking solutions for everyone.</p>
   </footer>
 
+  <!-- Footer 2 -->
   <footer class="footer">
-    <p>Quick Links: <a href="#services">Services</a> | <a href="#features">Features</a> | <a href="#contact">Contact</a></p>
+    <h3>Services</h3>
+    <ul>
+      <li><a href="#services">Accounts</a></li>
+      <li><a href="#loans">Loans</a></li>
+      <li><a href="#crypto">Crypto</a></li>
+      <li><a href="#business">Business</a></li>
+    </ul>
   </footer>
 
+  <!-- Footer 3 -->
   <footer class="footer">
-    <p>Download our App: <a href="#">iOS</a> | <a href="#">Android</a></p>
+    <h3>Contact & Support</h3>
+    <p>Email: support@oaklinebank.com | Phone: +1 800 555 1234</p>
   </footer>
 
+  <!-- Footer 4 -->
   <footer class="footer">
-  <p>About Oakline: Trusted banking since 1995, serving clients nationwide.</p>
-</footer>
+    <h3>Follow Us</h3>
+    <p><a href="#">Facebook</a> | <a href="#">Twitter</a> | <a href="#">LinkedIn</a></p>
+  </footer>
 
-<footer class="footer">
-  <p>Careers: <a href="#">Join our team</a> | <a href="#">Open Positions</a></p>
-</footer>
+  <!-- Footer 5 -->
+  <footer class="footer">
+    <h3>Legal</h3>
+    <p><a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
+  </footer>
 
-<footer class="footer">
-  <p>Investor Relations: <a href="#">Reports</a> | <a href="#">Financials</a></p>
-</footer>
+  <!-- Footer 6 -->
+  <footer class="footer">
+    <h3>Partners</h3>
+    <p>Trusted by leading financial institutions worldwide.</p>
+  </footer>
 
-<footer class="footer">
-  <p>Privacy Policy | Terms & Conditions</p>
-</footer>
+  <!-- Footer 7 -->
+  <footer class="footer">
+    <h3>Careers</h3>
+    <p>Join our team and grow with us.</p>
+  </footer>
 
-<footer class="footer">
-  <p>Support: <a href="mailto:support@oaklinebank.com">Email Us</a> | 1-800-OAKLINE</p>
-</footer>
+  <!-- Footer 8 -->
+  <footer class="footer">
+    <h3>Newsletter</h3>
+    <form>
+      <input type="email" placeholder="Enter your email">
+      <button type="submit">Subscribe</button>
+    </form>
+  </footer>
 
-<footer class="footer">
-  <p>Social Media: 
-    <a href="#">Instagram</a> | 
-    <a href="#">LinkedIn</a> | 
-    <a href="#">YouTube</a>
-  </p>
-</footer>
+  <!-- Footer 9 -->
+  <footer class="footer">
+    <h3>FAQ</h3>
+    <p>Find answers to common questions about Oakline Bank.</p>
+  </footer>
 
-<footer class="footer">
-  <p>Locations: <a href="#">Find a Branch</a> | <a href="#">ATM Locator</a></p>
-</footer>
+  <!-- Footer 10 -->
+  <footer class="footer">
+    <h3>© 2025 Oakline Bank</h3>
+    <p>All Rights Reserved</p>
+  </footer>
 
-<footer class="footer">
-  <p>Small Business Support: <a href="#">Advisory</a> | <a href="#">Loans</a></p>
-</footer>
-
-<footer class="footer">
-  <p>Customer Feedback: <a href="#">Submit a Review</a> | <a href="#">Testimonials</a></p>
-</footer>
-
-<footer class="footer">
-  <p>Mobile Banking: <a href="#">iOS App</a> | <a href="#">Android App</a></p>
-</footer>
-
-<footer class="footer">
-  <p>Newsletter: <a href="#">Subscribe</a> to receive updates and offers.</p>
-</footer>
-
-<footer class="footer">
-  <p>Emergency Services: <a href="tel:1800OAKLINE">1-800-OAKLINE</a> | <a href="#">Report Fraud</a></p>
-</footer>
   <script src="script.js"></script>
 </body>
 </html>
