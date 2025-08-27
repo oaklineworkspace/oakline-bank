@@ -1,44 +1,46 @@
-// ===== POP-UP & TESTIMONIAL ANIMATIONS =====
-const popUps = document.querySelectorAll('.pop-up');
-const testimonials = document.querySelectorAll('.testimonial');
-
-function handleScrollAnimations() {
-  const triggerBottom = window.innerHeight / 5 * 4;
-
-  // Pop-ups
-  popUps.forEach(section => {
-    const sectionTop = section.getBoundingClientRect().top;
-    if(sectionTop < triggerBottom) section.classList.add('active');
-  });
-
-  // Testimonials
-  testimonials.forEach(testimonial => {
-    const testimonialTop = testimonial.getBoundingClientRect().top;
-    if(testimonialTop < triggerBottom) {
-      testimonial.style.opacity = '1';
-      testimonial.style.transform = 'translateY(0)';
-    }
-  });
-}
-
-window.addEventListener('scroll', handleScrollAnimations);
-window.addEventListener('load', handleScrollAnimations);
-
 // ===== COUNTER ANIMATION =====
 const counters = document.querySelectorAll('.counter');
-
 counters.forEach(counter => {
   counter.innerText = '0';
   const updateCounter = () => {
     const target = +counter.getAttribute('data-target');
     const current = +counter.innerText;
-    const increment = Math.ceil(target / 200); // speed control
+    const increment = target / 200; // speed
     if(current < target){
-      counter.innerText = current + increment;
+      counter.innerText = `${Math.ceil(current + increment)}`;
       setTimeout(updateCounter, 20);
     } else {
       counter.innerText = target;
     }
   };
   updateCounter();
+});
+
+// ===== SCROLL REVEAL / POP-UP ANIMATION =====
+const popUps = document.querySelectorAll('.pop-up');
+
+const revealOnScroll = () => {
+  const triggerBottom = window.innerHeight * 0.85;
+  popUps.forEach(box => {
+    const boxTop = box.getBoundingClientRect().top;
+    if(boxTop < triggerBottom){
+      box.classList.add('active');
+    } else {
+      box.classList.remove('active');
+    }
+  });
+};
+
+window.addEventListener('scroll', revealOnScroll);
+window.addEventListener('load', revealOnScroll);
+
+// ===== MOBILE NAV TOGGLE =====
+const nav = document.querySelector('nav ul');
+const navToggle = document.createElement('div');
+navToggle.classList.add('nav-toggle');
+navToggle.innerHTML = '<i class="fas fa-bars"></i>';
+document.querySelector('header').appendChild(navToggle);
+
+navToggle.addEventListener('click', () => {
+  nav.classList.toggle('active');
 });
