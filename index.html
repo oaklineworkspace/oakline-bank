@@ -12,6 +12,50 @@
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
   <style>
+
+   /* Ensure dropdown is above everything and hidden by default */
+.dropdown-panel {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 44px;
+  min-width: 240px;
+  background: var(--card);
+  color: var(--text);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.18);
+  border: 1px solid #e8e8e8;
+  overflow: hidden;
+  z-index: 2000; /* Make sure it's above header */
+}
+
+/* Only show when .open is added */
+.dropdown.open .dropdown-panel {
+  display: block;
+}
+
+@media (max-width: 768px) {
+  header {
+    flex-wrap: wrap;
+  }
+
+  .nav-links {
+    display: none; /* hide the desktop nav */
+  }
+
+  .dropdown {
+    display: inline-block; /* show dropdown button only */
+  }
+}
+@media (max-width: 768px) {
+  .dropdown-panel {
+    right: 10px; /* keep it inside viewport */
+    left: auto;
+    max-width: 90vw;
+  }
+}
+    
+    
     html, body {
   overflow-x: hidden; /* Prevent horizontal scroll */
 }
@@ -402,6 +446,10 @@ body {
         mainDropdown.classList.remove('open');
       }
     });
+
+   window.addEventListener('resize', () => {
+  mainDropdown.classList.remove('open');
+}); 
 
     // SUPABASE INIT (from your Vercel environment variables)
     const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
