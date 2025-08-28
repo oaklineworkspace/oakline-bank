@@ -78,6 +78,36 @@
     .cards-container{display:flex;flex-wrap:wrap;gap:20px;justify-content:center;margin-top:40px}
     .card{background:var(--card);padding:20px;border-radius:var(--radius);width:260px;box-shadow:0 5px 15px rgba(0,0,0,.1)}
     .card i{color:var(--accent);margin-bottom:12px}
+
+    /* ===== Responsive Navigation Fix ===== */
+@media (max-width: 768px) {
+  .nav-links { 
+    display: none; /* hide big nav menu on mobile */
+  }
+
+  .dropdown {
+    display: block; /* keep dropdown visible */
+  }
+
+  .dropdown-panel {
+    position: relative; /* instead of absolute */
+    top: 10px;
+    right: 0;
+    width: 100%;
+    margin-top: 8px;
+    border-radius: 8px;
+  }
+
+  .dropdown-panel ul {
+    padding: 10px;
+  }
+
+  .dropdown-panel li a {
+    display: block;
+    padding: 12px;
+    text-align: left;
+  }
+}
   </style>
 </head>
 <body>
