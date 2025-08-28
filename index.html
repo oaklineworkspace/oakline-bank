@@ -12,6 +12,68 @@
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
   <style>
+
+        /* Container */
+    .dropdown {
+      position: relative;
+      display: inline-block;
+    }
+
+    /* Button */
+    .dropbtn {
+      background-color: #0077cc;
+      color: white;
+      padding: 12px 18px;
+      font-size: 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    /* Dropdown menu (hidden by default) */
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      background-color: #f9f9f9;
+      min-width: 160px;
+      box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
+      border-radius: 4px;
+      z-index: 999; /* make sure it appears above */
+    }
+
+    /* Links */
+    .dropdown-content a {
+      color: black;
+      padding: 12px 16px;
+      text-decoration: none;
+      display: block;
+    }
+    .dropdown-content a:hover {
+      background-color: #ddd;
+    }
+
+    /* Toggle class */
+    .show {
+      display: block;
+    }
+
+    /* ✅ Responsive fix: always keep button visible in portrait */
+    @media (max-width: 768px) {
+      .dropdown {
+        display: block;
+        text-align: center;
+        margin: 10px auto;
+      }
+      .dropbtn {
+        width: 90%; /* full-width button on mobile */
+      }
+      .dropdown-content {
+        position: relative; /* so it pushes content below */
+        width: 90%;
+        margin: 0 auto;
+      }
+    }
+  </style>
     html, body {
   margin: 0;
   padding: 0;
