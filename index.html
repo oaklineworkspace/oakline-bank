@@ -11,6 +11,39 @@
 
 <!-- Custom Styles -->
 <style>
+.hero {
+  position: relative;
+  text-align: center;
+  color: white; /* overlay text color */
+  background: #004080; /* fallback color */
+  padding: 2rem 1rem;
+  border-radius: 10px;
+  max-width: 1200px;
+  margin: 1.5rem auto;
+}
+
+.hero-img {
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+  display: block;
+  object-fit: cover;
+}
+
+.hero-text {
+  position: absolute; /* if overlay text on image */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 20px;
+}
+  
+.logo-primary {
+  height: 70px; /* adjust as needed */
+  width: auto;
+}
+  
+  
 body, html { margin:0; padding:0; font-family: 'Segoe UI', sans-serif; background:#f0f2f5; overflow-x:hidden; color:#222; }
 /* Dark Mode */
 .dark-mode { background:#121212; color:#eee; }
@@ -85,10 +118,9 @@ body, html { margin:0; padding:0; font-family: 'Segoe UI', sans-serif; backgroun
 
 <!-- Header Container -->
 <div class="header-container">
-  <div class="logo-placeholder"></div>
+  <img src="images/logo-primary.png.jpg" alt="Oakline Bank Logo" class="logo-primary" />
   <span class="bank-name">Oakline Bank</span>
 </div>
-
 <!-- Marquee Banner -->
 <div class="marquee-banner">
   <div class="marquee-text">🔐 Welcome to Oakline Bank — secure personal & business banking, competitive rates, and 24/7 support.</div>
@@ -126,7 +158,7 @@ document.getElementById('darkModeBtn').addEventListener('click', ()=>{
       <a href="signup.html" class="btn btn-light btn-lg mt-2">Get Started</a>
     </div>
     <div>
-      <img src="https://via.placeholder.com/150x150" alt="Handshake Image" class="img-fluid rounded" />
+      <img src="images/hero-mobile.jpg.PNG" alt="Oakline Bank Hero Image" class="img-fluid rounded" />
     </div>
   </div>
 </div>
@@ -187,8 +219,7 @@ document.getElementById('darkModeBtn').addEventListener('click', ()=>{
 </div>
 
 <!-- Handshake / "Here for You" Section -->
-<div class="container my-5 text-center" style="max-width:960px;">
-  <img src="https://via.placeholder.com/400x200" class="img-fluid rounded mb-3" alt="Handshake Here">
+<div class="container my-5 text-center" style="max-width:960px;"><img src="images/hero2-mobile.jpg.JPG" class="img-fluid rounded mb-3" alt="Oakline Bank Hero 2">
   <h3>We’re Here for You</h3>
   <p>Partnering with you to secure your financial future. Our team is ready to assist anytime.</p>
   <a href="contact.html" class="btn btn-primary btn-lg">Contact Us</a>
