@@ -240,7 +240,7 @@ document.getElementById('darkModeBtn').addEventListener('click', ()=>{
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
 const supabaseUrl = 'https://nrjdmgltshosdqccaymr.supabase.co';
-const supabaseKey = 'YOUR_ANON_KEY_HERE'; // Replace with NEXT_PUBLIC_SUPABASE_ANON_KEY in Vercel
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5yamRtZ2x0c2hvc2RxY2NheW1yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwMzYyMjAsImV4cCI6MjA3MTYxMjIyMH0.b9H553W2PCsSNvr8HyyINl4nTSrldHN_QMQ3TVwt6qk'; // Replace with NEXT_PUBLIC_SUPABASE_ANON_KEY in Vercel
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 const username = localStorage.getItem("loggedInUser");
