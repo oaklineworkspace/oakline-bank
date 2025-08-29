@@ -8,6 +8,32 @@
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
 <style>
+
+  .marquee {
+  background: #001f3f;  /* Banner color */
+  color: #fff;
+  font-weight: 600;
+  overflow: hidden;
+  white-space: nowrap;
+  padding: 8px 0;
+  position: relative;
+}
+
+.marquee span {
+  display: inline-block;
+  padding-left: 100%;
+  animation: scrollText 20s linear infinite;
+}
+
+@keyframes scrollText {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-100%); }
+}
+
+/* Pause on hover */
+.marquee:hover span {
+  animation-play-state: paused;
+}
   :root{
     --brand:#00264d; /* brighter */
     --accent:#36c957;
@@ -137,8 +163,9 @@
     </div>
   </div>
 
-  <div class="marquee">🔐 Welcome to Oakline Bank — secure personal & business banking, competitive rates, and 24/7 support.</div>
-</header>
+  <div class="marquee">
+  <span>🔐 Welcome to Oakline Bank — secure personal & business banking, competitive rates, and 24/7 support.</span>
+</div>
 
 <!-- MAIN HERO -->
 <section class="hero" aria-label="Main hero">
