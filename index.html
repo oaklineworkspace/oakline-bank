@@ -179,8 +179,40 @@
     </div>
 
     <div class="controls">
-      <button class="dropdown-btn" id="menuBtn" aria-expanded="false"><i class="fas fa-bars"></i></button>
+  <!-- Menu / hamburger button with full dropdown -->
+  <div style="position:relative">
+    <button class="dropdown-btn" id="menuBtn" aria-expanded="false"><i class="fas fa-bars"></i></button>
 
+    <div class="dropdown-panel" id="menuPanel" style="right:0; display:none; max-height:80vh; overflow-y:auto; padding:12px; width:280px;">
+      <h4 style="margin-bottom:8px; color:var(--brand)">Bank Features</h4>
+      <a href="index.html">Home</a>
+      <a href="checking.html">Checking Accounts</a>
+      <a href="savings.html">Savings Accounts</a>
+      <a href="business.html">Business Accounts</a>
+      <a href="loans.html">Personal & Business Loans</a>
+      <a href="cd.html">Certificates of Deposit (CDs)</a>
+      <a href="student.html">Student Accounts</a>
+      <a href="transfers.html">Instant Transfers</a>
+      <a href="billpay.html">Bill Pay</a>
+      <a href="international.html">International Transfers</a>
+      <a href="mobile.html">Mobile Wallets</a>
+      <a href="pos-solutions.html">POS & Merchant Solutions</a>
+      <a href="cards.html">Debit & Credit Cards</a>
+      <a href="virtual-cards.html">Virtual Cards</a>
+      <a href="security.html">Account Controls & Fraud Protection</a>
+      <a href="identity.html">Identity & Insurance Services</a>
+      <a href="invest.html">Investment Accounts</a>
+      <a href="crypto.html">Crypto Banking</a>
+      <a href="rewards.html">Rewards & Cashback</a>
+      <a href="budget.html">Budgeting & Analytics Tools</a>
+    </div>
+  </div>
+
+  <!-- Theme toggle -->
+  <button id="themeToggle" title="Toggle light / dark">
+    <i id="themeIcon" class="fas fa-moon"></i>
+  </button>
+</div>
       <button id="themeToggle" title="Toggle light / dark">
         <i id="themeIcon" class="fas fa-moon"></i>
       </button>
@@ -249,11 +281,7 @@
     <h2 style="font-size:1.9rem;margin-bottom:8px;color:var(--brand)">OAKLINE BANK — Bank Smarter</h2>
     <p style="color:var(--text);margin-bottom:12px">Secure mobile banking, fast transfers, and dedicated support — plus modern options like crypto wallets.</p>
     <ul style="color:var(--muted);list-style:none;padding:0;margin:0 0 16px;line-height:1.7">
-      <li>• Secure Mobile Banking</li>
-      <li>• Easy Deposits & Transfers</li>
-      <li>• 24/7 Support</li>
-      <li>• Savings, Checking, Business Accounts & Loans</li>
-      <li>• Certificates of Deposit & Crypto Banking</li>
+      
     </ul>
     <a class="btn-green" href="development-crypto.html">Learn More</a>
   </div>
