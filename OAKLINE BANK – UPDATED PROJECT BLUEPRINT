@@ -1,0 +1,175 @@
+/pages                          ← UI PAGES
+│
+├─ 💙 index.js
+├─ 💙 login.js
+├─ 💙 create-account.js
+├─ 💙 reset-password.js
+├─ 💙 verify-email.js
+├─ 💙 mfa-setup.js
+├─ 💙 dashboard.js
+├─ 💙 account-details.js
+├─ 💙 deposit.js
+├─ 💙 withdrawal.js
+├─ 💙 transfer.js
+├─ 💙 transactions.js
+├─ 💙 profile.js
+├─ 💙 notifications.js
+├─ 💙 messages.js
+├─ 💙 cards.js
+├─ 💙 rewards.js
+├─ 💙 applications.js
+├─ 💙 loans.js
+├─ 💙 crypto.js
+├─ 💙 investments.js
+├─ 💙 investment-details.js
+├─ 💙 market-news.js
+├─ 💙 financial-advisory.js
+├─ 💙 support.js
+├─ 💙 faq.js
+├─ 💙 terms.js
+├─ 💙 privacy.js
+├─ 💙 disclosures.js
+├─ 💙 security.js
+├─ 🟣 compliance.js
+└─ 🟣 internationalization.js
+
+/pages/admin                     ← ADMIN UI PAGES
+│
+├─ 🟢 admin-dashboard.js
+├─ 🟢 admin-balance.js
+├─ 🟢 admin-users.js
+├─ 🟢 admin-transactions.js
+├─ 🟢 admin-approvals.js
+├─ 🟢 admin-investments.js
+├─ 🟢 admin-loans.js
+├─ 🟢 admin-crypto.js
+├─ 🟢 admin-settings.js
+├─ 🟢 admin-reports.js
+├─ 🟢 admin-notifications.js
+├─ 🟢 admin-logs.js
+├─ 🟢 admin-audit.js
+└─ 🟢 admin-roles.js             ← New: admin roles/permissions management
+
+/pages/api                        ← SERVER-SIDE / LOGIC
+│
+├─ 🟠 auth.js
+├─ 🟠 deposit.js
+├─ 🟠 withdrawal.js
+├─ 🟠 transfer.js
+├─ 🟠 transactions.js
+├─ 🟠 applications.js
+├─ 🟠 loans.js
+├─ 🟠 crypto.js
+├─ 🟠 investments.js
+├─ 🟠 notifications.js
+├─ 🟠 messages.js
+├─ 🟠 audit.js
+├─ 🟠 monitoring.js
+├─ 🟠 security.js
+├─ 🟣 compliance.js
+└─ 🟣 internationalization.js
+
+/components                     ← REUSABLE UI COMPONENTS
+├─ Navbar.js
+├─ Hero.js
+├─ Features.js
+├─ Footer.js
+├─ AccountCard.js
+├─ TransactionItem.js
+├─ Modal.js
+├─ FormInput.js
+├─ NotificationItem.js
+├─ MessageItem.js
+├─ CardItem.js
+└─ Chart.js
+
+/lib                             ← SHARED LOGIC & BUSINESS RULES
+├─ supabaseClient.js
+├─ supabaseAdmin.js
+├─ auth.js
+├─ accounts.js
+├─ transactions.js
+├─ loans.js
+├─ crypto.js
+├─ investments.js
+├─ notifications.js
+├─ messages.js
+├─ cards.js
+├─ logger.js
+├─ audit.js
+├─ security.js
+├─ compliance.js
+├─ internationalization.js
+└─ utils/                        ← New: helper functions
+    ├─ format.js
+    ├─ validation.js
+    └─ calculations.js
+
+/styles                          ← STYLING & THEMES
+├─ globals.css
+├─ Navbar.module.css
+├─ Hero.module.css
+├─ Features.module.css
+├─ Footer.module.css
+├─ AccountCard.module.css
+├─ TransactionItem.module.css
+├─ Modal.module.css
+├─ FormInput.module.css
+├─ NotificationItem.module.css
+├─ MessageItem.module.css
+└─ CardItem.module.css
+
+/images                          ← PROJECT IMAGES
+├─ logo.png
+├─ hero.jpg
+└─ ...other images
+
+/public                          ← PUBLIC ASSETS
+├─ favicon.ico
+├─ manifest.json
+├─ robots.txt
+└─ bank-logo.png
+
+/config                          ← CONFIGURATION & ENVIRONMENT
+├─ env.js
+├─ featureFlags.js
+├─ database.js
+└─ security.js
+
+/tests                           ← TESTING
+├─ unit/
+│   ├─ auth.test.js
+│   ├─ accounts.test.js
+│   ├─ transactions.test.js
+│   ├─ loans.test.js
+│   ├─ crypto.test.js
+│   └─ investments.test.js
+├─ integration/
+│   └─ api.test.js
+└─ e2e/
+    └─ user-flows.test.js
+
+/docs                            ← DOCUMENTATION
+├─ ARCHITECTURE.md
+├─ API_REFERENCE.md
+├─ SECURITY.md
+└─ DEPLOYMENT.md
+
+/scripts                         ← UTILITIES
+├─ seed.js
+├─ migrate.js
+└─ backup.js
+
+/infra                           ← INFRASTRUCTURE
+├─ Dockerfile
+├─ docker-compose.yml
+├─ kubernetes/                 ← K8s manifests
+└─ terraform/                  ← Cloud IaC
+
+.github/workflows               ← CI/CD
+├─ ci.yml                        ← Linting & tests
+└─ cd.yml                        ← Deployment
+
+/package.json
+/README.md
+/.gitignore
