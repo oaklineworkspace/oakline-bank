@@ -113,7 +113,12 @@
       </div>
     </div>
   </div>
-
+<!-- LIGHT/DARK TOGGLE BUTTON -->
+<button id="themeToggle" style="margin-left:12px; width:40px; height:40px; border:none; border-radius:50%; background:#fff; cursor:pointer;">
+  <i class="fas fa-moon" id="themeIcon" style="color:#001f3f;"></i>
+</button>
+  
+  
   <!-- MARQUEE -->
   <div class="marquee-banner">
     <div class="marquee-text">🔐 Welcome to Oakline Bank — secure personal & business banking, competitive rates, and 24/7 support.</div>
@@ -384,17 +389,16 @@ setupDropdown('rightDropdown','rightDropdownPanel');
 </section>
 
 <!-- DEBIT CARD HERO SECTION 2 -->
-<section class="hero" style="position:relative; overflow:hidden; min-height:450px; margin-top:60px;">
-  <img src="images/hero-debit-card-2.jpg.PNG" 
-       alt="Oakline Debit Card 2" 
-       style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); width:50%; max-width:400px;">
-  <div style="position:relative; z-index:2; text-align:center; color:#fff; padding:60px 20px;">
-    <h2 style="font-size:2rem; font-weight:800;">Advanced Card Features</h2>
-    <p>Contactless payments, instant alerts, and real-time tracking at your fingertips.</p>
-    <a href="#" class="btn-green">Learn More</a>
+<section class="hero" style="position:relative; overflow:hidden; min-height:450px; margin-top:60px; background:#001f3f; color:#fff; border-radius:16px;">
+  <img src="images/hero-debit-card-1.jpg.PNG" 
+       alt="Oakline Debit Card 1" 
+       style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); width:50%; max-width:400px; filter:brightness(0.85);">
+  <div style="position:relative; z-index:2; text-align:center; padding:60px 20px;">
+    <h2 style="font-size:2rem; font-weight:800;">Oakline Debit Card</h2>
+    <p>Secure, convenient, and accepted worldwide. Manage your spending with ease.</p>
+    <a href="#" class="btn-green">Get Your Debit Card</a>
   </div>
 </section>
-
 <!-- POS / PAYMENT TERMINAL HERO -->
 <section class="hero" style="position:relative; overflow:hidden; min-height:450px; margin-top:60px;">
   <img src="images/hero-pos.jpg.PNG" 
@@ -431,6 +435,24 @@ setupDropdown('rightDropdown','rightDropdownPanel');
   </div>
 </section>
 
-<!-- CLOSING BODY AND HTML TAGS -->
+
+  <script>
+const toggle = document.getElementById('themeToggle');
+const icon = document.getElementById('themeIcon');
+
+toggle.addEventListener('click', () => {
+  if(document.documentElement.getAttribute('data-theme') === 'dark'){
+    document.documentElement.removeAttribute('data-theme');
+    icon.classList.remove('fa-sun');
+    icon.classList.add('fa-moon');
+  } else {
+    document.documentElement.setAttribute('data-theme','dark');
+    icon.classList.remove('fa-moon');
+    icon.classList.add('fa-sun');
+  }
+});
+
+</script>
+  <!-- CLOSING BODY AND HTML TAGS -->
 </body>
 </html>
