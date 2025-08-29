@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Oakline Bank - Modern Banking</title>
 
-  <!-- Font Awesome (icons) -->
+  <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 
   <!-- Supabase JS -->
@@ -19,8 +19,8 @@
       --bg:#f4f6f8;
       --card:#fff;
       --muted:#777;
-      --footer:#000;
     }
+
     [data-theme="dark"]{
       --brand:#0a2347;
       --accent:#34c759;
@@ -28,23 +28,22 @@
       --bg:#0f1420;
       --card:#121a2b;
       --muted:#aab;
-      --footer:#000;
     }
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,Ubuntu,"Helvetica Neue",Arial;background:var(--bg);color:var(--text)}
-    a{color:inherit;text-decoration:none;transition:.2s}
-    a:hover{opacity:.85}
-    img{max-width:100%;display:block}
+
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,Ubuntu,"Helvetica Neue",Arial;background:var(--bg);color:var(--text);}
+    a{color:inherit;text-decoration:none;transition:.2s;}
+    a:hover{opacity:.85;}
+    img{max-width:100%;display:block;}
 
     /* HEADER */
     header{
       position:sticky;top:0;z-index:1000;
       background:var(--brand);color:#fff;
-      display:flex;flex-direction:column;align-items:center;gap:6px;
-      padding:10px 20px;
+      display:flex;flex-direction:column;align-items:center;
+      gap:6px;padding:10px 20px;
     }
 
-    /* Logo centered */
     .header-logo{
       display:flex;flex-direction:column;align-items:center;
     }
@@ -66,9 +65,14 @@
     }
     @keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-100%)}}
 
+    /* Header controls */
+    .header-controls{
+      width:100%;display:flex;justify-content:space-between;align-items:center;margin-top:6px;
+    }
+
     /* Dropdown shared */
-    .dropdown{position:relative;display:inline-block}
-    .dropdown-btn{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border:1px solid rgba(255,255,255,.25);border-radius:8px;background:transparent;color:#fff;cursor:pointer}
+    .dropdown{position:relative;display:inline-block;}
+    .dropdown-btn{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border:1px solid rgba(255,255,255,.25);border-radius:8px;background:transparent;color:#fff;cursor:pointer;}
     .dropdown-btn:hover{background:rgba(255,255,255,.06);}
     .dropdown-panel{
       position:absolute;top:45px;min-width:250px;background:#fff;color:#222;border-radius:12px;
@@ -79,22 +83,29 @@
       display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:#222;font-weight:600;
     }
     .dropdown-panel li a:hover{background:#f3f5f8}
-    .dropdown .divider{height:1px;background:#eee;margin:6px 8px}
+    .dropdown .divider{height:1px;background:#eee;margin:6px 8px;}
 
-    /* Header controls layout */
-    .header-controls{
-      width:100%;display:flex;justify-content:space-between;align-items:center;margin-top:6px;
+    /* HERO */
+    .hero{
+      position:relative;min-height:600px;display:flex;flex-direction:column;justify-content:center;align-items:center;
+      background:linear-gradient(to bottom, rgba(0,0,0,0.35), rgba(0,0,0,0.35));
+      color:#fff;overflow:hidden;
     }
-
-    /* Dark mode button */
-    .dark-mode-btn{margin-left:10px;}
+    .hero img.hero-handshake{position:absolute;top:0;left:50%;transform:translateX(-50%);width:100%;max-height:500px;object-fit:cover;z-index:0;}
+    .hero-content{position:relative;z-index:2;text-align:center;padding:180px 20px 140px;}
+    .hero-content h1{font-size:clamp(2rem,5vw,3.2rem);margin-bottom:16px;}
+    .hero-content p{max-width:760px;margin:0 auto 30px;font-size:1.1rem;}
+    .hero-content .btn{
+      display:inline-block;padding:14px 26px;border-radius:10px;background:var(--accent);color:#fff;font-weight:800;letter-spacing:.3px;transition:transform .2s;margin-right:10px;
+    }
+    .hero-content .btn:hover{transform:translateY(-1px);}
+    .hero-content .btn-ghost{background:rgba(255,255,255,.12);border:1px dashed rgba(255,255,255,.35);}
   </style>
 </head>
 <body>
 
 <!-- HEADER -->
 <header>
-  <!-- Centered Logo -->
   <div class="header-logo">
     <img src="images/logo-primary.png.jpg" alt="Oakline Bank Logo">
     <div class="brand">Oakline Bank</div>
@@ -105,158 +116,88 @@
     <div class="marquee-text">🔐 Welcome to Oakline Bank — secure personal & business banking, competitive rates, and 24/7 support.</div>
   </div>
 
-  <!-- Header controls with two dropdowns + dark mode -->
+  <!-- Header controls -->
   <div class="header-controls">
-    <!-- LEFT DROPDOWN: Main banking services -->
+    <!-- LEFT DROPDOWN: Services -->
     <div class="dropdown" id="leftDropdown">
-      <button class="dropdown-btn" aria-haspopup="true" aria-expanded="false">
-        <i class="fas fa-bars"></i>
-      </button>
+      <button class="dropdown-btn"><i class="fas fa-bars"></i></button>
       <div class="dropdown-panel" id="leftDropdownPanel">
         <ul>
-          <li><a href="checking.html"><i class="fas fa-credit-card"></i> Checking Accounts</a></li>
-          <li><a href="savings.html"><i class="fas fa-piggy-bank"></i> Savings Accounts</a></li>
-          <li><a href="loans.html"><i class="fas fa-hand-holding-dollar"></i> Loans & Credit</a></li>
-          <li><a href="mortgages.html"><i class="fas fa-house"></i> Mortgages</a></li>
-          <li><a href="invest.html"><i class="fas fa-chart-line"></i> Investments & Wealth</a></li>
-          <li><a href="business.html"><i class="fas fa-briefcase"></i> Business Banking</a></li>
-          <li><a href="rates.html"><i class="fas fa-percent"></i> Rates</a></li>
-          <li><a href="branches.html"><i class="fas fa-location-dot"></i> Branch & ATM Locator</a></li>
-          <li class="divider"></li>
-          <li><a href="signup.html"><i class="fas fa-user-plus"></i> Open Account</a></li>
+          <li><a href="#"><i class="fas fa-credit-card"></i> Checking Accounts</a></li>
+          <li><a href="#"><i class="fas fa-piggy-bank"></i> Savings Accounts</a></li>
+          <li><a href="#"><i class="fas fa-hand-holding-dollar"></i> Loans & Credit</a></li>
+          <li><a href="#"><i class="fas fa-house"></i> Mortgages</a></li>
+          <li><a href="#"><i class="fas fa-briefcase"></i> Business Banking</a></li>
+          <li><a href="#"><i class="fas fa-chart-line"></i> Investments & Wealth</a></li>
+          <li><a href="#"><i class="fas fa-percent"></i> Rates</a></li>
+          <li><a href="#"><i class="fas fa-location-dot"></i> Branch Locator</a></li>
         </ul>
       </div>
     </div>
 
-    <!-- RIGHT DROPDOWN: User / Auth actions -->
+    <!-- RIGHT DROPDOWN: Auth -->
     <div class="dropdown" id="rightDropdown">
-      <button class="dropdown-btn" aria-haspopup="true" aria-expanded="false">
-        <i class="fas fa-user-circle"></i>
-      </button>
+      <button class="dropdown-btn"><i class="fas fa-user-circle"></i></button>
       <div class="dropdown-panel" id="rightDropdownPanel">
-        <ul class="public-only">
-          <li><a href="login.html"><i class="fas fa-right-to-bracket"></i> Log In</a></li>
-          <li><a href="signup.html"><i class="fas fa-user-plus"></i> Create Account</a></li>
-        </ul>
-        <ul class="auth-only">
-          <li><a href="dashboard.html"><i class="fas fa-gauge"></i> Dashboard</a></li>
-          <li><a href="transactions.html"><i class="fas fa-receipt"></i> Transactions</a></li>
+        <ul>
+          <li><a href="#"><i class="fas fa-right-to-bracket"></i> Log In</a></li>
+          <li><a href="#"><i class="fas fa-user-plus"></i> Sign Up</a></li>
+          <li><a href="#"><i class="fas fa-gauge"></i> Dashboard</a></li>
+          <li><a href="#"><i class="fas fa-receipt"></i> Transactions</a></li>
           <li><a href="#" id="logoutLink"><i class="fas fa-right-from-bracket"></i> Logout</a></li>
         </ul>
       </div>
     </div>
-
-    <!-- DARK MODE TOGGLE -->
-    <button class="dropdown-btn dark-mode-btn" id="darkModeBtn" aria-label="Toggle dark mode">
-      <i class="fas fa-moon"></i>
-    </button>
   </div>
 </header>
 
+<!-- HERO -->
+<section class="hero">
+  <img src="images/hero-mobile.jpg.PNG" alt="Handshake" class="hero-handshake">
+  <div class="hero-content">
+    <h1>Banking that Puts You First</h1>
+    <p>Open an account in minutes, move money instantly, and manage everything from a single, secure place. Experience the future of banking with Oakline Bank.</p>
+    <a href="#" class="btn">Open an Account</a>
+    <a href="#" class="btn btn-ghost">Log In</a>
+  </div>
+</section>
+
 <script>
-  // DROPDOWN TOGGLE FUNCTION
-  function setupDropdown(dropdownId, panelId){
-    const btn = document.getElementById(dropdownId).querySelector('.dropdown-btn');
-    const panel = document.getElementById(panelId);
-    btn.addEventListener('click', (e)=>{
+  // DROPDOWN TOGGLE
+  function setupDropdown(dropdownId,panelId){
+    const btn=document.getElementById(dropdownId).querySelector('.dropdown-btn');
+    const panel=document.getElementById(panelId);
+    btn.addEventListener('click',e=>{
       e.stopPropagation();
-      panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+      panel.style.display=panel.style.display==='block'?'none':'block';
     });
-    // Close on outside click
-    document.addEventListener('click',(e)=>{
-      if(!panel.contains(e.target) && e.target !== btn){
-        panel.style.display = 'none';
-      }
+    document.addEventListener('click',e=>{
+      if(!panel.contains(e.target) && e.target!==btn){panel.style.display='none';}
     });
   }
 
   setupDropdown('leftDropdown','leftDropdownPanel');
   setupDropdown('rightDropdown','rightDropdownPanel');
 
-  // DARK MODE TOGGLE
-  const darkModeBtn = document.getElementById('darkModeBtn');
-  darkModeBtn.addEventListener('click', () => {
-    const theme = document.documentElement.getAttribute('data-theme');
-    if(theme === 'dark'){
-      document.documentElement.removeAttribute('data-theme');
-    }else{
-      document.documentElement.setAttribute('data-theme','dark');
-    }
-  });
-
-  // LOGOUT LINK (Supabase)
-  const logoutLink = document.getElementById('logoutLink');
-  logoutLink?.addEventListener('click', async e => {
-    e.preventDefault();
-    const supabase = supabase.createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-    );
-    await supabase.auth.signOut();
-    window.location.href = '/';
+  // DARK MODE
+  const darkModeBtn=document.createElement('button');
+  darkModeBtn.className='dropdown-btn';
+  darkModeBtn.innerHTML='<i class="fas fa-moon"></i>';
+  document.querySelector('.header-controls').appendChild(darkModeBtn);
+  darkModeBtn.addEventListener('click',()=>{
+    const theme=document.documentElement.getAttribute('data-theme');
+    if(theme==='dark'){document.documentElement.removeAttribute('data-theme');}
+    else{document.documentElement.setAttribute('data-theme','dark');}
   });
 </script>
-<!-- HERO SECTION -->
-<section class="hero" id="home" style="position:relative;overflow:hidden;color:#fff;">
-  <!-- HERO IMAGES -->
-  <div style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:0;overflow:hidden;">
-    <!-- First hero image (handshake) on top -->
-    <img src="images/hero-mobile.jpg.PNG" alt="Handshake" style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:100%;max-height:500px;object-fit:cover;">
-    <!-- Second hero image in middle -->
-    <img src="images/hero2-mobile.jpg.JPG" alt="Middle hero" style="position:absolute;top:40%;left:50%;transform:translate(-50%,-50%);width:80%;max-height:400px;object-fit:cover;">
-    <!-- Third hero image at bottom -->
-    <img src="images/hero3-mobile.jpg.PNG" alt="Bottom hero" style="position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-height:400px;object-fit:cover;">
-  </div>
-
-  <!-- HERO CONTENT -->
-  <div style="position:relative;z-index:2;text-align:center;padding:180px 20px 140px;">
-    <h1 style="font-size:clamp(2rem,5vw,3.2rem);margin-bottom:16px;">Banking that Puts You First</h1>
-    <p style="max-width:760px;margin:0 auto 30px;font-size:1.1rem;">
-      Open an account in minutes, move money instantly, and manage everything from a single, secure place.
-      Experience the future of banking with Oakline Bank.
-    </p>
-
-    <!-- Public CTA -->
-    <div class="public-only">
-      <a href="signup.html" class="btn" style="margin-right:10px;">Open an Account</a>
-      <a href="login.html" class="btn btn-ghost" style="border-radius:10px;color:#fff;">Log in</a>
-    </div>
-
-    <!-- Auth CTA -->
-    <div class="auth-only">
-      <a href="dashboard.html" class="btn" style="margin-right:10px;">Go to Dashboard</a>
-      <a href="transactions.html" class="btn btn-ghost" style="border-radius:10px;color:#fff;">View Transactions</a>
-    </div>
-  </div>
+<!-- ADDITIONAL HERO IMAGES -->
+<section class="hero-additional" style="position:relative;min-height:500px;overflow:hidden;">
+  <!-- Middle hero image -->
+  <img src="images/hero2-mobile.jpg.JPG" alt="Middle Hero" style="position:absolute;top:40%;left:50%;transform:translate(-50%,-50%);width:80%;max-height:400px;object-fit:cover;z-index:0;">
+  <!-- Bottom hero image -->
+  <img src="images/hero3-mobile.jpg.PNG" alt="Bottom Hero" style="position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-height:400px;object-fit:cover;z-index:0;">
 </section>
 
-<style>
-  .hero{
-    min-height:600px;
-    background:linear-gradient(to bottom, rgba(0,0,0,0.35), rgba(0,0,0,0.35));
-    position:relative;
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    align-items:center;
-  }
-
-  .hero .btn{
-    display:inline-block;
-    padding:14px 26px;
-    border-radius:10px;
-    background:var(--accent);
-    color:#fff;
-    font-weight:800;
-    letter-spacing:.3px;
-    transition:transform .2s;
-  }
-  .hero .btn:hover{transform:translateY(-1px);}
-  .hero .btn-ghost{
-    background:rgba(255,255,255,.12);
-    border:1px dashed rgba(255,255,255,.35);
-  }
-</style>
 <!-- PERSONAL BANKING -->
 <section id="personal" style="padding:80px 20px;background:var(--bg);text-align:center;">
   <h2>Personal Banking</h2>
@@ -268,7 +209,7 @@
       <i class="fas fa-credit-card fa-2x" style="color:var(--accent)"></i>
       <h3>Checking Accounts</h3>
       <p>Flexible checking accounts with zero hidden fees and instant access.</p>
-      <a href="checking.html" class="btn" style="margin-top:12px;display:inline-block">Learn More</a>
+      <a href="#" class="btn" style="margin-top:12px;display:inline-block">Learn More</a>
     </div>
 
     <!-- Savings -->
@@ -276,7 +217,7 @@
       <i class="fas fa-piggy-bank fa-2x" style="color:var(--accent)"></i>
       <h3>Savings Accounts</h3>
       <p>High-yield savings accounts to grow your money safely.</p>
-      <a href="savings.html" class="btn" style="margin-top:12px;display:inline-block">Learn More</a>
+      <a href="#" class="btn" style="margin-top:12px;display:inline-block">Learn More</a>
     </div>
 
     <!-- Loans -->
@@ -284,7 +225,7 @@
       <i class="fas fa-hand-holding-dollar fa-2x" style="color:var(--accent)"></i>
       <h3>Loans & Credit</h3>
       <p>Personal loans, credit cards, and more with competitive rates.</p>
-      <a href="loans.html" class="btn" style="margin-top:12px;display:inline-block">Learn More</a>
+      <a href="#" class="btn" style="margin-top:12px;display:inline-block">Learn More</a>
     </div>
 
     <!-- Mortgages -->
@@ -292,7 +233,7 @@
       <i class="fas fa-house fa-2x" style="color:var(--accent)"></i>
       <h3>Mortgages</h3>
       <p>Affordable home financing options tailored to your needs.</p>
-      <a href="mortgages.html" class="btn" style="margin-top:12px;display:inline-block">Learn More</a>
+      <a href="#" class="btn" style="margin-top:12px;display:inline-block">Learn More</a>
     </div>
   </div>
 </section>
@@ -308,7 +249,7 @@
       <i class="fas fa-briefcase fa-2x" style="color:var(--accent)"></i>
       <h3>Business Accounts</h3>
       <p>Checking, savings, and merchant solutions for your business needs.</p>
-      <a href="business.html" class="btn" style="margin-top:12px;display:inline-block">Learn More</a>
+      <a href="#" class="btn" style="margin-top:12px;display:inline-block">Learn More</a>
     </div>
 
     <!-- Investments & Wealth -->
@@ -316,7 +257,7 @@
       <i class="fas fa-chart-line fa-2x" style="color:var(--accent)"></i>
       <h3>Investments & Wealth</h3>
       <p>Grow your business wealth with our tailored investment solutions.</p>
-      <a href="invest.html" class="btn" style="margin-top:12px;display:inline-block">Learn More</a>
+      <a href="#" class="btn" style="margin-top:12px;display:inline-block">Learn More</a>
     </div>
   </div>
 </section>
@@ -349,10 +290,10 @@
     </div>
   </div>
 </section>
-<!-- RATES -->
+<!-- RATES SECTION -->
 <section id="rates" style="padding:80px 20px;text-align:center;">
-  <h2>Rates</h2>
-  <p>Competitive rates for savings, loans, and mortgages.</p>
+  <h2>Competitive Rates</h2>
+  <p>Our savings, checking, and loan rates are designed to help you achieve your financial goals.</p>
 
   <div style="display:flex;flex-wrap:wrap;gap:20px;justify-content:center;margin-top:40px;">
     <div style="background:var(--card);padding:20px;border-radius:12px;width:220px;box-shadow:0 5px 15px rgba(0,0,0,.1)">
@@ -367,29 +308,49 @@
       <h3>Loans</h3>
       <p>Starting at <strong>6.5%</strong> APR</p>
     </div>
+    <div style="background:var(--card);padding:20px;border-radius:12px;width:220px;box-shadow:0 5px 15px rgba(0,0,0,.1)">
+      <h3>Mortgages</h3>
+      <p>Rates from <strong>7.1%</strong> APR</p>
+    </div>
   </div>
 </section>
 
-<!-- TESTIMONIALS -->
+<!-- TESTIMONIALS SECTION -->
 <section id="testimonials" style="padding:80px 20px;background:var(--bg);text-align:center;">
   <h2>What Our Customers Say</h2>
+  <p>Real feedback from people who trust Oakline Bank.</p>
+
   <div style="display:flex;flex-wrap:wrap;gap:20px;justify-content:center;margin-top:40px;">
-    <div style="background:var(--card);padding:20px;border-radius:12px;width:280px;box-shadow:0 5px 15px rgba(0,0,0,.1)">
+    <!-- Testimonial 1 -->
+    <div style="background:var(--card);padding:20px;border-radius:12px;width:280px;box-shadow:0 5px 15px rgba(0,0,0,.1);text-align:left;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+        <img src="images/testimonial1.jpg" alt="Jane D." style="width:50px;height:50px;border-radius:50%;object-fit:cover;">
+        <strong>Jane D.</strong>
+      </div>
       <p>"Oakline Bank makes managing my money so simple. The app is fast and secure!"</p>
-      <strong>- Jane D.</strong>
     </div>
-    <div style="background:var(--card);padding:20px;border-radius:12px;width:280px;box-shadow:0 5px 15px rgba(0,0,0,.1)">
+
+    <!-- Testimonial 2 -->
+    <div style="background:var(--card);padding:20px;border-radius:12px;width:280px;box-shadow:0 5px 15px rgba(0,0,0,.1);text-align:left;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+        <img src="images/testimonial2.jpg" alt="Mike S." style="width:50px;height:50px;border-radius:50%;object-fit:cover;">
+        <strong>Mike S.</strong>
+      </div>
       <p>"I love their business accounts. The transfers are instant and the support is excellent."</p>
-      <strong>- Mike S.</strong>
     </div>
-    <div style="background:var(--card);padding:20px;border-radius:12px;width:280px;box-shadow:0 5px 15px rgba(0,0,0,.1)">
+
+    <!-- Testimonial 3 -->
+    <div style="background:var(--card);padding:20px;border-radius:12px;width:280px;box-shadow:0 5px 15px rgba(0,0,0,.1);text-align:left;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+        <img src="images/testimonial3.jpg" alt="Emily R." style="width:50px;height:50px;border-radius:50%;object-fit:cover;">
+        <strong>Emily R.</strong>
+      </div>
       <p>"Opening a savings account was so easy. The rates are great compared to other banks."</p>
-      <strong>- Emily R.</strong>
     </div>
   </div>
 </section>
 
-<!-- CONTACT -->
+<!-- CONTACT SECTION -->
 <section id="contact" style="padding:80px 20px;text-align:center;">
   <h2>Contact Us</h2>
   <p>Questions? Reach out and our team will assist you immediately.</p>
@@ -401,21 +362,32 @@
     <button type="submit" class="btn">Send Message</button>
   </form>
 </section>
-
-<!-- MAP -->
+<!-- MAP SECTION -->
 <section id="map" style="padding:80px 20px;text-align:center;">
   <h2>Find Us</h2>
   <p>Locate the nearest Oakline Bank branch or ATM.</p>
-  <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3153.093462540608!2d-122.41941548468165!3d37.77492977975953!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x80858064c1e7c56b%3A0x2f30a6bb95a70f42!2sSan%20Francisco%2C%20CA!5e0!3m2!1sen!2sus!4v1693142010489!5m2!1sen!2sus" width="100%" height="400" style="border:0;border-radius:12px" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+  <iframe 
+    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3153.093462540608!2d-122.41941548468165!3d37.77492977975953!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x80858064c1e7c56b%3A0x2f30a6bb95a70f42!2sSan%20Francisco%2C%20CA!5e0!3m2!1sen!2sus!4v1693142010489!5m2!1sen!2sus" 
+    width="100%" 
+    height="400" 
+    style="border:0;border-radius:12px;" 
+    allowfullscreen="" 
+    loading="lazy" 
+    referrerpolicy="no-referrer-when-downgrade">
+  </iframe>
 </section>
 
-<!-- FOOTER -->
+<!-- FOOTER SECTION -->
 <footer style="background:var(--brand);color:#fff;padding:60px 20px;text-align:center;">
   <div style="display:flex;flex-wrap:wrap;gap:40px;justify-content:center;">
+    
+    <!-- About -->
     <div>
       <h3>About Oakline</h3>
       <p>Oakline Bank provides modern banking solutions for individuals and businesses. Secure, fast, and reliable.</p>
     </div>
+
+    <!-- Services -->
     <div>
       <h3>Services</h3>
       <ul style="list-style:none;padding:0;margin:0;">
@@ -427,6 +399,8 @@
         <li><a href="business.html" style="color:#fff">Business Accounts</a></li>
       </ul>
     </div>
+
+    <!-- Quick Links -->
     <div>
       <h3>Quick Links</h3>
       <ul style="list-style:none;padding:0;margin:0;">
@@ -435,45 +409,23 @@
         <li><a href="#contact" style="color:#fff">Contact</a></li>
       </ul>
     </div>
+
+    <!-- Social Media -->
     <div>
       <h3>Follow Us</h3>
       <a href="#" style="margin-right:8px;color:#fff"><i class="fab fa-facebook-f"></i></a>
       <a href="#" style="margin-right:8px;color:#fff"><i class="fab fa-twitter"></i></a>
       <a href="#" style="margin-right:8px;color:#fff"><i class="fab fa-linkedin-in"></i></a>
+      <a href="#" style="margin-right:8px;color:#fff"><i class="fab fa-instagram"></i></a>
     </div>
   </div>
+
   <p style="margin-top:40px">&copy; 2025 Oakline Bank. All Rights Reserved.</p>
 </footer>
 
-<!-- SCRIPTS -->
+<!-- FINAL SCRIPTS -->
 <script>
-  // DARK MODE TOGGLE
-  const darkModeBtn = document.getElementById('darkModeBtn');
-  darkModeBtn.addEventListener('click', () => {
-    const theme = document.documentElement.getAttribute('data-theme');
-    if(theme === 'dark'){
-      document.documentElement.removeAttribute('data-theme');
-    }else{
-      document.documentElement.setAttribute('data-theme','dark');
-    }
-  });
-
-  // DROPDOWN MENU
-  const menuBtn = document.getElementById('menuBtn');
-  const mainDropdown = document.getElementById('mainDropdown');
-  menuBtn.addEventListener('click', (e) => {
-    e.stopPropagation(); // Prevent immediate close
-    mainDropdown.classList.toggle('open');
-  });
-
-  // CLOSE DROPDOWN WHEN CLICKING OUTSIDE
-  document.addEventListener('click', (e) => {
-    if(!mainDropdown.contains(e.target)){
-      mainDropdown.classList.remove('open');
-    }
-  });
-
-  // SUPABASE INIT (Using Vercel Environment Variables)
+  // SUPABASE INIT (Vercel Environment Variables)
   const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -489,10 +441,25 @@
 
   // CONTACT FORM SUBMISSION
   const contactForm = document.getElementById('contactForm');
-  contactForm?.addEventListener('submit', e => {
+  contactForm?.addEventListener('submit', async e => {
     e.preventDefault();
-    alert('Message sent! We will contact you shortly.');
-    contactForm.reset();
+
+    const name = contactForm.querySelector('input[type="text"]').value;
+    const email = contactForm.querySelector('input[type="email"]').value;
+    const message = contactForm.querySelector('textarea').value;
+
+    // Example: insert into Supabase table 'contacts'
+    const { data, error } = await supabase.from('contacts').insert([
+      { full_name: name, email: email, message: message }
+    ]);
+
+    if(error){
+      alert('Error sending message. Try again.');
+      console.error(error);
+    } else {
+      alert('Message sent successfully! We will contact you shortly.');
+      contactForm.reset();
+    }
   });
 </script>
 </body>
