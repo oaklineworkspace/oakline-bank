@@ -1,12 +1,16 @@
+// pages/index.js
+import Hero from '../components/Hero';
+import Features from '../components/Features';
+import Footer from '../components/Footer';
+import Navbar from '../components/Navbar';
 
 export default function Home() {
   return (
-    <div style={{ fontFamily: "Arial, sans-serif", textAlign: "center", padding: "2rem" }}>
-      <h1>Welcome to Oakline Bank</h1>
-      <p>Your secure and modern banking solution.</p>
-      <a href="/dashboard" style={{ color: "blue", textDecoration: "underline" }}>
-        Go to Dashboard
-      </a>
-    </div>
+    <>
+      <Navbar />
+      <Hero />
+      <Features />
+      <Footer />
+    </>
   );
 }
