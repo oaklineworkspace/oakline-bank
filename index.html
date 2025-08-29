@@ -80,6 +80,51 @@
     font-weight:700;
   }
   @keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-100%)}}
+.hero-features {
+  background: linear-gradient(to bottom, rgba(0,0,0,0.35), rgba(0,0,0,0.35));
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.hero-features-img {
+  max-width: 100vw;
+  object-fit: cover;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+}
+
+.hero-features div {
+  position: relative;
+  z-index: 2;
+}
+
+ .hero-bottom {
+  background: linear-gradient(to bottom, rgba(0,0,0,0.35), rgba(0,0,0,0.35));
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.hero-bottom-img {
+  max-width: 100vw;
+  object-fit: contain;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+}
+
+.hero-bottom div {
+  position: relative;
+  z-index: 2;
+} 
 </style>
 </head>
 <body>
@@ -419,6 +464,39 @@ setupDropdown('rightDropdown','rightDropdownPanel');
       </ul>
     </div>
 
+    
+    <!-- NEW HERO IMAGE SECTION: Oakline Features -->
+<section class="hero-features" style="position:relative;overflow:hidden;min-height:500px;">
+  <!-- Background image -->
+  <img src="images/hero-oakline-features.jpg" alt="Oakline Bank Features" class="hero-features-img" style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:80%;max-width:600px;object-fit:cover;">
+
+  <!-- Content overlay -->
+  <div style="position:relative;z-index:2;text-align:center;padding:60px 20px;">
+    <h2 style="color:#fff;font-size:2.2rem;font-weight:800;">OAKLINE BANK</h2>
+    <p style="color:#fff;font-size:1.2rem;margin:12px 0;">Bank Smarter with Oakline</p>
+    <ul style="color:#fff;font-size:1rem;list-style:none;line-height:1.8;margin-top:12px;padding:0;">
+      <li>• Secure Mobile Banking</li>
+      <li>• Easy Deposits & Transfers</li>
+      <li>• 24/7 Support</li>
+      <li>• Savings & Checking Accounts</li>
+    </ul>
+    <a href="#" style="background:var(--btn-green);color:#fff;padding:14px 26px;border-radius:10px;font-weight:700;margin-top:20px;display:inline-block;">Learn More</a>
+  </div>
+</section>
+
+    <!-- NEW HERO IMAGE SECTION: Mobile Transactions -->
+<section class="hero-bottom" style="position:relative;overflow:hidden;min-height:450px;">
+  <!-- Mobile phone image -->
+  <img src="images/hero-mobile-transactions.jpg" alt="Mobile Transactions" class="hero-bottom-img" style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:60%;max-width:400px;object-fit:contain;">
+
+  <!-- Content overlay -->
+  <div style="position:relative;z-index:2;text-align:center;padding:50px 20px;">
+    <h2 style="color:#fff;font-size:2rem;">Bank On The Go</h2>
+    <p style="color:#fff;max-width:700px;margin:20px auto;">Check your balances, make transfers, and track transactions directly from your mobile device.</p>
+    <a href="#" style="background:var(--btn-green);color:#fff;padding:14px 26px;border-radius:10px;font-weight:700;">Learn More</a>
+  </div>
+</section>
+    
     <!-- Quick Links -->
     <div style="max-width:200px;">
       <h3>Quick Links</h3>
