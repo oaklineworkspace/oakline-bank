@@ -147,29 +147,4 @@ const HomePage = () => {
           </div>
         </div>
 
-        <div style={{ borderTop: '1px solid rgba(255,255,255,.08)', marginTop: '28px', paddingTop: '18px', textAlign: 'center', color: 'var(--muted)' }}>
-          <p style={{ margin: '8px 0' }}>&copy; 2025 Oakline Bank — All rights reserved.</p>
-          <p style={{ margin: '0', fontSize: '.85rem' }}>
-            Oakline Bank is a member of FDIC and an Equal Housing Lender. Terms, rates, and offers are subject to change.
-          </p>
-        </div>
-      </footer>
-
-      {/* Floating Chat */}
-      <button id="chatButton" title="Chat with Oakline">
-        <i className="fas fa-comments"></i>
-      </button>
-
-      {/* Scripts for interactions */}
-      <script>
-        // Floating chat button logic
-        const chatBtn = document.getElementById('chatButton');
-        chatBtn.addEventListener('click', () => {
-          window.open('https://oakline-bank.vercel.app/chat', 'oakline-chat', 'width=420,height=620');
-        });
-      </script>
-    </div>
-  );
-};
-
-export default HomePage;
+        <div style={{ borderTop: '1px solid rgba(255,255,255,.08)', marginTop
