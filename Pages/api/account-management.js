@@ -30,30 +30,68 @@ const sendEmail = async (to, subject, text) => {
 
 // Account Creation (User Registration)
 export const createAccount = async (req, res) => {
-  const { email, password, name } = req.body;
+  const {
+    firstName,
+    middleName,
+    lastName,
+    dob,
+    ssn,
+    maidenName,
+    address,
+    city,
+    state,
+    zip,
+    country,
+    accountType,
+  } = req.body;
 
-  // Sign up user via Supabase
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
-  });
+  try {
+    // Create user with Supabase Auth
+    const { user, error: authError } = await supabase.auth.signUp({
+      email: `${firstName}.${lastName}@example.com`, // Generate a unique email address (replace with your logic)
+      password: 'SecurePassword123', // You can ask the user to create a password later, or do it here
+    });
 
-  if (error) return res.status(400).json({ error: error.message });
+    if (authError) {
+      return res.status(400).json({ error: authError.message });
+    }
 
-  // Store additional user data in a users table if needed
-  const { error: insertError } = await supabase
-    .from('users')
-    .insert([{ email, name, user_id: data.user.id }]);
+    // Store user details in 'users' table
+    const { error: insertError } = await supabase
+      .from('users')
+      .insert([
+        {
+          user_id: user.id,
+          first_name: firstName,
+          middle_name: middleName,
+          last_name: lastName,
+          dob,
+          ssn,
+          maiden_name: maidenName,
+          address,
+          city,
+          state,
+          zip,
+          country,
+          account_type: accountType, // Store selected account types as an array
+          status: 'limited', // Initially, the account will be in 'limited' mode
+        },
+      ]);
 
-  if (insertError) return res.status(400).json({ error: insertError.message });
+    if (insertError) {
+      return res.status(400).json({ error: insertError.message });
+    }
 
-  // Send welcome email
-  const subject = 'Welcome to Oakline Bank!';
-  const text = `Hello ${name},\n\nYour account has been successfully created. Welcome to Oakline Bank!`;
+    // Send email to user
+    const emailSubject = 'Welcome to Oakline Bank';
+    const emailBody = `Hello ${firstName} ${lastName},\n\nYour account has been created successfully. Please follow the instructions to complete your account setup.`;
 
-  await sendEmail(email, subject, text);
+    await sendEmail(user.email, emailSubject, emailBody);
 
-  res.status(200).json({ message: 'Account created successfully' });
+    return res.status(200).json({ message: 'Account created successfully' });
+  } catch (error) {
+    return res.status(500).json({ error: 'Something went wrong' });
+  }
 };
 
 // Reset Password
