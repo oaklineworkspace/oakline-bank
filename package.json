@@ -7,8 +7,17 @@
     "start": "next start"
   },
   "dependencies": {
-    "next": "^13.0.0",
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0"
+    "next": "^13.0.0", // Next.js version
+    "react": "^18.0.0", // React version
+    "react-dom": "^18.0.0", // React DOM version
+    "supabase": "^2.0.0", // Add Supabase if you're using it
+    "axios": "^0.24.0" // Example, add any other dependencies you're using
+  },
+  "devDependencies": {
+    "eslint": "^8.0.0", // Optional: If you use ESLint
+    "eslint-config-next": "^13.0.0" // Optional: For Next.js linting
+  },
+  "engines": {
+    "node": "16.x" // Set the node version if necessary
   }
 }
