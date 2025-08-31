@@ -1,0 +1,22 @@
+1. GitHub 
+2. ⁠ Vercel
+3. ⁠Supabase 
+4. ⁠Godaddy Domain
+
+✅ Your Modern Banking Flow
+	1.	User submits application form.
+	•	Instantly sees confirmation → “We’ve received your application.”
+	2.	Instant account number is generated.
+	•	User gets a welcome email with:
+	•	Account number
+	•	Link to enroll in online banking
+	3.	User sets up online access right away.
+	•	Creates username/password (via Supabase Auth).
+	•	Can log in to dashboard immediately.
+	4.	Account is in “limited mode.”
+	•	Can view balance, see account number, and explore dashboard.
+	•	Transactions are disabled until verification is complete.
+	5.	Backend verification runs (KYC/AML).
+	•	Once approved, system updates account → “Fully Active.”
+	•	User gets a congratulations email and in-app notification.
+	•	Full features unlock: deposits, transfers, bill pay, etc.
