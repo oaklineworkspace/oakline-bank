@@ -20,81 +20,67 @@ const HomePage = () => {
             <i className="fas fa-hand-holding-dollar"></i>
             <h3>Loans</h3>
             <p>Personal & business loans with competitive rates.</p>
-            <Link href="/loans">
-              <a className="btn-green">Apply Loan</a>
-            </Link>
+            <Link href="/loans"><a className="btn-green">Apply Loan</a></Link>
           </div>
 
           <div className="feature reveal">
             <i className="fas fa-coins"></i>
             <h3>Certificates (CDs)</h3>
             <p>Fixed-term deposits with guaranteed returns.</p>
-            <Link href="/cd">
-              <a className="btn-green">Open CD</a>
-            </Link>
+            <Link href="/cd"><a className="btn-green">Open CD</a></Link>
           </div>
 
           <div className="feature reveal">
             <i className="fas fa-wallet"></i>
             <h3>Digital Wallet</h3>
             <p>Connect cards for instant mobile payments & wallets.</p>
-            <Link href="/mobile">
-              <a className="btn-green">Learn More</a>
-            </Link>
+            <Link href="/mobile"><a className="btn-green">Learn More</a></Link>
           </div>
 
           <div className="feature reveal">
             <i className="fas fa-globe"></i>
             <h3>International Transfers</h3>
             <p>Fast cross-border payments with competitive FX.</p>
-            <Link href="/transfers">
-              <a className="btn-green">Send Money</a>
-            </Link>
+            <Link href="/transfers"><a className="btn-green">Send Money</a></Link>
           </div>
 
           <div className="feature reveal">
             <i className="fas fa-shield-alt"></i>
             <h3>Security & Fraud Protection</h3>
             <p>Multi-layer encryption, 2FA, and real-time fraud alerts.</p>
-            <Link href="/security">
-              <a className="btn-green">Security</a>
-            </Link>
+            <Link href="/security"><a className="btn-green">Security</a></Link>
           </div>
 
           <div className="feature reveal">
             <i className="fas fa-chart-line"></i>
             <h3>Investments</h3>
             <p>Advisory, robo-advice and investment accounts.</p>
-            <Link href="/invest">
-              <a className="btn-green">Invest</a>
-            </Link>
+            <Link href="/invest"><a className="btn-green">Invest</a></Link>
           </div>
         </div>
       </div>
 
       {/* Product Hero: Debit Card */}
-      <section className="product-hero" style={{ margin: '48px auto', maxWidth: '1100px' }}>
+      <section className="product-hero" style={{ margin: '48px auto', maxWidth: '1100px', textAlign: 'center' }}>
         <figure>
           <img src="/images/hero-debit-card-1.jpg.PNG" alt="Oakline debit card" />
         </figure>
-        <div style={{ maxWidth: '820px', textAlign: 'center' }}>
-          <h2>Oakline Debit Card</h2>
-          <p style={{ color: 'var(--muted)' }}>
-            Secure worldwide, with contactless payments, instant lock & unlock, and real-time spend tracking.
-          </p>
-          <Link href="/debit-card">
-            <a className="btn-green">Get Your Debit Card</a>
-          </Link>
-        </div>
+        <h2>Oakline Debit Card</h2>
+        <p style={{ color: 'var(--muted)' }}>
+          Secure worldwide, contactless payments, instant lock & unlock, and real-time spend tracking.
+        </p>
+        <Link href="/debit-card">
+          <a className="btn-green">Get Your Debit Card</a>
+        </Link>
       </section>
 
-      {/* Testimonial Section */}
+      {/* Testimonials */}
       <div className="wrap" style={{ marginTop: '20px' }}>
         <h2 style={{ textAlign: 'center', color: 'var(--brand)' }}>What Our Customers Say</h2>
         <div className="test-grid" style={{ marginTop: '18px' }}>
           <div className="testimonial reveal">
             <div className="meta">
-              <img src="/images/testimonial-1.jpg.JPG" alt="" />
+              <img src="/images/testimonial-1.jpg.JPG" alt="Jane D." />
               <strong>Jane D.</strong>
             </div>
             <p>"Oakline Bank makes managing my money so simple. The app is fast and secure!"</p>
@@ -102,7 +88,7 @@ const HomePage = () => {
 
           <div className="testimonial reveal">
             <div className="meta">
-              <img src="/images/testimonial-2.jpg.JPG" alt="" />
+              <img src="/images/testimonial-2.jpg.JPG" alt="Charlotte S." />
               <strong>Charlotte S.</strong>
             </div>
             <p>"I love their business accounts. The transfers are instant and the support is excellent."</p>
@@ -110,7 +96,7 @@ const HomePage = () => {
 
           <div className="testimonial reveal">
             <div className="meta">
-              <img src="/images/testimonial-3.jpg.JPG" alt="" />
+              <img src="/images/testimonial-3.jpg.JPG" alt="Scott R." />
               <strong>Scott R.</strong>
             </div>
             <p>"Opening a savings account was so easy. The rates are great compared to other banks."</p>
@@ -169,11 +155,15 @@ const HomePage = () => {
           <div style={{ flex: '1', minWidth: '200px' }}>
             <h4>Follow Us</h4>
             <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
-              <a href="#" aria-label="facebook"><i className="fab fa-facebook-f"></i></a>
-              <a href="#" aria-label="twitter"><i className="fab fa-twitter"></i></a>
-              <a href="#" aria-label="linkedin"><i className="fab fa-linkedin-in"></i></a>
+              <a href="#" aria-label="facebook" style={{ color: 'inherit' }}><i className="fab fa-facebook-f"></i></a>
+              <a href="#" aria-label="twitter" style={{ color: 'inherit' }}><i className="fab fa-twitter"></i></a>
+              <a href="#" aria-label="linkedin" style={{ color: 'inherit' }}><i className="fab fa-linkedin-in"></i></a>
             </div>
           </div>
+        </div>
+
+        <div style={{ borderTop: '1px solid rgba(255,255,255,.08)', marginTop: '24px', paddingTop: '12px', textAlign: 'center', color: 'var(--muted)' }}>
+          &copy; {new Date().getFullYear()} Oakline Bank. All rights reserved.
         </div>
       </footer>
     </div>
