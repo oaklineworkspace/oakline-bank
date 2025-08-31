@@ -1,24 +1,14 @@
 {
   "name": "oakline-bank",
   "version": "1.0.0",
-  "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "start": "next start"
   },
   "dependencies": {
-    "next": "^14.2.4",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "@supabase/supabase-js": "^2.44.0"
-  },
-  "devDependencies": {
-    "eslint": "^8.57.0",
-    "eslint-config-next": "^14.2.4"
-  },
-  "engines": {
-    "node": ">=22.x"
+    "next": "latest",
+    "react": "latest",
+    "react-dom": "latest"
   }
 }
