@@ -1,33 +1,31 @@
+/* styles/TransactionItem.module.css */
+
 .transaction {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: 0.75rem 1rem;
-  background: #fff;
-  border-radius: 6px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  padding: 1rem;
+  border-radius: 0.5rem;
   margin-bottom: 0.5rem;
-  font-size: 0.95rem;
+  background: #f4f4f4;
+}
+
+.income {
+  border-left: 4px solid green;
+}
+
+.expense {
+  border-left: 4px solid red;
 }
 
 .date {
-  color: #888;
   flex: 1;
 }
 
 .description {
   flex: 2;
-  font-weight: 500;
 }
 
 .amount {
-  font-weight: bold;
-}
-
-.income {
-  color: #008000;
-}
-
-.expense {
-  color: #d32f2f;
+  flex: 1;
+  text-align: right;
 }
