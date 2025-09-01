@@ -1,3 +1,16 @@
-.formInput {
-  /* Placeholder styles for FormInput component */
+import styles from './FormInput.module.css';
+
+export default function FormInput({ label, type = "text", value, onChange, placeholder }) {
+  return (
+    <div className={styles.formGroup}>
+      {label && <label className={styles.label}>{label}</label>}
+      <input
+        type={type}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        className={styles.input}
+      />
+    </div>
+  );
 }
