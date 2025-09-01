@@ -1,22 +1,16 @@
-.footer {
-  background-color: #004080;
-  color: white;
-  text-align: center;
-  padding: 2rem;
-}
+import styles from './Footer.module.css';
 
-.footer .links {
-  margin-top: 1rem;
-  display: flex;
-  justify-content: center;
-  gap: 2rem;
-}
-
-.footer a {
-  color: #ffcc00;
-  text-decoration: none;
-}
-
-.footer a:hover {
-  text-decoration: underline;
+export default function Footer() {
+  return (
+    <footer className={styles.footer}>
+      <div className={styles.footerContent}>
+        <p>&copy; {new Date().getFullYear()} Oakline Bank. All rights reserved.</p>
+        <div className={styles.socialIcons}>
+          <a href="#"><i className="fab fa-facebook-f"></i></a>
+          <a href="#"><i className="fab fa-twitter"></i></a>
+          <a href="#"><i className="fab fa-linkedin-in"></i></a>
+        </div>
+      </div>
+    </footer>
+  );
 }
