@@ -1,4 +1,12 @@
 
-.messageItem {
-  /* Placeholder styles for MessageItem component */
+import styles from './MessageItem.module.css';
+
+export default function MessageItem({ sender, text, timestamp }) {
+  return (
+    <div className={styles.messageItem}>
+      <div className={styles.sender}>{sender}</div>
+      <div className={styles.text}>{text}</div>
+      <div className={styles.timestamp}>{timestamp}</div>
+    </div>
+  );
 }
