@@ -1,126 +1,111 @@
 // pages/index.js
-import Head from "next/head";
-import { useEffect, useState } from "react";
-
-import Header from "../components/Header";
-import Hero from "../components/Hero";
-import Features from "../components/Features";
-import Promo from "../components/Promo";
-import ProductHero from "../components/ProductHero";
-import Testimonials from "../components/Testimonials";
-import Certificates from "../components/Certificates";
-import CTA from "../components/CTA";
-import Footer from "../components/Footer";
-import ChatButton from "../components/ChatButton";
+import { useState } from 'react';
+import Head from 'next/head';
 
 export default function Home() {
-  const [theme, setTheme] = useState("light");
-
-  useEffect(() => {
-    const html = document.documentElement;
-    html.setAttribute("data-theme", theme === "dark" ? "dark" : "");
-  }, [theme]);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <>
       <Head>
-        <title>Oakline Bank — Modern Banking</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link
-          rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+        <title>My Next.js Site</title>
+        <meta
+          name="description"
+          content="A clean Next.js starter homepage with responsive nav."
         />
+        <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <Header theme={theme} setTheme={setTheme} />
+      {/* HEADER */}
+      <header>
+        <div className="logo">MyBrand</div>
+        <nav>
+          <button
+            className="menu-toggle"
+            onClick={() => setMenuOpen(!menuOpen)}
+            aria-label="Toggle menu"
+          >
+            ☰
+          </button>
+          <ul className={menuOpen ? 'show' : ''}>
+            <li><a href="#hero" onClick={() => setMenuOpen(false)}>Home</a></li>
+            <li>
+              <a href="#features" onClick={() => setMenuOpen(false)}>Features</a>
+              <ul className="dropdown-content">
+                <li><a href="#feature1" onClick={() => setMenuOpen(false)}>Feature 1</a></li>
+                <li><a href="#feature2" onClick={() => setMenuOpen(false)}>Feature 2</a></li>
+                <li><a href="#feature3" onClick={() => setMenuOpen(false)}>Feature 3</a></li>
+              </ul>
+            </li>
+            <li><a href="#testimonials" onClick={() => setMenuOpen(false)}>Testimonials</a></li>
+            <li><a href="#contact" onClick={() => setMenuOpen(false)}>Contact</a></li>
+          </ul>
+        </nav>
+      </header>
 
-      <main>
-        {/* Hero Section */}
-        <Hero
-          title="Welcome to Oakline Bank"
-          subtitle="Banking made simple, secure, and smart."
-          ctaText="Get Started"
-          ctaHref="/signup"
-          imgSrc="/images/hero-main.jpg"
-        />
+      {/* HERO */}
+      <section id="hero" className="hero">
+        <h1>Welcome to My Next.js Site</h1>
+        <p>Your awesome tagline goes here. Build modern, responsive websites easily.</p>
+        <a href="#features" className="btn">Get Started</a>
+      </section>
 
-        {/* Features Grid */}
-        <Features start={0} end={6} />
+      {/* FEATURES */}
+      <section id="features">
+        <h2>Our Features</h2>
+        <div className="grid">
+          <div className="box">
+            <h3>Fast</h3>
+            <p>Optimized for speed with Next.js and modern tooling.</p>
+          </div>
+          <div className="box">
+            <h3>Responsive</h3>
+            <p>Mobile-first design that works across all devices.</p>
+          </div>
+          <div className="box">
+            <h3>Scalable</h3>
+            <p>Built to scale with your business growth.</p>
+          </div>
+        </div>
+      </section>
 
-        {/* Promo Banner */}
-        <Promo
-          imgSrc="/images/hero-oakline-features.jpg.PNG"
-          title="Smart Banking Features"
-          description="Manage accounts, track transactions, and gain insights all in one app."
-          ctaText="Learn More"
-          ctaHref="/features"
-        />
+      {/* TESTIMONIALS */}
+      <section id="testimonials">
+        <h2>What People Say</h2>
+        <div className="testimonial-grid">
+          <div className="testimonial">
+            <img src="https://via.placeholder.com/90" alt="User" />
+            <p>"This is the best platform I’ve ever used!"</p>
+            <h4>- Alex</h4>
+          </div>
+          <div className="testimonial">
+            <img src="https://via.placeholder.com/90" alt="User" />
+            <p>"A game-changer for my business."</p>
+            <h4>- Jamie</h4>
+          </div>
+          <div className="testimonial">
+            <img src="https://via.placeholder.com/90" alt="User" />
+            <p>"Highly recommend to everyone!"</p>
+            <h4>- Taylor</h4>
+          </div>
+        </div>
+      </section>
 
-        {/* Product Hero */}
-        <ProductHero
-          imgSrc="/images/hero-debit-card-1.jpg.PNG"
-          title="Oakline Debit Card"
-          description="Secure worldwide, contactless payments, instant lock & unlock, and real-time spend tracking."
-          ctaText="Get Your Debit Card"
-          ctaHref="/debit-card"
-        />
+      {/* CONTACT */}
+      <section id="contact">
+        <h2>Contact Us</h2>
+        <form className="contact-form">
+          <input type="text" placeholder="Your Name" required />
+          <input type="email" placeholder="Your Email" required />
+          <textarea placeholder="Your Message" rows="5" required></textarea>
+          <button type="submit">Send</button>
+        </form>
+      </section>
 
-        <Features start={6} end={12} />
-
-        {/* Mobile Banking Promo */}
-        <Promo
-          imgSrc="/images/hero-mobile-transactions.jpg.PNG"
-          title="Bank On The Go"
-          description="Check balances, make transfers, and track statements right from your phone."
-          isDark
-          ctaText="Learn More"
-          ctaHref="/mobile"
-        />
-
-        <Features start={12} end={18} />
-
-        {/* POS Solutions */}
-        <ProductHero
-          imgSrc="/images/hero-pos.jpg.PNG"
-          title="POS & Merchant Solutions"
-          description="Fast, secure payment processing and an easy dashboard for merchants."
-          ctaText="Explore POS"
-          ctaHref="/pos-solutions"
-        />
-
-        {/* Crypto & Development Fund */}
-        <ProductHero
-          imgSrc="/images/hero-development-fund.jpg.PNG"
-          title="Oakline Development & Crypto Banking"
-          description="Support innovation with our development fund, and explore crypto banking including secure wallets and trading."
-          list={[
-            "Secure Crypto Wallets",
-            "Real-Time Crypto Trading",
-            "Investment Tracking & Reports",
-            "Dedicated Development Fund Initiatives",
-          ]}
-          ctaText="Explore Fund & Crypto"
-          ctaHref="/development-crypto"
-          imageLeft
-        />
-
-        {/* Testimonials */}
-        <Testimonials />
-
-        <Features start={18} end={28} />
-
-        {/* Certificates */}
-        <Certificates />
-
-        {/* Call To Action */}
-        <CTA />
-      </main>
-
-      {/* Footer */}
-      <Footer />
-
-      {/* Chat Button */}
-      <ChatButton />
+      {/* FOOTER */}
+      <footer>
+        <p>&copy; {new Date().getFullYear()} MyBrand. All rights reserved.</p>
+      </footer>
     </>
   );
 }
