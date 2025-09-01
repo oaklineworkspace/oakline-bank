@@ -1,14 +1,13 @@
-import Navbar from '../styles/Navbar';
-import Hero from '../styles/Hero';
-import AccountCard from '../styles/AccountCard';
-import TransactionItem from '../styles/TransactionItem';
-import NotificationItem from '../styles/NotificationItem';
-import MessageItem from '../styles/MessageItem';
-import FormInput from '../styles/FormInput';
-import Modal from '../styles/Modal';
-import Footer from '../styles/Footer';
-
 import { useState } from 'react';
+import Navbar from '../components/Navbar';
+import Hero from '../components/Hero';
+import AccountCard from '../components/AccountCard';
+import TransactionItem from '../components/TransactionItem';
+import NotificationItem from '../components/NotificationItem';
+import MessageItem from '../components/MessageItem';
+import FormInput from '../components/FormInput';
+import Modal from '../components/Modal';
+import Footer from '../components/Footer';
 
 export default function Dashboard() {
   const [isModalOpen, setModalOpen] = useState(false);
