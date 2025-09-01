@@ -1,126 +1,123 @@
-// pages/index.js
-import Head from "next/head";
-import { useEffect, useState } from "react";
-
-import Header from "../components/Header";
-import Hero from "../components/Hero";
-import Features from "../components/Features";
-import Promo from "../components/Promo";
-import ProductHero from "../components/ProductHero";
-import Testimonials from "../components/Testimonials";
-import Certificates from "../components/Certificates";
-import CTA from "../components/CTA";
-import Footer from "../components/Footer";
-import ChatButton from "../components/ChatButton";
+import Image from 'next/image';
+import Link from 'next/link';
+import styles from '../styles/Home.module.css'; // optional CSS module
 
 export default function Home() {
-  const [theme, setTheme] = useState("light");
-
-  useEffect(() => {
-    const html = document.documentElement;
-    html.setAttribute("data-theme", theme === "dark" ? "dark" : "");
-  }, [theme]);
-
   return (
-    <>
-      <Head>
-        <title>Oakline Bank — Modern Banking</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link
-          rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-        />
-      </Head>
+    <main>
+      {/* HERO SECTION: DEBIT CARD */}
+      <section className={styles.productHero}>
+        <div className={styles.heroContent}>
+          <h1>Oakline Debit Card</h1>
+          <p>
+            Secure worldwide, with contactless payments, instant lock & unlock, and real-time spend tracking.
+          </p>
+          <Link href="/debit-card">
+            <a className="btn-green">Get Your Debit Card</a>
+          </Link>
+        </div>
+        <div className={styles.heroImage}>
+          <Image
+            src="/hero-debit-card-1.jpg.PNG"
+            alt="Oakline debit card"
+            width={600}
+            height={400}
+          />
+        </div>
+      </section>
 
-      <Header theme={theme} setTheme={setTheme} />
+      {/* FEATURES GRID */}
+      <section className={styles.features}>
+        <div className={styles.featuresGrid}>
+          <div className={styles.feature}>
+            <i className="fas fa-hand-holding-dollar"></i>
+            <h3>Loans</h3>
+            <p>Personal & business loans with competitive rates.</p>
+            <Link href="/loans"><a className="btn-green">Apply Loan</a></Link>
+          </div>
 
-      <main>
-        {/* Hero Section */}
-        <Hero
-          title="Welcome to Oakline Bank"
-          subtitle="Banking made simple, secure, and smart."
-          ctaText="Get Started"
-          ctaHref="/signup"
-          imgSrc="/images/hero-main.jpg"
-        />
+          <div className={styles.feature}>
+            <i className="fas fa-coins"></i>
+            <h3>Certificates (CDs)</h3>
+            <p>Fixed-term deposits with guaranteed returns.</p>
+            <Link href="/cd"><a className="btn-green">Open CD</a></Link>
+          </div>
 
-        {/* Features Grid */}
-        <Features start={0} end={6} />
+          <div className={styles.feature}>
+            <i className="fas fa-wallet"></i>
+            <h3>Digital Wallet</h3>
+            <p>Connect cards for instant mobile payments & wallets.</p>
+            <Link href="/mobile"><a className="btn-green">Learn More</a></Link>
+          </div>
 
-        {/* Promo Banner */}
-        <Promo
-          imgSrc="/images/hero-oakline-features.jpg.PNG"
-          title="Smart Banking Features"
-          description="Manage accounts, track transactions, and gain insights all in one app."
-          ctaText="Learn More"
-          ctaHref="/features"
-        />
+          <div className={styles.feature}>
+            <i className="fas fa-globe"></i>
+            <h3>International Transfers</h3>
+            <p>Fast cross-border payments with competitive FX.</p>
+            <Link href="/transfers"><a className="btn-green">Send Money</a></Link>
+          </div>
 
-        {/* Product Hero */}
-        <ProductHero
-          imgSrc="/images/hero-debit-card-1.jpg.PNG"
-          title="Oakline Debit Card"
-          description="Secure worldwide, contactless payments, instant lock & unlock, and real-time spend tracking."
-          ctaText="Get Your Debit Card"
-          ctaHref="/debit-card"
-        />
+          <div className={styles.feature}>
+            <i className="fas fa-shield-alt"></i>
+            <h3>Security & Fraud Protection</h3>
+            <p>Multi-layer encryption, 2FA, and real-time fraud alerts.</p>
+            <Link href="/security"><a className="btn-green">Security</a></Link>
+          </div>
 
-        <Features start={6} end={12} />
+          <div className={styles.feature}>
+            <i className="fas fa-chart-line"></i>
+            <h3>Investments</h3>
+            <p>Advisory, robo-advice and investment accounts.</p>
+            <Link href="/invest"><a className="btn-green">Invest</a></Link>
+          </div>
+        </div>
+      </section>
 
-        {/* Mobile Banking Promo */}
-        <Promo
-          imgSrc="/images/hero-mobile-transactions.jpg.PNG"
-          title="Bank On The Go"
-          description="Check balances, make transfers, and track statements right from your phone."
-          isDark
-          ctaText="Learn More"
-          ctaHref="/mobile"
-        />
+      {/* PRODUCT HERO: MOBILE TRANSACTIONS */}
+      <section className={styles.promoDark}>
+        <div className={styles.heroContent}>
+          <h2>Bank On The Go</h2>
+          <p>
+            Check balances, make transfers, and track statements right from your phone.
+          </p>
+          <Link href="/mobile"><a className="btn-green">Learn More</a></Link>
+        </div>
+        <div className={styles.heroImage}>
+          <Image
+            src="/hero-mobile-transactions.jpg.PNG"
+            alt="Mobile transactions"
+            width={600}
+            height={400}
+            style={{ opacity: 0.12 }}
+          />
+        </div>
+      </section>
 
-        <Features start={12} end={18} />
+      {/* ADDITIONAL FEATURES */}
+      <section className={styles.features}>
+        <div className={styles.featuresGrid}>
+          <div className={styles.feature}>
+            <i className="fas fa-bolt"></i>
+            <h3>Instant Transfers</h3>
+            <p>Inter-account and same-day transfers.</p>
+            <Link href="/transfers"><a className="btn-green">Transfer</a></Link>
+          </div>
 
-        {/* POS Solutions */}
-        <ProductHero
-          imgSrc="/images/hero-pos.jpg.PNG"
-          title="POS & Merchant Solutions"
-          description="Fast, secure payment processing and an easy dashboard for merchants."
-          ctaText="Explore POS"
-          ctaHref="/pos-solutions"
-        />
+          <div className={styles.feature}>
+            <i className="fas fa-receipt"></i>
+            <h3>Bill Pay</h3>
+            <p>Automate bills and schedule payments easily.</p>
+            <Link href="/billpay"><a className="btn-green">Set Up</a></Link>
+          </div>
 
-        {/* Crypto & Development Fund */}
-        <ProductHero
-          imgSrc="/images/hero-development-fund.jpg.PNG"
-          title="Oakline Development & Crypto Banking"
-          description="Support innovation with our development fund, and explore crypto banking including secure wallets and trading."
-          list={[
-            "Secure Crypto Wallets",
-            "Real-Time Crypto Trading",
-            "Investment Tracking & Reports",
-            "Dedicated Development Fund Initiatives",
-          ]}
-          ctaText="Explore Fund & Crypto"
-          ctaHref="/development-crypto"
-          imageLeft
-        />
-
-        {/* Testimonials */}
-        <Testimonials />
-
-        <Features start={18} end={28} />
-
-        {/* Certificates */}
-        <Certificates />
-
-        {/* Call To Action */}
-        <CTA />
-      </main>
-
-      {/* Footer */}
-      <Footer />
-
-      {/* Chat Button */}
-      <ChatButton />
-    </>
+          <div className={styles.feature}>
+            <i className="fas fa-file-invoice"></i>
+            <h3>Statements & Reporting</h3>
+            <p>Download statements, CSV exports and analytics.</p>
+            <Link href="/reports"><a className="btn-green">View Reports</a></Link>
+          </div>
+        </div>
+      </section>
+    </main>
   );
 }
