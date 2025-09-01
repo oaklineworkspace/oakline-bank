@@ -1,18 +1,17 @@
-.features {
-  padding: 4rem 2rem;
-  background-color: #fff;
-  text-align: center;
-}
+import styles from './Features.module.css';
 
-.features h2 {
-  font-size: 2rem;
-  margin-bottom: 2rem;
-  color: #004080;
-}
-
-.cardContainer {
-  display: flex;
-  gap: 2rem;
-  justify-content: center;
-  flex-wrap: wrap;
+export default function Features({ features }) {
+  return (
+    <section className={styles.featuresSection}>
+      <div className={styles.featuresGrid}>
+        {features.map((feature, idx) => (
+          <div className={styles.featureCard} key={idx}>
+            <i className={feature.icon}></i>
+            <h3 className={styles.featureTitle}>{feature.title}</h3>
+            <p className={styles.featureDesc}>{feature.description}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
 }
