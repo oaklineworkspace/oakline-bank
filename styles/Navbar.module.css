@@ -1,35 +1,58 @@
 
+/* styles/Navbar.module.css */
+
 .navbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 1rem 2rem;
-  background-color: #004080;
+  background-color: #003366;
   color: white;
-  position: relative;
 }
 
 .logo {
-  font-weight: bold;
   font-size: 1.5rem;
+  font-weight: bold;
 }
 
 .navLinks {
   display: flex;
+  gap: 1.5rem;
   list-style: none;
-  gap: 1rem;
 }
 
-.navLinks li a {
+.navLinks li {
+  position: relative;
+}
+
+.link {
   color: white;
   font-weight: 500;
 }
 
+.dropdownMenu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: white;
+  color: #003366;
+  padding: 0.5rem 0;
+  border-radius: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  min-width: 150px;
+}
+
+.dropdownMenu li {
+  padding: 0.5rem 1rem;
+}
+
 .authButtons button {
-  margin-left: 0.5rem;
+  margin-left: 1rem;
   padding: 0.5rem 1rem;
   border-radius: 4px;
   border: none;
+  font-weight: bold;
   cursor: pointer;
 }
 
@@ -41,49 +64,5 @@
 
 .signup {
   background: #ffcc00;
-  color: #004080;
-}
-
-.hamburger {
-  display: none;
-  font-size: 1.5rem;
-  background: none;
-  border: none;
-  color: white;
-}
-
-.showMenu {
-  display: block !important;
-}
-
-.dropdownMenu {
-  position: absolute;
-  background: #004080;
-  padding: 0.5rem;
-  margin-top: 0.5rem;
-  list-style: none;
-}
-
-.dropdownMenu li a {
-  color: white;
-  display: block;
-  padding: 0.5rem 1rem;
-}
-
-/* Mobile */
-@media (max-width: 768px) {
-  .navLinks {
-    display: none;
-    flex-direction: column;
-    gap: 0;
-    background: #004080;
-    position: absolute;
-    top: 60px;
-    width: 100%;
-    left: 0;
-    padding: 1rem 0;
-  }
-  .hamburger {
-    display: block;
-  }
+  color: #003366;
 }
