@@ -1,11 +1,11 @@
+// components/CTA.js
+import styles from "../styles/CTA.module.css";
+
 export default function CTA() {
   return (
-    <section className="cta-section">
-      <h2>Ready to Experience Modern Banking?</h2>
-      <p>Sign up now and take control of your finances with Oakline Bank.</p>
-      <a className="cta-button" href="signup.html">
-        Create Account
-      </a>
+    <section className={styles.cta}>
+      <h2>Get Started with Oakline Bank Today</h2>
+      <a href="/signup" className={styles.ctaButton}>Sign Up Now</a>
     </section>
   );
 }
