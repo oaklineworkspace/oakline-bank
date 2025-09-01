@@ -1,7 +1,11 @@
-import React from 'react';
+import styles from '../styles/TransactionItem.module.css';
 
-const TransactionItem = () => {
-  return <div>TransactionItem placeholder</div>;
-};
-
-export default TransactionItem;
+export default function TransactionItem({ date, description, amount, type }) {
+  return (
+    <div className={`${styles.transaction} ${type === 'income' ? styles.income : styles.expense}`}>
+      <p className={styles.date}>{date}</p>
+      <p className={styles.description}>{description}</p>
+      <p className={styles.amount}>{amount}</p>
+    </div>
+  );
+}
