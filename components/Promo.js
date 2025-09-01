@@ -1,25 +1,20 @@
-export default function Promo({
-  imgSrc,
-  title,
-  description,
-  isDark = false,
-  ctaText,
-  ctaHref,
-}) {
+// components/Promo.js
+import styles from "../styles/Promo.module.css";
+import Link from "next/link";
+
+export default function Promo({ imgSrc, title, description, ctaText, ctaHref, isDark }) {
   return (
-    <section className={`promo-section ${isDark ? "dark" : ""}`}>
-      <div className="promo-image">
-        <img src={imgSrc} alt={title} />
-      </div>
-      <div className="promo-content">
+    <section className={`${styles.promo} ${isDark ? styles.dark : ""}`}>
+      <div className={styles.content}>
         {title && <h2>{title}</h2>}
         {description && <p>{description}</p>}
         {ctaText && ctaHref && (
-          <a className="cta-button" href={ctaHref}>
-            {ctaText}
-          </a>
+          <Link href={ctaHref}>
+            <button>{ctaText}</button>
+          </Link>
         )}
       </div>
+      {imgSrc && <img src={imgSrc} alt={title || "Promo"} className={styles.image} />}
     </section>
   );
 }
