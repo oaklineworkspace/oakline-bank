@@ -1,20 +1,25 @@
 /* styles/FormInput.module.css */
 
-.inputGroup {
+.inputContainer {
   display: flex;
   flex-direction: column;
   margin-bottom: 1rem;
 }
 
-label {
+.inputLabel {
   margin-bottom: 0.3rem;
   font-weight: 500;
 }
 
-input {
-  padding: 0.5rem 0.75rem;
+.inputField {
+  padding: 0.5rem;
   border: 1px solid #ccc;
   border-radius: 4px;
   font-size: 1rem;
-  box-sizing: border-box;
+}
+
+.inputField:focus {
+  outline: none;
+  border-color: #0070f3;
+  box-shadow: 0 0 0 2px rgba(0, 112, 243, 0.2);
 }
