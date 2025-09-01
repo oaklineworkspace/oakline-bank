@@ -1,10 +1,11 @@
-import styles from '../styles/AccountCard.module.css';
+// components/AccountCard.js
+import styles from "../styles/AccountCard.module.css";
 
 export default function AccountCard({ accountName, balance }) {
   return (
     <div className={styles.card}>
-      <h3>{accountName}</h3>
-      <p>{balance}</p>
+      <p className={styles.accountName}>{accountName}</p>
+      <p className={styles.balance}>{balance}</p>
     </div>
   );
 }
