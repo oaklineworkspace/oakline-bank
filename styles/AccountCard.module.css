@@ -1,12 +1,16 @@
-import styles from './AccountCard.module.css';
-
-export default function AccountCard({ accountName, balance, accountNumber }) {
-  return (
-    <div className={styles.card}>
-      <h3 className={styles.accountName}>{accountName}</h3>
-      <p className={styles.balance}>${balance.toLocaleString()}</p>
-      <p className={styles.accountNumber}>Account #: {accountNumber}</p>
-      <button className={styles.viewButton}>View Details</button>
-    </div>
-  );
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+  transition: transform 0.3s, box-shadow 0.3s;
+  text-align: center;
 }
+
+.card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+}
+
+.card h3 { margin-top: 0; color: #001f3f; }
+.card p { font-size: 1.2rem; font-weight: bold; margin-top: 10px; }
