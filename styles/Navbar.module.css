@@ -1,20 +1,83 @@
 
-import styles from './Navbar.module.css';
-import Link from 'next/link';
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #001f3f;
+  color: white;
+  padding: 15px 30px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
 
-export default function Navbar({ links }) {
-  return (
-    <nav className={styles.navbar}>
-      <div className={styles.logo}>Oakline Bank</div>
-      <ul className={styles.navLinks}>
-        {links.map((link, idx) => (
-          <li key={idx}>
-            <Link href={link.href}>
-              <a className={styles.link}>{link.name}</a>
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </nav>
-  );
+.logo {
+  font-size: 1.6rem;
+  font-weight: bold;
+}
+
+.navLinks {
+  list-style: none;
+  display: flex;
+  gap: 20px;
+}
+
+.navLinks li a,
+.navLinks li span {
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.authButtons button {
+  margin-left: 10px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.login { background: transparent; color: white; border: 1px solid white; }
+.signup { background: #28a745; color: white; }
+
+.hamburger {
+  display: none;
+  font-size: 1.5rem;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+.dropdownMenu {
+  position: absolute;
+  top: 35px;
+  background: #00264d;
+  border-radius: 5px;
+  min-width: 180px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.dropdownMenu li a {
+  color: white;
+  display: block;
+  padding: 10px;
+}
+
+.showMenu {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  top: 60px;
+  right: 0;
+  background: #001f3f;
+  width: 200px;
+}
+
+@media (max-width: 768px) {
+  .navLinks {
+    display: none;
+    flex-direction: column;
+  }
+  .hamburger { display: block; }
 }
