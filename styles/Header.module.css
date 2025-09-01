@@ -5,18 +5,17 @@
   justify-content: space-between;
   align-items: center;
   padding: 1rem 2rem;
-  background-color: var(--header-bg, #fff);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  background-color: #003366;
+  color: white;
   position: sticky;
   top: 0;
-  z-index: 1000;
+  z-index: 100;
 }
 
 .logo a {
   font-size: 1.5rem;
   font-weight: bold;
-  color: #003366;
-  text-decoration: none;
+  color: white;
 }
 
 .nav {
@@ -25,52 +24,23 @@
 }
 
 .nav a {
-  color: #003366;
-  text-decoration: none;
+  color: white;
   font-weight: 500;
-}
-
-.nav.open {
-  display: block;
 }
 
 .actions {
   display: flex;
   gap: 1rem;
-  align-items: center;
-}
-
-.actions button {
-  font-size: 1.2rem;
-  background: none;
-  border: none;
-  cursor: pointer;
 }
 
 .hamburger {
-  display: none;
   font-size: 1.5rem;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
 }
 
-@media (max-width: 768px) {
-  .nav {
-    display: none;
-    flex-direction: column;
-    gap: 1rem;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background-color: #fff;
-    padding: 1rem 2rem;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-  }
-
-  .nav.open {
-    display: flex;
-  }
-
-  .hamburger {
-    display: block;
-  }
+.open {
+  display: flex !important;
 }
