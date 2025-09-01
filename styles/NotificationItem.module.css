@@ -1,4 +1,9 @@
+import styles from './NotificationItem.module.css';
 
-.notificationItem {
-  /* Placeholder styles for NotificationItem component */
+export default function NotificationItem({ message, type }) {
+  return (
+    <div className={`${styles.notification} ${styles[type] || ''}`}>
+      {message}
+    </div>
+  );
 }
