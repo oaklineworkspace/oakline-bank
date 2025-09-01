@@ -1,13 +1,19 @@
+// components/Certificates.js
+import styles from "../styles/Certificates.module.css";
+
+const certificates = [
+  "FDIC Insured",
+  "ISO 27001 Certified",
+  "PCI DSS Compliant",
+];
+
 export default function Certificates() {
   return (
-    <section className="certificates-section">
-      <h2>Our Certifications & Partnerships</h2>
-      <div className="certificates-grid">
-        <img src="/images/cert1.png" alt="Certificate 1" />
-        <img src="/images/cert2.png" alt="Certificate 2" />
-        <img src="/images/cert3.png" alt="Certificate 3" />
-        <img src="/images/cert4.png" alt="Certificate 4" />
-      </div>
+    <section className={styles.certificates}>
+      <h2>Our Certifications</h2>
+      <ul>
+        {certificates.map((cert, idx) => <li key={idx}>{cert}</li>)}
+      </ul>
     </section>
   );
 }
