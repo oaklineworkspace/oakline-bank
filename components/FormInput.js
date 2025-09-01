@@ -1,7 +1,10 @@
-import React from 'react';
+import styles from '../styles/FormInput.module.css';
 
-const FormInput = () => {
-  return <div>FormInput placeholder</div>;
-};
-
-export default FormInput;
+export default function FormInput({ label, placeholder }) {
+  return (
+    <div className={styles.formGroup}>
+      <label>{label}</label>
+      <input type="text" placeholder={placeholder} />
+    </div>
+  );
+}
