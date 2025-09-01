@@ -1,12 +1,19 @@
 
-import styles from './MessageItem.module.css';
+.message {
+  background: white;
+  padding: 15px 20px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
 
-export default function MessageItem({ sender, text, timestamp }) {
-  return (
-    <div className={styles.messageItem}>
-      <div className={styles.sender}>{sender}</div>
-      <div className={styles.text}>{text}</div>
-      <div className={styles.timestamp}>{timestamp}</div>
-    </div>
-  );
+.message .header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5px;
+}
+
+.time {
+  font-size: 0.8rem;
+  color: #888;
 }
