@@ -1,4 +1,18 @@
-
 .features {
-  /* Placeholder styles for Features component */
+  padding: 4rem 2rem;
+  background-color: #fff;
+  text-align: center;
+}
+
+.features h2 {
+  font-size: 2rem;
+  margin-bottom: 2rem;
+  color: #004080;
+}
+
+.cardContainer {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  flex-wrap: wrap;
 }
