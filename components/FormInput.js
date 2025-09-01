@@ -1,10 +1,10 @@
 import styles from '../styles/FormInput.module.css';
 
-export default function FormInput({ label, placeholder }) {
+export default function FormInput({ label, ...props }) {
   return (
-    <div className={styles.formGroup}>
-      <label>{label}</label>
-      <input type="text" placeholder={placeholder} />
+    <div className={styles.inputContainer}>
+      <label className={styles.inputLabel}>{label}</label>
+      <input className={styles.inputField} {...props} />
     </div>
   );
 }
