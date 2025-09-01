@@ -1,111 +1,160 @@
-// pages/index.js
-import { useState } from 'react';
-import Head from 'next/head';
+import { useEffect } from "react";
+import Head from "next/head";
+import Image from "next/image";
+import Link from "next/link";
+import "../styles/globals.css";
 
 export default function Home() {
-  const [menuOpen, setMenuOpen] = useState(false);
+  useEffect(() => {
+    // Dropdown toggles
+    function togglePanel(btnId, panelId) {
+      const btn = document.getElementById(btnId);
+      const panel = document.getElementById(panelId);
+      if (!btn || !panel) return;
+
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        panel.style.display = panel.style.display === "block" ? "none" : "block";
+      });
+
+      document.addEventListener("click", () => {
+        panel.style.display = "none";
+      });
+    }
+
+    togglePanel("accountBtn", "accountPanel");
+    togglePanel("menuBtn", "menuPanel");
+
+    // Theme toggle
+    const themeToggle = document.getElementById("themeToggle");
+    const themeIcon = document.getElementById("themeIcon");
+    if (document.documentElement.getAttribute("data-theme") === "dark") {
+      themeIcon.classList.remove("fa-moon");
+      themeIcon.classList.add("fa-sun");
+    }
+    themeToggle.addEventListener("click", () => {
+      const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+      if (isDark) {
+        document.documentElement.removeAttribute("data-theme");
+        themeIcon.classList.replace("fa-sun", "fa-moon");
+      } else {
+        document.documentElement.setAttribute("data-theme", "dark");
+        themeIcon.classList.replace("fa-moon", "fa-sun");
+      }
+    });
+
+    // Floating chat
+    const chatBtn = document.getElementById("chatButton");
+    chatBtn?.addEventListener("click", () => {
+      window.open("https://oakline-bank.vercel.app/chat", "oakline-chat", "width=420,height=620");
+    });
+
+    setInterval(() => {
+      if (chatBtn) {
+        chatBtn.style.transform = chatBtn.style.transform === "scale(1.06)" ? "scale(1)" : "scale(1.06)";
+      }
+    }, 1600);
+
+    // Reveal animation
+    const reveals = document.querySelectorAll(".reveal");
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            e.target.classList.add("visible");
+            io.unobserve(e.target);
+          }
+        });
+      },
+      { threshold: 0.12 }
+    );
+    reveals.forEach((r) => io.observe(r));
+  }, []);
 
   return (
     <>
       <Head>
-        <title>My Next.js Site</title>
-        <meta
-          name="description"
-          content="A clean Next.js starter homepage with responsive nav."
+        <title>Oakline Bank — Modern Banking</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta charSet="utf-8" />
+        <link
+          rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
         />
-        <link rel="icon" href="/favicon.ico" />
       </Head>
 
       {/* HEADER */}
       <header>
-        <div className="logo">MyBrand</div>
-        <nav>
-          <button
-            className="menu-toggle"
-            onClick={() => setMenuOpen(!menuOpen)}
-            aria-label="Toggle menu"
-          >
-            ☰
+        <div className="header-inner">
+          <div className="logo-row">
+            <Image src="/images/logo-primary.png.jpg" alt="Oakline logo" width={52} height={52} />
+            <div className="brand-title">Oakline Bank</div>
+          </div>
+
+          <div className="controls">
+            <div style={{ position: "relative" }}>
+              <button className="dropdown-btn" id="menuBtn" aria-expanded="false">
+                <i className="fas fa-bars"></i>
+              </button>
+              <div
+                className="dropdown-panel"
+                id="menuPanel"
+                style={{ right: 0, display: "none", maxHeight: "80vh", overflowY: "auto", padding: "12px", width: "280px" }}
+              >
+                <h4 style={{ marginBottom: "8px", color: "var(--brand)" }}>Bank Features</h4>
+                <Link href="/">Home</Link>
+                <Link href="/checking">Checking Accounts</Link>
+                <Link href="/savings">Savings Accounts</Link>
+                <Link href="/business">Business Accounts</Link>
+                {/* Add rest of links */}
+              </div>
+            </div>
+          </div>
+
+          <button id="themeToggle" title="Toggle light / dark">
+            <i id="themeIcon" className="fas fa-moon"></i>
           </button>
-          <ul className={menuOpen ? 'show' : ''}>
-            <li><a href="#hero" onClick={() => setMenuOpen(false)}>Home</a></li>
-            <li>
-              <a href="#features" onClick={() => setMenuOpen(false)}>Features</a>
-              <ul className="dropdown-content">
-                <li><a href="#feature1" onClick={() => setMenuOpen(false)}>Feature 1</a></li>
-                <li><a href="#feature2" onClick={() => setMenuOpen(false)}>Feature 2</a></li>
-                <li><a href="#feature3" onClick={() => setMenuOpen(false)}>Feature 3</a></li>
-              </ul>
-            </li>
-            <li><a href="#testimonials" onClick={() => setMenuOpen(false)}>Testimonials</a></li>
-            <li><a href="#contact" onClick={() => setMenuOpen(false)}>Contact</a></li>
-          </ul>
-        </nav>
+
+          <div style={{ position: "relative" }}>
+            <button className="dropdown-btn" id="accountBtn" aria-expanded="false">
+              <i className="fas fa-user-circle"></i>
+            </button>
+            <div className="dropdown-panel" id="accountPanel" style={{ right: 0 }}>
+              <Link href="/login">
+                <i className="fas fa-right-to-bracket"></i> Log In
+              </Link>
+              <Link href="/signup">
+                <i className="fas fa-user-plus"></i> Create Account
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        <div className="marquee">
+          <span>🔐 Welcome to Oakline Bank — secure personal & business banking, competitive rates, and 24/7 support.</span>
+        </div>
       </header>
 
-      {/* HERO */}
-      <section id="hero" className="hero">
-        <h1>Welcome to My Next.js Site</h1>
-        <p>Your awesome tagline goes here. Build modern, responsive websites easily.</p>
-        <a href="#features" className="btn">Get Started</a>
-      </section>
-
-      {/* FEATURES */}
-      <section id="features">
-        <h2>Our Features</h2>
-        <div className="grid">
-          <div className="box">
-            <h3>Fast</h3>
-            <p>Optimized for speed with Next.js and modern tooling.</p>
-          </div>
-          <div className="box">
-            <h3>Responsive</h3>
-            <p>Mobile-first design that works across all devices.</p>
-          </div>
-          <div className="box">
-            <h3>Scalable</h3>
-            <p>Built to scale with your business growth.</p>
+      {/* HERO SECTION */}
+      <section className="hero">
+        <Image className="hero-bg" src="/images/hero-mobile.jpg.PNG" alt="Mobile banking image" fill />
+        <div className="hero-inner">
+          <h1>Banking that puts you first — wherever you are.</h1>
+          <p>Open accounts in minutes, transfer funds instantly and manage your money securely with the Oakline mobile app.</p>
+          <div className="cta-row">
+            <Link className="btn-green" href="/signup">Open Account</Link>
+            <Link className="btn-soft" href="/login">Log In</Link>
           </div>
         </div>
       </section>
 
-      {/* TESTIMONIALS */}
-      <section id="testimonials">
-        <h2>What People Say</h2>
-        <div className="testimonial-grid">
-          <div className="testimonial">
-            <img src="https://via.placeholder.com/90" alt="User" />
-            <p>"This is the best platform I’ve ever used!"</p>
-            <h4>- Alex</h4>
-          </div>
-          <div className="testimonial">
-            <img src="https://via.placeholder.com/90" alt="User" />
-            <p>"A game-changer for my business."</p>
-            <h4>- Jamie</h4>
-          </div>
-          <div className="testimonial">
-            <img src="https://via.placeholder.com/90" alt="User" />
-            <p>"Highly recommend to everyone!"</p>
-            <h4>- Taylor</h4>
-          </div>
-        </div>
-      </section>
+      {/* FEATURES & REST OF CONTENT */}
+      {/* Move over your features, promo sections, testimonials, etc., same as in your HTML but JSX-ready */}
 
-      {/* CONTACT */}
-      <section id="contact">
-        <h2>Contact Us</h2>
-        <form className="contact-form">
-          <input type="text" placeholder="Your Name" required />
-          <input type="email" placeholder="Your Email" required />
-          <textarea placeholder="Your Message" rows="5" required></textarea>
-          <button type="submit">Send</button>
-        </form>
-      </section>
-
-      {/* FOOTER */}
-      <footer>
-        <p>&copy; {new Date().getFullYear()} MyBrand. All rights reserved.</p>
-      </footer>
+      {/* FLOATING CHAT */}
+      <button id="chatButton" title="Chat with Oakline">
+        <i className="fas fa-comments"></i>
+      </button>
     </>
   );
 }
