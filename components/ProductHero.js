@@ -1,26 +1,21 @@
 // components/ProductHero.js
 import styles from "../styles/ProductHero.module.css";
-import Link from "next/link";
 
-export default function ProductHero({ imgSrc, title, description, list, ctaText, ctaHref, imageLeft }) {
+export default function ProductHero({ imgSrc, title, description, ctaText, ctaHref, list, imageLeft }) {
   return (
-    <section className={`${styles.productHero} ${imageLeft ? styles.imageLeft : ""}`}>
-      {imgSrc && <img src={imgSrc} alt={title} className={styles.image} />}
-      <div className={styles.content}>
-        {title && <h2>{title}</h2>}
-        {description && <p>{description}</p>}
+    <section className={styles.productHero}>
+      <div className={styles.content} style={{ order: imageLeft ? 2 : 1 }}>
+        <h2>{title}</h2>
+        <p>{description}</p>
         {list && (
           <ul>
-            {list.map((item, idx) => (
-              <li key={idx}>{item}</li>
-            ))}
+            {list.map((item, idx) => <li key={idx}>{item}</li>)}
           </ul>
         )}
-        {ctaText && ctaHref && (
-          <Link href={ctaHref}>
-            <button>{ctaText}</button>
-          </Link>
-        )}
+        {ctaText && <a href={ctaHref || "#"} className={styles.cta}>{ctaText}</a>}
+      </div>
+      <div className={styles.image} style={{ order: imageLeft ? 1 : 2 }}>
+        <img src={imgSrc} alt={title} />
       </div>
     </section>
   );
