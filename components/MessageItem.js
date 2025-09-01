@@ -1,7 +1,13 @@
-import React from 'react';
+import styles from '../styles/MessageItem.module.css';
 
-const MessageItem = () => {
-  return <div>MessageItem placeholder</div>;
-};
-
-export default MessageItem;
+export default function MessageItem({ sender, text, timestamp }) {
+  return (
+    <div className={styles.message}>
+      <div className={styles.header}>
+        <strong>{sender}</strong>
+        <span className={styles.time}>{timestamp}</span>
+      </div>
+      <p>{text}</p>
+    </div>
+  );
+}
