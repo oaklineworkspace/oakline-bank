@@ -1,16 +1,17 @@
 {
-  "name": "oakline-bank",
+  "name": "my-node-app",
   "version": "1.0.0",
-  "private": true,
+  "description": "A simple Node.js application",
+  "main": "index.js",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start"
+    "start": "node index.js",
+    "test": "jest"
   },
   "dependencies": {
-    "next": "^14.2.32",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "@swc/core": "^1.13.5"
-  }
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "jest": "^29.5.0"
+  },
+  "license": "MIT"
 }
