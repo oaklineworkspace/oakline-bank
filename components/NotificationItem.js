@@ -1,7 +1,9 @@
-import React from 'react';
+import styles from '../styles/NotificationItem.module.css';
 
-const NotificationItem = () => {
-  return <div>NotificationItem placeholder</div>;
-};
-
-export default NotificationItem;
+export default function NotificationItem({ message, type }) {
+  return (
+    <div className={`${styles.notification} ${styles[type]}`}>
+      {message}
+    </div>
+  );
+}
