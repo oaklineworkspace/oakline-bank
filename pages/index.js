@@ -1,160 +1,126 @@
-import { useEffect } from "react";
+// pages/index.js
 import Head from "next/head";
-import Image from "next/image";
-import Link from "next/link";
-import "../styles/globals.css";
+import { useEffect, useState } from "react";
+
+import Header from "../components/Header";
+import Hero from "../components/Hero";
+import Features from "../components/Features";
+import Promo from "../components/Promo";
+import ProductHero from "../components/ProductHero";
+import Testimonials from "../components/Testimonials";
+import Certificates from "../components/Certificates";
+import CTA from "../components/CTA";
+import Footer from "../components/Footer";
+import ChatButton from "../components/ChatButton";
 
 export default function Home() {
+  const [theme, setTheme] = useState("light");
+
   useEffect(() => {
-    // Dropdown toggles
-    function togglePanel(btnId, panelId) {
-      const btn = document.getElementById(btnId);
-      const panel = document.getElementById(panelId);
-      if (!btn || !panel) return;
-
-      btn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        panel.style.display = panel.style.display === "block" ? "none" : "block";
-      });
-
-      document.addEventListener("click", () => {
-        panel.style.display = "none";
-      });
-    }
-
-    togglePanel("accountBtn", "accountPanel");
-    togglePanel("menuBtn", "menuPanel");
-
-    // Theme toggle
-    const themeToggle = document.getElementById("themeToggle");
-    const themeIcon = document.getElementById("themeIcon");
-    if (document.documentElement.getAttribute("data-theme") === "dark") {
-      themeIcon.classList.remove("fa-moon");
-      themeIcon.classList.add("fa-sun");
-    }
-    themeToggle.addEventListener("click", () => {
-      const isDark = document.documentElement.getAttribute("data-theme") === "dark";
-      if (isDark) {
-        document.documentElement.removeAttribute("data-theme");
-        themeIcon.classList.replace("fa-sun", "fa-moon");
-      } else {
-        document.documentElement.setAttribute("data-theme", "dark");
-        themeIcon.classList.replace("fa-moon", "fa-sun");
-      }
-    });
-
-    // Floating chat
-    const chatBtn = document.getElementById("chatButton");
-    chatBtn?.addEventListener("click", () => {
-      window.open("https://oakline-bank.vercel.app/chat", "oakline-chat", "width=420,height=620");
-    });
-
-    setInterval(() => {
-      if (chatBtn) {
-        chatBtn.style.transform = chatBtn.style.transform === "scale(1.06)" ? "scale(1)" : "scale(1.06)";
-      }
-    }, 1600);
-
-    // Reveal animation
-    const reveals = document.querySelectorAll(".reveal");
-    const io = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => {
-          if (e.isIntersecting) {
-            e.target.classList.add("visible");
-            io.unobserve(e.target);
-          }
-        });
-      },
-      { threshold: 0.12 }
-    );
-    reveals.forEach((r) => io.observe(r));
-  }, []);
+    const html = document.documentElement;
+    html.setAttribute("data-theme", theme === "dark" ? "dark" : "");
+  }, [theme]);
 
   return (
     <>
       <Head>
         <title>Oakline Bank — Modern Banking</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta charSet="utf-8" />
         <link
           rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
         />
       </Head>
 
-      {/* HEADER */}
-      <header>
-        <div className="header-inner">
-          <div className="logo-row">
-            <Image src="/images/logo-primary.png.jpg" alt="Oakline logo" width={52} height={52} />
-            <div className="brand-title">Oakline Bank</div>
-          </div>
+      <Header theme={theme} setTheme={setTheme} />
 
-          <div className="controls">
-            <div style={{ position: "relative" }}>
-              <button className="dropdown-btn" id="menuBtn" aria-expanded="false">
-                <i className="fas fa-bars"></i>
-              </button>
-              <div
-                className="dropdown-panel"
-                id="menuPanel"
-                style={{ right: 0, display: "none", maxHeight: "80vh", overflowY: "auto", padding: "12px", width: "280px" }}
-              >
-                <h4 style={{ marginBottom: "8px", color: "var(--brand)" }}>Bank Features</h4>
-                <Link href="/">Home</Link>
-                <Link href="/checking">Checking Accounts</Link>
-                <Link href="/savings">Savings Accounts</Link>
-                <Link href="/business">Business Accounts</Link>
-                {/* Add rest of links */}
-              </div>
-            </div>
-          </div>
+      <main>
+        {/* Hero Section */}
+        <Hero
+          title="Welcome to Oakline Bank"
+          subtitle="Banking made simple, secure, and smart."
+          ctaText="Get Started"
+          ctaHref="/signup"
+          imgSrc="/images/hero-main.jpg"
+        />
 
-          <button id="themeToggle" title="Toggle light / dark">
-            <i id="themeIcon" className="fas fa-moon"></i>
-          </button>
+        {/* Features Grid */}
+        <Features start={0} end={6} />
 
-          <div style={{ position: "relative" }}>
-            <button className="dropdown-btn" id="accountBtn" aria-expanded="false">
-              <i className="fas fa-user-circle"></i>
-            </button>
-            <div className="dropdown-panel" id="accountPanel" style={{ right: 0 }}>
-              <Link href="/login">
-                <i className="fas fa-right-to-bracket"></i> Log In
-              </Link>
-              <Link href="/signup">
-                <i className="fas fa-user-plus"></i> Create Account
-              </Link>
-            </div>
-          </div>
-        </div>
+        {/* Promo Banner */}
+        <Promo
+          imgSrc="/images/hero-oakline-features.jpg.PNG"
+          title="Smart Banking Features"
+          description="Manage accounts, track transactions, and gain insights all in one app."
+          ctaText="Learn More"
+          ctaHref="/features"
+        />
 
-        <div className="marquee">
-          <span>🔐 Welcome to Oakline Bank — secure personal & business banking, competitive rates, and 24/7 support.</span>
-        </div>
-      </header>
+        {/* Product Hero */}
+        <ProductHero
+          imgSrc="/images/hero-debit-card-1.jpg.PNG"
+          title="Oakline Debit Card"
+          description="Secure worldwide, contactless payments, instant lock & unlock, and real-time spend tracking."
+          ctaText="Get Your Debit Card"
+          ctaHref="/debit-card"
+        />
 
-      {/* HERO SECTION */}
-      <section className="hero">
-        <Image className="hero-bg" src="/images/hero-mobile.jpg.PNG" alt="Mobile banking image" fill />
-        <div className="hero-inner">
-          <h1>Banking that puts you first — wherever you are.</h1>
-          <p>Open accounts in minutes, transfer funds instantly and manage your money securely with the Oakline mobile app.</p>
-          <div className="cta-row">
-            <Link className="btn-green" href="/signup">Open Account</Link>
-            <Link className="btn-soft" href="/login">Log In</Link>
-          </div>
-        </div>
-      </section>
+        <Features start={6} end={12} />
 
-      {/* FEATURES & REST OF CONTENT */}
-      {/* Move over your features, promo sections, testimonials, etc., same as in your HTML but JSX-ready */}
+        {/* Mobile Banking Promo */}
+        <Promo
+          imgSrc="/images/hero-mobile-transactions.jpg.PNG"
+          title="Bank On The Go"
+          description="Check balances, make transfers, and track statements right from your phone."
+          isDark
+          ctaText="Learn More"
+          ctaHref="/mobile"
+        />
 
-      {/* FLOATING CHAT */}
-      <button id="chatButton" title="Chat with Oakline">
-        <i className="fas fa-comments"></i>
-      </button>
+        <Features start={12} end={18} />
+
+        {/* POS Solutions */}
+        <ProductHero
+          imgSrc="/images/hero-pos.jpg.PNG"
+          title="POS & Merchant Solutions"
+          description="Fast, secure payment processing and an easy dashboard for merchants."
+          ctaText="Explore POS"
+          ctaHref="/pos-solutions"
+        />
+
+        {/* Crypto & Development Fund */}
+        <ProductHero
+          imgSrc="/images/hero-development-fund.jpg.PNG"
+          title="Oakline Development & Crypto Banking"
+          description="Support innovation with our development fund, and explore crypto banking including secure wallets and trading."
+          list={[
+            "Secure Crypto Wallets",
+            "Real-Time Crypto Trading",
+            "Investment Tracking & Reports",
+            "Dedicated Development Fund Initiatives",
+          ]}
+          ctaText="Explore Fund & Crypto"
+          ctaHref="/development-crypto"
+          imageLeft
+        />
+
+        {/* Testimonials */}
+        <Testimonials />
+
+        <Features start={18} end={28} />
+
+        {/* Certificates */}
+        <Certificates />
+
+        {/* Call To Action */}
+        <CTA />
+      </main>
+
+      {/* Footer */}
+      <Footer />
+
+      {/* Chat Button */}
+      <ChatButton />
     </>
   );
 }
