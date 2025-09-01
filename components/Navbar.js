@@ -1,32 +1,48 @@
 import { useState } from 'react';
 import styles from '../styles/Navbar.module.css';
+import Link from 'next/link';
 
-export default function Navbar() {
+export default function Navbar({ links }) {
+  const [menuOpen, setMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
 
   return (
     <nav className={styles.navbar}>
       <div className={styles.logo}>Oakline Bank</div>
-      <ul className={styles.navLinks}>
-        <li><a href="#home">Home</a></li>
-        <li><a href="#features">Features</a></li>
-        <li 
-          className={styles.dropdown}
-          onMouseEnter={() => setDropdownOpen(true)}
-          onMouseLeave={() => setDropdownOpen(false)}
-        >
-          <span>Products ▼</span>
-          {dropdownOpen && (
-            <ul className={styles.dropdownMenu}>
-              <li><a href="#accounts">Accounts</a></li>
-              <li><a href="#loans">Loans</a></li>
-              <li><a href="#investments">Investments</a></li>
-            </ul>
-          )}
-        </li>
-        <li><a href="#contact">Contact</a></li>
+
+      <button className={styles.hamburger} onClick={() => setMenuOpen(!menuOpen)}>
+        ☰
+      </button>
+
+      <ul className={`${styles.navLinks} ${menuOpen ? styles.showMenu : ''}`}>
+        {links.map((link, idx) => (
+          <li key={idx} className={link.dropdown ? styles.dropdown : ''}>
+            {link.dropdown ? (
+              <>
+                <span onClick={() => setDropdownOpen(!dropdownOpen)}>
+                  {link.name} ▼
+                </span>
+                {dropdownOpen && (
+                  <ul className={styles.dropdownMenu}>
+                    {link.dropdown.map((item, i) => (
+                      <li key={i}>
+                        <Link href={item.href}>
+                          <a>{item.name}</a>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </>
+            ) : (
+              <Link href={link.href}>
+                <a>{link.name}</a>
+              </Link>
+            )}
+          </li>
+        ))}
       </ul>
+
       <div className={styles.authButtons}>
         <button className={styles.login}>Login</button>
         <button className={styles.signup}>Sign Up</button>
