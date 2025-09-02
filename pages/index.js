@@ -22,16 +22,14 @@ export default function Home() {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("pop-up");
-          }
+          if (entry.isIntersecting) entry.target.classList.add("pop-up");
         });
       },
       { threshold: 0.2 }
     );
 
-    cardsRef.current.forEach((card) => card && observer.observe(card));
-    transactionsRef.current.forEach((item) => item && observer.observe(item));
+    (cardsRef.current || []).forEach((card) => card && observer.observe(card));
+    (transactionsRef.current || []).forEach((item) => item && observer.observe(item));
 
     return () => observer.disconnect();
   }, []);
@@ -69,7 +67,7 @@ export default function Home() {
       <section className="accounts-section">
         <h2>Choose Your Account</h2>
         <div className="grid">
-          {accountCards.map((card, index) => (
+          {(accountCards || []).map((card, index) => (
             <div
               key={index}
               ref={(el) => (cardsRef.current[index] = el)}
@@ -99,7 +97,7 @@ export default function Home() {
       <section className="transactions-section">
         <h2>Recent Transactions</h2>
         <div className="grid">
-          {transactions.map((txn, index) => (
+          {(transactions || []).map((txn, index) => (
             <div
               key={index}
               ref={(el) => (transactionsRef.current[index] = el)}
