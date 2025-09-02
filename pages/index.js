@@ -1,6 +1,4 @@
-import Head from "next/head";
-import Image from "next/image";
-
+import { useEffect, useRef } from "react";
 import Header from "../components/Header";
 import Navbar from "../components/Navbar";
 import Hero from "../components/Hero";
@@ -12,66 +10,109 @@ import Testimonials from "../components/Testimonials";
 import Footer from "../components/Footer";
 import ChatButton from "../components/ChatButton";
 
+import AccountCard from "../components/AccountCard";
+import TransactionItem from "../components/TransactionItem";
+import CTA from "../components/CTA";
+
 export default function Home() {
+  const cardsRef = useRef([]);
+  const transactionsRef = useRef([]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("pop-up");
+          }
+        });
+      },
+      { threshold: 0.2 }
+    );
+
+    cardsRef.current.forEach((card) => card && observer.observe(card));
+    transactionsRef.current.forEach((item) => item && observer.observe(item));
+
+    return () => observer.disconnect();
+  }, []);
+
+  const accountCards = [
+    { title: "Debit Card", description: "Fast and secure", image: "/hero-debit-card-1.jpg.PNG" },
+    { title: "Development Fund", description: "Grow your savings", image: "/hero-development-fund.jpg.PNG" },
+    { title: "Mobile Transactions", description: "Bank on the go", image: "/hero-mobile-transactions.jpg.PNG" },
+  ];
+
+  const transactions = [
+    { title: "Payment to Vendor", amount: "-$120", date: "2025-08-31" },
+    { title: "Salary Credit", amount: "+$3500", date: "2025-08-30" },
+    { title: "Utility Bill", amount: "-$90", date: "2025-08-29" },
+  ];
+
   return (
     <div className="app-container">
-      <Head>
-        <title>Oakline Bank - Modern Banking Solutions</title>
-        <meta name="description" content="Oakline Bank offers modern banking, investment, and financial services for individuals and businesses." />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/logo-primary.png.jpg" />
-      </Head>
-
-      {/* Header and Navbar */}
       <Header />
       <Navbar />
 
-      {/* Hero Section */}
-      <Hero>
-        <Image 
-          src="/hero-mobile.jpg" 
-          alt="Mobile Banking" 
-          width={600} 
-          height={400} 
-          priority
-        />
-      </Hero>
+      <section className="hero fade-up">
+        <Hero />
+      </section>
 
-      {/* Product / Feature Highlights */}
-      <ProductHero>
-        <Image 
-          src="/hero-debit-card-1.jpg.PNG" 
-          alt="Debit Card" 
-          width={600} 
-          height={400} 
-        />
-        <Image 
-          src="/hero-debit-card-2.jpg.PNG" 
-          alt="Debit Card 2" 
-          width={600} 
-          height={400} 
-        />
-      </ProductHero>
+      <section className="product-hero fade-up delay-1">
+        <ProductHero />
+      </section>
 
-      <Features />
+      <section className="features-section fade-up delay-2">
+        <h2>Our Features</h2>
+        <Features />
+      </section>
 
-      {/* Certificates / Achievements */}
-      <Certificates />
+      <section className="accounts-section">
+        <h2>Choose Your Account</h2>
+        <div className="grid">
+          {accountCards.map((card, index) => (
+            <div
+              key={index}
+              ref={(el) => (cardsRef.current[index] = el)}
+              className={`box ${index % 2 === 0 ? "fade-left" : "fade-right"}`}
+              style={{ animationDelay: `${index * 0.2}s` }}
+            >
+              <AccountCard {...card} />
+            </div>
+          ))}
+        </div>
+      </section>
 
-      {/* Promo or CTA */}
-      <Promo />
+      <section className="certificates-section fade-up delay-1">
+        <Certificates />
+      </section>
 
-      {/* Testimonials */}
-      <Testimonials>
-        <Image src="/testimonial-1.jpg.JPG" alt="Customer 1" width={150} height={150} />
-        <Image src="/testimonial-2.jpg.JPG" alt="Customer 2" width={150} height={150} />
-        <Image src="/testimonial-3.jpg.JPG" alt="Customer 3" width={150} height={150} />
-      </Testimonials>
+      <section className="promo-section fade-up delay-2">
+        <CTA text="Open an account today" buttonText="Get Started" />
+        <Promo />
+      </section>
 
-      {/* Footer */}
+      <section className="testimonials-section fade-up delay-3">
+        <h2>What Our Clients Say</h2>
+        <Testimonials />
+      </section>
+
+      <section className="transactions-section">
+        <h2>Recent Transactions</h2>
+        <div className="grid">
+          {transactions.map((txn, index) => (
+            <div
+              key={index}
+              ref={(el) => (transactionsRef.current[index] = el)}
+              className={`box ${index % 2 === 0 ? "fade-left" : "fade-right"}`}
+              style={{ animationDelay: `${index * 0.2}s` }}
+            >
+              <TransactionItem {...txn} />
+            </div>
+          ))}
+        </div>
+      </section>
+
       <Footer />
-
-      {/* Floating Chat Button */}
       <ChatButton />
     </div>
   );
