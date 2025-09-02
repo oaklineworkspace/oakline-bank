@@ -1,37 +1,37 @@
 // pages/index.js
-import React, { useEffect, useState } from 'react';
+import Head from "next/head";
+import Header from "../components/Header";
+import Navbar from "../components/Navbar";
+import Hero from "../components/Hero";
+import Features from "../components/Features";
+import Certificates from "../components/Certificates";
+import Chart from "../components/Chart";
+import Testimonials from "../components/Testimonials";
+import Promo from "../components/Promo";
+import Footer from "../components/Footer";
 
 export default function Home() {
-  const [data, setData] = useState([]);
-
-  useEffect(() => {
-    // Example: Fetch your data here
-    async function fetchData() {
-      try {
-        const res = await fetch('/api/your-endpoint');
-        if (!res.ok) throw new Error('Failed to fetch');
-        const json = await res.json();
-        setData(json || []);
-      } catch (err) {
-        console.error(err);
-        setData([]); // Ensure it's never undefined
-      }
-    }
-    fetchData();
-  }, []);
-
   return (
-    <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
-      <h1>Welcome to Oakline Bank</h1>
-      {data && data.length > 0 ? (
-        <ul>
-          {data.map((item, index) => (
-            <li key={index}>{item.name || 'Unnamed Item'}</li>
-          ))}
-        </ul>
-      ) : (
-        <p>No data yet, but your app is running!</p>
-      )}
+    <div>
+      <Head>
+        <title>Oakline Bank 🏦</title>
+        <meta name="description" content="Modern banking experience with Oakline Bank" />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+
+      <Header />
+      <Navbar />
+
+      <main>
+        <Hero />
+        <Features />
+        <Certificates />
+        <Chart />
+        <Testimonials />
+        <Promo />
+      </main>
+
+      <Footer />
     </div>
   );
 }
