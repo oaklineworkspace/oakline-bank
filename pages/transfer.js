@@ -1,3 +1,4 @@
+// pages/transfer.js
 import { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -9,12 +10,9 @@ const supabase = createClient(
 export default function Transfer() {
   const [accounts, setAccounts] = useState([]);
   const [fromAccount, setFromAccount] = useState('');
-  const [transferType, setTransferType] = useState('Domestic');
   const [toAccountNumber, setToAccountNumber] = useState('');
-  const [recipientBank, setRecipientBank] = useState('');
-  const [swiftCode, setSwiftCode] = useState('');
-  const [currency, setCurrency] = useState('USD');
   const [amount, setAmount] = useState('');
+  const [transferType, setTransferType] = useState('domestic');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -49,35 +47,32 @@ export default function Transfer() {
     setMessage('');
 
     if (!fromAccount || !toAccountNumber || !amount || parseFloat(amount) <= 0) {
-      setMessage('Fill all required fields correctly.');
+      setMessage('Please fill all fields correctly.');
       setLoading(false);
       return;
     }
 
     try {
-      const res = await fetch('/api/transfer', {
+      const res = await fetch('/api/transactions-management', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          fromAccount,
-          transferType,
+          action: 'transfer',
+          fromAccountId: fromAccount,
           toAccountNumber,
-          recipientBank,
-          swiftCode,
-          currency,
-          amount: parseFloat(amount)
+          amount,
+          transferType
         })
       });
 
       const data = await res.json();
+
       if (res.ok) {
-        setMessage(data.message);
+        setMessage(`Success! ${data.message}`);
         setAmount('');
         setToAccountNumber('');
-        setRecipientBank('');
-        setSwiftCode('');
       } else {
-        setMessage(data.error);
+        setMessage(`Error: ${data.error}`);
       }
     } catch (err) {
       setMessage(`Error: ${err.message}`);
@@ -103,14 +98,6 @@ export default function Transfer() {
         </label>
 
         <label>
-          Transfer Type:
-          <select value={transferType} onChange={(e) => setTransferType(e.target.value)}>
-            <option value="Domestic">Domestic</option>
-            <option value="International">International</option>
-          </select>
-        </label>
-
-        <label>
           To Account Number:
           <input
             type="text"
@@ -119,39 +106,6 @@ export default function Transfer() {
             required
           />
         </label>
-
-        {transferType === 'International' && (
-          <>
-            <label>
-              Recipient Bank:
-              <input
-                type="text"
-                value={recipientBank}
-                onChange={(e) => setRecipientBank(e.target.value)}
-                required
-              />
-            </label>
-            <label>
-              SWIFT/BIC Code:
-              <input
-                type="text"
-                value={swiftCode}
-                onChange={(e) => setSwiftCode(e.target.value)}
-                required
-              />
-            </label>
-            <label>
-              Currency:
-              <select value={currency} onChange={(e) => setCurrency(e.target.value)}>
-                <option value="USD">USD</option>
-                <option value="EUR">EUR</option>
-                <option value="GBP">GBP</option>
-                <option value="CAD">CAD</option>
-                <option value="AUD">AUD</option>
-              </select>
-            </label>
-          </>
-        )}
 
         <label>
           Amount:
@@ -163,6 +117,14 @@ export default function Transfer() {
             min="0.01"
             required
           />
+        </label>
+
+        <label>
+          Transfer Type:
+          <select value={transferType} onChange={(e) => setTransferType(e.target.value)}>
+            <option value="domestic">Domestic</option>
+            <option value="international">International</option>
+          </select>
         </label>
 
         <button type="submit" disabled={loading}>
