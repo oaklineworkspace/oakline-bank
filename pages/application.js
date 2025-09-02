@@ -1,9 +1,9 @@
 
-// pages/applications.js
+// pages/application.js
 
 import { useState } from 'react';
 
-export default function Applications() {
+export default function ApplicationPage() {
   const [formData, setFormData] = useState({
     first_name: '',
     middle_name: '',
@@ -43,26 +43,13 @@ export default function Applications() {
     }
   };
 
-  const validateSSN = (ssn) => {
-    // Simple SSN format check: 9 digits
-    const ssnPattern = /^\d{9}$/;
-    return ssnPattern.test(ssn.replace(/[-\s]/g, ''));
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setMessage('');
 
-    // Basic validation
     if (formData.account_types.length === 0) {
       setMessage('Please select at least one account type.');
-      setLoading(false);
-      return;
-    }
-
-    if (!validateSSN(formData.ssn)) {
-      setMessage('Please enter a valid 9-digit SSN.');
       setLoading(false);
       return;
     }
@@ -77,7 +64,7 @@ export default function Applications() {
       const data = await res.json();
 
       if (res.ok) {
-        setMessage('Application submitted successfully! Check your email for account details.');
+        setMessage('Application submitted successfully!');
         setFormData({
           first_name: '',
           middle_name: '',
@@ -108,7 +95,7 @@ export default function Applications() {
 
   return (
     <div className="container" style={{ maxWidth: '700px', margin: '0 auto', padding: '40px' }}>
-      <h1>Apply for Oakline Bank Accounts</h1>
+      <h1>Bank Application Form</h1>
       {message && <p style={{ color: message.startsWith('Error') ? 'red' : 'green' }}>{message}</p>}
 
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -118,7 +105,7 @@ export default function Applications() {
         <input type="text" name="mothers_maiden_name" placeholder="Mother's Maiden Name" value={formData.mothers_maiden_name} onChange={handleChange} />
         <input type="email" name="email" placeholder="Email" required value={formData.email} onChange={handleChange} />
         <input type="text" name="phone" placeholder="Phone" value={formData.phone} onChange={handleChange} />
-        <input type="text" name="ssn" placeholder="SSN / National ID (9 digits)" required value={formData.ssn} onChange={handleChange} />
+        <input type="text" name="ssn" placeholder="SSN / National ID" value={formData.ssn} onChange={handleChange} />
         <input type="text" name="id_number" placeholder="ID Number" value={formData.id_number} onChange={handleChange} />
         <input type="date" name="dob" placeholder="Date of Birth" value={formData.dob} onChange={handleChange} />
         <input type="text" name="address_line1" placeholder="Address Line 1" required value={formData.address_line1} onChange={handleChange} />
@@ -148,3 +135,5 @@ export default function Applications() {
     </div>
   );
 }
+
+// No need for getStaticProps or getServerSideProps unless fetching external data
