@@ -31,13 +31,7 @@ button {
 h2 {
   color: #001f3f;
   margin-bottom: 20px;
-}
-
-/* ===== APP CONTAINER ===== */
-.app-container {
-  max-width: 100%;
-  padding: 0 1rem;
-  box-sizing: border-box;
+  font-size: 1.8rem;
 }
 
 /* ===== HEADER ===== */
@@ -150,8 +144,8 @@ section {
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit,minmax(250px,1fr));
+  gap: 30px;
   margin-top: 40px;
 }
 
@@ -161,11 +155,6 @@ section {
   padding: 25px;
   box-shadow: 0 6px 15px rgba(0,0,0,0.08);
   transition: transform 0.3s, box-shadow 0.3s;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
 }
 
 .grid .box:hover {
@@ -180,20 +169,20 @@ section {
 
 /* ===== TESTIMONIALS ===== */
 .testimonial-grid {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 30px;
-  margin-top: 40px;
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:30px;
+  margin-top:40px;
 }
 
 .testimonial {
-  background: white;
-  padding: 30px;
-  border-radius: 10px;
-  width: 280px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  text-align: center;
+  background:white;
+  padding:30px;
+  border-radius:10px;
+  width:280px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.1);
+  text-align:center;
   transition: transform 0.3s;
 }
 
@@ -202,60 +191,52 @@ section {
 }
 
 .testimonial img {
-  width: 90px;
-  height: 90px;
-  border-radius: 50%;
-  object-fit: cover;
-  margin-bottom: 15px;
+  width:90px;
+  height:90px;
+  border-radius:50%;
+  object-fit:cover;
+  margin-bottom:15px;
 }
 
 /* ===== CONTACT FORM ===== */
 .contact-form {
-  max-width: 600px;
-  margin: auto;
-  text-align: left;
+  max-width:600px;
+  margin:auto;
+  text-align:left;
 }
 
-.contact-form input,
-.contact-form textarea {
-  width: 100%;
-  padding: 12px;
-  margin: 10px 0;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-  box-sizing: border-box;
+.contact-form input, .contact-form textarea {
+  width:100%;
+  padding:12px;
+  margin:10px 0;
+  border-radius:5px;
+  border:1px solid #ccc;
+  box-sizing:border-box;
 }
 
 .contact-form button {
-  padding: 12px 25px;
-  background: #28a745;
-  color: white;
-  border: none;
-  border-radius: 5px;
+  padding:12px 25px;
+  background:#28a745;
+  color:white;
+  border:none;
+  border-radius:5px;
 }
 
 .contact-form button:hover {
-  background: #218838;
+  background:#218838;
 }
 
 /* ===== FOOTER ===== */
 footer {
-  background: #111;
-  color: #bbb;
-  padding: 40px 20px;
-  text-align: center;
-  font-size: 14px;
+  background:#111;
+  color:#bbb;
+  padding:40px 20px;
+  text-align:center;
+  font-size:14px;
 }
 
 footer p {
-  margin: 5px 0;
-}
-
-/* ===== IMAGES ===== */
-img {
-  max-width: 100%;
-  height: auto;
-  display: block;
+  margin:5px 0;
 }
 
 /* ===== ANIMATIONS ===== */
@@ -299,16 +280,55 @@ img {
 @keyframes popUp { to { opacity:1; transform:scale(1); } }
 
 /* ===== RESPONSIVE ===== */
-@media (max-width: 768px) {
+@media (max-width:768px) {
+  nav ul {
+    flex-direction: column;
+    background:#001f3f;
+    position:absolute;
+    top:60px;
+    right:0;
+    width:200px;
+    display:none;
+  }
 
-  /* Navigation */
+  nav ul.show {
+    display:flex;
+  }
+
+  nav ul li {
+    padding:10px 20px;
+  }
+
+  .hero h1 {
+    font-size:2.2rem;
+  }
+
+  .hero p {
+    font-size:1rem;
+  }
+
+  .grid {
+    gap: 20px;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+  }
+}
+
+/* ===== MOBILE MENU TOGGLE ===== */
+.menu-toggle {
+  display: none;
+  font-size: 1.8rem;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
   .menu-toggle {
     display: block;
-    font-size: 1.8rem;
-    background: none;
-    border: none;
-    color: white;
-    cursor: pointer;
   }
 
   nav ul {
@@ -327,63 +347,5 @@ img {
 
   nav ul li {
     padding: 10px 20px;
-  }
-
-  /* Hero adjustments */
-  .hero {
-    padding: 80px 15px;
-  }
-
-  .hero h1 {
-    font-size: 2.2rem;
-  }
-
-  .hero p {
-    font-size: 1rem;
-    padding: 0 10px;
-  }
-
-  .hero .btn {
-    padding: 12px 25px;
-    font-size: 0.95rem;
-  }
-
-  /* Headings */
-  h2 {
-    font-size: 1.3rem;
-    text-align: center;
-  }
-
-  /* Grids stack nicely */
-  .grid {
-    gap: 15px;
-  }
-
-  .grid .box {
-    padding: 15px;
-  }
-}
-
-/* Extra small screens */
-@media (max-width: 480px) {
-  .hero {
-    padding: 60px 10px;
-  }
-
-  .hero h1 {
-    font-size: 1.8rem;
-  }
-
-  .hero p {
-    font-size: 0.9rem;
-  }
-
-  .hero .btn {
-    padding: 10px 20px;
-    font-size: 0.9rem;
-  }
-
-  section {
-    padding: 50px 10px;
   }
 }
