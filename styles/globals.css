@@ -31,7 +31,6 @@ button {
 h2 {
   color: #001f3f;
   margin-bottom: 20px;
-  font-size: 1.8rem;
 }
 
 /* ===== HEADER ===== */
@@ -50,6 +49,13 @@ header {
 header .logo {
   font-size: 1.6rem;
   font-weight: bold;
+}
+
+/* ===== NAVBAR ===== */
+nav {
+  display: flex;
+  align-items: center;
+  gap: 20px;
 }
 
 nav ul {
@@ -75,7 +81,7 @@ nav ul li:hover a {
   color: #28a745;
 }
 
-/* ===== DROPDOWN MENU ===== */
+/* Dropdown */
 nav ul li .dropdown-content {
   display: none;
   position: absolute;
@@ -85,6 +91,7 @@ nav ul li .dropdown-content {
   border-radius: 5px;
   min-width: 180px;
   box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  z-index: 100;
 }
 
 nav ul li:hover .dropdown-content {
@@ -95,13 +102,18 @@ nav ul li .dropdown-content li {
   padding: 10px;
 }
 
-nav ul li .dropdown-content li a {
-  color: white;
-  display: block;
-}
-
 nav ul li .dropdown-content li a:hover {
   color: #28a745;
+}
+
+/* Mobile menu toggle */
+.menu-toggle {
+  display: none;
+  font-size: 1.8rem;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
 }
 
 /* ===== HERO ===== */
@@ -142,9 +154,10 @@ section {
   text-align: center;
 }
 
+/* ===== GRID & CARDS ===== */
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit,minmax(250px,1fr));
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 30px;
   margin-top: 40px;
 }
@@ -198,14 +211,18 @@ section {
   margin-bottom:15px;
 }
 
-/* ===== CONTACT FORM ===== */
-.contact-form {
+/* ===== FORM & INPUTS ===== */
+.contact-form,
+form {
   max-width:600px;
   margin:auto;
   text-align:left;
 }
 
-.contact-form input, .contact-form textarea {
+.contact-form input,
+.contact-form textarea,
+form input,
+form textarea {
   width:100%;
   padding:12px;
   margin:10px 0;
@@ -214,7 +231,8 @@ section {
   box-sizing:border-box;
 }
 
-.contact-form button {
+.contact-form button,
+form button {
   padding:12px 25px;
   background:#28a745;
   color:white;
@@ -222,8 +240,39 @@ section {
   border-radius:5px;
 }
 
-.contact-form button:hover {
+.contact-form button:hover,
+form button:hover {
   background:#218838;
+}
+
+/* ===== MODAL ===== */
+.modal {
+  position: fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background: rgba(0,0,0,0.5);
+  opacity:0;
+  pointer-events:none;
+  transition: opacity 0.3s ease;
+}
+
+.modal.open {
+  opacity:1;
+  pointer-events:auto;
+}
+
+.modal-content {
+  background:#fff;
+  padding:30px;
+  border-radius:10px;
+  max-width:500px;
+  width:100%;
+  text-align:center;
 }
 
 /* ===== FOOTER ===== */
@@ -256,15 +305,11 @@ footer p {
   animation: fadeLeft 1s forwards;
 }
 
-.fade-left.delay-1 { animation-delay: 0.3s; }
-
 .fade-right {
   opacity: 0;
   transform: translateX(30px);
   animation: fadeRight 1s forwards;
 }
-
-.fade-right.delay-1 { animation-delay: 0.3s; }
 
 .pop-up {
   opacity: 0;
@@ -273,7 +318,6 @@ footer p {
   animation-delay: 0.2s;
 }
 
-/* ===== KEYFRAMES ===== */
 @keyframes fadeUp { to { opacity:1; transform:translateY(0); } }
 @keyframes fadeLeft { to { opacity:1; transform:translateX(0); } }
 @keyframes fadeRight { to { opacity:1; transform:translateX(0); } }
@@ -307,45 +351,7 @@ footer p {
     font-size:1rem;
   }
 
-  .grid {
-    gap: 20px;
-  }
-
-  h2 {
-    font-size: 1.5rem;
-  }
-}
-
-/* ===== MOBILE MENU TOGGLE ===== */
-.menu-toggle {
-  display: none;
-  font-size: 1.8rem;
-  background: none;
-  border: none;
-  color: white;
-  cursor: pointer;
-}
-
-@media (max-width: 768px) {
   .menu-toggle {
     display: block;
-  }
-
-  nav ul {
-    flex-direction: column;
-    background: #001f3f;
-    position: absolute;
-    top: 60px;
-    right: 0;
-    width: 200px;
-    display: none;
-  }
-
-  nav ul.show {
-    display: flex;
-  }
-
-  nav ul li {
-    padding: 10px 20px;
   }
 }
