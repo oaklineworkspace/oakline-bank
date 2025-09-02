@@ -30,8 +30,8 @@ export default function Home() {
       { threshold: 0.2 }
     );
 
-    (cardsRef.current || []).forEach((card) => card && observer.observe(card));
-    (transactionsRef.current || []).forEach((item) => item && observer.observe(item));
+    cardsRef.current.forEach((card) => card && observer.observe(card));
+    transactionsRef.current.forEach((item) => item && observer.observe(item));
 
     return () => observer.disconnect();
   }, []);
@@ -46,6 +46,12 @@ export default function Home() {
     { title: "Payment to Vendor", amount: "-$120", date: "2025-08-31" },
     { title: "Salary Credit", amount: "+$3500", date: "2025-08-30" },
     { title: "Utility Bill", amount: "-$90", date: "2025-08-29" },
+  ];
+
+  // Optional: add testimonial data if needed
+  const testimonialData = [
+    { name: "John Doe", feedback: "Great service!", image: "/john.jpg" },
+    { name: "Jane Smith", feedback: "Banking made easy.", image: "/jane.jpg" },
   ];
 
   return (
@@ -69,7 +75,7 @@ export default function Home() {
       <section className="accounts-section">
         <h2>Choose Your Account</h2>
         <div className="grid">
-          {(accountCards || []).map((card, index) => (
+          {accountCards.map((card, index) => (
             <div
               key={index}
               ref={(el) => (cardsRef.current[index] = el)}
@@ -93,23 +99,25 @@ export default function Home() {
 
       <section className="testimonials-section fade-up delay-3">
         <h2>What Our Clients Say</h2>
-        {(Testimonials || []).map((testimonial, idx) => (
-          <Testimonials key={idx} {...testimonial} />
+        {testimonialData.map((t, idx) => (
+          <Testimonials key={idx} {...t} />
         ))}
       </section>
 
       <section className="transactions-section">
         <h2>Recent Transactions</h2>
-        {(transactions || []).map((txn, index) => (
-          <div
-            key={index}
-            ref={(el) => (transactionsRef.current[index] = el)}
-            className={`box ${index % 2 === 0 ? "fade-left" : "fade-right"}`}
-            style={{ animationDelay: `${index * 0.2}s` }}
-          >
-            <TransactionItem {...txn} />
-          </div>
-        ))}
+        <div className="grid">
+          {transactions.map((txn, index) => (
+            <div
+              key={index}
+              ref={(el) => (transactionsRef.current[index] = el)}
+              className={`box ${index % 2 === 0 ? "fade-left" : "fade-right"}`}
+              style={{ animationDelay: `${index * 0.2}s` }}
+            >
+              <TransactionItem {...txn} />
+            </div>
+          ))}
+        </div>
       </section>
 
       <Footer />
