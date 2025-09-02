@@ -48,12 +48,6 @@ export default function Home() {
     { title: "Utility Bill", amount: "-$90", date: "2025-08-29" },
   ];
 
-  // Optional: add testimonial data if needed
-  const testimonialData = [
-    { name: "John Doe", feedback: "Great service!", image: "/john.jpg" },
-    { name: "Jane Smith", feedback: "Banking made easy.", image: "/jane.jpg" },
-  ];
-
   return (
     <div className="app-container">
       <Header />
@@ -75,7 +69,7 @@ export default function Home() {
       <section className="accounts-section">
         <h2>Choose Your Account</h2>
         <div className="grid">
-          {accountCards.map((card, index) => (
+          {(accountCards || []).map((card, index) => (
             <div
               key={index}
               ref={(el) => (cardsRef.current[index] = el)}
@@ -99,15 +93,13 @@ export default function Home() {
 
       <section className="testimonials-section fade-up delay-3">
         <h2>What Our Clients Say</h2>
-        {testimonialData.map((t, idx) => (
-          <Testimonials key={idx} {...t} />
-        ))}
+        <Testimonials />
       </section>
 
       <section className="transactions-section">
         <h2>Recent Transactions</h2>
         <div className="grid">
-          {transactions.map((txn, index) => (
+          {(transactions || []).map((txn, index) => (
             <div
               key={index}
               ref={(el) => (transactionsRef.current[index] = el)}
