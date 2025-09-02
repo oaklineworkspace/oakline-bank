@@ -1,34 +1,14 @@
-// components/Header.js
-import { useState } from "react";
 import Link from "next/link";
-import styles from "../styles/Header.module.css";
 
-export default function Header({ theme, setTheme }) {
-  const [menuOpen, setMenuOpen] = useState(false);
-
+export default function Header() {
   return (
-    <header className={styles.header}>
-      <div className={styles.logo}>
-        <Link href="/">Oakline Bank</Link>
-      </div>
-
-      <nav className={`${styles.nav} ${menuOpen ? styles.open : ""}`}>
-        <Link href="/">Home</Link>
-        <Link href="/features">Features</Link>
-        <Link href="/debit-card">Debit Card</Link>
-        <Link href="/mobile">Mobile</Link>
-        <Link href="/pos-solutions">POS</Link>
-        <Link href="/development-crypto">Crypto</Link>
+    <header style={{ padding: "20px", background: "#1E1E1E", color: "white", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <h1>MySite</h1>
+      <nav>
+        <Link href="/" style={{ margin: "0 10px", color: "white" }}>Home</Link>
+        <Link href="/login" style={{ margin: "0 10px", color: "white" }}>Login</Link>
+        <Link href="/dashboard" style={{ margin: "0 10px", color: "white" }}>Dashboard</Link>
       </nav>
-
-      <div className={styles.actions}>
-        <button onClick={() => setTheme(theme === "light" ? "dark" : "light")}>
-          {theme === "light" ? "🌙" : "☀️"}
-        </button>
-        <button className={styles.hamburger} onClick={() => setMenuOpen(!menuOpen)}>
-          ☰
-        </button>
-      </div>
     </header>
   );
 }
