@@ -43,13 +43,26 @@ export default function Applications() {
     }
   };
 
+  const validateSSN = (ssn) => {
+    // Simple SSN format check: 9 digits
+    const ssnPattern = /^\d{9}$/;
+    return ssnPattern.test(ssn.replace(/[-\s]/g, ''));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setMessage('');
 
+    // Basic validation
     if (formData.account_types.length === 0) {
       setMessage('Please select at least one account type.');
+      setLoading(false);
+      return;
+    }
+
+    if (!validateSSN(formData.ssn)) {
+      setMessage('Please enter a valid 9-digit SSN.');
       setLoading(false);
       return;
     }
@@ -105,7 +118,7 @@ export default function Applications() {
         <input type="text" name="mothers_maiden_name" placeholder="Mother's Maiden Name" value={formData.mothers_maiden_name} onChange={handleChange} />
         <input type="email" name="email" placeholder="Email" required value={formData.email} onChange={handleChange} />
         <input type="text" name="phone" placeholder="Phone" value={formData.phone} onChange={handleChange} />
-        <input type="text" name="ssn" placeholder="SSN / National ID" value={formData.ssn} onChange={handleChange} />
+        <input type="text" name="ssn" placeholder="SSN / National ID (9 digits)" required value={formData.ssn} onChange={handleChange} />
         <input type="text" name="id_number" placeholder="ID Number" value={formData.id_number} onChange={handleChange} />
         <input type="date" name="dob" placeholder="Date of Birth" value={formData.dob} onChange={handleChange} />
         <input type="text" name="address_line1" placeholder="Address Line 1" required value={formData.address_line1} onChange={handleChange} />
