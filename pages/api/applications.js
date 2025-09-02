@@ -1,9 +1,9 @@
 // pages/api/applications.js
 
-import { supabase } from '../../lib/supabaseClient';
+import { supabaseAdmin } from '../../lib/supabaseClient'; // Use admin client
 import { sendEmail } from '../../lib/email';
 
-// Function to generate a random 10-digit account number
+// Generate a random 10-digit account number
 function generateAccountNumber() {
   return Math.floor(1000000000 + Math.random() * 9000000000).toString();
 }
@@ -33,8 +33,8 @@ export default async function handler(req, res) {
   } = req.body;
 
   try {
-    // Insert user into Supabase
-    const { data: user, error: userError } = await supabase
+    // Insert user into Supabase using admin client
+    const { data: user, error: userError } = await supabaseAdmin
       .from('users')
       .insert([{
         first_name,
@@ -60,10 +60,10 @@ export default async function handler(req, res) {
 
     const createdAccounts = [];
 
-    // Insert accounts for each selected account type with unique account numbers
+    // Insert accounts for each selected account type
     for (const type of account_types) {
       const accountNumber = generateAccountNumber();
-      const { data: account, error: accountError } = await supabase
+      const { data: account, error: accountError } = await supabaseAdmin
         .from('accounts')
         .insert([{
           user_id: user.id,
@@ -79,7 +79,7 @@ export default async function handler(req, res) {
     }
 
     // Insert application record
-    await supabase
+    await supabaseAdmin
       .from('applications')
       .insert([{
         user_id: user.id,
