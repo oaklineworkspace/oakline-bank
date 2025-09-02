@@ -46,7 +46,7 @@ export default function Dashboard() {
       />
 
       <section id="notifications">
-        {notifications.map((n, idx) => (
+        {(notifications || []).map((n, idx) => (
           <NotificationItem key={idx} message={n.message} type={n.type} />
         ))}
       </section>
@@ -59,7 +59,7 @@ export default function Dashboard() {
 
       <section id="transactions">
         <h2>Recent Transactions</h2>
-        {transactions.map((t, idx) => (
+        {(transactions || []).map((t, idx) => (
           <TransactionItem
             key={idx}
             date={t.date}
@@ -72,7 +72,7 @@ export default function Dashboard() {
 
       <section id="messages">
         <h2>Messages</h2>
-        {messages.map((m, idx) => (
+        {(messages || []).map((m, idx) => (
           <MessageItem
             key={idx}
             sender={m.sender}
