@@ -1,15 +1,9 @@
-// components/Hero.js
-import styles from "../styles/Hero.module.css";
-
-export default function Hero({ title, subtitle, ctaText, ctaLink, imgSrc }) {
+export default function Hero() {
   return (
-    <section 
-      className={styles.hero} 
-      style={{ backgroundImage: `url(${imgSrc || "/images/hero-mobile.jpg.PNG"})` }}
-    >
-      <h1>{title || "Welcome to Oakline Bank"}</h1>
-      <p>{subtitle || "Modern banking at your fingertips."}</p>
-      {ctaText && <a href={ctaLink || "#"} className={styles.cta}>{ctaText}</a>}
+    <section style={{ padding: "80px 20px", textAlign: "center", background: "#f5f5f5" }}>
+      <h2>Welcome to MySite</h2>
+      <p>Your journey to awesome web apps starts here!</p>
+      <button style={{ padding: "10px 20px", fontSize: "16px", cursor: "pointer" }}>Get Started</button>
     </section>
   );
 }
