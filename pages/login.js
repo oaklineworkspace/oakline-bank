@@ -1,38 +1,63 @@
 // pages/login.js
 
+import { useState } from 'react';
+import { supabase } from '../lib/supabaseClient';
+import { useRouter } from 'next/router';
+
 export default function Login() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const router = useRouter();
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        setError(error.message);
+      } else {
+        // Successful login
+        router.push('/dashboard'); // redirect to dashboard
+      }
+    } catch (err) {
+      setError('Unexpected error: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div style={{
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
-      minHeight: "100vh",
-      fontFamily: "Arial, sans-serif",
-      backgroundColor: "#f0f4f8",
-      textAlign: "center",
-      padding: "2rem"
-    }}>
-      <h1 style={{ color: "#004aad", marginBottom: "1rem" }}>Login to Oakline Bank</h1>
-      <form style={{ display: "flex", flexDirection: "column", width: "300px" }}>
+    <div className="container" style={{ maxWidth: '400px', margin: '0 auto', padding: '40px' }}>
+      <h1>Login to Oakline Bank</h1>
+      {error && <p style={{ color: 'red' }}>{error}</p>}
+
+      <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         <input
           type="email"
           placeholder="Email"
-          style={{ marginBottom: "1rem", padding: "10px", borderRadius: "5px", border: "1px solid #ccc" }}
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
         />
         <input
           type="password"
           placeholder="Password"
-          style={{ marginBottom: "1rem", padding: "10px", borderRadius: "5px", border: "1px solid #ccc" }}
+          required
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
         />
-        <button style={{
-          padding: "10px",
-          backgroundColor: "#004aad",
-          color: "white",
-          border: "none",
-          borderRadius: "5px",
-          cursor: "pointer"
-        }}>Login</button>
+        <button type="submit" disabled={loading}>
+          {loading ? 'Logging in...' : 'Login'}
+        </button>
       </form>
     </div>
   );
