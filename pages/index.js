@@ -22,7 +22,9 @@ export default function Home() {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting) entry.target.classList.add("pop-up");
+          if (entry.isIntersecting) {
+            entry.target.classList.add("pop-up");
+          }
         });
       },
       { threshold: 0.2 }
@@ -91,23 +93,23 @@ export default function Home() {
 
       <section className="testimonials-section fade-up delay-3">
         <h2>What Our Clients Say</h2>
-        <Testimonials />
+        {(Testimonials || []).map((testimonial, idx) => (
+          <Testimonials key={idx} {...testimonial} />
+        ))}
       </section>
 
       <section className="transactions-section">
         <h2>Recent Transactions</h2>
-        <div className="grid">
-          {(transactions || []).map((txn, index) => (
-            <div
-              key={index}
-              ref={(el) => (transactionsRef.current[index] = el)}
-              className={`box ${index % 2 === 0 ? "fade-left" : "fade-right"}`}
-              style={{ animationDelay: `${index * 0.2}s` }}
-            >
-              <TransactionItem {...txn} />
-            </div>
-          ))}
-        </div>
+        {(transactions || []).map((txn, index) => (
+          <div
+            key={index}
+            ref={(el) => (transactionsRef.current[index] = el)}
+            className={`box ${index % 2 === 0 ? "fade-left" : "fade-right"}`}
+            style={{ animationDelay: `${index * 0.2}s` }}
+          >
+            <TransactionItem {...txn} />
+          </div>
+        ))}
       </section>
 
       <Footer />
