@@ -1,16 +1,41 @@
-//// pages/enroll.js
-import { useState } from 'react';
+// pages/enroll.js
+import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useRouter } from 'next/router';
 
 export default function EnrollPage() {
   const router = useRouter();
-  const { temp_user_id } = router.query;
+  const { temp_user_id } = router.query; // from email link
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [userExists, setUserExists] = useState(false);
 
-  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+  // Check if temp_user_id exists in Supabase
+  useEffect(() => {
+    if (!temp_user_id) return;
+
+    const checkUser = async () => {
+      const { data: user, error } = await supabase
+        .from('users')
+        .select('id, email')
+        .eq('id', temp_user_id)
+        .single();
+
+      if (error || !user) {
+        setMessage('Invalid enrollment link.');
+        return;
+      }
+      setUserExists(true);
+      setFormData({ ...formData, email: user.email || '' });
+    };
+
+    checkUser();
+  }, [temp_user_id]);
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -18,15 +43,25 @@ export default function EnrollPage() {
     setMessage('');
 
     try {
-      const { data, error } = await supabase.auth.signUp({
+      if (!temp_user_id) throw new Error('Missing temp user ID');
+
+      // 1️⃣ Sign up in Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password
       });
-      if (error) throw error;
 
-      // Link temp user rows to Auth user
-      await supabase.from('users').update({ auth_user_id: data.user.id }).eq('id', temp_user_id);
-      await supabase.from('accounts').update({ user_id: data.user.id }).eq('user_id', temp_user_id);
+      if (authError) {
+        setMessage(`Error: ${authError.message}`);
+        setLoading(false);
+        return;
+      }
+
+      // 2️⃣ Update the users table to link with auth user
+      await supabase
+        .from('users')
+        .update({ auth_id: authData.user.id }) // assuming you add `auth_id` column
+        .eq('id', temp_user_id);
 
       setMessage('Enrollment successful! You can now log in to your dashboard.');
       setFormData({ email: '', password: '' });
@@ -37,16 +72,55 @@ export default function EnrollPage() {
     }
   };
 
+  if (!userExists) return <p style={{ textAlign: 'center', marginTop: '2rem' }}>{message || 'Loading...'}</p>;
+
   return (
-    <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', minHeight:'100vh', fontFamily:'Arial', textAlign:'center' }}>
-      <h1>Enroll in Online Banking</h1>
-      <p>User ID: <strong>{temp_user_id || 'Loading...'}</strong></p>
-      <form onSubmit={handleSubmit} style={{ display:'flex', flexDirection:'column', gap:'10px', width:300 }}>
-        <input type="email" name="email" placeholder="Email" required value={formData.email} onChange={handleChange} />
-        <input type="password" name="password" placeholder="Password" required value={formData.password} onChange={handleChange} />
-        <button type="submit" disabled={loading}>{loading ? 'Enrolling...' : 'Enroll Now'}</button>
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      minHeight: '100vh',
+      fontFamily: 'Arial, sans-serif',
+      padding: '2rem',
+      backgroundColor: '#f0f4f8',
+      textAlign: 'center'
+    }}>
+      <h1 style={{ color: '#0070f3', marginBottom: '1rem' }}>Enroll in Online Banking</h1>
+      <p>Set your online banking email and password:</p>
+
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', width: '300px', gap: '10px' }}>
+        <input
+          type="email"
+          name="email"
+          placeholder="Email"
+          required
+          value={formData.email}
+          onChange={handleChange}
+          style={{ padding: '10px', borderRadius: '5px', border: '1px solid #ccc' }}
+        />
+        <input
+          type="password"
+          name="password"
+          placeholder="Password"
+          required
+          value={formData.password}
+          onChange={handleChange}
+          style={{ padding: '10px', borderRadius: '5px', border: '1px solid #ccc' }}
+        />
+        <button type="submit" disabled={loading} style={{
+          padding: '10px',
+          backgroundColor: '#0070f3',
+          color: '#fff',
+          border: 'none',
+          borderRadius: '5px',
+          cursor: 'pointer'
+        }}>
+          {loading ? 'Enrolling...' : 'Enroll Now'}
+        </button>
       </form>
-      {message && <p style={{ marginTop:20, color: message.startsWith('Error') ? 'red':'green' }}>{message}</p>}
+
+      {message && <p style={{ marginTop: '20px', color: message.startsWith('Error') ? 'red' : 'green' }}>{message}</p>}
     </div>
   );
 }
