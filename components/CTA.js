@@ -1,11 +1,13 @@
 // components/CTA.js
-import styles from "../styles/CTA.module.css";
+import Link from 'next/link';
 
-export default function CTA() {
+export default function CTA({ title, buttonText, buttonLink }) {
   return (
-    <section className={styles.cta}>
-      <h2>Get Started with Oakline Bank Today</h2>
-      <a href="/signup" className={styles.ctaButton}>Sign Up Now</a>
+    <section className="cta">
+      <h3>{title}</h3>
+      <Link href={buttonLink}>
+        <button>{buttonText}</button>
+      </Link>
     </section>
   );
 }
