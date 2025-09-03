@@ -1,82 +1,87 @@
 // pages/dashboard.js
-
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useRouter } from 'next/router';
 
 export default function Dashboard() {
+  const router = useRouter();
   const [user, setUser] = useState(null);
   const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
 
-  // Fetch the logged-in user
   useEffect(() => {
-    const fetchUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        router.push('/login');
-        return;
-      }
-      setUser(session.user);
+    const session = supabase.auth.session();
 
-      // Fetch accounts
-      const { data: accountsData, error } = await supabase
-        .from('accounts')
-        .select('*')
-        .eq('user_id', session.user.id);
-
-      if (error) {
-        console.error(error);
-      } else {
-        setAccounts(accountsData);
-      }
-      setLoading(false);
-    };
-
-    fetchUser();
+    if (!session) {
+      router.push('/enroll'); // Redirect to enroll/login if not authenticated
+    } else {
+      fetchUserData(session.user.id);
+    }
   }, []);
 
-  if (loading) return <p>Loading your dashboard...</p>;
+  const fetchUserData = async (userId) => {
+    setLoading(true);
+    try {
+      // Fetch user info
+      const { data: users, error: userError } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (userError) throw userError;
+      setUser(users);
+
+      // Fetch accounts for this user
+      const { data: userAccounts, error: accountsError } = await supabase
+        .from('accounts')
+        .select('*')
+        .eq('user_id', userId);
+
+      if (accountsError) throw accountsError;
+      setAccounts(userAccounts);
+    } catch (err) {
+      console.error(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) return <p style={{ textAlign: 'center', marginTop: '50px' }}>Loading your dashboard...</p>;
 
   return (
-    <div className="container" style={{ maxWidth: '800px', margin: '0 auto', padding: '40px' }}>
-      <h1>Welcome to Oakline Bank, {user?.email}</h1>
-      <p>Your accounts are currently in <strong>limited mode</strong>. Full features will unlock after verification.</p>
+    <div style={{ fontFamily: 'Arial, sans-serif', padding: '2rem' }}>
+      <h1>Welcome, {user?.first_name || 'Customer'}!</h1>
+      <p>Your online banking account is currently in <strong>limited mode</strong>.</p>
+      <p>Transactions and transfers will be available after verification.</p>
 
-      <h2>Your Accounts</h2>
       {accounts.length === 0 ? (
-        <p>No accounts found.</p>
+        <p>You do not have any accounts yet.</p>
       ) : (
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr>
-              <th style={{ border: '1px solid #ccc', padding: '8px' }}>Account Number</th>
-              <th style={{ border: '1px solid #ccc', padding: '8px' }}>Type</th>
-              <th style={{ border: '1px solid #ccc', padding: '8px' }}>Balance</th>
-              <th style={{ border: '1px solid #ccc', padding: '8px' }}>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {accounts.map(acc => (
-              <tr key={acc.id}>
-                <td style={{ border: '1px solid #ccc', padding: '8px' }}>{acc.account_number}</td>
-                <td style={{ border: '1px solid #ccc', padding: '8px' }}>{acc.account_type}</td>
-                <td style={{ border: '1px solid #ccc', padding: '8px' }}>${acc.balance.toFixed(2)}</td>
-                <td style={{ border: '1px solid #ccc', padding: '8px' }}>{acc.status}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '20px' }}>
+          {accounts.map((acc) => (
+            <div key={acc.id} style={{ padding: '15px', border: '1px solid #ccc', borderRadius: '8px', backgroundColor: '#f9f9f9' }}>
+              <p><strong>Account Number:</strong> {acc.account_number}</p>
+              <p><strong>Account Type:</strong> {acc.account_type}</p>
+              <p><strong>Balance:</strong> ${acc.balance.toFixed(2)}</p>
+              <p><strong>Status:</strong> {acc.status}</p>
+            </div>
+          ))}
+        </div>
       )}
 
-      <h2>Quick Actions</h2>
-      <p>Transactions are currently disabled until your account is fully verified.</p>
-      <ul>
-        <li>Deposit: Disabled</li>
-        <li>Transfer: Disabled</li>
-        <li>Bill Pay: Disabled</li>
-      </ul>
+      <div style={{ marginTop: '40px', textAlign: 'center' }}>
+        <button disabled style={{
+          padding: '10px 20px',
+          backgroundColor: '#0070f3',
+          color: '#fff',
+          border: 'none',
+          borderRadius: '5px',
+          cursor: 'not-allowed'
+        }}>
+          Make Transfer (Disabled)
+        </button>
+      </div>
     </div>
   );
 }
