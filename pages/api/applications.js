@@ -1,12 +1,6 @@
 // pages/api/applications.js
-
-import { supabaseAdmin } from '../../lib/supabaseClient'; // Use admin client
-import { sendEmail } from '../../lib/email';
-
-// Generate a random 10-digit account number
-function generateAccountNumber() {
-  return Math.floor(1000000000 + Math.random() * 9000000000).toString();
-}
+import { supabaseAdmin } from '../../lib/supabaseClient';
+import nodemailer from 'nodemailer';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -29,11 +23,24 @@ export default async function handler(req, res) {
     state,
     county,
     country,
-    account_types,
+    account_types
   } = req.body;
 
+  // Basic server-side validation
+  if (!first_name || !last_name || !email || !dob || !address_line1 || !city || !state || !country || account_types.length === 0) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+  if (country === 'US' && !/^\d{3}-\d{2}-\d{4}$/.test(ssn)) {
+    return res.status(400).json({ error: 'Invalid SSN format' });
+  }
+
+  if (country !== 'US' && !id_number) {
+    return res.status(400).json({ error: 'ID number required for non-US users' });
+  }
+
   try {
-    // Insert user into Supabase using admin client
+    // Insert user into 'users' table
     const { data: user, error: userError } = await supabaseAdmin
       .from('users')
       .insert([{
@@ -43,70 +50,74 @@ export default async function handler(req, res) {
         mothers_maiden_name,
         email,
         phone,
-        ssn,
-        id_number,
+        ssn: ssn || null,
+        id_number: id_number || null,
         dob,
         address_line1,
         address_line2,
         city,
         state,
         county,
-        country,
+        country
       }])
       .select()
       .single();
 
-    if (userError) throw userError;
-
-    const createdAccounts = [];
-
-    // Insert accounts for each selected account type
-    for (const type of account_types) {
-      const accountNumber = generateAccountNumber();
-      const { data: account, error: accountError } = await supabaseAdmin
-        .from('accounts')
-        .insert([{
-          user_id: user.id,
-          account_number: accountNumber,
-          account_type: type,
-        }])
-        .select()
-        .single();
-
-      if (accountError) throw accountError;
-
-      createdAccounts.push(account);
+    if (userError) {
+      return res.status(400).json({ error: userError.message });
     }
 
-    // Insert application record
-    await supabaseAdmin
-      .from('applications')
+    // Generate unique account number
+    const accountNumber = 'AC' + Math.floor(10000000 + Math.random() * 90000000);
+
+    // Insert first selected account type (you can loop if multiple accounts)
+    const { data: account, error: accountError } = await supabaseAdmin
+      .from('accounts')
       .insert([{
         user_id: user.id,
-        account_number: createdAccounts.map(acc => acc.account_number).join(', '),
-      }]);
+        account_number: accountNumber,
+        account_type: account_types[0],
+        balance: 0.00
+      }])
+      .select()
+      .single();
 
-    // Send welcome email
-    const accountNumbersList = createdAccounts.map(acc => `<li>${acc.account_type}: ${acc.account_number}</li>`).join('');
-    await sendEmail({
-      to: email,
-      subject: 'Welcome to Oakline Bank!',
-      text: `Hello ${first_name},\n\nYour application has been received!\nYour accounts:\n${createdAccounts.map(acc => acc.account_type + ': ' + acc.account_number).join('\n')}\nEnroll in online banking at: ${process.env.NEXT_PUBLIC_SITE_URL}/login`,
-      html: `
-        <p>Hello <strong>${first_name}</strong>,</p>
-        <p>Your application has been received!</p>
-        <p>Your accounts:</p>
-        <ul>
-          ${accountNumbersList}
-        </ul>
-        <p><a href="${process.env.NEXT_PUBLIC_SITE_URL}/login">Click here to enroll in online banking</a></p>
-      `,
+    if (accountError) {
+      return res.status(400).json({ error: accountError.message });
+    }
+
+    // Send welcome email with enroll link
+    const transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: Number(process.env.SMTP_PORT),
+      secure: true,
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS
+      }
     });
 
-    res.status(200).json({ message: 'Application submitted and email sent!' });
+    const enrollLink = `${process.env.NEXT_PUBLIC_SITE_URL}/enroll?account=${accountNumber}`;
 
+    const mailOptions = {
+      from: process.env.SMTP_FROM,
+      to: email,
+      subject: 'Welcome to Oakline Bank!',
+      html: `
+        <h2>Welcome, ${first_name}!</h2>
+        <p>Your account has been created in limited mode.</p>
+        <p><strong>Account Number:</strong> ${accountNumber}</p>
+        <p>Click below to enroll in online banking and set your password:</p>
+        <a href="${enrollLink}" style="display:inline-block;padding:10px 20px;background-color:#0070f3;color:#fff;border-radius:5px;text-decoration:none;">Enroll Now</a>
+        <p>Thank you for choosing Oakline Bank.</p>
+      `
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    return res.status(200).json({ message: 'Application submitted successfully', accountNumber });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Failed to submit application', details: err.message });
+    return res.status(500).json({ error: 'Server error' });
   }
 }
