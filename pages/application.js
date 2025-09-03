@@ -42,16 +42,65 @@ export default function ApplicationForm() {
     e.preventDefault();
     setLoading(true);
     setMessage('');
+
+    // Frontend validation for SSN / ID
+    if (formData.country === 'US' && !formData.ssn) {
+      setMessage('SSN is required for US users.');
+      setLoading(false);
+      return;
+    }
+    if (formData.country !== 'US' && !formData.id_number) {
+      setMessage('ID Number is required for non-US users.');
+      setLoading(false);
+      return;
+    }
+    if (formData.account_types.length === 0) {
+      setMessage('Please select at least one account type.');
+      setLoading(false);
+      return;
+    }
+
     try {
       const res = await fetch('/api/applications', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
+
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Submission failed');
-      setMessage(`Application received! Your first account number: ${data.accountNumbers[0]}`);
-      setFormData({ ...formData, account_types: [] });
+
+      // Build the enrollment link with temp_user_id and pre-filled email
+      const enrollLink = `https://oaklineworkspac-oakline-bank.repl.co/enroll?temp_user_id=${data.tempUserId}&email=${encodeURIComponent(formData.email)}`;
+
+      setMessage(
+        <span>
+          Application received! Your first account number: <strong>{data.accountNumbers[0]}</strong>.<br/>
+          <a href={enrollLink} target="_blank" style={{ color: '#0070f3', textDecoration: 'underline' }}>
+            Click here to enroll in online banking
+          </a>
+        </span>
+      );
+
+      // Reset all fields
+      setFormData({
+        first_name: '',
+        middle_name: '',
+        last_name: '',
+        mothers_maiden_name: '',
+        email: '',
+        phone: '',
+        ssn: '',
+        id_number: '',
+        dob: '',
+        address_line1: '',
+        address_line2: '',
+        city: '',
+        state: '',
+        county: '',
+        country: 'US',
+        account_types: []
+      });
     } catch (err) {
       setMessage(`Error: ${err.message}`);
     } finally {
@@ -103,7 +152,7 @@ export default function ApplicationForm() {
           {loading ? 'Submitting...' : 'Submit Application'}
         </button>
       </form>
-      {message && <p style={{ marginTop: '1rem' }}>{message}</p>}
+      {message && <div style={{ marginTop: '1rem', color: typeof message === 'string' && message.startsWith('Error') ? 'red' : 'green' }}>{message}</div>}
     </div>
   );
 }
