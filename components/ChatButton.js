@@ -1,26 +1,27 @@
-import { useState } from "react";
+// components/CTAButtons.js
+import Link from 'next/link';
 
-export default function ChatButton() {
-  const [open, setOpen] = useState(false);
-
+export default function CTAButtons() {
   return (
-    <>
-      <button
-        className="chat-button"
-        onClick={() => setOpen(!open)}
-        title="Chat with us"
-      >
-        <i className="fas fa-comments"></i>
-      </button>
-      {open && (
-        <div className="chat-window">
-          <header>Oakline Support</header>
-          <div className="chat-messages">
-            <p>Hi! How can we help you today?</p>
-          </div>
-          <input type="text" placeholder="Type your message..." />
-        </div>
-      )}
-    </>
+    <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', justifyContent: 'center', marginTop: '30px' }}>
+      <Link href="/application">
+        <button style={buttonStyle}>Apply for an Account</button>
+      </Link>
+      <Link href="/enroll">
+        <button style={{ ...buttonStyle, backgroundColor: '#28a745' }}>Enroll in Online Banking</button>
+      </Link>
+    </div>
   );
 }
+
+const buttonStyle = {
+  padding: '15px 30px',
+  fontSize: '16px',
+  fontWeight: '600',
+  color: 'white',
+  backgroundColor: '#0070f3',
+  border: 'none',
+  borderRadius: '8px',
+  cursor: 'pointer',
+  transition: 'all 0.3s ease',
+};
