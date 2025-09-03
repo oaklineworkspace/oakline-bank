@@ -1,27 +1,18 @@
-// components/CTAButtons.js
-import Link from 'next/link';
+import { useState } from 'react';
 
-export default function CTAButtons() {
+export default function ChatButton() {
+  const [open, setOpen] = useState(false);
+
+  const toggleChat = () => setOpen(!open);
+
   return (
-    <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', justifyContent: 'center', marginTop: '30px' }}>
-      <Link href="/application">
-        <button style={buttonStyle}>Apply for an Account</button>
-      </Link>
-      <Link href="/enroll">
-        <button style={{ ...buttonStyle, backgroundColor: '#28a745' }}>Enroll in Online Banking</button>
-      </Link>
-    </div>
+    <>
+      <button className="chat-button" onClick={toggleChat}>💬</button>
+      {open && (
+        <div className="chat-box">
+          <p>Chat with us!</p>
+        </div>
+      )}
+    </>
   );
 }
-
-const buttonStyle = {
-  padding: '15px 30px',
-  fontSize: '16px',
-  fontWeight: '600',
-  color: 'white',
-  backgroundColor: '#0070f3',
-  border: 'none',
-  borderRadius: '8px',
-  cursor: 'pointer',
-  transition: 'all 0.3s ease',
-};
