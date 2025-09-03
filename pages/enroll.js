@@ -1,53 +1,42 @@
 // pages/enroll.js
 import { useState } from 'react';
+import { supabase } from '../lib/supabaseClient';
+import { useRouter } from 'next/router';
 
 export default function EnrollPage() {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    confirmPassword: '',
-    accountNumber: '',
-    ssnLast4: '',
-  });
-
-  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const { account } = router.query; // account number from enroll link
+  const [formData, setFormData] = useState({ email: '', password: '' });
   const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     setMessage('');
 
-    if (formData.password !== formData.confirmPassword) {
-      setMessage('Passwords do not match.');
-      return;
-    }
-
-    setLoading(true);
     try {
-      const res = await fetch('/api/enroll', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+      // Sign up with Supabase Auth
+      const { data, error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password
       });
 
-      const data = await res.json();
-      if (res.ok) {
-        setMessage('Enrollment successful! You can now log in.');
-        setFormData({
-          email: '',
-          password: '',
-          confirmPassword: '',
-          accountNumber: '',
-          ssnLast4: '',
-        });
-      } else {
-        setMessage(`Error: ${data.error || 'Something went wrong'}`);
+      if (error) {
+        setMessage(`Error: ${error.message}`);
+        setLoading(false);
+        return;
       }
+
+      // Optionally, link Supabase user with our accounts table
+      // You can update the users table with supabase user ID if needed
+
+      setMessage('Enrollment successful! You can now log in to your dashboard.');
+      setFormData({ email: '', password: '' });
     } catch (err) {
       setMessage(`Error: ${err.message}`);
     } finally {
@@ -56,35 +45,29 @@ export default function EnrollPage() {
   };
 
   return (
-    <div className="container" style={{ maxWidth: '600px', margin: '0 auto', padding: '40px' }}>
-      <h1>Enroll in Online Banking</h1>
-      <p style={{ color: '#555' }}>Enter your details to create an online banking login.</p>
-      {message && <p style={{ color: message.startsWith('Error') ? 'red' : 'green' }}>{message}</p>}
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      minHeight: '100vh',
+      fontFamily: 'Arial, sans-serif',
+      padding: '2rem',
+      backgroundColor: '#f0f4f8',
+      textAlign: 'center'
+    }}>
+      <h1 style={{ color: '#0070f3', marginBottom: '1rem' }}>Enroll in Online Banking</h1>
+      <p>Your Account Number: <strong>{account || 'Loading...'}</strong></p>
 
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        <input
-          type="text"
-          name="accountNumber"
-          placeholder="Account Number"
-          required
-          value={formData.accountNumber}
-          onChange={handleChange}
-        />
-        <input
-          type="text"
-          name="ssnLast4"
-          placeholder="Last 4 digits of SSN"
-          required
-          value={formData.ssnLast4}
-          onChange={handleChange}
-        />
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', width: '300px', gap: '10px' }}>
         <input
           type="email"
           name="email"
-          placeholder="Email Address"
+          placeholder="Email"
           required
           value={formData.email}
           onChange={handleChange}
+          style={{ padding: '10px', borderRadius: '5px', border: '1px solid #ccc' }}
         />
         <input
           type="password"
@@ -93,19 +76,21 @@ export default function EnrollPage() {
           required
           value={formData.password}
           onChange={handleChange}
+          style={{ padding: '10px', borderRadius: '5px', border: '1px solid #ccc' }}
         />
-        <input
-          type="password"
-          name="confirmPassword"
-          placeholder="Confirm Password"
-          required
-          value={formData.confirmPassword}
-          onChange={handleChange}
-        />
-        <button type="submit" disabled={loading}>
-          {loading ? 'Enrolling...' : 'Enroll'}
+        <button type="submit" disabled={loading} style={{
+          padding: '10px',
+          backgroundColor: '#0070f3',
+          color: '#fff',
+          border: 'none',
+          borderRadius: '5px',
+          cursor: 'pointer'
+        }}>
+          {loading ? 'Enrolling...' : 'Enroll Now'}
         </button>
       </form>
+
+      {message && <p style={{ marginTop: '20px', color: message.startsWith('Error') ? 'red' : 'green' }}>{message}</p>}
     </div>
   );
 }
