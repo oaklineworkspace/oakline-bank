@@ -1,5 +1,4 @@
-// pages/dashboard.js
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useRouter } from 'next/router';
 
@@ -11,77 +10,69 @@ export default function Dashboard() {
 
   useEffect(() => {
     const session = supabase.auth.session();
-
     if (!session) {
-      router.push('/enroll'); // Redirect to enroll/login if not authenticated
-    } else {
-      fetchUserData(session.user.id);
+      router.push('/enroll'); // redirect to enroll/login if not logged in
+      return;
     }
+    setUser(session.user);
+    fetchAccounts(session.user.id);
   }, []);
 
-  const fetchUserData = async (userId) => {
-    setLoading(true);
+  const fetchAccounts = async (userId) => {
     try {
-      // Fetch user info
-      const { data: users, error: userError } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', userId)
-        .single();
-
-      if (userError) throw userError;
-      setUser(users);
-
-      // Fetch accounts for this user
-      const { data: userAccounts, error: accountsError } = await supabase
+      const { data, error } = await supabase
         .from('accounts')
-        .select('*')
+        .select('account_number, account_type, balance, status')
         .eq('user_id', userId);
 
-      if (accountsError) throw accountsError;
-      setAccounts(userAccounts);
+      if (error) throw error;
+      setAccounts(data);
     } catch (err) {
-      console.error(err.message);
+      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  if (loading) return <p style={{ textAlign: 'center', marginTop: '50px' }}>Loading your dashboard...</p>;
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push('/enroll');
+  };
+
+  if (loading) return <p>Loading dashboard...</p>;
 
   return (
-    <div style={{ fontFamily: 'Arial, sans-serif', padding: '2rem' }}>
-      <h1>Welcome, {user?.first_name || 'Customer'}!</h1>
-      <p>Your online banking account is currently in <strong>limited mode</strong>.</p>
-      <p>Transactions and transfers will be available after verification.</p>
+    <div style={{ maxWidth: 800, margin: '2rem auto', fontFamily: 'Arial, sans-serif' }}>
+      <h1>Welcome, {user?.email}</h1>
+      <button onClick={handleLogout} style={{ marginBottom: '1rem' }}>Logout</button>
 
+      <h2>Your Accounts</h2>
       {accounts.length === 0 ? (
-        <p>You do not have any accounts yet.</p>
+        <p>No accounts found.</p>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '20px' }}>
-          {accounts.map((acc) => (
-            <div key={acc.id} style={{ padding: '15px', border: '1px solid #ccc', borderRadius: '8px', backgroundColor: '#f9f9f9' }}>
-              <p><strong>Account Number:</strong> {acc.account_number}</p>
-              <p><strong>Account Type:</strong> {acc.account_type}</p>
-              <p><strong>Balance:</strong> ${acc.balance.toFixed(2)}</p>
-              <p><strong>Status:</strong> {acc.status}</p>
-            </div>
-          ))}
-        </div>
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <thead>
+            <tr style={{ borderBottom: '2px solid #ccc' }}>
+              <th style={{ padding: '8px' }}>Account Number</th>
+              <th style={{ padding: '8px' }}>Type</th>
+              <th style={{ padding: '8px' }}>Balance</th>
+              <th style={{ padding: '8px' }}>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {accounts.map((acc) => (
+              <tr key={acc.account_number} style={{ borderBottom: '1px solid #eee' }}>
+                <td style={{ padding: '8px' }}>{acc.account_number}</td>
+                <td style={{ padding: '8px' }}>{acc.account_type}</td>
+                <td style={{ padding: '8px' }}>${acc.balance.toFixed(2)}</td>
+                <td style={{ padding: '8px' }}>
+                  {acc.status === 'limited' ? 'Limited (Transactions Disabled)' : 'Active'}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       )}
-
-      <div style={{ marginTop: '40px', textAlign: 'center' }}>
-        <button disabled style={{
-          padding: '10px 20px',
-          backgroundColor: '#0070f3',
-          color: '#fff',
-          border: 'none',
-          borderRadius: '5px',
-          cursor: 'not-allowed'
-        }}>
-          Make Transfer (Disabled)
-        </button>
-      </div>
     </div>
   );
 }
