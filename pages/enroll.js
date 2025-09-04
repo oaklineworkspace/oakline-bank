@@ -6,7 +6,7 @@ import { useRouter } from 'next/router';
 export default function EnrollPage() {
   const router = useRouter();
   const { temp_user_id } = router.query; // from email link
-  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [formData, setFormData] = useState({ email: '', password: '', ssn: '', accountNumber: '' });
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [userExists, setUserExists] = useState(false);
@@ -27,7 +27,7 @@ export default function EnrollPage() {
         return;
       }
       setUserExists(true);
-      setFormData({ ...formData, email: user.email || '' });
+      setFormData({ ...formData, email: user.email || '', password: '', ssn: '', accountNumber: '' });
     };
 
     checkUser();
@@ -54,7 +54,9 @@ export default function EnrollPage() {
         body: JSON.stringify({
           temp_user_id: temp_user_id,
           email: formData.email,
-          password: formData.password
+          password: formData.password,
+          ssn: formData.ssn,
+          accountNumber: formData.accountNumber
         })
       });
 
@@ -65,7 +67,7 @@ export default function EnrollPage() {
       }
 
       setMessage('🎉 Enrollment successful! You can now log in to your dashboard.');
-      setFormData({ email: '', password: '' });
+      setFormData({ email: '', password: '', ssn: '', accountNumber: '' });
       
       // Redirect to login page after 2 seconds
       setTimeout(() => {
@@ -94,27 +96,54 @@ export default function EnrollPage() {
       textAlign: 'center'
     }}>
       <h1 style={{ color: '#0070f3', marginBottom: '1rem' }}>Enroll in Online Banking</h1>
-      <p>Set your online banking email and password:</p>
+      <p>Complete your enrollment by verifying your identity and setting your online banking credentials:</p>
 
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', width: '300px', gap: '10px' }}>
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          required
-          value={formData.email}
-          onChange={handleChange}
-          style={{ padding: '10px', borderRadius: '5px', border: '1px solid #ccc' }}
-        />
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          required
-          value={formData.password}
-          onChange={handleChange}
-          style={{ padding: '10px', borderRadius: '5px', border: '1px solid #ccc' }}
-        />
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', width: '350px', gap: '15px' }}>
+        <div style={{ textAlign: 'left' }}>
+          <h3 style={{ margin: '0 0 10px 0', color: '#0070f3', fontSize: '16px' }}>Identity Verification</h3>
+          <input
+            type="text"
+            name="ssn"
+            placeholder="Social Security Number (XXX-XX-XXXX)"
+            required
+            value={formData.ssn}
+            onChange={handleChange}
+            pattern="[0-9]{3}-[0-9]{2}-[0-9]{4}"
+            style={{ padding: '10px', borderRadius: '5px', border: '1px solid #ccc', width: '100%', boxSizing: 'border-box' }}
+          />
+          <input
+            type="text"
+            name="accountNumber"
+            placeholder="One of your account numbers"
+            required
+            value={formData.accountNumber}
+            onChange={handleChange}
+            style={{ padding: '10px', borderRadius: '5px', border: '1px solid #ccc', width: '100%', boxSizing: 'border-box', marginTop: '10px' }}
+          />
+        </div>
+        
+        <div style={{ textAlign: 'left' }}>
+          <h3 style={{ margin: '0 0 10px 0', color: '#0070f3', fontSize: '16px' }}>Online Banking Setup</h3>
+          <input
+            type="email"
+            name="email"
+            placeholder="Email"
+            required
+            value={formData.email}
+            onChange={handleChange}
+            style={{ padding: '10px', borderRadius: '5px', border: '1px solid #ccc', width: '100%', boxSizing: 'border-box' }}
+          />
+          <input
+            type="password"
+            name="password"
+            placeholder="Create Password"
+            required
+            value={formData.password}
+            onChange={handleChange}
+            minLength="6"
+            style={{ padding: '10px', borderRadius: '5px', border: '1px solid #ccc', width: '100%', boxSizing: 'border-box', marginTop: '10px' }}
+          />
+        </div>
         <button type="submit" disabled={loading} style={{
           padding: '10px',
           backgroundColor: '#0070f3',

@@ -6,14 +6,14 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { temp_user_id, email, password } = req.body;
+  const { temp_user_id, email, password, ssn, accountNumber } = req.body;
 
-  if (!temp_user_id || !email || !password) {
-    return res.status(400).json({ error: 'Missing required fields' });
+  if (!temp_user_id || !email || !password || !ssn || !accountNumber) {
+    return res.status(400).json({ error: 'Missing required fields: temp_user_id, email, password, ssn, and accountNumber are required' });
   }
 
   try {
-    // 1️⃣ Check if user exists and hasn't already enrolled
+    // 1️⃣ Check if user exists and verify identity
     const { data: existingUser, error: userError } = await supabaseAdmin
       .from('users')
       .select('*')
@@ -22,6 +22,27 @@ export default async function handler(req, res) {
 
     if (userError || !existingUser) {
       return res.status(404).json({ error: 'User not found or invalid enrollment link' });
+    }
+
+    // Verify SSN matches
+    if (existingUser.ssn && existingUser.ssn !== ssn) {
+      return res.status(400).json({ error: 'SSN verification failed. Please check your Social Security Number.' });
+    }
+
+    // Verify account number exists for this user
+    const { data: userAccounts, error: accountsError } = await supabaseAdmin
+      .from('accounts')
+      .select('account_number')
+      .eq('user_id', temp_user_id);
+
+    if (accountsError) {
+      console.error('Error fetching user accounts:', accountsError);
+      return res.status(500).json({ error: 'Error verifying account information' });
+    }
+
+    const accountNumbers = userAccounts?.map(acc => acc.account_number) || [];
+    if (!accountNumbers.includes(accountNumber)) {
+      return res.status(400).json({ error: 'Account number verification failed. Please check one of your account numbers.' });
     }
 
     // Skip auth_id check since column may not exist
