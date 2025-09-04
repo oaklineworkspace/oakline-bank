@@ -45,26 +45,33 @@ export default function EnrollPage() {
     try {
       if (!temp_user_id) throw new Error('Missing temp user ID');
 
-      // 1️⃣ Sign up in Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password
+      // Use server-side API for reliable enrollment
+      const response = await fetch('/api/complete-enrollment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          temp_user_id: temp_user_id,
+          email: formData.email,
+          password: formData.password
+        })
       });
 
-      if (authError) {
-        setMessage(`Error: ${authError.message}`);
-        setLoading(false);
-        return;
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Enrollment failed');
       }
 
-      // 2️⃣ Update the users table to link with auth user
-      await supabase
-        .from('users')
-        .update({ auth_id: authData.user.id }) // assuming you add `auth_id` column
-        .eq('id', temp_user_id);
-
-      setMessage('Enrollment successful! You can now log in to your dashboard.');
+      setMessage('🎉 Enrollment successful! You can now log in to your dashboard.');
       setFormData({ email: '', password: '' });
+      
+      // Redirect to login page after 2 seconds
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 2000);
+
     } catch (err) {
       setMessage(`Error: ${err.message}`);
     } finally {
