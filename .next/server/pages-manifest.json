@@ -3,5 +3,5 @@
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
   "/": "pages/index.js",
-  "/admin/resend-enrollment": "pages/admin/resend-enrollment.js"
+  "/api/resend-enrollment": "pages/api/resend-enrollment.js"
 }
