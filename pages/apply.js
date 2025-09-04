@@ -44,10 +44,11 @@ export default function ApplyPage() {
     setMessage('');
 
     try {
-      // 1. Create user record
+      // 1. Create user record (excluding account_type which belongs in accounts table)
+      const { account_type, ...userDataOnly } = formData;
       const { data: userData, error: userError } = await supabase
         .from('users')
-        .insert([formData])
+        .insert([userDataOnly])
         .select()
         .single();
 
@@ -60,7 +61,7 @@ export default function ApplyPage() {
         .insert([{
           user_id: userData.id,
           account_number: accountNumber,
-          account_type: formData.account_type,
+          account_type: account_type,
           balance: 0.00,
           status: 'limited'
         }])
