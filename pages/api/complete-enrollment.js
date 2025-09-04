@@ -28,16 +28,30 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'User has already completed enrollment' });
     }
 
-    // 2️⃣ Create user in Supabase Auth
-    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
-      email: email,
-      password: password,
-      email_confirm: true // Auto-confirm email
-    });
+    // 2️⃣ Check if user already exists in auth, if not create them
+    let authData;
+    
+    // First try to get existing user by email
+    const { data: existingAuthUsers, error: listError } = await supabaseAdmin.auth.admin.listUsers();
+    const existingAuthUser = existingAuthUsers?.users?.find(user => user.email === email);
+    
+    if (existingAuthUser) {
+      // User already exists in auth
+      authData = { user: existingAuthUser };
+    } else {
+      // Create new user in auth
+      const { data: newAuthData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+        email: email,
+        password: password,
+        email_confirm: true // Auto-confirm email
+      });
 
-    if (authError) {
-      console.error('Auth error:', authError);
-      return res.status(400).json({ error: `Authentication error: ${authError.message}` });
+      if (authError) {
+        console.error('Auth error:', authError);
+        return res.status(400).json({ error: `Authentication error: ${authError.message}` });
+      }
+      
+      authData = newAuthData;
     }
 
     // 3️⃣ Update user record with auth_id
