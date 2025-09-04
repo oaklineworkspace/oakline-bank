@@ -1,5 +1,6 @@
 
-// pages/api/transactions-management.js
+// pages/api/account-management.js
+// Combined: Account operations, transactions, balance updates, and admin functions
 
 import { createClient } from '@supabase/supabase-js';
 
