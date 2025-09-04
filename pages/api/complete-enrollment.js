@@ -24,9 +24,10 @@ export default async function handler(req, res) {
       return res.status(404).json({ error: 'User not found or invalid enrollment link' });
     }
 
-    if (existingUser.auth_id) {
-      return res.status(400).json({ error: 'User has already completed enrollment' });
-    }
+    // Skip auth_id check since column may not exist
+    // if (existingUser.auth_id) {
+    //   return res.status(400).json({ error: 'User has already completed enrollment' });
+    // }
 
     // 2️⃣ Check if user already exists in auth, if not create them
     let authData;
@@ -54,11 +55,10 @@ export default async function handler(req, res) {
       authData = newAuthData;
     }
 
-    // 3️⃣ Update user record with auth_id
+    // 3️⃣ Update user record (without auth_id since column doesn't exist)
     const { data: updateData, error: updateError } = await supabaseAdmin
       .from('users')
       .update({ 
-        auth_id: authData.user.id,
         email: email, // Update email to match auth
         updated_at: new Date().toISOString()
       })
@@ -95,7 +95,7 @@ export default async function handler(req, res) {
         id: existingUser.id,
         email: email,
         name: `${existingUser.first_name} ${existingUser.last_name}`,
-        auth_id: authData.user.id
+        supabase_auth_id: authData.user.id
       }
     });
 

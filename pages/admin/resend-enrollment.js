@@ -19,7 +19,6 @@ export default function ResendEnrollmentAdmin() {
       const { data, error } = await supabaseAdmin
         .from('users')
         .select('id, first_name, last_name, email, created_at')
-        .is('auth_id', null)
         .order('created_at', { ascending: false });
 
       if (error) throw error;

@@ -2,7 +2,5 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/": "pages/index.js",
-  "/enroll": "pages/enroll.js",
-  "/api/complete-enrollment": "pages/api/complete-enrollment.js"
+  "/": "pages/index.js"
 }
