@@ -17,6 +17,8 @@ export default async function handler(req, res) {
   const typesList = account_types || ['Checking'];
 
   try {
+    console.log('Attempting to send welcome email to:', email);
+    
     // Create transporter
     const transporter = nodemailer.createTransporter({
       host: process.env.SMTP_HOST,
@@ -27,6 +29,15 @@ export default async function handler(req, res) {
         pass: process.env.SMTP_PASS,
       },
     });
+
+    // Test the connection
+    try {
+      await transporter.verify();
+      console.log('SMTP connection verified successfully');
+    } catch (verifyError) {
+      console.error('SMTP verification failed:', verifyError);
+      throw new Error(`SMTP configuration error: ${verifyError.message}`);
+    }
 
     // Get the base URL for enrollment link
     const baseUrl = process.env.NODE_ENV === 'production' 

@@ -119,7 +119,7 @@ export default function ApplyPage() {
         }]);
 
       // 4. Send welcome email with enrollment link
-      await fetch('/api/send-welcome-email', {
+      const emailResponse = await fetch('/api/send-welcome-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -131,6 +131,13 @@ export default function ApplyPage() {
           temp_user_id: userData.id
         })
       });
+
+      if (!emailResponse.ok) {
+        const emailError = await emailResponse.json();
+        console.error('Email sending failed:', emailError);
+        // Don't fail the entire application, but log the error
+        console.warn('Application created but email failed to send. User may need manual email resend.');
+      }
 
       const accountSummary = accountsData.length > 1 
         ? `${accountsData.length} accounts created: ${accountsData.map(acc => acc.account_number).join(', ')}`
@@ -432,11 +439,21 @@ export default function ApplyPage() {
                 { value: 'Premium', label: 'Premium Banking', description: 'Premium banking with additional benefits and services' },
                 { value: 'IRA', label: 'Individual Retirement Account', description: 'Tax-advantaged retirement savings account' },
                 { value: 'Money Market', label: 'Money Market Account', description: 'Higher interest account with limited transactions' },
-                { value: 'Certificate of Deposit', label: 'Certificate of Deposit', description: 'Fixed-term deposit with guaranteed returns' },
+                { value: 'Certificate of Deposit', label: 'Certificate of Deposit (CD)', description: 'Fixed-term deposit with guaranteed returns' },
+                { value: 'Foreign Currency', label: 'Foreign Currency Account', description: 'Multi-currency account for international banking' },
+                { value: 'Trust', label: 'Trust Account', description: 'Fiduciary account for trust management' },
                 { value: 'Healthcare Savings', label: 'Healthcare Savings (HSA)', description: 'Tax-free savings for medical expenses' },
                 { value: 'Youth Savings', label: 'Youth Savings', description: 'Savings account for minors under 18' },
                 { value: 'Senior Savings', label: 'Senior Savings', description: 'Special benefits for customers 65+' },
-                { value: 'Crypto', label: 'Cryptocurrency Account', description: 'Digital currency trading and storage' }
+                { value: 'Payroll', label: 'Payroll Account', description: 'Business payroll management account' },
+                { value: 'Loan', label: 'Loan Account', description: 'Personal, auto, or mortgage loan account' },
+                { value: 'Crypto', label: 'Cryptocurrency Account', description: 'Digital currency trading and storage' },
+                { value: 'Retirement Savings', label: 'Retirement Savings', description: '401k and pension retirement planning' },
+                { value: 'Education Savings', label: 'Education Savings (529)', description: 'Tax-advantaged education funding' },
+                { value: 'Investment', label: 'Investment Account', description: 'Stocks, bonds, and securities trading' },
+                { value: 'Estate', label: 'Estate Account', description: 'Estate planning and wealth management' },
+                { value: 'Emergency Fund', label: 'Emergency Fund', description: 'High-yield emergency savings account' },
+                { value: 'Special Purpose', label: 'Special Purpose Account', description: 'Custom account for specific financial goals' }
               ].map((accountType) => (
                 <div 
                   key={accountType.value}

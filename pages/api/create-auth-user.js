@@ -45,6 +45,8 @@ export default async function handler(req, res) {
     // 3️⃣ Create auth user immediately with temporary password
     const tempPassword = `temp_${Date.now()}_${Math.random().toString(36).substring(7)}`;
     
+    console.log('Creating auth user for:', existingUser.email);
+    
     const { data: newAuthData, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email: existingUser.email,
       password: tempPassword,
@@ -52,23 +54,33 @@ export default async function handler(req, res) {
     });
 
     if (authError) {
-      console.error('Auth creation error:', authError);
+      console.error('Auth creation error details:', {
+        message: authError.message,
+        status: authError.status,
+        details: authError
+      });
       
       // Handle case where user already exists but wasn't found
-      if (authError.message?.includes('already registered') || authError.message?.includes('already exists')) {
+      if (authError.message?.includes('already registered') || 
+          authError.message?.includes('already exists') ||
+          authError.message?.includes('User already registered')) {
+        console.log('User already exists in auth, returning success');
         return res.status(200).json({ 
           message: 'Auth user already exists (not found in initial search)',
           user: {
             id: existingUser.id,
             email: existingUser.email,
             name: `${existingUser.first_name} ${existingUser.last_name}`,
+            country: existingUser.country,
             auth_created: true
           }
         });
       }
       
-      return res.status(400).json({ error: `Failed to create auth user: ${authError.message}` });
+      return res.status(400).json({ error: `Failed to create auth user: Database error creating new user - ${authError.message}` });
     }
+
+    console.log('Auth user created successfully:', newAuthData.user.id);
 
     // 4️⃣ Update user record to mark auth as created
     const { error: updateError } = await supabaseAdmin
