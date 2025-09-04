@@ -24,12 +24,12 @@ export default function Home() {
       <CTA
         title="Open Your Account Today"
         buttonText="Apply Now"
-        buttonLink="/application"
+        buttonLink="/apply"
       />
       <CTA
-        title="Enroll in Online Banking"
-        buttonText="Enroll Now"
-        buttonLink="/enroll"
+        title="Existing Customer? Sign In"
+        buttonText="Sign In"
+        buttonLink="/login"
       />
 
       {/* Testimonials Section */}

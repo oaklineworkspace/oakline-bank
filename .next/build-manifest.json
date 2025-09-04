@@ -27,6 +27,11 @@
       "static/chunks/main.js",
       "static/chunks/pages/_error.js"
     ],
+    "/apply": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/apply.js"
+    ],
     "/enroll": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
