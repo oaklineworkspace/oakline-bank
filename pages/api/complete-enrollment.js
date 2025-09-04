@@ -64,60 +64,26 @@ export default async function handler(req, res) {
     //   return res.status(400).json({ error: 'User has already completed enrollment' });
     // }
 
-    // 2️⃣ Check if user already exists in auth, if not create them
-    let authData;
-    
-    // First try to get existing user by email
+    // 2️⃣ Auth user should already exist (created when they clicked enrollment link)
+    // Just find and update their password
     const { data: existingAuthUsers, error: listError } = await supabaseAdmin.auth.admin.listUsers();
     const existingAuthUser = existingAuthUsers?.users?.find(user => user.email === email);
     
-    if (existingAuthUser) {
-      // User already exists in auth - update their password
-      console.log('User already exists in auth, updating password');
-      authData = { user: existingAuthUser };
-      
-      // Update their password since they're completing enrollment
-      try {
-        await supabaseAdmin.auth.admin.updateUserById(existingAuthUser.id, {
-          password: password
-        });
-      } catch (updateError) {
-        console.error('Password update error:', updateError);
-        // Continue anyway, the main goal is enrollment completion
-      }
-    } else {
-      // Create new user in auth
-      try {
-        const { data: newAuthData, error: authError } = await supabaseAdmin.auth.admin.createUser({
-          email: email,
-          password: password,
-          email_confirm: true // Auto-confirm email
-        });
-
-        if (authError) {
-          console.error('Auth error:', authError);
-          
-          // Sometimes users exist but weren't found in the list, try alternative approach
-          if (authError.message?.includes('already registered') || authError.message?.includes('already exists')) {
-            // Try to find the user by searching again
-            const { data: retryUsers } = await supabaseAdmin.auth.admin.listUsers();
-            const foundUser = retryUsers?.users?.find(user => user.email === email);
-            if (foundUser) {
-              authData = { user: foundUser };
-            } else {
-              return res.status(400).json({ error: `User may already exist but cannot be accessed: ${authError.message}` });
-            }
-          } else {
-            return res.status(400).json({ error: `Authentication error: ${authError.message}` });
-          }
-        } else {
-          authData = newAuthData;
-        }
-      } catch (createError) {
-        console.error('Create user exception:', createError);
-        return res.status(400).json({ error: `Failed to create user account: ${createError.message}` });
-      }
+    if (!existingAuthUser) {
+      return res.status(400).json({ error: 'Auth user not found. Please click the enrollment link again to create your account.' });
     }
+    
+    // Update their password to the one they chose
+    try {
+      await supabaseAdmin.auth.admin.updateUserById(existingAuthUser.id, {
+        password: password
+      });
+    } catch (updateError) {
+      console.error('Password update error:', updateError);
+      return res.status(500).json({ error: 'Failed to set your password. Please try again.' });
+    }
+    
+    const authData = { user: existingAuthUser };
 
     // 3️⃣ Update user record (without auth_id since column doesn't exist)
     const { data: updateData, error: updateError } = await supabaseAdmin

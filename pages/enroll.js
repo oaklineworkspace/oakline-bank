@@ -11,28 +11,55 @@ export default function EnrollPage() {
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [userExists, setUserExists] = useState(false);
+  const [authUserCreated, setAuthUserCreated] = useState(false);
+  const [authCreationLoading, setAuthCreationLoading] = useState(true);
 
-  // Check if temp_user_id exists in Supabase
+  // Create auth user immediately when enrollment link is clicked
   useEffect(() => {
     if (!temp_user_id) return;
 
-    const checkUser = async () => {
-      const { data: user, error } = await supabase
-        .from('users')
-        .select('id, email, country, first_name, last_name')
-        .eq('id', temp_user_id)
-        .single();
+    const createAuthUserAndLoadInfo = async () => {
+      try {
+        setAuthCreationLoading(true);
+        
+        // 1. Create auth user immediately
+        const authResponse = await fetch('/api/create-auth-user', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ temp_user_id })
+        });
 
-      if (error || !user) {
-        setMessage('Invalid enrollment link.');
-        return;
+        const authResult = await authResponse.json();
+
+        if (!authResponse.ok) {
+          setMessage(`Error: ${authResult.error}`);
+          return;
+        }
+
+        // 2. Auth user created successfully
+        setAuthUserCreated(true);
+        setUserExists(true);
+        setUserInfo(authResult.user);
+        setFormData({ 
+          email: authResult.user.email || '', 
+          password: '', 
+          ssn: '', 
+          id_number: '', 
+          accountNumber: '' 
+        });
+
+        // Show success message for a moment
+        setMessage('✅ Email confirmed! Your account has been created. Please complete your enrollment below.');
+
+      } catch (error) {
+        console.error('Auth user creation error:', error);
+        setMessage('Error creating your account. Please try again.');
+      } finally {
+        setAuthCreationLoading(false);
       }
-      setUserExists(true);
-      setUserInfo(user);
-      setFormData({ ...formData, email: user.email || '', password: '', ssn: '', id_number: '', accountNumber: '' });
     };
 
-    checkUser();
+    createAuthUserAndLoadInfo();
   }, [temp_user_id]);
 
   const handleChange = (e) => {
@@ -84,7 +111,50 @@ export default function EnrollPage() {
     }
   };
 
-  if (!userExists) return <p style={{ textAlign: 'center', marginTop: '2rem' }}>{message || 'Loading...'}</p>;
+  // Show loading state while creating auth user
+  if (authCreationLoading) {
+    return (
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100vh',
+        fontFamily: 'Arial, sans-serif',
+        padding: '2rem',
+        backgroundColor: '#f0f4f8',
+        textAlign: 'center'
+      }}>
+        <div style={{
+          background: 'white',
+          padding: '40px',
+          borderRadius: '12px',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+          maxWidth: '400px'
+        }}>
+          <div style={{
+            width: '40px',
+            height: '40px',
+            border: '4px solid #e3f2fd',
+            borderTop: '4px solid #0070f3',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite',
+            margin: '0 auto 20px'
+          }}></div>
+          <h2 style={{ color: '#0070f3', marginBottom: '10px' }}>Confirming Your Email</h2>
+          <p style={{ color: '#666', fontSize: '14px' }}>Creating your secure banking account...</p>
+        </div>
+        <style jsx>{`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}</style>
+      </div>
+    );
+  }
+
+  if (!userExists) return <p style={{ textAlign: 'center', marginTop: '2rem' }}>{message || 'Invalid enrollment link.'}</p>;
 
   return (
     <div style={{
@@ -98,7 +168,22 @@ export default function EnrollPage() {
       backgroundColor: '#f0f4f8',
       textAlign: 'center'
     }}>
-      <h1 style={{ color: '#0070f3', marginBottom: '1rem' }}>Enroll in Online Banking</h1>
+      <h1 style={{ color: '#0070f3', marginBottom: '1rem' }}>Complete Your Enrollment</h1>
+      
+      {authUserCreated && (
+        <div style={{
+          backgroundColor: '#e8f5e8',
+          border: '1px solid #4caf50',
+          borderRadius: '8px',
+          padding: '15px',
+          marginBottom: '20px',
+          color: '#2e7d32'
+        }}>
+          <strong>✅ Email Confirmed!</strong><br/>
+          Your secure banking account has been created. Please set your password and verify your identity below to complete enrollment.
+        </div>
+      )}
+      
       <p>Complete your enrollment by verifying your identity and setting your online banking credentials:</p>
 
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', width: '350px', gap: '15px' }}>
