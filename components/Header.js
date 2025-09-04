@@ -32,25 +32,25 @@ export default function Header() {
           {dropdownOpen && (
             <div style={styles.dropdownContent}>
               <h4 style={styles.dropdownHeading}>Accounts</h4>
-              <Link href="/application"><a>Checking Account</a></Link>
-              <Link href="/application"><a>Savings Account</a></Link>
-              <Link href="/application"><a>Business Account</a></Link>
-              <Link href="/application"><a>Student Account</a></Link>
-              <Link href="/application"><a>Joint Account</a></Link>
+              <Link href="/application">Checking Account</Link>
+              <Link href="/application">Savings Account</Link>
+              <Link href="/application">Business Account</Link>
+              <Link href="/application">Student Account</Link>
+              <Link href="/application">Joint Account</Link>
 
               <h4 style={styles.dropdownHeading}>Loans</h4>
-              <Link href="/application"><a>Home Loan</a></Link>
-              <Link href="/application"><a>Personal Loan</a></Link>
-              <Link href="/application"><a>Auto Loan</a></Link>
-              <Link href="/application"><a>Business Loan</a></Link>
-              <Link href="/application"><a>Education Loan</a></Link>
+              <Link href="/application">Home Loan</Link>
+              <Link href="/application">Personal Loan</Link>
+              <Link href="/application">Auto Loan</Link>
+              <Link href="/application">Business Loan</Link>
+              <Link href="/application">Education Loan</Link>
             </div>
           )}
         </div>
         <div style={styles.links}>
-          <Link href="/application"><a style={styles.navLink}>Apply</a></Link>
-          <Link href="/enroll"><a style={styles.navLink}>Enroll</a></Link>
-          <Link href="/login"><a style={styles.navLink}>Sign In</a></Link>
+          <Link href="/application" style={styles.navLink}>Apply</Link>
+          <Link href="/enroll" style={styles.navLink}>Enroll</Link>
+          <Link href="/login" style={styles.navLink}>Sign In</Link>
         </div>
       </nav>
     </header>

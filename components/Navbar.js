@@ -27,7 +27,7 @@ export default function Navbar({ links }) {
                     {link.dropdown.map((item, i) => (
                       <li key={i}>
                         <Link href={item.href}>
-                          <a>{item.name}</a>
+                          {item.name}
                         </Link>
                       </li>
                     ))}
@@ -36,7 +36,7 @@ export default function Navbar({ links }) {
               </>
             ) : (
               <Link href={link.href}>
-                <a>{link.name}</a>
+                {link.name}
               </Link>
             )}
           </li>
