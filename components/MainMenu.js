@@ -50,7 +50,7 @@ export default function MainMenu({ user = null }) {
         {/* Logo */}
         <Link href="/" style={styles.logo} onClick={closeAllDropdowns}>
           <img 
-            src="/images/logo-primary.png.jpg" 
+            src="/images/logo-primary.png" 
             alt="Oakline Bank" 
             style={styles.logoImage}
           />

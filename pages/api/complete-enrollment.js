@@ -6,10 +6,15 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { temp_user_id, email, password, ssn, accountNumber } = req.body;
+  const { temp_user_id, email, password, ssn, id_number, accountNumber } = req.body;
 
-  if (!temp_user_id || !email || !password || !ssn || !accountNumber) {
-    return res.status(400).json({ error: 'Missing required fields: temp_user_id, email, password, ssn, and accountNumber are required' });
+  if (!temp_user_id || !email || !password || !accountNumber) {
+    return res.status(400).json({ error: 'Missing required fields: temp_user_id, email, password, and accountNumber are required' });
+  }
+
+  // Require either SSN or ID number based on citizenship
+  if (!ssn && !id_number) {
+    return res.status(400).json({ error: 'Either SSN or ID number is required' });
   }
 
   try {
@@ -24,9 +29,18 @@ export default async function handler(req, res) {
       return res.status(404).json({ error: 'User not found or invalid enrollment link' });
     }
 
-    // Verify SSN matches
-    if (existingUser.ssn && existingUser.ssn !== ssn) {
-      return res.status(400).json({ error: 'SSN verification failed. Please check your Social Security Number.' });
+    // Verify identity - either SSN or ID number based on citizenship
+    if (existingUser.country === 'US') {
+      // US citizens - verify SSN
+      const cleanSSN = ssn ? ssn.replace(/-/g, '') : '';
+      if (existingUser.ssn && existingUser.ssn !== cleanSSN) {
+        return res.status(400).json({ error: 'SSN verification failed. Please check your Social Security Number.' });
+      }
+    } else {
+      // International citizens - verify ID number
+      if (existingUser.id_number && existingUser.id_number !== id_number) {
+        return res.status(400).json({ error: 'ID number verification failed. Please check your Government ID Number.' });
+      }
     }
 
     // Verify account number exists for this user

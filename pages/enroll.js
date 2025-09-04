@@ -6,7 +6,8 @@ import { useRouter } from 'next/router';
 export default function EnrollPage() {
   const router = useRouter();
   const { temp_user_id } = router.query; // from email link
-  const [formData, setFormData] = useState({ email: '', password: '', ssn: '', accountNumber: '' });
+  const [formData, setFormData] = useState({ email: '', password: '', ssn: '', id_number: '', accountNumber: '' });
+  const [userInfo, setUserInfo] = useState(null);
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [userExists, setUserExists] = useState(false);
@@ -18,7 +19,7 @@ export default function EnrollPage() {
     const checkUser = async () => {
       const { data: user, error } = await supabase
         .from('users')
-        .select('id, email')
+        .select('id, email, country, first_name, last_name')
         .eq('id', temp_user_id)
         .single();
 
@@ -27,7 +28,8 @@ export default function EnrollPage() {
         return;
       }
       setUserExists(true);
-      setFormData({ ...formData, email: user.email || '', password: '', ssn: '', accountNumber: '' });
+      setUserInfo(user);
+      setFormData({ ...formData, email: user.email || '', password: '', ssn: '', id_number: '', accountNumber: '' });
     };
 
     checkUser();
@@ -56,6 +58,7 @@ export default function EnrollPage() {
           email: formData.email,
           password: formData.password,
           ssn: formData.ssn,
+          id_number: formData.id_number,
           accountNumber: formData.accountNumber
         })
       });
@@ -67,7 +70,7 @@ export default function EnrollPage() {
       }
 
       setMessage('🎉 Enrollment successful! You can now log in to your dashboard.');
-      setFormData({ email: '', password: '', ssn: '', accountNumber: '' });
+      setFormData({ email: '', password: '', ssn: '', id_number: '', accountNumber: '' });
       
       // Redirect to login page after 2 seconds
       setTimeout(() => {
@@ -101,16 +104,47 @@ export default function EnrollPage() {
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', width: '350px', gap: '15px' }}>
         <div style={{ textAlign: 'left' }}>
           <h3 style={{ margin: '0 0 10px 0', color: '#0070f3', fontSize: '16px' }}>Identity Verification</h3>
-          <input
-            type="text"
-            name="ssn"
-            placeholder="Social Security Number (XXX-XX-XXXX)"
-            required
-            value={formData.ssn}
-            onChange={handleChange}
-            pattern="[0-9]{3}-[0-9]{2}-[0-9]{4}"
-            style={{ padding: '10px', borderRadius: '5px', border: '1px solid #ccc', width: '100%', boxSizing: 'border-box' }}
-          />
+          {userInfo && (
+            <div style={{
+              backgroundColor: '#e3f2fd',
+              padding: '10px',
+              borderRadius: '5px',
+              marginBottom: '15px',
+              fontSize: '14px',
+              color: '#1976d2'
+            }}>
+              <strong>Welcome {userInfo.first_name} {userInfo.last_name}!</strong><br/>
+              Citizenship: {userInfo.country === 'US' ? 'U.S. Citizen' : 'International'}<br/>
+              Please verify your {userInfo.country === 'US' ? 'Social Security Number' : 'Government ID Number'} to complete enrollment.
+            </div>
+          )}
+          
+          {/* Conditional Identity Verification */}
+          {userInfo && userInfo.country === 'US' && (
+            <input
+              type="text"
+              name="ssn"
+              placeholder="Social Security Number (XXX-XX-XXXX)"
+              required
+              value={formData.ssn}
+              onChange={handleChange}
+              pattern="[0-9]{3}-?[0-9]{2}-?[0-9]{4}"
+              maxLength="11"
+              style={{ padding: '10px', borderRadius: '5px', border: '1px solid #ccc', width: '100%', boxSizing: 'border-box' }}
+            />
+          )}
+          
+          {userInfo && userInfo.country === 'International' && (
+            <input
+              type="text"
+              name="id_number"
+              placeholder="Government ID Number"
+              required
+              value={formData.id_number}
+              onChange={handleChange}
+              style={{ padding: '10px', borderRadius: '5px', border: '1px solid #ccc', width: '100%', boxSizing: 'border-box' }}
+            />
+          )}
           <input
             type="text"
             name="accountNumber"

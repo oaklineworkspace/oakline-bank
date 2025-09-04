@@ -68,6 +68,19 @@ export default function ApplyPage() {
       if (userDataForDB.dob === '') {
         userDataForDB.dob = null;
       }
+
+      // Handle SSN/ID validation based on citizenship
+      if (userDataForDB.country === 'US') {
+        // US citizens: Clear ID number if SSN is provided
+        userDataForDB.id_number = null;
+        // Format SSN to remove dashes for storage
+        if (userDataForDB.ssn) {
+          userDataForDB.ssn = userDataForDB.ssn.replace(/-/g, '');
+        }
+      } else {
+        // International: Clear SSN if ID is provided
+        userDataForDB.ssn = null;
+      }
       
       const { data: userData, error: userError } = await supabase
         .from('users')
@@ -287,24 +300,64 @@ export default function ApplyPage() {
         {step === 2 && (
           <div>
             <h3>Identity & Address</h3>
-            <input
-              type="text"
-              name="ssn"
-              placeholder="Social Security Number (XXX-XX-XXXX) *"
-              required
-              pattern="[0-9]{3}-[0-9]{2}-[0-9]{4}"
-              value={formData.ssn}
-              onChange={handleChange}
-              style={inputStyle}
-            />
-            <input
-              type="text"
-              name="id_number"
-              placeholder="Driver's License or ID Number"
-              value={formData.id_number}
-              onChange={handleChange}
-              style={inputStyle}
-            />
+            
+            {/* Citizenship Selection */}
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ display: 'block', marginBottom: '10px', fontSize: '16px', fontWeight: 'bold' }}>
+                Citizenship Status *
+              </label>
+              <div style={{ display: 'flex', gap: '20px', marginBottom: '15px' }}>
+                <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                  <input
+                    type="radio"
+                    name="country"
+                    value="US"
+                    checked={formData.country === 'US'}
+                    onChange={handleChange}
+                    style={{ marginRight: '8px', transform: 'scale(1.2)' }}
+                  />
+                  <span>U.S. Citizen</span>
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                  <input
+                    type="radio"
+                    name="country"
+                    value="International"
+                    checked={formData.country === 'International'}
+                    onChange={handleChange}
+                    style={{ marginRight: '8px', transform: 'scale(1.2)' }}
+                  />
+                  <span>International</span>
+                </label>
+              </div>
+            </div>
+
+            {/* Conditional Identity Fields */}
+            {formData.country === 'US' && (
+              <input
+                type="text"
+                name="ssn"
+                placeholder="Social Security Number (XXX-XX-XXXX) *"
+                required
+                pattern="[0-9]{3}-?[0-9]{2}-?[0-9]{4}"
+                value={formData.ssn}
+                onChange={handleChange}
+                style={inputStyle}
+                maxLength="11"
+              />
+            )}
+            
+            {formData.country === 'International' && (
+              <input
+                type="text"
+                name="id_number"
+                placeholder="Government ID Number *"
+                required
+                value={formData.id_number}
+                onChange={handleChange}
+                style={inputStyle}
+              />
+            )}
             <input
               type="date"
               name="dob"
@@ -373,9 +426,17 @@ export default function ApplyPage() {
               {[
                 { value: 'Checking', label: 'Checking Account', description: 'Standard checking with debit card and unlimited transactions' },
                 { value: 'Savings', label: 'Savings Account', description: 'High-yield savings with competitive interest rates' },
-                { value: 'Business', label: 'Business Account', description: 'For business banking and commercial transactions' },
+                { value: 'Business Checking', label: 'Business Checking', description: 'Business checking for commercial transactions' },
                 { value: 'Student', label: 'Student Account', description: 'No fees for students with valid student ID' },
-                { value: 'Joint', label: 'Joint Account', description: 'Shared account for couples or family members' }
+                { value: 'Joint', label: 'Joint Account', description: 'Shared account for couples or family members' },
+                { value: 'Premium', label: 'Premium Banking', description: 'Premium banking with additional benefits and services' },
+                { value: 'IRA', label: 'Individual Retirement Account', description: 'Tax-advantaged retirement savings account' },
+                { value: 'Money Market', label: 'Money Market Account', description: 'Higher interest account with limited transactions' },
+                { value: 'Certificate of Deposit', label: 'Certificate of Deposit', description: 'Fixed-term deposit with guaranteed returns' },
+                { value: 'Healthcare Savings', label: 'Healthcare Savings (HSA)', description: 'Tax-free savings for medical expenses' },
+                { value: 'Youth Savings', label: 'Youth Savings', description: 'Savings account for minors under 18' },
+                { value: 'Senior Savings', label: 'Senior Savings', description: 'Special benefits for customers 65+' },
+                { value: 'Crypto', label: 'Cryptocurrency Account', description: 'Digital currency trading and storage' }
               ].map((accountType) => (
                 <div 
                   key={accountType.value}
