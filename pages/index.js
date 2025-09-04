@@ -10,47 +10,27 @@ export default function Home() {
       <Header />
 
       {/* Hero Section */}
-      <Hero
-        images={[
-          '/images/hero-mobile.jpg',
-          '/images/hero-debit-card-1.jpg.PNG',
-          '/images/hero-mobile-transactions.jpg',
-        ]}
-        title="Welcome to Oakline Bank"
-        subtitle="Secure, convenient, and innovative banking solutions for everyone."
-      />
+      <Hero />
 
-      {/* CTA Section */}
+      {/* Main CTA Section */}
       <CTA
-        title="Open Your Account Today"
-        buttonText="Apply Now"
+        title="Ready to Get Started?"
+        subtitle="Join thousands of satisfied customers and experience modern banking designed for your success. Open your account in minutes, not days."
+        buttonText="Apply for Account"
         buttonLink="/apply"
-      />
-      <CTA
-        title="Existing Customer? Sign In"
-        buttonText="Sign In"
-        buttonLink="/login"
+        variant="primary"
       />
 
       {/* Testimonials Section */}
-      <Testimonials
-        testimonials={[
-          {
-            name: "John D.",
-            image: "/images/testimonial-1.jpg.JPG",
-            feedback: "Oakline Bank makes banking so easy and reliable!"
-          },
-          {
-            name: "Samantha R.",
-            image: "/images/testimonial-2.jpg.JPG",
-            feedback: "The customer service is exceptional, highly recommended."
-          },
-          {
-            name: "Michael P.",
-            image: "/images/testimonial-3.jpg.JPG",
-            feedback: "I love the mobile app and all the convenient features."
-          }
-        ]}
+      <Testimonials />
+
+      {/* Secondary CTA Section */}
+      <CTA
+        title="Existing Customer?"
+        subtitle="Access your accounts, transfer money, pay bills, and manage your finances with our secure online banking platform."
+        buttonText="Sign In to Dashboard"
+        buttonLink="/login"
+        variant="secondary"
       />
 
       <Footer />

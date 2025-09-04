@@ -3,6 +3,5 @@
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
   "/": "pages/index.js",
-  "/enroll": "pages/enroll.js",
-  "/apply": "pages/apply.js"
+  "/enroll": "pages/enroll.js"
 }
