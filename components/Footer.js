@@ -111,6 +111,15 @@ export default function Footer() {
               Oakline Bank is a full-service digital bank offering checking, savings, loans, and investment services. 
               Member FDIC. All deposit accounts are FDIC-insured up to $250,000 per depositor.
             </p>
+            <div style={styles.additionalInfo}>
+              <p style={styles.legalText}>
+                NMLS ID: 123456 | Routing Number: 987654321 | Swift Code: OAKLUS33 | Equal Housing Lender
+              </p>
+              <p style={styles.legalText}>
+                Investment products are not FDIC insured, may lose value, and are not bank guaranteed. 
+                Cryptocurrency trading involves substantial risk of loss.
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -245,9 +254,14 @@ const styles = {
   },
   legalText: {
     fontSize: '12px',
-    color: '#64748b',
+    color: '#94a3b8',
     lineHeight: '1.5',
-    margin: 0,
+    margin: '0 0 8px 0',
     textAlign: 'center',
+  },
+  additionalInfo: {
+    marginTop: '16px',
+    paddingTop: '16px',
+    borderTop: '1px solid #334155',
   },
 };

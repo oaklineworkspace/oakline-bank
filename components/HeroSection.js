@@ -164,6 +164,8 @@ const styles = {
     height: 'auto',
     borderRadius: '20px',
     boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1)',
+    maxHeight: '500px',
+    objectFit: 'cover',
   },
   imageOverlay: {
     position: 'absolute',
@@ -204,5 +206,8 @@ if (typeof window !== 'undefined') {
     styles.stats.gap = '16px';
     styles.cta.flexDirection = 'column';
     styles.cta.alignItems = 'stretch';
+    styles.heroImage.maxHeight = '300px';
+    styles.heroImage.minHeight = '250px';
+    styles.heroImage.objectPosition = 'center';
   }
 }

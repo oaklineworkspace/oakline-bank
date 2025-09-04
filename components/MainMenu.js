@@ -1,5 +1,5 @@
 // components/MainMenu.js
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 
@@ -8,6 +8,14 @@ export default function MainMenu({ user = null }) {
   const [dropdownOpen, setDropdownOpen] = useState({});
   const [scrolled, setScrolled] = useState(false);
   const router = useRouter();
+
+  // Add mobile styles to head
+  React.useEffect(() => {
+    const styleSheet = document.createElement('style');
+    styleSheet.textContent = mobileStyles;
+    document.head.appendChild(styleSheet);
+    return () => document.head.removeChild(styleSheet);
+  }, []);
 
   // Handle scroll effect
   useEffect(() => {
@@ -55,7 +63,7 @@ export default function MainMenu({ user = null }) {
         </Link>
 
         {/* Desktop Menu */}
-        <div style={styles.desktopMenu}>
+        <div style={styles.desktopMenu} className="desktop-menu">
           <Link 
             href="/" 
             style={{
@@ -93,6 +101,7 @@ export default function MainMenu({ user = null }) {
             {dropdownOpen.services && (
               <div 
                 style={styles.dropdownContent}
+                className="dropdown-content"
                 onMouseLeave={() => setDropdownOpen({ ...dropdownOpen, services: false })}
               >
                 <div style={styles.dropdownSection}>
@@ -177,6 +186,7 @@ export default function MainMenu({ user = null }) {
             ...styles.mobileMenuBtn,
             color: scrolled ? '#1a202c' : '#ffffff'
           }}
+          className="mobile-menu-btn"
           onClick={() => setIsOpen(!isOpen)}
         >
           {isOpen ? '✕' : '☰'}
@@ -412,15 +422,19 @@ const styles = {
   },
 };
 
-// Mobile responsive styles
-if (typeof window !== 'undefined') {
-  const mediaQuery = window.matchMedia('(max-width: 768px)');
-  
-  if (mediaQuery.matches) {
-    styles.desktopMenu.display = 'none';
-    styles.mobileMenuBtn.display = 'block';
-    styles.dropdownContent.minWidth = '90vw';
-    styles.dropdownContent.gridTemplateColumns = '1fr';
-    styles.dropdownContent.left = '-50px';
+// Mobile responsive styles using CSS media queries instead of JS
+const mobileStyles = `
+  @media (max-width: 768px) {
+    .desktop-menu { display: none !important; }
+    .mobile-menu-btn { display: block !important; }
+    .dropdown-content { 
+      min-width: 90vw !important; 
+      grid-template-columns: 1fr !important; 
+      left: -50px !important; 
+    }
   }
-}
+  @media (min-width: 769px) {
+    .desktop-menu { display: flex !important; }
+    .mobile-menu-btn { display: none !important; }
+  }
+`;
