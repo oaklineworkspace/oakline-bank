@@ -19,7 +19,7 @@ export default function ApplyPage() {
     state: 'CA',
     county: '',
     country: 'US',
-    account_type: 'Checking'
+    account_types: ['Checking'] // Changed to array for multiple selections
   });
   
   const [loading, setLoading] = useState(false);
@@ -28,6 +28,23 @@ export default function ApplyPage() {
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleAccountTypeChange = (accountType) => {
+    const { account_types } = formData;
+    if (account_types.includes(accountType)) {
+      // Remove if already selected
+      setFormData({
+        ...formData,
+        account_types: account_types.filter(type => type !== accountType)
+      });
+    } else {
+      // Add if not selected
+      setFormData({
+        ...formData,
+        account_types: [...account_types, accountType]
+      });
+    }
   };
 
   const nextStep = () => setStep(step + 1);
@@ -44,31 +61,40 @@ export default function ApplyPage() {
     setMessage('');
 
     try {
-      // 1. Create user record (excluding account_type which belongs in accounts table)
-      const { account_type, ...userDataOnly } = formData;
+      // 1. Create user record (excluding account_types which belongs in accounts table)
+      const { account_types, ...userDataForDB } = formData;
+      
+      // Handle empty date - convert empty string to null
+      if (userDataForDB.dob === '') {
+        userDataForDB.dob = null;
+      }
+      
       const { data: userData, error: userError } = await supabase
         .from('users')
-        .insert([userDataOnly])
+        .insert([userDataForDB])
         .select()
         .single();
 
       if (userError) throw userError;
 
-      // 2. Generate account number and create account
-      const accountNumber = generateAccountNumber();
-      const { data: accountData, error: accountError } = await supabase
+      // 2. Create multiple accounts based on selected account types
+      const accountsToCreate = account_types.map(accountType => ({
+        user_id: userData.id,
+        account_number: generateAccountNumber(),
+        account_type: accountType,
+        balance: 0.00,
+        status: 'limited'
+      }));
+
+      const { data: accountsData, error: accountError } = await supabase
         .from('accounts')
-        .insert([{
-          user_id: userData.id,
-          account_number: accountNumber,
-          account_type: account_type,
-          balance: 0.00,
-          status: 'limited'
-        }])
-        .select()
-        .single();
+        .insert(accountsToCreate)
+        .select();
 
       if (accountError) throw accountError;
+
+      // Get the first account number for display
+      const firstAccountNumber = accountsData[0].account_number;
 
       // 3. Create application record
       await supabase
@@ -76,7 +102,7 @@ export default function ApplyPage() {
         .insert([{
           user_id: userData.id,
           status: 'received',
-          account_number: accountNumber
+          account_number: accountsData.map(acc => acc.account_number).join(', ')
         }]);
 
       // 4. Send welcome email with enrollment link
@@ -87,12 +113,17 @@ export default function ApplyPage() {
           email: formData.email,
           first_name: formData.first_name,
           last_name: formData.last_name,
-          account_number: accountNumber,
+          account_numbers: accountsData.map(acc => acc.account_number),
+          account_types: account_types,
           temp_user_id: userData.id
         })
       });
 
-      setMessage(`🎉 Application submitted successfully! Account #${accountNumber} has been created. Check your email for enrollment instructions.`);
+      const accountSummary = accountsData.length > 1 
+        ? `${accountsData.length} accounts created: ${accountsData.map(acc => acc.account_number).join(', ')}`
+        : `Account #${firstAccountNumber} created`;
+      
+      setMessage(`🎉 Application submitted successfully! ${accountSummary}. Check your email for enrollment instructions.`);
       setStep(4); // Success step
 
     } catch (error) {
@@ -334,20 +365,64 @@ export default function ApplyPage() {
         {step === 3 && (
           <div>
             <h3>Account Selection</h3>
-            <label style={{ display: 'block', marginBottom: '15px', fontSize: '16px' }}>
-              Choose your account type:
+            <label style={{ display: 'block', marginBottom: '15px', fontSize: '16px', fontWeight: 'bold' }}>
+              Choose your account types (you can select multiple):
             </label>
-            <select
-              name="account_type"
-              value={formData.account_type}
-              onChange={handleChange}
-              style={{...inputStyle, fontSize: '16px'}}
-            >
-              <option value="Checking">Checking Account - Standard checking with debit card</option>
-              <option value="Savings">Savings Account - High-yield savings</option>
-              <option value="Business">Business Account - For business banking</option>
-              <option value="Student">Student Account - No fees for students</option>
-            </select>
+            
+            <div style={{ marginBottom: '20px' }}>
+              {[
+                { value: 'Checking', label: 'Checking Account', description: 'Standard checking with debit card and unlimited transactions' },
+                { value: 'Savings', label: 'Savings Account', description: 'High-yield savings with competitive interest rates' },
+                { value: 'Business', label: 'Business Account', description: 'For business banking and commercial transactions' },
+                { value: 'Student', label: 'Student Account', description: 'No fees for students with valid student ID' },
+                { value: 'Joint', label: 'Joint Account', description: 'Shared account for couples or family members' }
+              ].map((accountType) => (
+                <div 
+                  key={accountType.value}
+                  style={{
+                    border: '2px solid #e1e5e9',
+                    borderRadius: '8px',
+                    padding: '15px',
+                    marginBottom: '10px',
+                    backgroundColor: formData.account_types.includes(accountType.value) ? '#e3f2fd' : 'white',
+                    borderColor: formData.account_types.includes(accountType.value) ? '#0070f3' : '#e1e5e9',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease'
+                  }}
+                  onClick={() => handleAccountTypeChange(accountType.value)}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <input
+                      type="checkbox"
+                      checked={formData.account_types.includes(accountType.value)}
+                      onChange={() => handleAccountTypeChange(accountType.value)}
+                      style={{ cursor: 'pointer', transform: 'scale(1.2)' }}
+                    />
+                    <div>
+                      <strong style={{ fontSize: '16px', color: '#0070f3' }}>
+                        {accountType.label}
+                      </strong>
+                      <p style={{ margin: '5px 0 0 0', fontSize: '14px', color: '#666' }}>
+                        {accountType.description}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            {formData.account_types.length === 0 && (
+              <div style={{
+                color: '#dc3545',
+                fontSize: '14px',
+                marginBottom: '15px',
+                padding: '10px',
+                backgroundColor: '#f8d7da',
+                borderRadius: '4px'
+              }}>
+                Please select at least one account type to continue.
+              </div>
+            )}
             
             <div style={{ 
               backgroundColor: 'white', 
@@ -356,9 +431,26 @@ export default function ApplyPage() {
               marginBottom: '1rem',
               border: '1px solid #e1e5e9'
             }}>
+              <h4>Selected Account Types ({formData.account_types.length}):</h4>
+              <div style={{ marginBottom: '10px' }}>
+                {formData.account_types.map((type, index) => (
+                  <span key={type} style={{
+                    display: 'inline-block',
+                    backgroundColor: '#0070f3',
+                    color: 'white',
+                    padding: '4px 12px',
+                    borderRadius: '20px',
+                    fontSize: '12px',
+                    marginRight: '8px',
+                    marginBottom: '5px'
+                  }}>
+                    {type}
+                  </span>
+                ))}
+              </div>
               <h4>What happens next:</h4>
-              <p>✅ Instant account number generation<br/>
-              ✅ Welcome email with enrollment link<br/>
+              <p>✅ Instant account numbers for each selected type<br/>
+              ✅ Welcome email with all account details<br/>
               ✅ Set up online banking immediately<br/>
               ✅ Limited access until verification complete</p>
             </div>
@@ -367,8 +459,16 @@ export default function ApplyPage() {
               <button type="button" onClick={prevStep} style={{...buttonStyle, backgroundColor: '#6c757d'}}>
                 ← Previous
               </button>
-              <button type="submit" disabled={loading} style={{...buttonStyle, backgroundColor: '#28a745'}}>
-                {loading ? 'Processing...' : 'Submit Application'}
+              <button 
+                type="submit" 
+                disabled={loading || formData.account_types.length === 0} 
+                style={{
+                  ...buttonStyle, 
+                  backgroundColor: (loading || formData.account_types.length === 0) ? '#6c757d' : '#28a745',
+                  cursor: (loading || formData.account_types.length === 0) ? 'not-allowed' : 'pointer'
+                }}
+              >
+                {loading ? 'Processing...' : `Submit Application (${formData.account_types.length} account${formData.account_types.length !== 1 ? 's' : ''})`}
               </button>
             </div>
           </div>

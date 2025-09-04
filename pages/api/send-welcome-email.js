@@ -6,11 +6,15 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { email, first_name, last_name, account_number, temp_user_id } = req.body;
+  const { email, first_name, last_name, account_numbers, account_types, temp_user_id } = req.body;
 
-  if (!email || !first_name || !account_number || !temp_user_id) {
+  if (!email || !first_name || (!account_numbers && !req.body.account_number) || !temp_user_id) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
+
+  // Handle both old single account and new multiple accounts format
+  const accountsList = account_numbers || [req.body.account_number];
+  const typesList = account_types || ['Checking'];
 
   try {
     // Create transporter
@@ -57,9 +61,13 @@ export default async function handler(req, res) {
                 
                 <div class="account-box">
                     <h3>🏦 Your Account Details</h3>
-                    <p><strong>Account Number:</strong> ${account_number}</p>
-                    <p><strong>Routing Number:</strong> 075915826</p>
-                    <p><strong>Status:</strong> Limited Access (pending verification)</p>
+                    ${accountsList.map((accountNum, index) => `
+                        <div style="margin-bottom: 15px; padding: 10px; background: #f8f9fa; border-radius: 6px;">
+                            <p><strong>${typesList[index] || 'Account'} Account:</strong> ${accountNum}</p>
+                            <p><strong>Routing Number:</strong> 075915826</p>
+                            <p><strong>Status:</strong> Limited Access (pending verification)</p>
+                        </div>
+                    `).join('')}
                 </div>
 
                 <h3>🔐 Complete Your Enrollment</h3>
@@ -98,7 +106,7 @@ export default async function handler(req, res) {
     await transporter.sendMail({
       from: process.env.SMTP_FROM,
       to: email,
-      subject: `🎉 Welcome to Oakline Bank - Account #${account_number} Created!`,
+      subject: `🎉 Welcome to Oakline Bank - ${accountsList.length > 1 ? `${accountsList.length} Accounts` : `Account #${accountsList[0]}`} Created!`,
       html: htmlEmail,
     });
 
