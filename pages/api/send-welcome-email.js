@@ -40,9 +40,8 @@ export default async function handler(req, res) {
     }
 
     // Get the base URL for enrollment link
-    const baseUrl = process.env.NODE_ENV === 'production' 
-      ? `https://${process.env.VERCEL_URL}` 
-      : 'http://localhost:5000';
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 
+                   (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:5000');
     
     const enrollmentLink = `${baseUrl}/enroll?temp_user_id=${temp_user_id}`;
 

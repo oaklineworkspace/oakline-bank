@@ -117,6 +117,7 @@ export default function Apply() {
   const [showManualCountry, setShowManualCountry] = useState(false);
   const [showManualState, setShowManualState] = useState(false);
   const [showManualCity, setShowManualCity] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -289,13 +290,14 @@ export default function Apply() {
     if (!validateStep(3)) return;
 
     setLoading(true);
+    setErrors({});
 
     try {
       const effectiveCountry = getEffectiveCountry();
       const effectiveState = getEffectiveState();
       const effectiveCity = getEffectiveCity();
 
-      // Insert user data - store state as text to avoid foreign key issues
+      // Insert user data
       const { data: userData, error: userError } = await supabase
         .from('users')
         .insert([{
@@ -340,6 +342,32 @@ export default function Apply() {
         await supabase.from('user_account_types').insert(accountInserts);
       }
 
+      // Create accounts for each selected account type
+      const accountNumbers = [];
+      const accountTypes = [];
+      
+      for (const accountTypeId of formData.accountTypes) {
+        const accountType = ACCOUNT_TYPES.find(at => at.id === accountTypeId);
+        const accountNumber = `${Date.now()}${Math.random().toString().slice(2, 8)}`;
+        
+        const { error: accountError } = await supabase
+          .from('accounts')
+          .insert([{
+            user_id: userId,
+            account_number: accountNumber,
+            account_type: accountType.name,
+            balance: 0.00,
+            status: 'limited'
+          }]);
+
+        if (accountError) {
+          console.error('Account creation error:', accountError);
+        } else {
+          accountNumbers.push(accountNumber);
+          accountTypes.push(accountType.name);
+        }
+      }
+
       // Create application record
       await supabase
         .from('applications')
@@ -349,22 +377,38 @@ export default function Apply() {
           notes: `Application for ${formData.accountTypes.length} account type(s): ${formData.accountTypes.map(id => ACCOUNT_TYPES.find(at => at.id === id)?.name).join(', ')}`
         }]);
 
-      // Send welcome email
+      // Send welcome email with enrollment link
       try {
-        await fetch('/api/send-welcome-email', {
+        const emailResponse = await fetch('/api/send-welcome-email', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            email: formData.email,
-            name: `${formData.firstName} ${formData.lastName}`,
-            type: 'application_confirmation'
+            email: formData.email.trim().toLowerCase(),
+            first_name: formData.firstName.trim(),
+            last_name: formData.lastName.trim(),
+            account_numbers: accountNumbers,
+            account_types: accountTypes,
+            temp_user_id: userId
           })
         });
+
+        if (!emailResponse.ok) {
+          throw new Error('Failed to send welcome email');
+        }
+
+        console.log('Welcome email sent successfully');
       } catch (emailError) {
         console.error('Email sending failed:', emailError);
+        // Don't fail the entire process for email issues
       }
 
-      router.push('/dashboard');
+      // Show success message
+      setSubmitSuccess(true);
+
+      // Redirect to success page after a delay
+      setTimeout(() => {
+        router.push('/dashboard');
+      }, 3000);
 
     } catch (error) {
       console.error('Application submission error:', error);
@@ -643,9 +687,7 @@ export default function Apply() {
       backgroundColor: '#f8fafc',
       borderRadius: '12px',
       border: '2px solid #e2e8f0',
-      marginTop: '1.5rem',
-      position: 'relative',
-      zIndex: 10
+      marginTop: '1.5rem'
     },
     checkbox: {
       width: '20px',
@@ -654,8 +696,9 @@ export default function Apply() {
       cursor: 'pointer',
       accentColor: '#059669',
       transform: 'scale(1.2)',
-      position: 'relative',
-      zIndex: 20
+      backgroundColor: 'transparent',
+      border: 'none',
+      outline: 'none'
     },
     checkboxLabel: {
       fontSize: '15px',
@@ -721,6 +764,25 @@ export default function Apply() {
     },
     errorAlertText: {
       color: '#dc2626',
+      fontSize: '14px',
+      fontWeight: '500'
+    },
+    successAlert: {
+      backgroundColor: '#f0fdf4',
+      border: '1px solid #bbf7d0',
+      borderRadius: '12px',
+      padding: '1.5rem',
+      marginTop: '1rem',
+      textAlign: 'center'
+    },
+    successAlertText: {
+      color: '#16a34a',
+      fontSize: '16px',
+      fontWeight: '600',
+      marginBottom: '0.5rem'
+    },
+    successMessage: {
+      color: '#15803d',
       fontSize: '14px',
       fontWeight: '500'
     },
@@ -1269,6 +1331,16 @@ export default function Apply() {
               {errors.submit && (
                 <div style={styles.errorAlert}>
                   <div style={styles.errorAlertText}>⚠️ {errors.submit}</div>
+                </div>
+              )}
+
+              {submitSuccess && (
+                <div style={styles.successAlert}>
+                  <div style={styles.successAlertText}>🎉 Application Submitted Successfully!</div>
+                  <div style={styles.successMessage}>
+                    Your account has been created and a welcome email with enrollment instructions has been sent to {formData.email}. 
+                    Please check your inbox (and spam folder) for the enrollment link.
+                  </div>
                 </div>
               )}
             </div>
