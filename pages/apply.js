@@ -87,8 +87,18 @@ export default function Apply() {
   });
 
   const handleNext = async () => {
-    const isValid = await form.trigger();
-    if (isValid) setCurrentStep(currentStep + 1);
+    let fieldsToValidate = [];
+    
+    if (currentStep === 1) {
+      fieldsToValidate = ['firstName', 'lastName', 'email', 'phone', 'dob', 'ssnOrId', 'country', 'state', 'city', 'address', 'zipCode'];
+    } else if (currentStep === 2) {
+      fieldsToValidate = ['selectedAccountTypes'];
+    }
+    
+    const isValid = await form.trigger(fieldsToValidate);
+    if (isValid) {
+      setCurrentStep(currentStep + 1);
+    }
   };
 
   const handleBack = () => {
@@ -239,6 +249,20 @@ export default function Apply() {
                         )}
                       />
 
+                      <FormField
+                        name="address"
+                        control={form.control}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Street Address</FormLabel>
+                            <FormControl>
+                              <Input {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <FormField
                           name="state"
@@ -323,11 +347,14 @@ export default function Apply() {
                         name="termsAgreed"
                         control={form.control}
                         render={({ field }) => (
-                          <FormItem className="flex items-center space-x-2">
+                          <FormItem className="flex flex-row items-start space-x-3 space-y-0">
                             <FormControl>
                               <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                             </FormControl>
-                            <FormLabel>I agree to terms & conditions</FormLabel>
+                            <div className="space-y-1 leading-none">
+                              <FormLabel>I agree to terms & conditions</FormLabel>
+                            </div>
+                            <FormMessage />
                           </FormItem>
                         )}
                       />
@@ -336,11 +363,14 @@ export default function Apply() {
                         name="emailConsent"
                         control={form.control}
                         render={({ field }) => (
-                          <FormItem className="flex items-center space-x-2">
+                          <FormItem className="flex flex-row items-start space-x-3 space-y-0">
                             <FormControl>
                               <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                             </FormControl>
-                            <FormLabel>I consent to receive account notifications via email</FormLabel>
+                            <div className="space-y-1 leading-none">
+                              <FormLabel>I consent to receive account notifications via email</FormLabel>
+                            </div>
+                            <FormMessage />
                           </FormItem>
                         )}
                       />
@@ -349,11 +379,13 @@ export default function Apply() {
                         name="marketingConsent"
                         control={form.control}
                         render={({ field }) => (
-                          <FormItem className="flex items-center space-x-2">
+                          <FormItem className="flex flex-row items-start space-x-3 space-y-0">
                             <FormControl>
                               <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                             </FormControl>
-                            <FormLabel>Receive marketing updates (optional)</FormLabel>
+                            <div className="space-y-1 leading-none">
+                              <FormLabel>Receive marketing updates (optional)</FormLabel>
+                            </div>
                           </FormItem>
                         )}
                       />
