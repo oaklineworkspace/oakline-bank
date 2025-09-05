@@ -310,7 +310,7 @@ export default function Apply() {
           id_number: effectiveCountry !== 'US' ? formData.idNumber.trim() : null,
           address_line1: formData.address.trim(),
           city: effectiveCity,
-          state: effectiveState,
+          state_province: effectiveState,
           zip_code: formData.zipCode.trim(),
           county: null,
           country: effectiveCountry
@@ -648,17 +648,14 @@ export default function Apply() {
       zIndex: 10
     },
     checkbox: {
-      width: '18px',
-      height: '18px',
-      marginTop: '3px',
+      width: '20px',
+      height: '20px',
+      marginTop: '2px',
       cursor: 'pointer',
-      accentColor: '#3b82f6',
-      transform: 'scale(1.3)',
+      accentColor: '#059669',
+      transform: 'scale(1.2)',
       position: 'relative',
-      zIndex: 20,
-      backgroundColor: '#ffffff',
-      border: '2px solid #d1d5db',
-      borderRadius: '4px'
+      zIndex: 20
     },
     checkboxLabel: {
       fontSize: '15px',
