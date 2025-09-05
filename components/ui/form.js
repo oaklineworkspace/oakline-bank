@@ -2,7 +2,28 @@
 import React from 'react';
 
 export const Form = ({ children, ...props }) => {
-  return <form {...props}>{children}</form>;
+  // Filter out React Hook Form specific props to prevent them from being passed to the DOM
+  const {
+    handleSubmit,
+    setValue,
+    getValues,
+    resetField,
+    clearErrors,
+    setError,
+    setFocus,
+    getFieldState,
+    formState,
+    subscribe,
+    trigger,
+    register,
+    watch,
+    reset,
+    unregister,
+    control,
+    ...formProps
+  } = props;
+  
+  return <form {...formProps}>{children}</form>;
 };
 
 export const FormField = ({ name, control, render }) => {
