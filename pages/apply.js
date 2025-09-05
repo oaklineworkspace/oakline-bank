@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useLocation } from "wouter";
+import { useRouter } from "next/router";
 import { z } from "zod";
 
 import { Button } from "../components/ui/button";
@@ -36,7 +36,7 @@ const applicationSchema = z.object({
 });
 
 export default function Apply() {
-  const [, setLocation] = useLocation();
+  const router = useRouter();
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(1);
   const [showAllAccountTypes, setShowAllAccountTypes] = useState(false);
@@ -78,7 +78,7 @@ export default function Apply() {
     },
     onSuccess: (data) => {
       toast({ title: "Application Submitted!", description: "Check your email for enrollment link." });
-      setLocation(`/success?applicationId=${data.id}`);
+      router.push(`/success?applicationId=${data.id}`);
     },
     onError: (error) => {
       toast({ title: "Submission Error", description: error.message, variant: "destructive" });
