@@ -9,11 +9,16 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.2.1",
+    "@supabase/supabase-js": "^2.0.0",
+    "@tanstack/react-query": "^5.86.0",
     "next": "14.2.3",
+    "nodemailer": "^6.9.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "@supabase/supabase-js": "^2.0.0",
-    "nodemailer": "^6.9.0"
+    "react-hook-form": "^7.62.0",
+    "wouter": "^3.7.1",
+    "zod": "^4.1.5"
   },
   "devDependencies": {
     "eslint": "8.57.0",
