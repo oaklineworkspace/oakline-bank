@@ -1,624 +1,285 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+);
 
 export default function Apply() {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [states, setStates] = useState([]);
+  const [cities, setCities] = useState([]);
+
   const [formData, setFormData] = useState({
     firstName: '',
+    middleName: '',
     lastName: '',
     email: '',
     phone: '',
     dob: '',
     ssn: '',
+    idNumber: '',
     address: '',
     city: '',
     state: '',
     zipCode: '',
-    accountType: '',
-    initialDeposit: '',
+    country: '',
+    accountTypes: [],
     employment: '',
     income: '',
     termsAgreed: false
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const accountTypes = [
+    { id: 1, title: 'Checking', icon: '💳', description: 'Everyday banking' },
+    { id: 2, title: 'Savings', icon: '💰', description: 'Earn interest' },
+    { id: 3, title: 'Premium', icon: '⭐', description: 'Priority service' },
+    { id: 4, title: 'Business', icon: '🏢', description: 'Business solutions' },
+    { id: 5, title: 'Student', icon: '🎓', description: 'Low fees for students' },
+    { id: 6, title: 'Joint', icon: '🤝', description: 'Shared account' },
+    { id: 7, title: 'Retirement', icon: '🏖️', description: 'Plan your future' },
+    { id: 8, title: 'Investment', icon: '📈', description: 'Grow your wealth' },
+    { id: 9, title: 'Crypto', icon: '🪙', description: 'Digital currency account' },
+  ];
+
+  const countries = ['US', 'Canada', 'UK', 'Australia', 'Other'];
+
+  // Fetch states dynamically
+  useEffect(() => {
+    const fetchStates = async () => {
+      const { data, error } = await supabase.from('states').select('code, name').order('name');
+      if (error) console.error(error);
+      else setStates(data);
+    };
+    fetchStates();
+  }, []);
+
+  // Fetch cities dynamically based on state
+  useEffect(() => {
+    if (!formData.state) return;
+
+    const fetchCities = async () => {
+      const { data, error } = await supabase
+        .from('cities')
+        .select('name')
+        .eq('state_code', formData.state)
+        .order('name');
+
+      if (error) console.error(error);
+      else setCities(data.map(c => c.name));
+    };
+
+    fetchCities();
+  }, [formData.state]);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
+    setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
   };
 
-  const handleNext = () => {
-    if (currentStep < 3) {
-      setCurrentStep(currentStep + 1);
-    }
+  const toggleAccountType = (id) => {
+    setFormData(prev => {
+      const selected = prev.accountTypes.includes(id)
+        ? prev.accountTypes.filter(a => a !== id)
+        : [...prev.accountTypes, id];
+      return { ...prev, accountTypes: selected };
+    });
   };
 
-  const handleBack = () => {
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
-    }
-  };
+  const handleNext = () => currentStep < 3 && setCurrentStep(prev => prev + 1);
+  const handleBack = () => currentStep > 1 && setCurrentStep(prev => prev - 1);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
+    if (!formData.termsAgreed) return alert('You must agree to terms');
     setIsSubmitting(true);
-    
-    try {
-      const response = await fetch('/api/applications', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
 
-      if (response.ok) {
-        router.push('/success?message=Application submitted successfully!');
-      } else {
-        alert('Failed to submit application. Please try again.');
-      }
+    try {
+      // Insert user
+      const { data: user, error: userError } = await supabase
+        .from('users')
+        .insert([{
+          first_name: formData.firstName,
+          middle_name: formData.middleName,
+          last_name: formData.lastName,
+          email: formData.email,
+          phone: formData.phone,
+          dob: formData.dob,
+          ssn: formData.country === 'US' ? formData.ssn : null,
+          id_number: formData.country !== 'US' ? formData.idNumber : null,
+          address_line1: formData.address,
+          city: formData.city,
+          state: formData.state,
+          zip_code: formData.zipCode,
+          country: formData.country
+        }])
+        .select()
+        .single();
+
+      if (userError) throw userError;
+
+      const userId = user.id;
+
+      // Insert employment
+      await supabase.from('user_employment').insert([{
+        user_id: userId,
+        employment_status: formData.employment,
+        annual_income: formData.income
+      }]);
+
+      // Insert selected account types
+      const accountInsert = formData.accountTypes.map(id => ({
+        user_id: userId,
+        account_type_id: id
+      }));
+      await supabase.from('user_account_types').insert(accountInsert);
+
+      router.push(`/success?message=Application submitted successfully!`);
     } catch (error) {
-      console.error('Error submitting application:', error);
-      alert('An error occurred. Please try again.');
+      console.error(error);
+      alert('Failed to submit application.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const styles = {
-    container: {
-      minHeight: '100vh',
-      backgroundColor: '#f8f9fa',
-      fontFamily: 'Arial, sans-serif'
-    },
-    header: {
-      backgroundColor: '#0070f3',
-      color: 'white',
-      padding: '1rem 2rem',
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-    },
-    logo: {
-      fontSize: '24px',
-      fontWeight: 'bold',
-      margin: 0
-    },
-    main: {
-      padding: '2rem',
-      maxWidth: '800px',
-      margin: '0 auto'
-    },
-    card: {
-      backgroundColor: 'white',
-      borderRadius: '12px',
-      padding: '2rem',
-      boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-      marginBottom: '2rem'
-    },
-    stepIndicator: {
-      display: 'flex',
-      justifyContent: 'center',
-      marginBottom: '2rem',
-      gap: '1rem'
-    },
-    step: {
-      width: '40px',
-      height: '40px',
-      borderRadius: '50%',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      fontWeight: 'bold',
-      color: 'white',
-      fontSize: '16px'
-    },
-    stepActive: {
-      backgroundColor: '#0070f3'
-    },
-    stepCompleted: {
-      backgroundColor: '#28a745'
-    },
-    stepPending: {
-      backgroundColor: '#dee2e6',
-      color: '#6c757d'
-    },
-    stepTitle: {
-      textAlign: 'center',
-      fontSize: '24px',
-      fontWeight: 'bold',
-      color: '#333',
-      marginBottom: '1.5rem'
-    },
-    form: {
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '1rem'
-    },
-    formRow: {
-      display: 'grid',
-      gridTemplateColumns: '1fr 1fr',
-      gap: '1rem',
-      '@media (max-width: 768px)': {
-        gridTemplateColumns: '1fr'
-      }
-    },
-    formGroup: {
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '0.5rem'
-    },
-    label: {
-      fontWeight: '500',
-      color: '#333',
-      fontSize: '14px'
-    },
-    input: {
-      padding: '12px',
-      border: '2px solid #e1e5e9',
-      borderRadius: '8px',
-      fontSize: '16px',
-      transition: 'border-color 0.3s',
-      outline: 'none'
-    },
-    inputFocus: {
-      borderColor: '#0070f3'
-    },
-    select: {
-      padding: '12px',
-      border: '2px solid #e1e5e9',
-      borderRadius: '8px',
-      fontSize: '16px',
-      backgroundColor: 'white',
-      cursor: 'pointer'
-    },
-    accountTypeGrid: {
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-      gap: '1rem',
-      marginTop: '1rem'
-    },
-    accountTypeCard: {
-      border: '2px solid #e1e5e9',
-      borderRadius: '12px',
-      padding: '1.5rem',
-      cursor: 'pointer',
-      transition: 'all 0.3s',
-      textAlign: 'center'
-    },
-    accountTypeCardSelected: {
-      borderColor: '#0070f3',
-      backgroundColor: '#f0f7ff'
-    },
-    accountTypeIcon: {
-      fontSize: '32px',
-      marginBottom: '0.5rem'
-    },
-    accountTypeTitle: {
-      fontSize: '18px',
-      fontWeight: 'bold',
-      color: '#333',
-      marginBottom: '0.5rem'
-    },
-    accountTypeDesc: {
-      fontSize: '14px',
-      color: '#666'
-    },
-    checkboxGroup: {
-      display: 'flex',
-      alignItems: 'flex-start',
-      gap: '0.5rem',
-      padding: '1rem',
-      backgroundColor: '#f8f9fa',
-      borderRadius: '8px',
-      border: '1px solid #e1e5e9'
-    },
-    checkbox: {
-      marginTop: '2px'
-    },
-    checkboxLabel: {
-      fontSize: '14px',
-      lineHeight: '1.4',
-      color: '#333'
-    },
-    buttonGroup: {
-      display: 'flex',
-      justifyContent: 'space-between',
-      marginTop: '2rem',
-      gap: '1rem'
-    },
-    button: {
-      padding: '12px 24px',
-      borderRadius: '8px',
-      fontSize: '16px',
-      fontWeight: '500',
-      cursor: 'pointer',
-      transition: 'all 0.3s',
-      border: 'none'
-    },
-    buttonPrimary: {
-      backgroundColor: '#0070f3',
-      color: 'white'
-    },
-    buttonSecondary: {
-      backgroundColor: 'transparent',
-      color: '#0070f3',
-      border: '2px solid #0070f3'
-    },
-    buttonDisabled: {
-      backgroundColor: '#dee2e6',
-      color: '#6c757d',
-      cursor: 'not-allowed'
-    },
-    backLink: {
-      color: '#0070f3',
-      textDecoration: 'none',
-      fontSize: '14px',
-      display: 'inline-flex',
-      alignItems: 'center',
-      gap: '0.5rem',
-      marginTop: '1rem'
-    }
-  };
-
-  const accountTypes = [
-    {
-      id: 'checking',
-      title: 'Checking Account',
-      icon: '💳',
-      description: 'Perfect for everyday banking with no monthly fees'
-    },
-    {
-      id: 'savings',
-      title: 'Savings Account',
-      icon: '💰',
-      description: 'Earn competitive interest on your savings'
-    },
-    {
-      id: 'premium',
-      title: 'Premium Account',
-      icon: '⭐',
-      description: 'Premium benefits with priority customer service'
-    },
-    {
-      id: 'business',
-      title: 'Business Account',
-      icon: '🏢',
-      description: 'Tailored solutions for your business needs'
-    }
-  ];
-
-  const renderStepIndicator = () => (
-    <div style={styles.stepIndicator}>
-      {[1, 2, 3].map(step => (
-        <div
-          key={step}
-          style={{
-            ...styles.step,
-            ...(step < currentStep ? styles.stepCompleted : 
-                step === currentStep ? styles.stepActive : styles.stepPending)
-          }}
-        >
-          {step}
-        </div>
-      ))}
-    </div>
-  );
-
-  const renderStep1 = () => (
-    <div>
-      <h2 style={styles.stepTitle}>Personal Information</h2>
-      <form style={styles.form}>
-        <div style={styles.formRow}>
-          <div style={styles.formGroup}>
-            <label style={styles.label}>First Name *</label>
-            <input
-              type="text"
-              name="firstName"
-              value={formData.firstName}
-              onChange={handleInputChange}
-              style={styles.input}
-              required
-            />
-          </div>
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Last Name *</label>
-            <input
-              type="text"
-              name="lastName"
-              value={formData.lastName}
-              onChange={handleInputChange}
-              style={styles.input}
-              required
-            />
-          </div>
-        </div>
-
-        <div style={styles.formRow}>
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Email *</label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              style={styles.input}
-              required
-            />
-          </div>
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Phone Number *</label>
-            <input
-              type="tel"
-              name="phone"
-              value={formData.phone}
-              onChange={handleInputChange}
-              style={styles.input}
-              required
-            />
-          </div>
-        </div>
-
-        <div style={styles.formRow}>
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Date of Birth *</label>
-            <input
-              type="date"
-              name="dob"
-              value={formData.dob}
-              onChange={handleInputChange}
-              style={styles.input}
-              required
-            />
-          </div>
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Social Security Number *</label>
-            <input
-              type="text"
-              name="ssn"
-              value={formData.ssn}
-              onChange={handleInputChange}
-              style={styles.input}
-              placeholder="XXX-XX-XXXX"
-              required
-            />
-          </div>
-        </div>
-
-        <div style={styles.formGroup}>
-          <label style={styles.label}>Street Address *</label>
-          <input
-            type="text"
-            name="address"
-            value={formData.address}
-            onChange={handleInputChange}
-            style={styles.input}
-            required
-          />
-        </div>
-
-        <div style={styles.formRow}>
-          <div style={styles.formGroup}>
-            <label style={styles.label}>City *</label>
-            <input
-              type="text"
-              name="city"
-              value={formData.city}
-              onChange={handleInputChange}
-              style={styles.input}
-              required
-            />
-          </div>
-          <div style={styles.formGroup}>
-            <label style={styles.label}>State *</label>
-            <select
-              name="state"
-              value={formData.state}
-              onChange={handleInputChange}
-              style={styles.select}
-              required
-            >
-              <option value="">Select State</option>
-              <option value="AL">Alabama</option>
-              <option value="CA">California</option>
-              <option value="FL">Florida</option>
-              <option value="NY">New York</option>
-              <option value="TX">Texas</option>
-            </select>
-          </div>
-          <div style={styles.formGroup}>
-            <label style={styles.label}>ZIP Code *</label>
-            <input
-              type="text"
-              name="zipCode"
-              value={formData.zipCode}
-              onChange={handleInputChange}
-              style={styles.input}
-              required
-            />
-          </div>
-        </div>
-      </form>
-    </div>
-  );
-
-  const renderStep2 = () => (
-    <div>
-      <h2 style={styles.stepTitle}>Account Selection</h2>
-      <div style={styles.accountTypeGrid}>
-        {accountTypes.map(type => (
-          <div
-            key={type.id}
-            style={{
-              ...styles.accountTypeCard,
-              ...(formData.accountType === type.id ? styles.accountTypeCardSelected : {})
-            }}
-            onClick={() => setFormData(prev => ({...prev, accountType: type.id}))}
-          >
-            <div style={styles.accountTypeIcon}>{type.icon}</div>
-            <div style={styles.accountTypeTitle}>{type.title}</div>
-            <div style={styles.accountTypeDesc}>{type.description}</div>
-          </div>
-        ))}
-      </div>
-
-      <div style={{...styles.formGroup, marginTop: '2rem'}}>
-        <label style={styles.label}>Initial Deposit Amount *</label>
-        <select
-          name="initialDeposit"
-          value={formData.initialDeposit}
-          onChange={handleInputChange}
-          style={styles.select}
-          required
-        >
-          <option value="">Select Amount</option>
-          <option value="100">$100 - $499</option>
-          <option value="500">$500 - $999</option>
-          <option value="1000">$1,000 - $4,999</option>
-          <option value="5000">$5,000+</option>
-        </select>
-      </div>
-
-      <div style={styles.formRow}>
-        <div style={styles.formGroup}>
-          <label style={styles.label}>Employment Status *</label>
-          <select
-            name="employment"
-            value={formData.employment}
-            onChange={handleInputChange}
-            style={styles.select}
-            required
-          >
-            <option value="">Select Status</option>
-            <option value="employed">Employed Full-time</option>
-            <option value="parttime">Employed Part-time</option>
-            <option value="selfemployed">Self-employed</option>
-            <option value="student">Student</option>
-            <option value="retired">Retired</option>
-            <option value="unemployed">Unemployed</option>
-          </select>
-        </div>
-        <div style={styles.formGroup}>
-          <label style={styles.label}>Annual Income *</label>
-          <select
-            name="income"
-            value={formData.income}
-            onChange={handleInputChange}
-            style={styles.select}
-            required
-          >
-            <option value="">Select Range</option>
-            <option value="under25k">Under $25,000</option>
-            <option value="25k-50k">$25,000 - $50,000</option>
-            <option value="50k-75k">$50,000 - $75,000</option>
-            <option value="75k-100k">$75,000 - $100,000</option>
-            <option value="over100k">Over $100,000</option>
-          </select>
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderStep3 = () => (
-    <div>
-      <h2 style={styles.stepTitle}>Review & Submit</h2>
-      
-      <div style={{backgroundColor: '#f8f9fa', padding: '1.5rem', borderRadius: '8px', marginBottom: '2rem'}}>
-        <h3 style={{margin: '0 0 1rem 0', color: '#333'}}>Application Summary</h3>
-        <div style={{display: 'grid', gap: '0.5rem', fontSize: '14px'}}>
-          <div><strong>Name:</strong> {formData.firstName} {formData.lastName}</div>
-          <div><strong>Email:</strong> {formData.email}</div>
-          <div><strong>Phone:</strong> {formData.phone}</div>
-          <div><strong>Account Type:</strong> {accountTypes.find(t => t.id === formData.accountType)?.title || 'Not selected'}</div>
-          <div><strong>Initial Deposit:</strong> {formData.initialDeposit ? `$${formData.initialDeposit}+` : 'Not selected'}</div>
-        </div>
-      </div>
-
-      <div style={styles.checkboxGroup}>
-        <input
-          type="checkbox"
-          id="terms"
-          name="termsAgreed"
-          checked={formData.termsAgreed}
-          onChange={handleInputChange}
-          style={styles.checkbox}
-          required
-        />
-        <label htmlFor="terms" style={styles.checkboxLabel}>
-          I agree to the <Link href="/terms" style={{color: '#0070f3'}}>Terms of Service</Link> and <Link href="/privacy" style={{color: '#0070f3'}}>Privacy Policy</Link>. 
-          I understand that my application will be reviewed and I will receive an email confirmation once processed.
-        </label>
-      </div>
-    </div>
-  );
-
   return (
-    <div style={styles.container}>
-      <header style={styles.header}>
-        <h1 style={styles.logo}>🏦 Oakline Bank</h1>
-        <Link href="/login" style={{color: 'white', textDecoration: 'none'}}>
-          Sign In
-        </Link>
+    <div className="min-h-screen bg-gray-100 p-8">
+      <header className="mb-6 flex justify-between items-center">
+        <h1 className="text-3xl font-bold text-blue-700">🏦 Oakline Bank Application</h1>
+        <Link href="/login" className="text-blue-700 underline">Sign In</Link>
       </header>
 
-      <main style={styles.main}>
-        <div style={styles.card}>
-          {renderStepIndicator()}
-          
-          {currentStep === 1 && renderStep1()}
-          {currentStep === 2 && renderStep2()}
-          {currentStep === 3 && renderStep3()}
+      <div className="bg-white p-8 rounded-xl shadow-md max-w-4xl mx-auto">
+        {/* Step Indicators */}
+        <div className="flex justify-center gap-4 mb-6">
+          {[1,2,3].map(step => (
+            <div key={step} className={`w-10 h-10 rounded-full flex items-center justify-center
+              ${step === currentStep ? 'bg-blue-700 text-white' : step < currentStep ? 'bg-green-600 text-white' : 'bg-gray-300 text-gray-600'}`}>
+              {step}
+            </div>
+          ))}
+        </div>
 
-          <div style={styles.buttonGroup}>
-            {currentStep > 1 && (
-              <button
-                type="button"
-                onClick={handleBack}
-                style={{...styles.button, ...styles.buttonSecondary}}
-              >
-                Back
-              </button>
-            )}
-            
-            <div style={{flex: 1}}></div>
+        {/* Step 1: Personal Info */}
+        {currentStep === 1 && (
+          <div className="space-y-4">
+            <h2 className="text-xl font-semibold mb-2">Personal Information</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <input placeholder="First Name*" name="firstName" value={formData.firstName} onChange={handleInputChange} className="input"/>
+              <input placeholder="Middle Name" name="middleName" value={formData.middleName} onChange={handleInputChange} className="input"/>
+              <input placeholder="Last Name*" name="lastName" value={formData.lastName} onChange={handleInputChange} className="input"/>
+              <input placeholder="Email*" name="email" type="email" value={formData.email} onChange={handleInputChange} className="input"/>
+              <input placeholder="Phone*" name="phone" value={formData.phone} onChange={handleInputChange} className="input"/>
+              <input type="date" name="dob" value={formData.dob} onChange={handleInputChange} className="input"/>
+            </div>
 
-            {currentStep < 3 ? (
-              <button
-                type="button"
-                onClick={handleNext}
-                style={{...styles.button, ...styles.buttonPrimary}}
-              >
-                Next
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={handleSubmit}
-                disabled={!formData.termsAgreed || isSubmitting}
-                style={{
-                  ...styles.button,
-                  ...(formData.termsAgreed && !isSubmitting ? styles.buttonPrimary : styles.buttonDisabled)
-                }}
-              >
-                {isSubmitting ? 'Submitting...' : 'Submit Application'}
-              </button>
-            )}
+            {formData.country === 'US' 
+              ? <input placeholder="SSN" name="ssn" value={formData.ssn} onChange={handleInputChange} className="input"/>
+              : <input placeholder="ID Number" name="idNumber" value={formData.idNumber} onChange={handleInputChange} className="input"/>
+            }
+
+            <input placeholder="Address*" name="address" value={formData.address} onChange={handleInputChange} className="input"/>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <input placeholder="City*" name="city" list="city-list" value={formData.city} onChange={handleInputChange} className="input"/>
+              <datalist id="city-list">
+                {cities.map(city => <option key={city} value={city} />)}
+              </datalist>
+
+              <select name="state" value={formData.state} onChange={handleInputChange} className="input">
+                <option value="">Select State</option>
+                {states.map(s => <option key={s.code} value={s.code}>{s.name}</option>)}
+              </select>
+
+              <input placeholder="ZIP Code*" name="zipCode" value={formData.zipCode} onChange={handleInputChange} className="input"/>
+            </div>
+
+            <select name="country" value={formData.country} onChange={handleInputChange} className="input">
+              <option value="">Select Country</option>
+              {countries.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
           </div>
-        </div>
+        )}
 
-        <div style={{textAlign: 'center'}}>
-          <Link href="/" style={styles.backLink}>
-            ← Back to Home
-          </Link>
+        {/* Step 2: Account Types & Employment */}
+        {currentStep === 2 && (
+          <div className="space-y-4">
+            <h2 className="text-xl font-semibold mb-2">Select Account Types</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+              {accountTypes.map(a => {
+                const selected = formData.accountTypes.includes(a.id);
+                return (
+                  <div key={a.id} onClick={() => toggleAccountType(a.id)}
+                    className={`p-4 rounded-lg cursor-pointer border-2 ${selected ? 'border-green-600 bg-green-50' : 'border-gray-300 bg-white'}`}>
+                    <div className="text-2xl">{a.icon}</div>
+                    <div className="font-semibold">{a.title}</div>
+                    <div className="text-sm text-gray-600">{a.description}</div>
+                  </div>
+                )
+              })}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <select name="employment" value={formData.employment} onChange={handleInputChange} className="input">
+                <option value="">Select Employment Status</option>
+                <option value="employed">Employed Full-time</option>
+                <option value="parttime">Employed Part-time</option>
+                <option value="selfemployed">Self-employed</option>
+                <option value="student">Student</option>
+                <option value="retired">Retired</option>
+                <option value="unemployed">Unemployed</option>
+              </select>
+
+              <select name="income" value={formData.income} onChange={handleInputChange} className="input">
+                <option value="">Select Annual Income</option>
+                <option value="under25k">Under $25,000</option>
+                <option value="25k-50k">$25,000 - $50,000</option>
+                <option value="50k-75k">$50,000 - $75,000</option>
+                <option value="75k-100k">$75,000 - $100,000</option>
+                <option value="over100k">Over $100,000</option>
+              </select>
+            </div>
+          </div>
+        )}
+
+        {/* Step 3: Review & Submit */}
+        {currentStep === 3 && (
+          <div className="space-y-4">
+            <h2 className="text-xl font-semibold mb-2">Review & Submit</h2>
+            <div className="bg-gray-50 p-4 rounded-lg space-y-2">
+              <p><strong>Name:</strong> {formData.firstName} {formData.middleName} {formData.lastName}</p>
+              <p><strong>Email:</strong> {formData.email}</p>
+              <p><strong>Phone:</strong> {formData.phone}</p>
+              <p><strong>Selected Accounts:</strong> {formData.accountTypes.map(id => accountTypes.find(a => a.id===id)?.title).join(', ')}</p>
+              <p><strong>Employment:</strong> {formData.employment}</p>
+              <p><strong>Income:</strong> {formData.income}</p>
+            </div>
+
+            <label className="flex items-center gap-2">
+              <input type="checkbox" name="termsAgreed" checked={formData.termsAgreed} onChange={handleInputChange}/>
+              I agree to the <Link href="/terms" className="text-blue-700 underline">Terms</Link> and <Link href="/privacy" className="text-blue-700 underline">Privacy Policy</Link>
+            </label>
+          </div>
+        )}
+
+        {/* Navigation */}
+        <div className="flex justify-between mt-6">
+          {currentStep > 1 && <button onClick={handleBack} className="btn-secondary">Back</button>}
+          {currentStep < 3 && <button onClick={handleNext} className="btn-primary">Next</button>}
+          {currentStep === 3 && (
+            <button onClick={handleSubmit} disabled={!formData.termsAgreed || isSubmitting} className="btn-primary">
+              {isSubmitting ? 'Submitting...' : 'Submit'}
+            </button>
+          )}
         </div>
-      </main>
+      </div>
     </div>
   );
 }
