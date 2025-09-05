@@ -3,6 +3,5 @@
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
   "/": "pages/index.js",
-  "/apply": "pages/apply.js",
-  "/api/send-welcome-email": "pages/api/send-welcome-email.js"
+  "/apply": "pages/apply.js"
 }

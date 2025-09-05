@@ -1,0 +1,208 @@
+// pages/apply.js
+import { useState, useEffect } from 'react';
+import { supabase } from '../lib/supabaseClient';
+
+export default function ApplyPage() {
+  const [formData, setFormData] = useState({
+    first_name: '',
+    middle_name: '',
+    last_name: '',
+    mothers_maiden_name: '',
+    email: '',
+    phone: '',
+    ssn: '',
+    id_number: '',
+    dob: '',
+    address_line1: '',
+    address_line2: '',
+    city: '',
+    state: '',
+    country: 'US',
+    account_types: [],
+  });
+
+  const [accountTypes, setAccountTypes] = useState([]);
+  const [step, setStep] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
+
+  useEffect(() => {
+    async function fetchAccountTypes() {
+      const { data, error } = await supabase.from('account_types').select('name');
+      if (error) {
+        console.error('Error fetching account types:', error);
+      } else {
+        setAccountTypes(data.map(a => a.name));
+      }
+    }
+    fetchAccountTypes();
+  }, []);
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleCheckboxChange = (type) => {
+    if (formData.account_types.includes(type)) {
+      setFormData({
+        ...formData,
+        account_types: formData.account_types.filter(a => a !== type)
+      });
+    } else {
+      setFormData({
+        ...formData,
+        account_types: [...formData.account_types, type]
+      });
+    }
+  };
+
+  const nextStep = () => setStep(step + 1);
+  const prevStep = () => setStep(step - 1);
+
+  const generateAccountNumber = () =>
+    Math.floor(1000000000 + Math.random() * 9000000000).toString();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setMessage('');
+
+    if (formData.account_types.length === 0) {
+      setMessage('Error: Please select at least one account type.');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const { account_types, ...userData } = formData;
+
+      // Validate US vs international
+      if (userData.country === 'US') userData.id_number = null;
+      else userData.ssn = null;
+
+      const { data: user, error: userError } = await supabase
+        .from('users')
+        .insert([userData])
+        .select()
+        .single();
+
+      if (userError) throw userError;
+
+      const accountsToCreate = account_types.map(type => ({
+        user_id: user.id,
+        account_number: generateAccountNumber(),
+        account_type: type,
+        balance: 0,
+        status: 'limited'
+      }));
+
+      const { data: accounts, error: accountError } = await supabase
+        .from('accounts')
+        .insert(accountsToCreate)
+        .select();
+
+      if (accountError) throw accountError;
+
+      await supabase.from('applications').insert([{
+        user_id: user.id,
+        status: 'received',
+        account_number: accounts.map(a => a.account_number).join(', ')
+      }]);
+
+      // Send confirmation email (replace /api/send-welcome-email with your endpoint)
+      await fetch('/api/send-welcome-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: user.email,
+          first_name: user.first_name,
+          last_name: user.last_name,
+          account_numbers: accounts.map(a => a.account_number),
+          account_types,
+          temp_user_id: user.id
+        })
+      });
+
+      setMessage('🎉 Application submitted! Check your email to enroll.');
+      setStep(4);
+
+    } catch (err) {
+      console.error(err);
+      setMessage('Error: Something went wrong. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const inputStyle = { width: '100%', padding: '12px', marginBottom: '12px', borderRadius: '6px', border: '1px solid #ccc' };
+  const buttonStyle = { padding: '12px 20px', margin: '5px', backgroundColor: '#0070f3', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer' };
+
+  if (step === 4) {
+    return (
+      <div style={{ maxWidth: '600px', margin: '2rem auto', textAlign: 'center' }}>
+        <h2>Application Submitted Successfully 🎉</h2>
+        <p>{message}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ maxWidth: '600px', margin: '2rem auto', fontFamily: 'Arial, sans-serif' }}>
+      <h1 style={{ textAlign: 'center' }}>Apply for Banking Account</h1>
+      <form onSubmit={handleSubmit}>
+        {step === 1 && (
+          <div>
+            <h3>Personal Information</h3>
+            <input name="first_name" placeholder="First Name*" value={formData.first_name} onChange={handleChange} style={inputStyle} required />
+            <input name="middle_name" placeholder="Middle Name" value={formData.middle_name} onChange={handleChange} style={inputStyle} />
+            <input name="last_name" placeholder="Last Name*" value={formData.last_name} onChange={handleChange} style={inputStyle} required />
+            <input name="mothers_maiden_name" placeholder="Mother's Maiden Name" value={formData.mothers_maiden_name} onChange={handleChange} style={inputStyle} />
+            <input name="email" type="email" placeholder="Email*" value={formData.email} onChange={handleChange} style={inputStyle} required />
+            <input name="phone" placeholder="Phone*" value={formData.phone} onChange={handleChange} style={inputStyle} required />
+            <select name="country" value={formData.country} onChange={handleChange} style={inputStyle}>
+              <option value="US">United States</option>
+              <option value="INTL">International</option>
+            </select>
+            {formData.country === 'US' 
+              ? <input name="ssn" placeholder="SSN*" value={formData.ssn} onChange={handleChange} style={inputStyle} required />
+              : <input name="id_number" placeholder="ID Number*" value={formData.id_number} onChange={handleChange} style={inputStyle} required />
+            }
+            <input type="date" name="dob" value={formData.dob} onChange={handleChange} style={inputStyle} required />
+            <input name="address_line1" placeholder="Address Line 1*" value={formData.address_line1} onChange={handleChange} style={inputStyle} required />
+            <input name="address_line2" placeholder="Address Line 2" value={formData.address_line2} onChange={handleChange} style={inputStyle} />
+            <input name="city" placeholder="City*" value={formData.city} onChange={handleChange} style={inputStyle} required />
+            <input name="state" placeholder="State*" value={formData.state} onChange={handleChange} style={inputStyle} required />
+            <button type="button" onClick={nextStep} style={buttonStyle}>Next Step →</button>
+          </div>
+        )}
+
+        {step === 2 && (
+          <div>
+            <h3>Select Account Types</h3>
+            {accountTypes.map(type => (
+              <div key={type}>
+                <label>
+                  <input type="checkbox" checked={formData.account_types.includes(type)} onChange={() => handleCheckboxChange(type)} />
+                  {` ${type}`}
+                </label>
+              </div>
+            ))}
+            <button type="button" onClick={prevStep} style={buttonStyle}>← Back</button>
+            <button type="button" onClick={nextStep} style={buttonStyle}>Next Step →</button>
+          </div>
+        )}
+
+        {step === 3 && (
+          <div>
+            <h3>Confirm & Submit</h3>
+            <p>Please review your information and selected accounts, then submit.</p>
+            <button type="button" onClick={prevStep} style={buttonStyle}>← Back</button>
+            <button type="submit" style={buttonStyle} disabled={loading}>{loading ? 'Submitting...' : 'Submit Application'}</button>
+          </div>
+        )}
+      </form>
+
+      {message && step !== 4 && <p style={{ marginTop: '20px', color: 'red' }}>{message}</p>}
+    </div>
+  );
+}
