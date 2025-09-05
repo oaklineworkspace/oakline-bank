@@ -295,7 +295,7 @@ export default function Apply() {
       const effectiveState = getEffectiveState();
       const effectiveCity = getEffectiveCity();
 
-      // Insert user data
+      // Insert user data - store state as text to avoid foreign key issues
       const { data: userData, error: userError } = await supabase
         .from('users')
         .insert([{
@@ -310,7 +310,7 @@ export default function Apply() {
           id_number: effectiveCountry !== 'US' ? formData.idNumber.trim() : null,
           address_line1: formData.address.trim(),
           city: effectiveCity,
-          state: effectiveState,
+          state_province: effectiveState,
           zip_code: formData.zipCode.trim(),
           county: null,
           country: effectiveCountry
@@ -642,19 +642,23 @@ export default function Apply() {
       padding: '1rem',
       backgroundColor: '#f8fafc',
       borderRadius: '12px',
-      border: '1px solid #e2e8f0'
+      border: '1px solid #e2e8f0',
+      marginTop: '1rem'
     },
     checkbox: {
       width: '20px',
       height: '20px',
       marginTop: '2px',
-      cursor: 'pointer'
+      cursor: 'pointer',
+      accentColor: '#3b82f6',
+      transform: 'scale(1.2)'
     },
     checkboxLabel: {
-      fontSize: '14px',
-      color: '#4b5563',
+      fontSize: '15px',
+      color: '#374151',
       lineHeight: 1.6,
-      cursor: 'pointer'
+      cursor: 'pointer',
+      fontWeight: '500'
     },
     link: {
       color: '#3b82f6',
