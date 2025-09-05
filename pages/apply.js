@@ -32,25 +32,91 @@ const ACCOUNT_TYPES = [
 
 const COUNTRIES = [
   { code: 'US', name: 'United States' },
-  { code: 'International', name: 'International' }
+  { code: 'CA', name: 'Canada' },
+  { code: 'GB', name: 'United Kingdom' },
+  { code: 'AU', name: 'Australia' },
+  { code: 'DE', name: 'Germany' },
+  { code: 'FR', name: 'France' },
+  { code: 'IT', name: 'Italy' },
+  { code: 'ES', name: 'Spain' },
+  { code: 'NL', name: 'Netherlands' },
+  { code: 'SE', name: 'Sweden' },
+  { code: 'NO', name: 'Norway' },
+  { code: 'DK', name: 'Denmark' },
+  { code: 'FI', name: 'Finland' },
+  { code: 'IE', name: 'Ireland' },
+  { code: 'NZ', name: 'New Zealand' },
+  { code: 'JP', name: 'Japan' },
+  { code: 'KR', name: 'South Korea' },
+  { code: 'CN', name: 'China' },
+  { code: 'IN', name: 'India' },
+  { code: 'BR', name: 'Brazil' },
+  { code: 'MX', name: 'Mexico' },
+  { code: 'ZA', name: 'South Africa' },
+  { code: 'NG', name: 'Nigeria' },
+  { code: 'EG', name: 'Egypt' },
+  { code: 'KE', name: 'Kenya' },
+  { code: 'SA', name: 'Saudi Arabia' },
+  { code: 'AE', name: 'UAE' },
+  { code: 'RU', name: 'Russia' },
+  { code: 'TR', name: 'Turkey' },
+  { code: 'AR', name: 'Argentina' },
+  { code: 'OTHER', name: 'Other / Enter Manually' }
 ];
 
-const US_STATES = [
-  'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut',
-  'Delaware', 'Florida', 'Georgia', 'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa',
-  'Kansas', 'Kentucky', 'Louisiana', 'Maine', 'Maryland', 'Massachusetts', 'Michigan',
-  'Minnesota', 'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire',
-  'New Jersey', 'New Mexico', 'New York', 'North Carolina', 'North Dakota', 'Ohio',
-  'Oklahoma', 'Oregon', 'Pennsylvania', 'Rhode Island', 'South Carolina', 'South Dakota',
-  'Tennessee', 'Texas', 'Utah', 'Vermont', 'Virginia', 'Washington', 'West Virginia',
-  'Wisconsin', 'Wyoming'
-];
+const STATES_BY_COUNTRY = {
+  US: [
+    'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut',
+    'Delaware', 'Florida', 'Georgia', 'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa',
+    'Kansas', 'Kentucky', 'Louisiana', 'Maine', 'Maryland', 'Massachusetts', 'Michigan',
+    'Minnesota', 'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire',
+    'New Jersey', 'New Mexico', 'New York', 'North Carolina', 'North Dakota', 'Ohio',
+    'Oklahoma', 'Oregon', 'Pennsylvania', 'Rhode Island', 'South Carolina', 'South Dakota',
+    'Tennessee', 'Texas', 'Utah', 'Vermont', 'Virginia', 'Washington', 'West Virginia',
+    'Wisconsin', 'Wyoming'
+  ],
+  CA: [
+    'Alberta', 'British Columbia', 'Manitoba', 'New Brunswick', 'Newfoundland and Labrador',
+    'Northwest Territories', 'Nova Scotia', 'Nunavut', 'Ontario', 'Prince Edward Island',
+    'Quebec', 'Saskatchewan', 'Yukon'
+  ],
+  AU: [
+    'Australian Capital Territory', 'New South Wales', 'Northern Territory', 'Queensland',
+    'South Australia', 'Tasmania', 'Victoria', 'Western Australia'
+  ],
+  IN: [
+    'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh', 'Goa', 'Gujarat',
+    'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka', 'Kerala', 'Madhya Pradesh',
+    'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab',
+    'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura', 'Uttar Pradesh',
+    'Uttarakhand', 'West Bengal'
+  ],
+  BR: [
+    'Acre', 'Alagoas', 'Amapá', 'Amazonas', 'Bahia', 'Ceará', 'Distrito Federal', 'Espírito Santo',
+    'Goiás', 'Maranhão', 'Mato Grosso', 'Mato Grosso do Sul', 'Minas Gerais', 'Pará', 'Paraíba',
+    'Paraná', 'Pernambuco', 'Piauí', 'Rio de Janeiro', 'Rio Grande do Norte', 'Rio Grande do Sul',
+    'Rondônia', 'Roraima', 'Santa Catarina', 'São Paulo', 'Sergipe', 'Tocantins'
+  ]
+};
+
+const MAJOR_CITIES_BY_STATE = {
+  'California': ['Los Angeles', 'San Francisco', 'San Diego', 'Sacramento', 'San Jose', 'Fresno'],
+  'New York': ['New York City', 'Buffalo', 'Rochester', 'Syracuse', 'Albany', 'Yonkers'],
+  'Texas': ['Houston', 'Dallas', 'Austin', 'San Antonio', 'Fort Worth', 'El Paso'],
+  'Florida': ['Miami', 'Orlando', 'Tampa', 'Jacksonville', 'Fort Lauderdale', 'Tallahassee'],
+  'Illinois': ['Chicago', 'Springfield', 'Rockford', 'Peoria', 'Elgin', 'Waukegan'],
+  'Ontario': ['Toronto', 'Ottawa', 'Hamilton', 'London', 'Mississauga', 'Windsor'],
+  'British Columbia': ['Vancouver', 'Victoria', 'Surrey', 'Burnaby', 'Richmond', 'Abbotsford']
+};
 
 export default function Apply() {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  const [showManualCountry, setShowManualCountry] = useState(false);
+  const [showManualState, setShowManualState] = useState(false);
+  const [showManualCity, setShowManualCity] = useState(false);
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -63,9 +129,12 @@ export default function Apply() {
     ssn: '',
     idNumber: '',
     country: 'US',
+    manualCountry: '',
     address: '',
     city: '',
+    manualCity: '',
     state: '',
+    manualState: '',
     zipCode: '',
     accountTypes: [],
     employmentStatus: '',
@@ -75,6 +144,38 @@ export default function Apply() {
 
   const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const validatePhone = (phone) => /^[\d\s\-\(\)]{10,}$/.test(phone);
+
+  const getEffectiveCountry = () => {
+    return formData.country === 'OTHER' ? formData.manualCountry : formData.country;
+  };
+
+  const getEffectiveState = () => {
+    return showManualState ? formData.manualState : formData.state;
+  };
+
+  const getEffectiveCity = () => {
+    return showManualCity ? formData.manualCity : formData.city;
+  };
+
+  const getAvailableStates = () => {
+    const country = getEffectiveCountry();
+    return STATES_BY_COUNTRY[country] || [];
+  };
+
+  const getAvailableCities = () => {
+    const state = getEffectiveState();
+    return MAJOR_CITIES_BY_STATE[state] || [];
+  };
+
+  const shouldShowManualState = () => {
+    const country = getEffectiveCountry();
+    return !STATES_BY_COUNTRY[country] || showManualState;
+  };
+
+  const shouldShowManualCity = () => {
+    const state = getEffectiveState();
+    return !MAJOR_CITIES_BY_STATE[state] || showManualCity;
+  };
 
   const validateStep = (step) => {
     const newErrors = {};
@@ -93,7 +194,10 @@ export default function Apply() {
         newErrors.phone = 'Invalid phone number';
       }
       if (!formData.dateOfBirth) newErrors.dateOfBirth = 'Date of birth is required';
-      if (formData.country === 'US') {
+      
+      if (!getEffectiveCountry()) newErrors.country = 'Country is required';
+      
+      if (getEffectiveCountry() === 'US') {
         if (!formData.ssn.trim()) newErrors.ssn = 'SSN is required';
       } else {
         if (!formData.idNumber.trim()) newErrors.idNumber = 'Government ID Number is required';
@@ -102,9 +206,9 @@ export default function Apply() {
 
     if (step === 2) {
       if (!formData.address.trim()) newErrors.address = 'Address is required';
-      if (!formData.city.trim()) newErrors.city = 'City is required';
-      if (!formData.state) newErrors.state = 'State is required';
-      if (!formData.zipCode.trim()) newErrors.zipCode = 'ZIP code is required';
+      if (!getEffectiveCity()) newErrors.city = 'City is required';
+      if (!getEffectiveState()) newErrors.state = 'State/Province is required';
+      if (!formData.zipCode.trim()) newErrors.zipCode = 'ZIP/Postal code is required';
     }
 
     if (step === 3) {
@@ -120,10 +224,38 @@ export default function Apply() {
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
+    
+    setFormData(prev => {
+      const newData = {
+        ...prev,
+        [name]: type === 'checkbox' ? checked : value
+      };
+
+      // Handle country change
+      if (name === 'country') {
+        setShowManualCountry(value === 'OTHER');
+        if (value !== 'OTHER') {
+          newData.manualCountry = '';
+        }
+        // Reset state and city when country changes
+        newData.state = '';
+        newData.manualState = '';
+        newData.city = '';
+        newData.manualCity = '';
+        setShowManualState(false);
+        setShowManualCity(false);
+      }
+
+      // Handle state change
+      if (name === 'state') {
+        // Reset city when state changes
+        newData.city = '';
+        newData.manualCity = '';
+        setShowManualCity(false);
+      }
+
+      return newData;
+    });
 
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
@@ -159,6 +291,10 @@ export default function Apply() {
     setLoading(true);
 
     try {
+      const effectiveCountry = getEffectiveCountry();
+      const effectiveState = getEffectiveState();
+      const effectiveCity = getEffectiveCity();
+
       // Insert user data
       const { data: userData, error: userError } = await supabase
         .from('users')
@@ -170,13 +306,14 @@ export default function Apply() {
           email: formData.email.trim().toLowerCase(),
           phone: formData.phone.trim(),
           dob: formData.dateOfBirth,
-          ssn: formData.country === 'US' ? formData.ssn.trim() : null,
-          id_number: formData.country === 'International' ? formData.idNumber.trim() : null,
+          ssn: effectiveCountry === 'US' ? formData.ssn.trim() : null,
+          id_number: effectiveCountry !== 'US' ? formData.idNumber.trim() : null,
           address_line1: formData.address.trim(),
-          city: formData.city.trim(),
-          state: formData.state,
-          county: null, // Will be determined from city/state if needed
-          country: formData.country
+          city: effectiveCity,
+          state: effectiveState,
+          zip_code: formData.zipCode.trim(),
+          county: null,
+          country: effectiveCountry
         }])
         .select()
         .single();
@@ -429,6 +566,15 @@ export default function Apply() {
       display: 'flex',
       alignItems: 'center',
       gap: '4px'
+    },
+    toggleButton: {
+      fontSize: '12px',
+      color: '#3b82f6',
+      background: 'none',
+      border: 'none',
+      cursor: 'pointer',
+      textDecoration: 'underline',
+      padding: '4px 0'
     },
     accountTypesGrid: {
       display: 'grid',
@@ -737,27 +883,27 @@ export default function Apply() {
                 )}
               </div>
 
-              <div style={styles.inputGroup}>
-                <label style={styles.label}>
-                  Phone Number <span style={styles.required}>*</span>
-                </label>
-                <input
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  style={{
-                    ...styles.input,
-                    ...(errors.phone ? styles.inputError : {})
-                  }}
-                  placeholder="(555) 123-4567"
-                />
-                {errors.phone && (
-                  <div style={styles.errorMessage}>⚠️ {errors.phone}</div>
-                )}
-              </div>
-
               <div style={{...styles.formGrid, ...styles.gridCols2}}>
+                <div style={styles.inputGroup}>
+                  <label style={styles.label}>
+                    Phone Number <span style={styles.required}>*</span>
+                  </label>
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    style={{
+                      ...styles.input,
+                      ...(errors.phone ? styles.inputError : {})
+                    }}
+                    placeholder="(555) 123-4567"
+                  />
+                  {errors.phone && (
+                    <div style={styles.errorMessage}>⚠️ {errors.phone}</div>
+                  )}
+                </div>
+
                 <div style={styles.inputGroup}>
                   <label style={styles.label}>
                     Date of Birth <span style={styles.required}>*</span>
@@ -776,45 +922,61 @@ export default function Apply() {
                     <div style={styles.errorMessage}>⚠️ {errors.dateOfBirth}</div>
                   )}
                 </div>
-
-                <div style={styles.inputGroup}>
-                  <label style={styles.label}>
-                    Country <span style={styles.required}>*</span>
-                  </label>
-                  <select
-                    name="country"
-                    value={formData.country}
-                    onChange={handleInputChange}
-                    style={styles.select}
-                  >
-                    {COUNTRIES.map(country => (
-                      <option key={country.code} value={country.code}>
-                        {country.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
               </div>
 
               <div style={styles.inputGroup}>
                 <label style={styles.label}>
-                  {formData.country === 'US' ? 'Social Security Number' : 'Government ID Number'} <span style={styles.required}>*</span>
+                  Country <span style={styles.required}>*</span>
+                </label>
+                <select
+                  name="country"
+                  value={formData.country}
+                  onChange={handleInputChange}
+                  style={{
+                    ...styles.select,
+                    ...(errors.country ? styles.inputError : {})
+                  }}
+                >
+                  {COUNTRIES.map(country => (
+                    <option key={country.code} value={country.code}>
+                      {country.name}
+                    </option>
+                  ))}
+                </select>
+                {showManualCountry && (
+                  <input
+                    type="text"
+                    name="manualCountry"
+                    value={formData.manualCountry}
+                    onChange={handleInputChange}
+                    style={styles.input}
+                    placeholder="Enter your country"
+                  />
+                )}
+                {errors.country && (
+                  <div style={styles.errorMessage}>⚠️ {errors.country}</div>
+                )}
+              </div>
+
+              <div style={styles.inputGroup}>
+                <label style={styles.label}>
+                  {getEffectiveCountry() === 'US' ? 'Social Security Number' : 'Government ID Number'} <span style={styles.required}>*</span>
                 </label>
                 <input
                   type="text"
-                  name={formData.country === 'US' ? 'ssn' : 'idNumber'}
-                  value={formData.country === 'US' ? formData.ssn : formData.idNumber}
+                  name={getEffectiveCountry() === 'US' ? 'ssn' : 'idNumber'}
+                  value={getEffectiveCountry() === 'US' ? formData.ssn : formData.idNumber}
                   onChange={handleInputChange}
                   style={{
                     ...styles.input,
-                    ...((formData.country === 'US' ? errors.ssn : errors.idNumber) ? styles.inputError : {})
+                    ...((getEffectiveCountry() === 'US' ? errors.ssn : errors.idNumber) ? styles.inputError : {})
                   }}
-                  placeholder={formData.country === 'US' ? 'XXX-XX-XXXX' : 'Enter your government ID number'}
+                  placeholder={getEffectiveCountry() === 'US' ? 'XXX-XX-XXXX' : 'Enter your government ID number'}
                 />
-                {formData.country === 'US' && errors.ssn && (
+                {getEffectiveCountry() === 'US' && errors.ssn && (
                   <div style={styles.errorMessage}>⚠️ {errors.ssn}</div>
                 )}
-                {formData.country === 'International' && errors.idNumber && (
+                {getEffectiveCountry() !== 'US' && errors.idNumber && (
                   <div style={styles.errorMessage}>⚠️ {errors.idNumber}</div>
                 )}
               </div>
@@ -849,17 +1011,46 @@ export default function Apply() {
                   <label style={styles.label}>
                     City <span style={styles.required}>*</span>
                   </label>
-                  <input
-                    type="text"
-                    name="city"
-                    value={formData.city}
-                    onChange={handleInputChange}
-                    style={{
-                      ...styles.input,
-                      ...(errors.city ? styles.inputError : {})
-                    }}
-                    placeholder="City"
-                  />
+                  {shouldShowManualCity() ? (
+                    <input
+                      type="text"
+                      name="manualCity"
+                      value={formData.manualCity}
+                      onChange={handleInputChange}
+                      style={{
+                        ...styles.input,
+                        ...(errors.city ? styles.inputError : {})
+                      }}
+                      placeholder="Enter your city"
+                    />
+                  ) : (
+                    <select
+                      name="city"
+                      value={formData.city}
+                      onChange={handleInputChange}
+                      style={{
+                        ...styles.select,
+                        ...(errors.city ? styles.inputError : {})
+                      }}
+                    >
+                      <option value="">Select City</option>
+                      {getAvailableCities().map(city => (
+                        <option key={city} value={city}>{city}</option>
+                      ))}
+                    </select>
+                  )}
+                  {getAvailableCities().length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowManualCity(!showManualCity);
+                        setFormData(prev => ({ ...prev, city: '', manualCity: '' }));
+                      }}
+                      style={styles.toggleButton}
+                    >
+                      {showManualCity ? 'Select from list' : 'Enter manually'}
+                    </button>
+                  )}
                   {errors.city && (
                     <div style={styles.errorMessage}>⚠️ {errors.city}</div>
                   )}
@@ -867,22 +1058,49 @@ export default function Apply() {
 
                 <div style={styles.inputGroup}>
                   <label style={styles.label}>
-                    State <span style={styles.required}>*</span>
+                    State / Province <span style={styles.required}>*</span>
                   </label>
-                  <select
-                    name="state"
-                    value={formData.state}
-                    onChange={handleInputChange}
-                    style={{
-                      ...styles.select,
-                      ...(errors.state ? styles.inputError : {})
-                    }}
-                  >
-                    <option value="">Select State</option>
-                    {US_STATES.map(state => (
-                      <option key={state} value={state}>{state}</option>
-                    ))}
-                  </select>
+                  {shouldShowManualState() ? (
+                    <input
+                      type="text"
+                      name="manualState"
+                      value={formData.manualState}
+                      onChange={handleInputChange}
+                      style={{
+                        ...styles.input,
+                        ...(errors.state ? styles.inputError : {})
+                      }}
+                      placeholder="Enter your state/province"
+                    />
+                  ) : (
+                    <select
+                      name="state"
+                      value={formData.state}
+                      onChange={handleInputChange}
+                      style={{
+                        ...styles.select,
+                        ...(errors.state ? styles.inputError : {})
+                      }}
+                    >
+                      <option value="">Select State/Province</option>
+                      {getAvailableStates().map(state => (
+                        <option key={state} value={state}>{state}</option>
+                      ))}
+                    </select>
+                  )}
+                  {getAvailableStates().length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowManualState(!showManualState);
+                        setFormData(prev => ({ ...prev, state: '', manualState: '', city: '', manualCity: '' }));
+                        setShowManualCity(false);
+                      }}
+                      style={styles.toggleButton}
+                    >
+                      {showManualState ? 'Select from list' : 'Enter manually'}
+                    </button>
+                  )}
                   {errors.state && (
                     <div style={styles.errorMessage}>⚠️ {errors.state}</div>
                   )}
@@ -890,7 +1108,7 @@ export default function Apply() {
 
                 <div style={styles.inputGroup}>
                   <label style={styles.label}>
-                    ZIP Code <span style={styles.required}>*</span>
+                    ZIP / Postal Code <span style={styles.required}>*</span>
                   </label>
                   <input
                     type="text"
