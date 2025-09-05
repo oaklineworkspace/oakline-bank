@@ -311,7 +311,7 @@ export default function Apply() {
           address_line1: formData.address.trim(),
           city: effectiveCity,
           state: effectiveState,
-          zip_code: formData.zipCode.trim(),
+          zipcode: formData.zipCode.trim(),
           county: null,
           country: effectiveCountry
         }])
