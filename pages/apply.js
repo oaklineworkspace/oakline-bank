@@ -1,215 +1,286 @@
-import { useState } from 'react';
-import { supabase } from '../lib/supabaseClient';
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
+import { z } from "zod";
 
-export default function ApplyPage() {
-  const [formData, setFormData] = useState({
-    citizenship: 'US',
-    first_name: '',
-    middle_name: '',
-    last_name: '',
-    mothers_maiden_name: '',
-    email: '',
-    phone: '',
-    ssn: '',
-    id_number: '',
-    dob: '',
-    account_types: [],
-    country: 'United States',
-    state: '',
-    city: '',
-    address_line1: '',
-    address_line2: ''
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
+import { StepIndicator } from "@/components/step-indicator";
+import { AccountTypeCard } from "@/components/account-type-card";
+import { US_STATES, COUNTRIES } from "@/lib/account-types";
+
+const applicationSchema = z.object({
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  email: z.string().email("Invalid email"),
+  phone: z.string().min(10, "Phone is required"),
+  dob: z.string().min(1, "Date of birth is required"),
+  ssnOrId: z.string().min(5, "SSN or ID is required"),
+  country: z.string().min(2, "Country is required"),
+  state: z.string().min(2, "State is required"),
+  city: z.string().min(1, "City is required"),
+  address: z.string().min(5, "Address is required"),
+  zipCode: z.string().min(4, "ZIP code is required"),
+  selectedAccountTypes: z.array(z.string()).min(1, "Select at least one account type"),
+  termsAgreed: z.boolean().refine(val => val, "You must agree to terms"),
+  emailConsent: z.boolean().refine(val => val, "Email consent is required"),
+  marketingConsent: z.boolean(),
+});
+
+export default function Apply() {
+  const [, setLocation] = useLocation();
+  const { toast } = useToast();
+  const [currentStep, setCurrentStep] = useState(1);
+  const [showAllAccountTypes, setShowAllAccountTypes] = useState(false);
+
+  const form = useForm({
+    resolver: zodResolver(applicationSchema),
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      phone: "",
+      dob: "",
+      ssnOrId: "",
+      country: "",
+      state: "",
+      city: "",
+      address: "",
+      zipCode: "",
+      selectedAccountTypes: [],
+      termsAgreed: false,
+      emailConsent: false,
+      marketingConsent: false,
+    },
   });
 
-  const [customCountry, setCustomCountry] = useState('');
-  const [customState, setCustomState] = useState('');
-  const [customCity, setCustomCity] = useState('');
-  const [step, setStep] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
-
-  const countries = [
-    'United States','United Kingdom','Canada','Germany','France','Australia',
-    'Nigeria','Japan','Brazil','India','Mexico','South Africa','Italy','Spain',
-    'China','Russia','Netherlands','Sweden','Norway','Other'
-  ];
-
-  const countryStates = {
-    'United States': ['California','New York','Texas','Florida','Other'],
-    'Canada': ['Ontario','Quebec','British Columbia','Alberta','Other'],
-    'Australia': ['New South Wales','Victoria','Queensland','Other'],
-    'Nigeria': ['Lagos','Abuja','Kano','Other'],
-    'Other': ['Other']
-  };
-
-  const accountTypes = [
-    'Checking','Savings','Business Checking','Student','Joint','Premium','IRA','Money Market',
-    'Certificate of Deposit','Foreign Currency','Trust','Healthcare Savings','Youth Savings',
-    'Senior Savings','Payroll','Loan','Crypto','Retirement Savings','Education Savings',
-    'Investment','Estate','Emergency Fund','Special Purpose'
-  ];
-
-  const handleChange = (e) => setFormData({...formData,[e.target.name]: e.target.value});
-
-  const handleAccountTypeChange = (type) => {
-    const selected = formData.account_types;
-    if (selected.includes(type)) {
-      setFormData({...formData, account_types: selected.filter(t=>t!==type)});
-    } else {
-      setFormData({...formData, account_types: [...selected,type]});
-    }
-  };
-
-  const nextStep = () => setStep(step+1);
-  const prevStep = () => setStep(step-1);
-
-  const generateAccountNumber = () => Math.floor(1000000000 + Math.random() * 9000000000).toString();
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setMessage('');
-
-    try {
-      if (formData.account_types.length === 0) {
-        setMessage('Select at least one account type.');
-        setLoading(false);
-        return;
-      }
-
-      // Country/State/City
-      const countryValue = customCountry || formData.country;
-      const stateValue = customState || formData.state;
-      const cityValue = customCity || formData.city;
-
-      const userInsert = {
-        first_name: formData.first_name,
-        middle_name: formData.middle_name,
-        last_name: formData.last_name,
-        mothers_maiden_name: formData.mothers_maiden_name,
-        email: formData.email,
-        phone: formData.phone,
-        ssn: formData.citizenship==='US' ? formData.ssn.replace(/-/g,'') : null,
-        id_number: formData.citizenship==='US' ? null : formData.id_number,
-        dob: formData.dob,
-        address_line1: formData.address_line1,
-        address_line2: formData.address_line2,
-        city: cityValue,
-        state: stateValue,
-        country: countryValue
-      };
-
-      const { data: userData, error: userError } = await supabase.from('users').insert([userInsert]).select().single();
-      if (userError) throw userError;
-
-      const accountsToCreate = formData.account_types.map(type => ({
-        user_id: userData.id,
-        account_number: generateAccountNumber(),
-        account_type: type,
-        balance: 0.00,
-        status: 'limited'
-      }));
-
-      const { data: accountsData, error: accountsError } = await supabase.from('accounts').insert(accountsToCreate).select();
-      if (accountsError) throw accountsError;
-
-      // Send welcome email with enrollment link
-      const emailResponse = await fetch('/api/send-enrollment-email', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-          email: userData.email,
-          first_name: userData.first_name,
-          last_name: userData.last_name,
-          temp_user_id: userData.id
-        })
-      });
-
-      if (!emailResponse.ok) console.warn('Email failed.');
-
-      setMessage(`Application submitted! ${accountsData.length} account(s) created. Check your email to enroll.`);
-
-    } catch(error) {
-      console.error(error);
-      setMessage('Error: Something went wrong. Please check all fields.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const inputStyle = { width:'100%', padding:'12px', border:'2px solid #e1e5e9', borderRadius:'8px', marginBottom:'15px' };
-  const buttonStyle = { padding:'12px 24px', margin:'5px', border:'none', borderRadius:'8px', cursor:'pointer', fontSize:'16px' };
-  const accountTypeStyle = (type) => ({
-    display:'inline-block', margin:'5px', padding:'10px 15px', borderRadius:'8px', cursor:'pointer',
-    border: formData.account_types.includes(type) ? '2px solid #28a745' : '2px solid #ccc',
-    backgroundColor: formData.account_types.includes(type) ? '#d4edda' : '#f8f9fa',
-    color:'#000'
+  const { data: accountTypes } = useQuery({
+    queryKey: ["account-types"],
+    queryFn: async () => {
+      const res = await apiRequest("GET", "/api/account-types");
+      return res.json();
+    },
   });
+
+  const submitApplication = useMutation({
+    mutationFn: async (data) => {
+      const res = await apiRequest("POST", "/api/applications", data);
+      if (!res.ok) throw new Error("Failed to submit application");
+      return res.json();
+    },
+    onSuccess: (data) => {
+      toast({ title: "Application Submitted!", description: "Check your email for enrollment link." });
+      setLocation(`/success?applicationId=${data.id}`);
+    },
+    onError: (error) => {
+      toast({ title: "Submission Error", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const handleNext = async () => {
+    const isValid = await form.trigger();
+    if (isValid) setCurrentStep(currentStep + 1);
+  };
+
+  const handleBack = () => {
+    if (currentStep > 1) setCurrentStep(currentStep - 1);
+  };
+
+  const toggleAccountType = (id) => {
+    const selected = form.getValues("selectedAccountTypes") || [];
+    const updated = selected.includes(id) ? selected.filter(a => a !== id) : [...selected, id];
+    form.setValue("selectedAccountTypes", updated);
+  };
 
   return (
-    <div style={{maxWidth:'600px',margin:'2rem auto',padding:'2rem',fontFamily:'Arial,sans-serif',backgroundColor:'#f8f9fa',borderRadius:'12px'}}>
-      <h1 style={{textAlign:'center',color:'#0070f3',marginBottom:'2rem'}}>Apply for Banking Account</h1>
-      <form onSubmit={handleSubmit}>
-        {step===1 && (
-          <div>
-            <h3>Step 1: Personal Info</h3>
-            <input type="date" name="dob" value={formData.dob} onChange={handleChange} style={inputStyle} required/>
-            <select name="citizenship" value={formData.citizenship} onChange={handleChange} style={inputStyle}>
-              <option value="US">United States</option>
-              <option value="International">International</option>
-            </select>
-            <input name="first_name" placeholder="First Name" value={formData.first_name} onChange={handleChange} style={inputStyle} required/>
-            <input name="middle_name" placeholder="Middle Name" value={formData.middle_name} onChange={handleChange} style={inputStyle}/>
-            <input name="last_name" placeholder="Last Name" value={formData.last_name} onChange={handleChange} style={inputStyle} required/>
-            <input name="mothers_maiden_name" placeholder="Mother's Maiden Name" value={formData.mothers_maiden_name} onChange={handleChange} style={inputStyle}/>
-            <input type="email" name="email" placeholder="Email" value={formData.email} onChange={handleChange} style={inputStyle} required/>
-            <input type="tel" name="phone" placeholder="Phone" value={formData.phone} onChange={handleChange} style={inputStyle} required/>
-            {formData.citizenship==='US' ? (
-              <input name="ssn" placeholder="SSN" value={formData.ssn} onChange={handleChange} style={inputStyle} required/>
-            ):(
-              <input name="id_number" placeholder="ID Number" value={formData.id_number} onChange={handleChange} style={inputStyle} required/>
-            )}
-            <button type="button" onClick={nextStep} style={{...buttonStyle, backgroundColor:'#0070f3', color:'#fff'}}>Next →</button>
-          </div>
-        )}
+    <div className="min-h-screen bg-gray-50">
+      <header className="bg-white shadow">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+          <h1 className="text-xl font-bold">Oakline Bank</h1>
+        </div>
+      </header>
 
-        {step===2 && (
-          <div>
-            <h3>Step 2: Account Types</h3>
-            <div style={{display:'flex',flexWrap:'wrap'}}>
-              {accountTypes.map(type => (
-                <div key={type} style={accountTypeStyle(type)} onClick={()=>handleAccountTypeChange(type)}>{type}</div>
-              ))}
-            </div>
-            <div style={{marginTop:'15px'}}>
-              <button type="button" onClick={prevStep} style={{...buttonStyle, backgroundColor:'#6c757d', color:'#fff'}}>← Back</button>
-              <button type="button" onClick={nextStep} style={{...buttonStyle, backgroundColor:'#0070f3', color:'#fff'}}>Next →</button>
-            </div>
-          </div>
-        )}
+      <main className="py-8">
+        <div className="max-w-4xl mx-auto px-4">
+          <Card className="shadow-lg">
+            <CardContent>
+              <StepIndicator currentStep={currentStep} totalSteps={3} steps={[
+                { title: "Personal Info" }, 
+                { title: "Accounts" }, 
+                { title: "Verify" }
+              ]} />
 
-        {step===3 && (
-          <div>
-            <h3>Step 3: Address</h3>
-            <input name="address_line1" placeholder="Address Line 1" value={formData.address_line1} onChange={handleChange} style={inputStyle} required/>
-            <input name="address_line2" placeholder="Address Line 2" value={formData.address_line2} onChange={handleChange} style={inputStyle}/>
-            <input name="city" placeholder="City" value={customCity || formData.city} onChange={(e)=>setCustomCity(e.target.value)} style={inputStyle} required/>
-            <select value={formData.country} onChange={(e)=>setFormData({...formData,country:e.target.value})} style={inputStyle}>
-              {countries.map(c=><option key={c} value={c}>{c}</option>)}
-            </select>
-            {formData.country==='Other' && <input placeholder="Enter country" value={customCountry} onChange={(e)=>setCustomCountry(e.target.value)} style={inputStyle} required/>}
-            <select value={formData.state} onChange={(e)=>setFormData({...formData,state:e.target.value})} style={inputStyle}>
-              {(countryStates[formData.country] || ['Other']).map(s=><option key={s} value={s}>{s}</option>)}
-            </select>
-            {formData.state==='Other' && <input placeholder="Enter state" value={customState} onChange={(e)=>setCustomState(e.target.value)} style={inputStyle} required/>}
-            <div style={{marginTop:'15px'}}>
-              <button type="button" onClick={prevStep} style={{...buttonStyle, backgroundColor:'#6c757d', color:'#fff'}}>← Back</button>
-              <button type="submit" style={{...buttonStyle, backgroundColor:'#28a745', color:'#fff'}}>{loading ? 'Submitting...' : 'Submit Application'}</button>
-            </div>
-          </div>
-        )}
-      </form>
-      {message && <div style={{marginTop:'20px',padding:'1rem',backgroundColor:'#d4edda',borderRadius:'8px',color:'#155724'}}>{message}</div>}
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit((data) => submitApplication.mutate(data))} className="space-y-6">
+
+                  {/* Step 1: Personal Info */}
+                  {currentStep === 1 && (
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <FormField name="firstName" control={form.control} render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>First Name</FormLabel>
+                            <FormControl><Input {...field} /></FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )} />
+                        <FormField name="lastName" control={form.control} render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Last Name</FormLabel>
+                            <FormControl><Input {...field} /></FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )} />
+                      </div>
+
+                      <FormField name="email" control={form.control} render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Email</FormLabel>
+                          <FormControl><Input type="email" {...field} /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+
+                      <FormField name="phone" control={form.control} render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Phone</FormLabel>
+                          <FormControl><Input {...field} /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <FormField name="dob" control={form.control} render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Date of Birth</FormLabel>
+                            <FormControl><Input type="date" {...field} /></FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )} />
+                        <FormField name="ssnOrId" control={form.control} render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>SSN / ID</FormLabel>
+                            <FormControl><Input {...field} /></FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )} />
+                      </div>
+
+                      <FormField name="country" control={form.control} render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Country</FormLabel>
+                          <Select value={field.value} onValueChange={field.onChange}>
+                            <SelectTrigger><SelectValue placeholder="Select country" /></SelectTrigger>
+                            <SelectContent>
+                              {COUNTRIES.map(c => <SelectItem key={c.code} value={c.name}>{c.name}</SelectItem>)}
+                              <SelectItem value="Other">Other</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <FormField name="state" control={form.control} render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>State</FormLabel>
+                            <Select value={field.value} onValueChange={field.onChange}>
+                              <SelectTrigger><SelectValue placeholder="Select state" /></SelectTrigger>
+                              <SelectContent>
+                                {US_STATES.map(s => <SelectItem key={s.value} value={s.label}>{s.label}</SelectItem>)}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )} />
+                        <FormField name="city" control={form.control} render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>City</FormLabel>
+                            <FormControl><Input {...field} /></FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )} />
+                        <FormField name="zipCode" control={form.control} render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>ZIP Code</FormLabel>
+                            <FormControl><Input {...field} /></FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )} />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Step 2: Account Types */}
+                  {currentStep === 2 && (
+                    <div className="space-y-4">
+                      <h2 className="text-lg font-bold">Select Account Types</h2>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {accountTypes?.slice(0, showAllAccountTypes ? accountTypes.length : 6).map(at => (
+                          <AccountTypeCard
+                            key={at.id}
+                            accountType={at}
+                            isSelected={form.getValues("selectedAccountTypes").includes(at.id)}
+                            onSelect={toggleAccountType}
+                          />
+                        ))}
+                      </div>
+                      {accountTypes && accountTypes.length > 6 && !showAllAccountTypes && (
+                        <Button onClick={() => setShowAllAccountTypes(true)}>Show More</Button>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Step 3: Verification */}
+                  {currentStep === 3 && (
+                    <div className="space-y-4">
+                      <h2 className="text-lg font-bold">Review & Submit</h2>
+                      <p>Make sure all information is correct before submitting.</p>
+
+                      <FormField name="termsAgreed" control={form.control} render={({ field }) => (
+                        <FormItem className="flex items-center space-x-2">
+                          <FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl>
+                          <FormLabel>I agree to terms & conditions</FormLabel>
+                        </FormItem>
+                      )} />
+
+                      <FormField name="emailConsent" control={form.control} render={({ field }) => (
+                        <FormItem className="flex items-center space-x-2">
+                          <FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl>
+                          <FormLabel>I consent to receive account notifications via email</FormLabel>
+                        </FormItem>
+                      )} />
+
+                      <FormField name="marketingConsent" control={form.control} render={({ field }) => (
+                        <FormItem className="flex items-center space-x-2">
+                          <FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl>
+                          <FormLabel>Receive marketing updates (optional)</FormLabel>
+                        </FormItem>
+                      )} />
+                    </div>
+                  )}
+
+                  <div className="flex justify-between mt-6">
+                    {currentStep > 1 && <Button onClick={handleBack}>Back</Button>}
+                    {currentStep < 3 ? 
+                      <Button onClick={handleNext}>Next</Button> :
+                      <Button type="submit">Submit Application</Button>
+                    }
+                  </div>
+                </form>
+              </Form>
+            </CardContent>
+          </Card>
+        </div>
+      </main>
     </div>
   );
 }
