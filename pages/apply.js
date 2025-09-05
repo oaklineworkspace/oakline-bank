@@ -310,7 +310,7 @@ export default function Apply() {
           id_number: effectiveCountry !== 'US' ? formData.idNumber.trim() : null,
           address_line1: formData.address.trim(),
           city: effectiveCity,
-          state_province: effectiveState,
+          state: effectiveState,
           zip_code: formData.zipCode.trim(),
           county: null,
           country: effectiveCountry
@@ -639,26 +639,36 @@ export default function Apply() {
       display: 'flex',
       alignItems: 'flex-start',
       gap: '12px',
-      padding: '1rem',
+      padding: '1.5rem',
       backgroundColor: '#f8fafc',
       borderRadius: '12px',
-      border: '1px solid #e2e8f0',
-      marginTop: '1rem'
+      border: '2px solid #e2e8f0',
+      marginTop: '1.5rem',
+      position: 'relative',
+      zIndex: 10
     },
     checkbox: {
-      width: '20px',
-      height: '20px',
-      marginTop: '2px',
+      width: '18px',
+      height: '18px',
+      marginTop: '3px',
       cursor: 'pointer',
       accentColor: '#3b82f6',
-      transform: 'scale(1.2)'
+      transform: 'scale(1.3)',
+      position: 'relative',
+      zIndex: 20,
+      backgroundColor: '#ffffff',
+      border: '2px solid #d1d5db',
+      borderRadius: '4px'
     },
     checkboxLabel: {
       fontSize: '15px',
       color: '#374151',
       lineHeight: 1.6,
       cursor: 'pointer',
-      fontWeight: '500'
+      fontWeight: '500',
+      flex: 1,
+      userSelect: 'none',
+      paddingTop: '1px'
     },
     link: {
       color: '#3b82f6',
