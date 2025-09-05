@@ -1,14 +1,15 @@
+
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { supabase } from '../lib/supabaseClient';
 
 const ACCOUNT_TYPES = [
-  { id: 1, name: 'Checking Account', description: 'Everyday banking needs' },
-  { id: 2, name: 'Savings Account', description: 'Earn interest on deposits' },
-  { id: 3, name: 'Business Checking', description: 'Business transactions' },
-  { id: 4, name: 'Money Market Account', description: 'Higher interest rates' },
-  { id: 5, name: 'Certificate of Deposit', description: 'Fixed-term savings' },
+  { id: 1, name: 'Personal Checking', description: 'Perfect for everyday banking needs', icon: '💳', rate: '0.01% APY' },
+  { id: 2, name: 'High-Yield Savings', description: 'Grow your money with competitive rates', icon: '💰', rate: '4.50% APY' },
+  { id: 3, name: 'Business Checking', description: 'Designed for business operations', icon: '🏢', rate: '0.01% APY' },
+  { id: 4, name: 'Money Market', description: 'Premium savings with higher yields', icon: '📈', rate: '4.75% APY' },
+  { id: 5, name: 'Certificate of Deposit', description: 'Secure your future with fixed rates', icon: '🔒', rate: '5.25% APY' },
 ];
 
 const US_STATES = [
@@ -203,136 +204,538 @@ export default function Apply() {
     }
   };
 
+  const styles = {
+    container: {
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif',
+      padding: '2rem 1rem',
+      position: 'relative',
+      overflow: 'hidden'
+    },
+    backgroundPattern: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      opacity: 0.03,
+      backgroundImage: 'radial-gradient(circle at 25% 25%, #1e40af 0%, transparent 50%), radial-gradient(circle at 75% 75%, #059669 0%, transparent 50%)',
+      zIndex: 0
+    },
+    content: {
+      maxWidth: '1000px',
+      margin: '0 auto',
+      position: 'relative',
+      zIndex: 1
+    },
+    header: {
+      textAlign: 'center',
+      marginBottom: '3rem',
+      animation: 'fadeInUp 0.8s ease'
+    },
+    logoContainer: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: '1.5rem'
+    },
+    logo: {
+      height: '60px',
+      width: 'auto',
+      marginRight: '15px'
+    },
+    brandText: {
+      fontSize: '2rem',
+      fontWeight: '700',
+      background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
+      WebkitBackgroundClip: 'text',
+      WebkitTextFillColor: 'transparent',
+      backgroundClip: 'text'
+    },
+    title: {
+      fontSize: 'clamp(28px, 5vw, 42px)',
+      fontWeight: '700',
+      color: '#1e293b',
+      marginBottom: '1rem',
+      lineHeight: 1.2
+    },
+    subtitle: {
+      fontSize: '18px',
+      color: '#64748b',
+      fontWeight: '500',
+      maxWidth: '600px',
+      margin: '0 auto'
+    },
+    progressContainer: {
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: '3rem',
+      gap: '1rem'
+    },
+    progressStep: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      width: '50px',
+      height: '50px',
+      borderRadius: '50%',
+      fontSize: '16px',
+      fontWeight: '600',
+      transition: 'all 0.3s ease',
+      boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+    },
+    progressStepActive: {
+      background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
+      color: 'white',
+      transform: 'scale(1.1)'
+    },
+    progressStepCompleted: {
+      background: 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
+      color: 'white'
+    },
+    progressStepPending: {
+      background: '#e2e8f0',
+      color: '#64748b'
+    },
+    progressLine: {
+      height: '3px',
+      width: '60px',
+      borderRadius: '2px',
+      transition: 'all 0.3s ease'
+    },
+    progressLineCompleted: {
+      background: 'linear-gradient(135deg, #059669 0%, #10b981 100%)'
+    },
+    progressLinePending: {
+      background: '#e2e8f0'
+    },
+    formCard: {
+      background: 'white',
+      borderRadius: '24px',
+      padding: '3rem',
+      boxShadow: '0 20px 60px rgba(0,0,0,0.08)',
+      border: '1px solid #e2e8f0',
+      marginBottom: '2rem',
+      animation: 'fadeInUp 0.6s ease'
+    },
+    sectionTitle: {
+      fontSize: '24px',
+      fontWeight: '700',
+      color: '#1e293b',
+      marginBottom: '2rem',
+      textAlign: 'center',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: '10px'
+    },
+    formGrid: {
+      display: 'grid',
+      gap: '1.5rem'
+    },
+    gridCols2: {
+      gridTemplateColumns: 'repeat(2, 1fr)'
+    },
+    gridCols3: {
+      gridTemplateColumns: 'repeat(3, 1fr)'
+    },
+    inputGroup: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '8px'
+    },
+    label: {
+      fontSize: '14px',
+      fontWeight: '600',
+      color: '#374151',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '5px'
+    },
+    required: {
+      color: '#ef4444'
+    },
+    input: {
+      width: '100%',
+      padding: '14px 16px',
+      border: '2px solid #e5e7eb',
+      borderRadius: '12px',
+      fontSize: '16px',
+      fontWeight: '500',
+      transition: 'all 0.3s ease',
+      backgroundColor: '#ffffff',
+      fontFamily: 'inherit'
+    },
+    inputFocus: {
+      outline: 'none',
+      borderColor: '#3b82f6',
+      boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.1)'
+    },
+    inputError: {
+      borderColor: '#ef4444',
+      backgroundColor: '#fef2f2'
+    },
+    select: {
+      width: '100%',
+      padding: '14px 16px',
+      border: '2px solid #e5e7eb',
+      borderRadius: '12px',
+      fontSize: '16px',
+      fontWeight: '500',
+      backgroundColor: '#ffffff',
+      cursor: 'pointer',
+      transition: 'all 0.3s ease'
+    },
+    errorMessage: {
+      color: '#ef4444',
+      fontSize: '13px',
+      fontWeight: '500',
+      marginTop: '4px',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '4px'
+    },
+    accountTypesGrid: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+      gap: '1rem',
+      marginTop: '1rem'
+    },
+    accountCard: {
+      border: '2px solid #e5e7eb',
+      borderRadius: '16px',
+      padding: '1.5rem',
+      cursor: 'pointer',
+      transition: 'all 0.3s ease',
+      backgroundColor: 'white',
+      position: 'relative',
+      overflow: 'hidden'
+    },
+    accountCardSelected: {
+      borderColor: '#3b82f6',
+      backgroundColor: '#eff6ff',
+      transform: 'translateY(-2px)',
+      boxShadow: '0 8px 25px rgba(59, 130, 246, 0.15)'
+    },
+    accountCardHover: {
+      borderColor: '#9ca3af',
+      transform: 'translateY(-1px)',
+      boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+    },
+    accountHeader: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '12px',
+      marginBottom: '8px'
+    },
+    accountIcon: {
+      fontSize: '24px',
+      padding: '8px',
+      borderRadius: '10px',
+      backgroundColor: '#f1f5f9'
+    },
+    accountName: {
+      fontSize: '16px',
+      fontWeight: '600',
+      color: '#1e293b'
+    },
+    accountDescription: {
+      fontSize: '14px',
+      color: '#64748b',
+      marginBottom: '12px',
+      lineHeight: 1.5
+    },
+    accountRate: {
+      fontSize: '14px',
+      fontWeight: '600',
+      color: '#059669',
+      backgroundColor: '#ecfdf5',
+      padding: '4px 8px',
+      borderRadius: '6px',
+      display: 'inline-block'
+    },
+    checkboxContainer: {
+      display: 'flex',
+      alignItems: 'flex-start',
+      gap: '12px',
+      padding: '1rem',
+      backgroundColor: '#f8fafc',
+      borderRadius: '12px',
+      border: '1px solid #e2e8f0'
+    },
+    checkbox: {
+      width: '20px',
+      height: '20px',
+      marginTop: '2px',
+      cursor: 'pointer'
+    },
+    checkboxLabel: {
+      fontSize: '14px',
+      color: '#4b5563',
+      lineHeight: 1.6,
+      cursor: 'pointer'
+    },
+    link: {
+      color: '#3b82f6',
+      textDecoration: 'none',
+      fontWeight: '600'
+    },
+    buttonContainer: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginTop: '3rem',
+      gap: '1rem'
+    },
+    button: {
+      padding: '14px 28px',
+      borderRadius: '12px',
+      fontSize: '16px',
+      fontWeight: '600',
+      border: 'none',
+      cursor: 'pointer',
+      transition: 'all 0.3s ease',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '8px',
+      minHeight: '52px'
+    },
+    primaryButton: {
+      background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
+      color: 'white',
+      boxShadow: '0 4px 14px rgba(30, 64, 175, 0.3)'
+    },
+    secondaryButton: {
+      background: 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
+      color: 'white',
+      boxShadow: '0 4px 14px rgba(5, 150, 105, 0.3)'
+    },
+    outlineButton: {
+      background: 'transparent',
+      color: '#6b7280',
+      border: '2px solid #d1d5db'
+    },
+    buttonDisabled: {
+      background: '#9ca3af',
+      cursor: 'not-allowed',
+      boxShadow: 'none'
+    },
+    errorAlert: {
+      backgroundColor: '#fef2f2',
+      border: '1px solid #fecaca',
+      borderRadius: '12px',
+      padding: '1rem',
+      marginTop: '1rem'
+    },
+    errorAlertText: {
+      color: '#dc2626',
+      fontSize: '14px',
+      fontWeight: '500'
+    },
+    footerLinks: {
+      textAlign: 'center',
+      marginTop: '2rem'
+    },
+    footerLink: {
+      color: '#3b82f6',
+      textDecoration: 'none',
+      fontSize: '16px',
+      fontWeight: '500',
+      transition: 'color 0.3s ease'
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-2xl mx-auto px-4">
+    <div style={styles.container}>
+      <div style={styles.backgroundPattern}></div>
+      
+      <div style={styles.content}>
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Bank Account Application</h1>
-          <p className="text-gray-600">Complete your application in 3 simple steps</p>
+        <div style={styles.header}>
+          <div style={styles.logoContainer}>
+            <img 
+              src="/images/logo-primary.png" 
+              alt="Oakline Bank" 
+              style={styles.logo}
+              onError={(e) => {
+                e.target.style.display = 'none';
+                e.target.nextSibling.style.marginLeft = '0';
+              }}
+            />
+            <div style={styles.brandText}>Oakline Bank</div>
+          </div>
+          <h1 style={styles.title}>Open Your Account Today</h1>
+          <p style={styles.subtitle}>
+            Join thousands of satisfied customers and experience modern banking at its finest
+          </p>
         </div>
 
         {/* Progress Steps */}
-        <div className="flex justify-center mb-8">
+        <div style={styles.progressContainer}>
           {[1, 2, 3].map((step, index) => (
-            <div key={step} className="flex items-center">
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold
-                ${step === currentStep 
-                  ? 'bg-blue-600 text-white' 
-                  : step < currentStep 
-                    ? 'bg-green-500 text-white' 
-                    : 'bg-gray-300 text-gray-600'
-                }`}>
+            <div key={step} style={{display: 'flex', alignItems: 'center'}}>
+              <div style={{
+                ...styles.progressStep,
+                ...(step === currentStep ? styles.progressStepActive : 
+                   step < currentStep ? styles.progressStepCompleted : styles.progressStepPending)
+              }}>
                 {step < currentStep ? '✓' : step}
               </div>
               {index < 2 && (
-                <div className={`w-12 h-1 mx-2 ${step < currentStep ? 'bg-green-500' : 'bg-gray-300'}`} />
+                <div style={{
+                  ...styles.progressLine,
+                  ...(step < currentStep ? styles.progressLineCompleted : styles.progressLinePending)
+                }} />
               )}
             </div>
           ))}
         </div>
 
         {/* Form Card */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold mb-6">
-            {currentStep === 1 && 'Personal Information'}
-            {currentStep === 2 && 'Address Information'}
-            {currentStep === 3 && 'Account & Employment'}
+        <div style={styles.formCard}>
+          <h2 style={styles.sectionTitle}>
+            {currentStep === 1 && (
+              <>
+                <span>👤</span> Personal Information
+              </>
+            )}
+            {currentStep === 2 && (
+              <>
+                <span>🏠</span> Address Details
+              </>
+            )}
+            {currentStep === 3 && (
+              <>
+                <span>💼</span> Account & Employment
+              </>
+            )}
           </h2>
 
           {/* Step 1: Personal Information */}
           {currentStep === 1 && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">First Name *</label>
+            <div style={styles.formGrid}>
+              <div style={{...styles.formGrid, ...styles.gridCols2}}>
+                <div style={styles.inputGroup}>
+                  <label style={styles.label}>
+                    First Name <span style={styles.required}>*</span>
+                  </label>
                   <input
                     type="text"
                     name="firstName"
                     value={formData.firstName}
                     onChange={handleInputChange}
-                    className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                      errors.firstName ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                    placeholder="Enter first name"
+                    style={{
+                      ...styles.input,
+                      ...(errors.firstName ? styles.inputError : {})
+                    }}
+                    placeholder="Enter your first name"
                   />
-                  {errors.firstName && <p className="text-red-500 text-sm mt-1">{errors.firstName}</p>}
+                  {errors.firstName && (
+                    <div style={styles.errorMessage}>⚠️ {errors.firstName}</div>
+                  )}
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Last Name *</label>
+                <div style={styles.inputGroup}>
+                  <label style={styles.label}>
+                    Last Name <span style={styles.required}>*</span>
+                  </label>
                   <input
                     type="text"
                     name="lastName"
                     value={formData.lastName}
                     onChange={handleInputChange}
-                    className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                      errors.lastName ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                    placeholder="Enter last name"
+                    style={{
+                      ...styles.input,
+                      ...(errors.lastName ? styles.inputError : {})
+                    }}
+                    placeholder="Enter your last name"
                   />
-                  {errors.lastName && <p className="text-red-500 text-sm mt-1">{errors.lastName}</p>}
+                  {errors.lastName && (
+                    <div style={styles.errorMessage}>⚠️ {errors.lastName}</div>
+                  )}
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email Address *</label>
+              <div style={styles.inputGroup}>
+                <label style={styles.label}>
+                  Email Address <span style={styles.required}>*</span>
+                </label>
                 <input
                   type="email"
                   name="email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                    errors.email ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  placeholder="Enter email address"
+                  style={{
+                    ...styles.input,
+                    ...(errors.email ? styles.inputError : {})
+                  }}
+                  placeholder="Enter your email address"
                 />
-                {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+                {errors.email && (
+                  <div style={styles.errorMessage}>⚠️ {errors.email}</div>
+                )}
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number *</label>
+              <div style={styles.inputGroup}>
+                <label style={styles.label}>
+                  Phone Number <span style={styles.required}>*</span>
+                </label>
                 <input
                   type="tel"
                   name="phone"
                   value={formData.phone}
                   onChange={handleInputChange}
-                  className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                    errors.phone ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  style={{
+                    ...styles.input,
+                    ...(errors.phone ? styles.inputError : {})
+                  }}
                   placeholder="(555) 123-4567"
                 />
-                {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
+                {errors.phone && (
+                  <div style={styles.errorMessage}>⚠️ {errors.phone}</div>
+                )}
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Date of Birth *</label>
+              <div style={{...styles.formGrid, ...styles.gridCols2}}>
+                <div style={styles.inputGroup}>
+                  <label style={styles.label}>
+                    Date of Birth <span style={styles.required}>*</span>
+                  </label>
                   <input
                     type="date"
                     name="dateOfBirth"
                     value={formData.dateOfBirth}
                     onChange={handleInputChange}
-                    className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                      errors.dateOfBirth ? 'border-red-500' : 'border-gray-300'
-                    }`}
+                    style={{
+                      ...styles.input,
+                      ...(errors.dateOfBirth ? styles.inputError : {})
+                    }}
                   />
-                  {errors.dateOfBirth && <p className="text-red-500 text-sm mt-1">{errors.dateOfBirth}</p>}
+                  {errors.dateOfBirth && (
+                    <div style={styles.errorMessage}>⚠️ {errors.dateOfBirth}</div>
+                  )}
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">SSN *</label>
+                <div style={styles.inputGroup}>
+                  <label style={styles.label}>
+                    Social Security Number <span style={styles.required}>*</span>
+                  </label>
                   <input
                     type="text"
                     name="ssn"
                     value={formData.ssn}
                     onChange={handleInputChange}
-                    className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                      errors.ssn ? 'border-red-500' : 'border-gray-300'
-                    }`}
+                    style={{
+                      ...styles.input,
+                      ...(errors.ssn ? styles.inputError : {})
+                    }}
                     placeholder="XXX-XX-XXXX"
                   />
-                  {errors.ssn && <p className="text-red-500 text-sm mt-1">{errors.ssn}</p>}
+                  {errors.ssn && (
+                    <div style={styles.errorMessage}>⚠️ {errors.ssn}</div>
+                  )}
                 </div>
               </div>
             </div>
@@ -340,69 +743,89 @@ export default function Apply() {
 
           {/* Step 2: Address Information */}
           {currentStep === 2 && (
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Street Address *</label>
+            <div style={styles.formGrid}>
+              <div style={styles.inputGroup}>
+                <label style={styles.label}>
+                  Street Address <span style={styles.required}>*</span>
+                </label>
                 <input
                   type="text"
                   name="address"
                   value={formData.address}
                   onChange={handleInputChange}
-                  className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                    errors.address ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  style={{
+                    ...styles.input,
+                    ...(errors.address ? styles.inputError : {})
+                  }}
                   placeholder="123 Main Street"
                 />
-                {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address}</p>}
+                {errors.address && (
+                  <div style={styles.errorMessage}>⚠️ {errors.address}</div>
+                )}
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">City *</label>
+              <div style={{...styles.formGrid, ...styles.gridCols3}}>
+                <div style={styles.inputGroup}>
+                  <label style={styles.label}>
+                    City <span style={styles.required}>*</span>
+                  </label>
                   <input
                     type="text"
                     name="city"
                     value={formData.city}
                     onChange={handleInputChange}
-                    className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                      errors.city ? 'border-red-500' : 'border-gray-300'
-                    }`}
+                    style={{
+                      ...styles.input,
+                      ...(errors.city ? styles.inputError : {})
+                    }}
                     placeholder="City"
                   />
-                  {errors.city && <p className="text-red-500 text-sm mt-1">{errors.city}</p>}
+                  {errors.city && (
+                    <div style={styles.errorMessage}>⚠️ {errors.city}</div>
+                  )}
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">State *</label>
+                <div style={styles.inputGroup}>
+                  <label style={styles.label}>
+                    State <span style={styles.required}>*</span>
+                  </label>
                   <select
                     name="state"
                     value={formData.state}
                     onChange={handleInputChange}
-                    className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                      errors.state ? 'border-red-500' : 'border-gray-300'
-                    }`}
+                    style={{
+                      ...styles.select,
+                      ...(errors.state ? styles.inputError : {})
+                    }}
                   >
                     <option value="">Select State</option>
                     {US_STATES.map(state => (
                       <option key={state} value={state}>{state}</option>
                     ))}
                   </select>
-                  {errors.state && <p className="text-red-500 text-sm mt-1">{errors.state}</p>}
+                  {errors.state && (
+                    <div style={styles.errorMessage}>⚠️ {errors.state}</div>
+                  )}
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">ZIP Code *</label>
+                <div style={styles.inputGroup}>
+                  <label style={styles.label}>
+                    ZIP Code <span style={styles.required}>*</span>
+                  </label>
                   <input
                     type="text"
                     name="zipCode"
                     value={formData.zipCode}
                     onChange={handleInputChange}
-                    className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                      errors.zipCode ? 'border-red-500' : 'border-gray-300'
-                    }`}
+                    style={{
+                      ...styles.input,
+                      ...(errors.zipCode ? styles.inputError : {})
+                    }}
                     placeholder="12345"
                   />
-                  {errors.zipCode && <p className="text-red-500 text-sm mt-1">{errors.zipCode}</p>}
+                  {errors.zipCode && (
+                    <div style={styles.errorMessage}>⚠️ {errors.zipCode}</div>
+                  )}
                 </div>
               </div>
             </div>
@@ -410,48 +833,65 @@ export default function Apply() {
 
           {/* Step 3: Account & Employment */}
           {currentStep === 3 && (
-            <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">Account Types *</label>
-                {errors.accountTypes && <p className="text-red-500 text-sm mb-3">{errors.accountTypes}</p>}
-                <div className="grid gap-3">
+            <div style={styles.formGrid}>
+              <div style={styles.inputGroup}>
+                <label style={styles.label}>
+                  Choose Your Account Types <span style={styles.required}>*</span>
+                </label>
+                {errors.accountTypes && (
+                  <div style={styles.errorMessage}>⚠️ {errors.accountTypes}</div>
+                )}
+                <div style={styles.accountTypesGrid}>
                   {ACCOUNT_TYPES.map(account => (
                     <div
                       key={account.id}
                       onClick={() => toggleAccountType(account.id)}
-                      className={`p-3 border-2 rounded-lg cursor-pointer transition-colors ${
-                        formData.accountTypes.includes(account.id)
-                          ? 'border-blue-500 bg-blue-50'
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
+                      style={{
+                        ...styles.accountCard,
+                        ...(formData.accountTypes.includes(account.id) ? styles.accountCardSelected : {})
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!formData.accountTypes.includes(account.id)) {
+                          Object.assign(e.target.style, styles.accountCardHover);
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!formData.accountTypes.includes(account.id)) {
+                          e.target.style.borderColor = '#e5e7eb';
+                          e.target.style.transform = 'translateY(0)';
+                          e.target.style.boxShadow = 'none';
+                        }
+                      }}
                     >
-                      <div className="flex items-center">
-                        <input
-                          type="checkbox"
-                          checked={formData.accountTypes.includes(account.id)}
-                          onChange={() => toggleAccountType(account.id)}
-                          className="mr-3"
-                        />
-                        <div>
-                          <div className="font-medium">{account.name}</div>
-                          <div className="text-sm text-gray-600">{account.description}</div>
+                      <div style={styles.accountHeader}>
+                        <div style={{
+                          ...styles.accountIcon,
+                          backgroundColor: formData.accountTypes.includes(account.id) ? '#dbeafe' : '#f1f5f9'
+                        }}>
+                          {account.icon}
                         </div>
+                        <div style={styles.accountName}>{account.name}</div>
                       </div>
+                      <div style={styles.accountDescription}>{account.description}</div>
+                      <div style={styles.accountRate}>{account.rate}</div>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Employment Status *</label>
+              <div style={{...styles.formGrid, ...styles.gridCols2}}>
+                <div style={styles.inputGroup}>
+                  <label style={styles.label}>
+                    Employment Status <span style={styles.required}>*</span>
+                  </label>
                   <select
                     name="employmentStatus"
                     value={formData.employmentStatus}
                     onChange={handleInputChange}
-                    className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                      errors.employmentStatus ? 'border-red-500' : 'border-gray-300'
-                    }`}
+                    style={{
+                      ...styles.select,
+                      ...(errors.employmentStatus ? styles.inputError : {})
+                    }}
                   >
                     <option value="">Select Status</option>
                     <option value="employed_fulltime">Employed Full-time</option>
@@ -461,18 +901,23 @@ export default function Apply() {
                     <option value="student">Student</option>
                     <option value="unemployed">Unemployed</option>
                   </select>
-                  {errors.employmentStatus && <p className="text-red-500 text-sm mt-1">{errors.employmentStatus}</p>}
+                  {errors.employmentStatus && (
+                    <div style={styles.errorMessage}>⚠️ {errors.employmentStatus}</div>
+                  )}
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Annual Income *</label>
+                <div style={styles.inputGroup}>
+                  <label style={styles.label}>
+                    Annual Income <span style={styles.required}>*</span>
+                  </label>
                   <select
                     name="annualIncome"
                     value={formData.annualIncome}
                     onChange={handleInputChange}
-                    className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                      errors.annualIncome ? 'border-red-500' : 'border-gray-300'
-                    }`}
+                    style={{
+                      ...styles.select,
+                      ...(errors.annualIncome ? styles.inputError : {})
+                    }}
                   >
                     <option value="">Select Income Range</option>
                     <option value="under_25k">Under $25,000</option>
@@ -482,80 +927,139 @@ export default function Apply() {
                     <option value="100k_150k">$100,000 - $150,000</option>
                     <option value="over_150k">Over $150,000</option>
                   </select>
-                  {errors.annualIncome && <p className="text-red-500 text-sm mt-1">{errors.annualIncome}</p>}
+                  {errors.annualIncome && (
+                    <div style={styles.errorMessage}>⚠️ {errors.annualIncome}</div>
+                  )}
                 </div>
               </div>
 
-              <div>
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    name="agreeToTerms"
-                    checked={formData.agreeToTerms}
-                    onChange={handleInputChange}
-                    className="mr-2"
-                  />
-                  <span className="text-sm text-gray-700">
-                    I agree to the{' '}
-                    <Link href="/terms" className="text-blue-600 hover:underline">
-                      Terms of Service
-                    </Link>{' '}
-                    and{' '}
-                    <Link href="/privacy" className="text-blue-600 hover:underline">
-                      Privacy Policy
-                    </Link>{' '}
-                    *
-                  </span>
+              <div style={styles.checkboxContainer}>
+                <input
+                  type="checkbox"
+                  name="agreeToTerms"
+                  checked={formData.agreeToTerms}
+                  onChange={handleInputChange}
+                  style={styles.checkbox}
+                />
+                <label style={styles.checkboxLabel}>
+                  I agree to the{' '}
+                  <Link href="/terms" style={styles.link}>
+                    Terms of Service
+                  </Link>{' '}
+                  and{' '}
+                  <Link href="/privacy" style={styles.link}>
+                    Privacy Policy
+                  </Link>{' '}
+                  <span style={styles.required}>*</span>
                 </label>
-                {errors.agreeToTerms && <p className="text-red-500 text-sm mt-1">{errors.agreeToTerms}</p>}
               </div>
+              {errors.agreeToTerms && (
+                <div style={styles.errorMessage}>⚠️ {errors.agreeToTerms}</div>
+              )}
 
               {errors.submit && (
-                <div className="bg-red-50 border border-red-200 rounded p-3">
-                  <p className="text-red-700 text-sm">{errors.submit}</p>
+                <div style={styles.errorAlert}>
+                  <div style={styles.errorAlertText}>⚠️ {errors.submit}</div>
                 </div>
               )}
             </div>
           )}
 
           {/* Navigation Buttons */}
-          <div className="flex justify-between mt-8">
+          <div style={styles.buttonContainer}>
             {currentStep > 1 && (
               <button
                 onClick={handleBack}
-                className="px-6 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors"
+                style={{...styles.button, ...styles.outlineButton}}
               >
-                Back
+                ← Back
               </button>
             )}
 
-            <div className="ml-auto">
+            <div style={{marginLeft: currentStep === 1 ? 'auto' : '0'}}>
               {currentStep < 3 ? (
                 <button
                   onClick={handleNext}
-                  className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                  style={{...styles.button, ...styles.primaryButton}}
                 >
-                  Next
+                  Next Step →
                 </button>
               ) : (
                 <button
                   onClick={handleSubmit}
                   disabled={loading || !formData.agreeToTerms}
-                  className="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                  style={{
+                    ...styles.button,
+                    ...styles.secondaryButton,
+                    ...(loading || !formData.agreeToTerms ? styles.buttonDisabled : {})
+                  }}
                 >
-                  {loading ? 'Submitting...' : 'Submit Application'}
+                  {loading ? (
+                    <>
+                      <span style={{
+                        width: '16px',
+                        height: '16px',
+                        border: '2px solid #ffffff40',
+                        borderTop: '2px solid #ffffff',
+                        borderRadius: '50%',
+                        animation: 'spin 1s linear infinite'
+                      }}></span>
+                      Submitting...
+                    </>
+                  ) : (
+                    <>
+                      🎉 Submit Application
+                    </>
+                  )}
                 </button>
               )}
             </div>
           </div>
         </div>
 
-        <div className="text-center mt-6">
-          <Link href="/login" className="text-blue-600 hover:underline">
+        <div style={styles.footerLinks}>
+          <Link href="/login" style={styles.footerLink}>
             Already have an account? Sign In
           </Link>
         </div>
       </div>
+
+      <style jsx>{`
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        @keyframes spin {
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(360deg);
+          }
+        }
+        
+        @media (max-width: 768px) {
+          .grid-cols-2 {
+            grid-template-columns: 1fr !important;
+          }
+          .grid-cols-3 {
+            grid-template-columns: 1fr !important;
+          }
+        }
+        
+        input:focus, select:focus {
+          outline: none !important;
+          border-color: #3b82f6 !important;
+          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+        }
+      `}</style>
     </div>
   );
 }
