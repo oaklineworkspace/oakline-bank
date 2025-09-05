@@ -5,11 +5,29 @@ import Link from 'next/link';
 import { supabase } from '../lib/supabaseClient';
 
 const ACCOUNT_TYPES = [
-  { id: 1, name: 'Personal Checking', description: 'Perfect for everyday banking needs', icon: '💳', rate: '0.01% APY' },
-  { id: 2, name: 'High-Yield Savings', description: 'Grow your money with competitive rates', icon: '💰', rate: '4.50% APY' },
+  { id: 1, name: 'Checking Account', description: 'Perfect for everyday banking needs', icon: '💳', rate: '0.01% APY' },
+  { id: 2, name: 'Savings Account', description: 'Grow your money with competitive rates', icon: '💰', rate: '4.50% APY' },
   { id: 3, name: 'Business Checking', description: 'Designed for business operations', icon: '🏢', rate: '0.01% APY' },
-  { id: 4, name: 'Money Market', description: 'Premium savings with higher yields', icon: '📈', rate: '4.75% APY' },
-  { id: 5, name: 'Certificate of Deposit', description: 'Secure your future with fixed rates', icon: '🔒', rate: '5.25% APY' },
+  { id: 4, name: 'Business Savings', description: 'Business savings with higher yields', icon: '🏦', rate: '4.25% APY' },
+  { id: 5, name: 'Student Checking', description: 'No-fee checking for students', icon: '🎓', rate: '0.01% APY' },
+  { id: 6, name: 'Money Market Account', description: 'Premium savings with higher yields', icon: '📈', rate: '4.75% APY' },
+  { id: 7, name: 'Certificate of Deposit (CD)', description: 'Secure your future with fixed rates', icon: '🔒', rate: '5.25% APY' },
+  { id: 8, name: 'Retirement Account (IRA)', description: 'Plan for your retirement', icon: '🏖️', rate: '4.80% APY' },
+  { id: 9, name: 'Joint Checking Account', description: 'Shared checking for couples', icon: '👫', rate: '0.01% APY' },
+  { id: 10, name: 'Trust Account', description: 'Manage assets for beneficiaries', icon: '🛡️', rate: '3.50% APY' },
+  { id: 11, name: 'Investment Brokerage Account', description: 'Trade stocks, bonds, and more', icon: '📊', rate: 'Variable' },
+  { id: 12, name: 'High-Yield Savings Account', description: 'Maximum earning potential', icon: '💎', rate: '5.00% APY' },
+  { id: 13, name: 'International Checking', description: 'Banking without borders', icon: '🌍', rate: '0.01% APY' },
+  { id: 14, name: 'Foreign Currency Account', description: 'Hold multiple currencies', icon: '💱', rate: 'Variable' },
+  { id: 15, name: 'Cryptocurrency Wallet', description: 'Digital asset storage', icon: '₿', rate: 'Variable' },
+  { id: 16, name: 'Loan Repayment Account', description: 'Streamline your loan payments', icon: '💳', rate: 'N/A' },
+  { id: 17, name: 'Mortgage Account', description: 'Home financing solutions', icon: '🏠', rate: 'Variable' },
+  { id: 18, name: 'Auto Loan Account', description: 'Vehicle financing made easy', icon: '🚗', rate: 'Variable' },
+  { id: 19, name: 'Credit Card Account', description: 'Flexible spending power', icon: '💳', rate: 'Variable APR' },
+  { id: 20, name: 'Prepaid Card Account', description: 'Controlled spending solution', icon: '🎫', rate: 'N/A' },
+  { id: 21, name: 'Payroll Account', description: 'Direct deposit convenience', icon: '💼', rate: '0.01% APY' },
+  { id: 22, name: 'Nonprofit/Charity Account', description: 'Special rates for nonprofits', icon: '❤️', rate: '2.50% APY' },
+  { id: 23, name: 'Escrow Account', description: 'Secure transaction holding', icon: '🔐', rate: '1.50% APY' },
 ];
 
 const US_STATES = [
@@ -141,8 +159,8 @@ export default function Apply() {
           address_line1: formData.address.trim(),
           city: formData.city.trim(),
           state: formData.state,
-          zip_code: formData.zipCode.trim(),
-          country: 'United States'
+          county: null, // Will be determined from city/state if needed
+          country: 'US' // Using country code from countries table
         }])
         .select()
         .single();
@@ -175,8 +193,7 @@ export default function Apply() {
         .insert([{
           user_id: userId,
           status: 'pending',
-          application_type: 'account_opening',
-          submitted_at: new Date().toISOString()
+          notes: `Application for ${formData.accountTypes.length} account type(s): ${formData.accountTypes.map(id => ACCOUNT_TYPES.find(at => at.id === id)?.name).join(', ')}`
         }]);
 
       // Send welcome email
