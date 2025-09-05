@@ -31,21 +31,6 @@
       "static/chunks/webpack.js",
       "static/chunks/main.js",
       "static/chunks/pages/apply.js"
-    ],
-    "/deposit": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/deposit.js"
-    ],
-    "/transfer": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/transfer.js"
-    ],
-    "/withdrawal": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/withdrawal.js"
     ]
   },
   "ampFirstPages": []
