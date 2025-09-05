@@ -1,3 +1,4 @@
+// pages/apply.js
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -102,6 +103,7 @@ export default function Apply() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Header */}
       <header className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
           <h1 className="text-xl font-bold">Oakline Bank</h1>
@@ -112,109 +114,180 @@ export default function Apply() {
         <div className="max-w-4xl mx-auto px-4">
           <Card className="shadow-lg">
             <CardContent>
-              <StepIndicator currentStep={currentStep} totalSteps={3} steps={[
-                { title: "Personal Info" }, 
-                { title: "Accounts" }, 
-                { title: "Verify" }
-              ]} />
+              <StepIndicator
+                currentStep={currentStep}
+                totalSteps={3}
+                steps={[{ title: "Personal Info" }, { title: "Accounts" }, { title: "Verify" }]}
+              />
 
               <Form {...form}>
-                <form onSubmit={form.handleSubmit((data) => submitApplication.mutate(data))} className="space-y-6">
-
+                <form
+                  onSubmit={form.handleSubmit((data) => submitApplication.mutate(data))}
+                  className="space-y-6"
+                >
                   {/* Step 1: Personal Info */}
                   {currentStep === 1 && (
                     <div className="space-y-4">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <FormField name="firstName" control={form.control} render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>First Name</FormLabel>
-                            <FormControl><Input {...field} /></FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )} />
-                        <FormField name="lastName" control={form.control} render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Last Name</FormLabel>
-                            <FormControl><Input {...field} /></FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )} />
+                        <FormField
+                          name="firstName"
+                          control={form.control}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>First Name</FormLabel>
+                              <FormControl>
+                                <Input {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          name="lastName"
+                          control={form.control}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Last Name</FormLabel>
+                              <FormControl>
+                                <Input {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
                       </div>
-
-                      <FormField name="email" control={form.control} render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email</FormLabel>
-                          <FormControl><Input type="email" {...field} /></FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )} />
-
-                      <FormField name="phone" control={form.control} render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Phone</FormLabel>
-                          <FormControl><Input {...field} /></FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )} />
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <FormField name="dob" control={form.control} render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Date of Birth</FormLabel>
-                            <FormControl><Input type="date" {...field} /></FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )} />
-                        <FormField name="ssnOrId" control={form.control} render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>SSN / ID</FormLabel>
-                            <FormControl><Input {...field} /></FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )} />
+                        <FormField
+                          name="email"
+                          control={form.control}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Email</FormLabel>
+                              <FormControl>
+                                <Input type="email" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          name="phone"
+                          control={form.control}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Phone</FormLabel>
+                              <FormControl>
+                                <Input {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
                       </div>
 
-                      <FormField name="country" control={form.control} render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Country</FormLabel>
-                          <Select value={field.value} onValueChange={field.onChange}>
-                            <SelectTrigger><SelectValue placeholder="Select country" /></SelectTrigger>
-                            <SelectContent>
-                              {COUNTRIES.map(c => <SelectItem key={c.code} value={c.name}>{c.name}</SelectItem>)}
-                              <SelectItem value="Other">Other</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )} />
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <FormField
+                          name="dob"
+                          control={form.control}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Date of Birth</FormLabel>
+                              <FormControl>
+                                <Input type="date" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          name="ssnOrId"
+                          control={form.control}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>SSN / ID</FormLabel>
+                              <FormControl>
+                                <Input {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <FormField name="state" control={form.control} render={({ field }) => (
+                      <FormField
+                        name="country"
+                        control={form.control}
+                        render={({ field }) => (
                           <FormItem>
-                            <FormLabel>State</FormLabel>
+                            <FormLabel>Country</FormLabel>
                             <Select value={field.value} onValueChange={field.onChange}>
-                              <SelectTrigger><SelectValue placeholder="Select state" /></SelectTrigger>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select country" />
+                              </SelectTrigger>
                               <SelectContent>
-                                {US_STATES.map(s => <SelectItem key={s.value} value={s.label}>{s.label}</SelectItem>)}
+                                {COUNTRIES.map((c) => (
+                                  <SelectItem key={c.code} value={c.name}>
+                                    {c.name}
+                                  </SelectItem>
+                                ))}
+                                <SelectItem value="Other">Other</SelectItem>
                               </SelectContent>
                             </Select>
                             <FormMessage />
                           </FormItem>
-                        )} />
-                        <FormField name="city" control={form.control} render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>City</FormLabel>
-                            <FormControl><Input {...field} /></FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )} />
-                        <FormField name="zipCode" control={form.control} render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>ZIP Code</FormLabel>
-                            <FormControl><Input {...field} /></FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )} />
+                        )}
+                      />
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <FormField
+                          name="state"
+                          control={form.control}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>State</FormLabel>
+                              <Select value={field.value} onValueChange={field.onChange}>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select state" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {US_STATES.map((s) => (
+                                    <SelectItem key={s.value} value={s.label}>
+                                      {s.label}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          name="city"
+                          control={form.control}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>City</FormLabel>
+                              <FormControl>
+                                <Input {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          name="zipCode"
+                          control={form.control}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>ZIP Code</FormLabel>
+                              <FormControl>
+                                <Input {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
                       </div>
                     </div>
                   )}
@@ -224,14 +297,16 @@ export default function Apply() {
                     <div className="space-y-4">
                       <h2 className="text-lg font-bold">Select Account Types</h2>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {accountTypes?.slice(0, showAllAccountTypes ? accountTypes.length : 6).map(at => (
-                          <AccountTypeCard
-                            key={at.id}
-                            accountType={at}
-                            isSelected={form.getValues("selectedAccountTypes").includes(at.id)}
-                            onSelect={toggleAccountType}
-                          />
-                        ))}
+                        {accountTypes
+                          ?.slice(0, showAllAccountTypes ? accountTypes.length : 6)
+                          .map((at) => (
+                            <AccountTypeCard
+                              key={at.id}
+                              accountType={at}
+                              isSelected={form.getValues("selectedAccountTypes").includes(at.id)}
+                              onSelect={toggleAccountType}
+                            />
+                          ))}
                       </div>
                       {accountTypes && accountTypes.length > 6 && !showAllAccountTypes && (
                         <Button onClick={() => setShowAllAccountTypes(true)}>Show More</Button>
@@ -243,37 +318,56 @@ export default function Apply() {
                   {currentStep === 3 && (
                     <div className="space-y-4">
                       <h2 className="text-lg font-bold">Review & Submit</h2>
-                      <p>Make sure all information is correct before submitting.</p>
 
-                      <FormField name="termsAgreed" control={form.control} render={({ field }) => (
-                        <FormItem className="flex items-center space-x-2">
-                          <FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl>
-                          <FormLabel>I agree to terms & conditions</FormLabel>
-                        </FormItem>
-                      )} />
+                      <FormField
+                        name="termsAgreed"
+                        control={form.control}
+                        render={({ field }) => (
+                          <FormItem className="flex items-center space-x-2">
+                            <FormControl>
+                              <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                            </FormControl>
+                            <FormLabel>I agree to terms & conditions</FormLabel>
+                          </FormItem>
+                        )}
+                      />
 
-                      <FormField name="emailConsent" control={form.control} render={({ field }) => (
-                        <FormItem className="flex items-center space-x-2">
-                          <FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl>
-                          <FormLabel>I consent to receive account notifications via email</FormLabel>
-                        </FormItem>
-                      )} />
+                      <FormField
+                        name="emailConsent"
+                        control={form.control}
+                        render={({ field }) => (
+                          <FormItem className="flex items-center space-x-2">
+                            <FormControl>
+                              <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                            </FormControl>
+                            <FormLabel>I consent to receive account notifications via email</FormLabel>
+                          </FormItem>
+                        )}
+                      />
 
-                      <FormField name="marketingConsent" control={form.control} render={({ field }) => (
-                        <FormItem className="flex items-center space-x-2">
-                          <FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl>
-                          <FormLabel>Receive marketing updates (optional)</FormLabel>
-                        </FormItem>
-                      )} />
+                      <FormField
+                        name="marketingConsent"
+                        control={form.control}
+                        render={({ field }) => (
+                          <FormItem className="flex items-center space-x-2">
+                            <FormControl>
+                              <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                            </FormControl>
+                            <FormLabel>Receive marketing updates (optional)</FormLabel>
+                          </FormItem>
+                        )}
+                      />
                     </div>
                   )}
 
+                  {/* Navigation Buttons */}
                   <div className="flex justify-between mt-6">
                     {currentStep > 1 && <Button onClick={handleBack}>Back</Button>}
-                    {currentStep < 3 ? 
-                      <Button onClick={handleNext}>Next</Button> :
+                    {currentStep < 3 ? (
+                      <Button onClick={handleNext}>Next</Button>
+                    ) : (
                       <Button type="submit">Submit Application</Button>
-                    }
+                    )}
                   </div>
                 </form>
               </Form>
