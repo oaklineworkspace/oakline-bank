@@ -30,6 +30,11 @@ const ACCOUNT_TYPES = [
   { id: 23, name: 'Escrow Account', description: 'Secure transaction holding', icon: '🔐', rate: '1.50% APY' },
 ];
 
+const COUNTRIES = [
+  { code: 'US', name: 'United States' },
+  { code: 'International', name: 'International' }
+];
+
 const US_STATES = [
   'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut',
   'Delaware', 'Florida', 'Georgia', 'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa',
@@ -49,11 +54,15 @@ export default function Apply() {
 
   const [formData, setFormData] = useState({
     firstName: '',
+    middleName: '',
     lastName: '',
+    mothersMaidenName: '',
     email: '',
     phone: '',
     dateOfBirth: '',
     ssn: '',
+    idNumber: '',
+    country: 'US',
     address: '',
     city: '',
     state: '',
@@ -84,7 +93,11 @@ export default function Apply() {
         newErrors.phone = 'Invalid phone number';
       }
       if (!formData.dateOfBirth) newErrors.dateOfBirth = 'Date of birth is required';
-      if (!formData.ssn.trim()) newErrors.ssn = 'SSN is required';
+      if (formData.country === 'US') {
+        if (!formData.ssn.trim()) newErrors.ssn = 'SSN is required';
+      } else {
+        if (!formData.idNumber.trim()) newErrors.idNumber = 'Government ID Number is required';
+      }
     }
 
     if (step === 2) {
@@ -151,16 +164,19 @@ export default function Apply() {
         .from('users')
         .insert([{
           first_name: formData.firstName.trim(),
+          middle_name: formData.middleName.trim() || null,
           last_name: formData.lastName.trim(),
+          mothers_maiden_name: formData.mothersMaidenName.trim() || null,
           email: formData.email.trim().toLowerCase(),
           phone: formData.phone.trim(),
           dob: formData.dateOfBirth,
-          ssn: formData.ssn.trim(),
+          ssn: formData.country === 'US' ? formData.ssn.trim() : null,
+          id_number: formData.country === 'International' ? formData.idNumber.trim() : null,
           address_line1: formData.address.trim(),
           city: formData.city.trim(),
           state: formData.state,
           county: null, // Will be determined from city/state if needed
-          country: 'US' // Using country code from countries table
+          country: formData.country
         }])
         .select()
         .single();
@@ -655,6 +671,20 @@ export default function Apply() {
                 </div>
 
                 <div style={styles.inputGroup}>
+                  <label style={styles.label}>Middle Name</label>
+                  <input
+                    type="text"
+                    name="middleName"
+                    value={formData.middleName}
+                    onChange={handleInputChange}
+                    style={styles.input}
+                    placeholder="Enter your middle name"
+                  />
+                </div>
+              </div>
+
+              <div style={{...styles.formGrid, ...styles.gridCols2}}>
+                <div style={styles.inputGroup}>
                   <label style={styles.label}>
                     Last Name <span style={styles.required}>*</span>
                   </label>
@@ -672,6 +702,18 @@ export default function Apply() {
                   {errors.lastName && (
                     <div style={styles.errorMessage}>⚠️ {errors.lastName}</div>
                   )}
+                </div>
+
+                <div style={styles.inputGroup}>
+                  <label style={styles.label}>Mother's Maiden Name</label>
+                  <input
+                    type="text"
+                    name="mothersMaidenName"
+                    value={formData.mothersMaidenName}
+                    onChange={handleInputChange}
+                    style={styles.input}
+                    placeholder="Enter your mother's maiden name"
+                  />
                 </div>
               </div>
 
@@ -737,23 +779,44 @@ export default function Apply() {
 
                 <div style={styles.inputGroup}>
                   <label style={styles.label}>
-                    Social Security Number <span style={styles.required}>*</span>
+                    Country <span style={styles.required}>*</span>
                   </label>
-                  <input
-                    type="text"
-                    name="ssn"
-                    value={formData.ssn}
+                  <select
+                    name="country"
+                    value={formData.country}
                     onChange={handleInputChange}
-                    style={{
-                      ...styles.input,
-                      ...(errors.ssn ? styles.inputError : {})
-                    }}
-                    placeholder="XXX-XX-XXXX"
-                  />
-                  {errors.ssn && (
-                    <div style={styles.errorMessage}>⚠️ {errors.ssn}</div>
-                  )}
+                    style={styles.select}
+                  >
+                    {COUNTRIES.map(country => (
+                      <option key={country.code} value={country.code}>
+                        {country.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
+              </div>
+
+              <div style={styles.inputGroup}>
+                <label style={styles.label}>
+                  {formData.country === 'US' ? 'Social Security Number' : 'Government ID Number'} <span style={styles.required}>*</span>
+                </label>
+                <input
+                  type="text"
+                  name={formData.country === 'US' ? 'ssn' : 'idNumber'}
+                  value={formData.country === 'US' ? formData.ssn : formData.idNumber}
+                  onChange={handleInputChange}
+                  style={{
+                    ...styles.input,
+                    ...((formData.country === 'US' ? errors.ssn : errors.idNumber) ? styles.inputError : {})
+                  }}
+                  placeholder={formData.country === 'US' ? 'XXX-XX-XXXX' : 'Enter your government ID number'}
+                />
+                {formData.country === 'US' && errors.ssn && (
+                  <div style={styles.errorMessage}>⚠️ {errors.ssn}</div>
+                )}
+                {formData.country === 'International' && errors.idNumber && (
+                  <div style={styles.errorMessage}>⚠️ {errors.idNumber}</div>
+                )}
               </div>
             </div>
           )}
