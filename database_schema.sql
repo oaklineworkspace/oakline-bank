@@ -1,4 +1,17 @@
 
+-- Drop existing tables and policies if they exist
+DROP POLICY IF EXISTS "Allow public insert on users" ON users;
+DROP POLICY IF EXISTS "Allow public insert on user_employment" ON user_employment;
+DROP POLICY IF EXISTS "Allow public insert on user_account_types" ON user_account_types;
+DROP POLICY IF EXISTS "Allow public insert on accounts" ON accounts;
+DROP POLICY IF EXISTS "Allow public insert on applications" ON applications;
+
+DROP TABLE IF EXISTS applications CASCADE;
+DROP TABLE IF EXISTS user_account_types CASCADE;
+DROP TABLE IF EXISTS user_employment CASCADE;
+DROP TABLE IF EXISTS accounts CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
+
 -- Users table - stores main user information
 CREATE TABLE users (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -68,21 +81,37 @@ ALTER TABLE user_account_types ENABLE ROW LEVEL SECURITY;
 ALTER TABLE accounts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE applications ENABLE ROW LEVEL SECURITY;
 
--- Create policies for public access (needed for form submission)
-CREATE POLICY "Allow public insert on users" ON users
-    FOR INSERT WITH CHECK (true);
+-- Create policies for anonymous access (needed for form submission)
+CREATE POLICY "Allow anonymous insert on users" ON users
+    FOR INSERT TO anon WITH CHECK (true);
 
-CREATE POLICY "Allow public insert on user_employment" ON user_employment
-    FOR INSERT WITH CHECK (true);
+CREATE POLICY "Allow anonymous insert on user_employment" ON user_employment
+    FOR INSERT TO anon WITH CHECK (true);
 
-CREATE POLICY "Allow public insert on user_account_types" ON user_account_types
-    FOR INSERT WITH CHECK (true);
+CREATE POLICY "Allow anonymous insert on user_account_types" ON user_account_types
+    FOR INSERT TO anon WITH CHECK (true);
 
-CREATE POLICY "Allow public insert on accounts" ON accounts
-    FOR INSERT WITH CHECK (true);
+CREATE POLICY "Allow anonymous insert on accounts" ON accounts
+    FOR INSERT TO anon WITH CHECK (true);
 
-CREATE POLICY "Allow public insert on applications" ON applications
-    FOR INSERT WITH CHECK (true);
+CREATE POLICY "Allow anonymous insert on applications" ON applications
+    FOR INSERT TO anon WITH CHECK (true);
+
+-- Also allow authenticated users to access their own data
+CREATE POLICY "Users can view own data" ON users
+    FOR SELECT USING (auth.uid()::text = id::text);
+
+CREATE POLICY "Users can view own employment" ON user_employment
+    FOR SELECT USING (auth.uid()::text = user_id::text);
+
+CREATE POLICY "Users can view own account types" ON user_account_types
+    FOR SELECT USING (auth.uid()::text = user_id::text);
+
+CREATE POLICY "Users can view own accounts" ON accounts
+    FOR SELECT USING (auth.uid()::text = user_id::text);
+
+CREATE POLICY "Users can view own applications" ON applications
+    FOR SELECT USING (auth.uid()::text = user_id::text);
 
 -- Create indexes for better performance
 CREATE INDEX idx_users_email ON users(email);
