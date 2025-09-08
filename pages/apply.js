@@ -442,19 +442,66 @@ export default function Apply() {
       // Generate enrollment token
       const enrollmentToken = `enroll_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
 
-      // Create enrollment record
-      const { error: enrollmentError } = await supabase
-        .from('enrollments')
-        .insert([{
-          email: formData.email.trim().toLowerCase(),
-          token: enrollmentToken,
-          is_used: false,
-          application_id: applicationId
-        }]);
+      // Create enrollment record (handle missing application_id column gracefully)
+      let enrollmentRecord = null;
+      try {
+        const { data: enrollmentData, error: enrollmentError } = await supabase
+          .from('enrollments')
+          .insert([{
+            email: formData.email.trim().toLowerCase(),
+            token: enrollmentToken,
+            is_used: false,
+            application_id: applicationId
+          }])
+          .select()
+          .single();
 
-      if (enrollmentError) {
-        console.error('Error creating enrollment record:', enrollmentError);
-        // Continue with the process even if enrollment record creation fails
+        if (enrollmentError) {
+          // Try without application_id if the column doesn't exist
+          const { data: fallbackEnrollmentData, error: fallbackError } = await supabase
+            .from('enrollments')
+            .insert([{
+              email: formData.email.trim().toLowerCase(),
+              token: enrollmentToken,
+              is_used: false
+            }])
+            .select()
+            .single();
+
+          if (fallbackError) {
+            console.error('Error creating enrollment record:', fallbackError);
+          } else {
+            enrollmentRecord = fallbackEnrollmentData;
+            console.log('Created enrollment record without application_id');
+          }
+        } else {
+          enrollmentRecord = enrollmentData;
+          console.log('Created enrollment record with application_id');
+        }
+      } catch (error) {
+        console.error('Unexpected error creating enrollment record:', error);
+      }
+
+      // Create Supabase Auth user immediately after successful application creation
+      try {
+        const authResponse = await fetch('/api/create-auth-user', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            token: enrollmentToken, 
+            application_id: applicationId 
+          })
+        });
+
+        if (!authResponse.ok) {
+          const authError = await authResponse.json();
+          console.error('Failed to create auth user:', authError);
+        } else {
+          const authResult = await authResponse.json();
+          console.log('Auth user created successfully:', authResult);
+        }
+      } catch (authError) {
+        console.error('Auth user creation failed:', authError);
       }
 
       // Send welcome email with enrollment link

@@ -48,7 +48,7 @@ export default async function handler(req, res) {
     const fullName = `${first_name} ${middle_name ? middle_name + ' ' : ''}${last_name}`;
 
     // Prepare account details HTML
-    const accountDetailsHtml = populatedAccountNumbers.length > 0 ? `
+    let accountDetailsHtml = populatedAccountNumbers.length > 0 ? `
       <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
         <h3 style="margin-top: 0; color: #333;">Your Account Numbers:</h3>
         ${populatedAccountNumbers.map((num, index) => `
