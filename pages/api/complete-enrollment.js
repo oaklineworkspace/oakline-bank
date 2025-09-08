@@ -128,7 +128,7 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error('Complete enrollment error:', error);
-    res.status(500).json({ error: 'Internal server error during enrollment completion' });formation' });
+    res.status(500).json({ error: 'Internal server error during enrollment completion' });
     }
 
     const accountNumbers = applicationAccounts?.map(acc => acc.account_number) || [];
