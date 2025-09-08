@@ -12,7 +12,7 @@ DROP TYPE IF EXISTS annual_income_enum CASCADE;
 -- Create enums
 CREATE TYPE employment_status_enum AS ENUM (
   'employed_fulltime',
-  'employed_parttime', 
+  'employed_parttime',
   'self_employed',
   'retired',
   'student',
@@ -22,7 +22,7 @@ CREATE TYPE employment_status_enum AS ENUM (
 CREATE TYPE annual_income_enum AS ENUM (
   'under_25k',
   '25k_50k',
-  '50k_75k', 
+  '50k_75k',
   '75k_100k',
   '100k_150k',
   'over_150k'
