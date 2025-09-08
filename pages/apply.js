@@ -315,7 +315,36 @@ export default function Apply() {
           zip_code: formData.zipCode.trim(),
           employment_status: formData.employmentStatus,
           annual_income: formData.annualIncome,
-          account_types: formData.accountTypes.map(id => ACCOUNT_TYPES.find(at => at.id === id)?.name),
+          account_types: formData.accountTypes.map(id => {
+            const accountType = ACCOUNT_TYPES.find(at => at.id === id);
+            // Convert account type names to enum values expected by database
+            const enumMapping = {
+              'Checking Account': 'checking',
+              'Savings Account': 'savings', 
+              'Business Checking': 'business_checking',
+              'Business Savings': 'business_savings',
+              'Student Checking': 'student_checking',
+              'Money Market Account': 'money_market',
+              'Certificate of Deposit (CD)': 'cd',
+              'Retirement Account (IRA)': 'ira',
+              'Joint Checking Account': 'joint_checking',
+              'Trust Account': 'trust',
+              'Investment Brokerage Account': 'brokerage',
+              'High-Yield Savings Account': 'high_yield_savings',
+              'International Checking': 'international_checking',
+              'Foreign Currency Account': 'foreign_currency',
+              'Cryptocurrency Wallet': 'crypto_wallet',
+              'Loan Repayment Account': 'loan_repayment',
+              'Mortgage Account': 'mortgage',
+              'Auto Loan Account': 'auto_loan',
+              'Credit Card Account': 'credit_card',
+              'Prepaid Card Account': 'prepaid_card',
+              'Payroll Account': 'payroll',
+              'Nonprofit/Charity Account': 'nonprofit',
+              'Escrow Account': 'escrow'
+            };
+            return enumMapping[accountType?.name] || accountType?.name?.toLowerCase().replace(/\s+/g, '_');
+          }),
           agree_to_terms: formData.agreeToTerms
         }])
         .select()
@@ -333,12 +362,38 @@ export default function Apply() {
         const accountType = ACCOUNT_TYPES.find(at => at.id === accountTypeId);
         const accountNumber = `${Date.now()}${Math.random().toString().slice(2, 8)}`;
         
+        const enumMapping = {
+          'Checking Account': 'checking',
+          'Savings Account': 'savings', 
+          'Business Checking': 'business_checking',
+          'Business Savings': 'business_savings',
+          'Student Checking': 'student_checking',
+          'Money Market Account': 'money_market',
+          'Certificate of Deposit (CD)': 'cd',
+          'Retirement Account (IRA)': 'ira',
+          'Joint Checking Account': 'joint_checking',
+          'Trust Account': 'trust',
+          'Investment Brokerage Account': 'brokerage',
+          'High-Yield Savings Account': 'high_yield_savings',
+          'International Checking': 'international_checking',
+          'Foreign Currency Account': 'foreign_currency',
+          'Cryptocurrency Wallet': 'crypto_wallet',
+          'Loan Repayment Account': 'loan_repayment',
+          'Mortgage Account': 'mortgage',
+          'Auto Loan Account': 'auto_loan',
+          'Credit Card Account': 'credit_card',
+          'Prepaid Card Account': 'prepaid_card',
+          'Payroll Account': 'payroll',
+          'Nonprofit/Charity Account': 'nonprofit',
+          'Escrow Account': 'escrow'
+        };
+
         const { error: accountError } = await supabase
           .from('accounts')
           .insert([{
             application_id: applicationId,
             account_number: accountNumber,
-            account_type: accountType.name,
+            account_type: enumMapping[accountType.name] || accountType.name.toLowerCase().replace(/\s+/g, '_'),
             balance: 0.00
           }]);
 
