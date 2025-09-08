@@ -31,11 +31,6 @@
       "static/chunks/webpack.js",
       "static/chunks/main.js",
       "static/chunks/pages/admin/admin-users.js"
-    ],
-    "/enroll": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/enroll.js"
     ]
   },
   "ampFirstPages": []
