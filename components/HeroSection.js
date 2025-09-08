@@ -195,7 +195,7 @@ const styles = {
 // Mobile responsive
 if (typeof window !== 'undefined') {
   const mediaQuery = window.matchMedia('(max-width: 768px)');
-  
+
   if (mediaQuery.matches) {
     styles.content.gridTemplateColumns = '1fr';
     styles.content.gap = '40px';

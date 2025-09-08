@@ -38,13 +38,13 @@ export default function ServicesSection() {
             Discover our comprehensive range of financial services designed to meet all your banking needs
           </p>
         </div>
-        
+
         <div style={styles.servicesGrid}>
           {services.map((service, index) => (
             <div key={index} style={styles.serviceCard}>
               <div style={styles.serviceImage}>
-                <img 
-                  src={service.image} 
+                <img
+                  src={service.image}
                   alt={service.title}
                   style={styles.image}
                 />
@@ -52,11 +52,11 @@ export default function ServicesSection() {
                   <span style={styles.serviceIcon}>{service.icon}</span>
                 </div>
               </div>
-              
+
               <div style={styles.serviceContent}>
                 <h3 style={styles.serviceTitle}>{service.title}</h3>
                 <p style={styles.serviceDescription}>{service.description}</p>
-                
+
                 <ul style={styles.featuresList}>
                   {service.features.map((feature, idx) => (
                     <li key={idx} style={styles.featureItem}>
@@ -65,7 +65,7 @@ export default function ServicesSection() {
                     </li>
                   ))}
                 </ul>
-                
+
                 <Link href={service.link} style={styles.serviceBtn}>
                   Learn More →
                 </Link>
@@ -189,7 +189,7 @@ const styles = {
 // Mobile responsive
 if (typeof window !== 'undefined') {
   const mediaQuery = window.matchMedia('(max-width: 768px)');
-  
+
   if (mediaQuery.matches) {
     styles.servicesGrid.gridTemplateColumns = '1fr';
     styles.servicesGrid.gap = '24px';
