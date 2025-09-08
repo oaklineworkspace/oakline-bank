@@ -59,23 +59,30 @@ export default async function handler(req, res) {
       });
     }
 
-    // 5️⃣ Create auth user immediately with temporary password
-    const tempPassword = `temp_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    // 5️⃣ Create Supabase Auth user with proper user metadata
+    const userMetadata = {
+      first_name: applicationData.first_name,
+      last_name: applicationData.last_name,
+      country: applicationData.country,
+      application_id: applicationData.id
+    };
 
-    console.log('Creating auth user for:', applicationData.email);
+    // Add the appropriate ID field based on country
+    if (applicationData.country === 'US') {
+      userMetadata.ssn = applicationData.ssn;
+    } else {
+      userMetadata.id_number = applicationData.id_number;
+    }
 
     const { data: newAuthData, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email: applicationData.email,
-      password: tempPassword,
-      email_confirm: true // Auto-confirm email
+      password: 'temp_password_' + Date.now(), // Temporary password
+      email_confirm: true,
+      user_metadata: userMetadata
     });
 
     if (authError) {
-      console.error('Auth creation error details:', {
-        message: authError.message,
-        status: authError.status,
-        details: authError
-      });
+      console.error('Auth user creation error:', authError);
 
       // Handle case where user already exists in auth but wasn't caught by listUsers
       if (authError.message?.includes('already registered') ||

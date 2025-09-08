@@ -104,6 +104,21 @@ export default function EnrollPage() {
       return;
     }
 
+    // Validate ID field based on country
+    if (applicationInfo?.country === 'US') {
+      if (!formData.ssn || formData.ssn.trim() === '') {
+        setMessage('Social Security Number is required');
+        setLoading(false);
+        return;
+      }
+    } else {
+      if (!formData.id_number || formData.id_number.trim() === '') {
+        setMessage('Government ID Number is required');
+        setLoading(false);
+        return;
+      }
+    }
+
     try {
       const response = await fetch('/api/complete-enrollment', {
         method: 'POST',
@@ -215,7 +230,7 @@ export default function EnrollPage() {
 
         {applicationInfo?.country === 'US' ? (
           <div style={{ marginBottom: '1rem' }}>
-            <label>Social Security Number:</label>
+            <label>Social Security Number <span style={{color: '#ef4444'}}>*</span>:</label>
             <input
               type="text"
               name="ssn"
@@ -224,11 +239,12 @@ export default function EnrollPage() {
               required
               style={{ width: '100%', padding: '8px', marginTop: '4px' }}
               placeholder="XXX-XX-XXXX"
+              maxLength="11"
             />
           </div>
         ) : (
           <div style={{ marginBottom: '1rem' }}>
-            <label>Government ID Number:</label>
+            <label>Government ID Number <span style={{color: '#ef4444'}}>*</span>:</label>
             <input
               type="text"
               name="id_number"
@@ -236,7 +252,7 @@ export default function EnrollPage() {
               onChange={handleInputChange}
               required
               style={{ width: '100%', padding: '8px', marginTop: '4px' }}
-              placeholder="Enter your ID number"
+              placeholder="Enter your government ID number"
             />
           </div>
         )}

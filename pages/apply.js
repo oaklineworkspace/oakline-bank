@@ -354,13 +354,36 @@ export default function Apply() {
 
       const applicationId = applicationData.id;
 
+      // Helper function to check if account number is taken
+      const isAccountNumberTaken = async (num) => {
+        const { data, error } = await supabase
+          .from('accounts')
+          .select('account_number')
+          .eq('account_number', num)
+          .single();
+        
+        return !error && data; // Returns true if account number exists
+      };
+
+      // Generate unique random 10-digit account number
+      const generateAccountNumber = async () => {
+        let num;
+        do {
+          num = '';
+          for (let i = 0; i < 10; i++) {
+            num += Math.floor(Math.random() * 10);
+          }
+        } while (await isAccountNumberTaken(num));
+        return num;
+      };
+
       // Create accounts for each selected account type
       const accountNumbers = [];
       const accountTypes = [];
       
       for (const accountTypeId of formData.accountTypes) {
         const accountType = ACCOUNT_TYPES.find(at => at.id === accountTypeId);
-        const accountNumber = `${Date.now()}${Math.random().toString().slice(2, 8)}`;
+        const accountNumber = await generateAccountNumber();
         
         const enumMapping = {
           'Checking Account': 'checking_account',
@@ -394,7 +417,8 @@ export default function Apply() {
             application_id: applicationId,
             account_number: accountNumber,
             account_type: enumMapping[accountType.name] || accountType.name.toLowerCase().replace(/\s+/g, '_'),
-            balance: 0.00
+            balance: 0.00,
+            status: 'limited' // Start with limited status until enrollment completes
           }]);
 
         if (accountError) {

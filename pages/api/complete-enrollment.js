@@ -50,7 +50,8 @@ export default async function handler(req, res) {
     if (applicationData.country === 'US') {
       // US citizens - verify SSN
       const cleanSSN = ssn ? ssn.replace(/-/g, '') : '';
-      if (applicationData.ssn && applicationData.ssn !== cleanSSN) {
+      const applicationSSN = applicationData.ssn ? applicationData.ssn.replace(/-/g, '') : '';
+      if (applicationSSN && applicationSSN !== cleanSSN) {
         return res.status(400).json({ error: 'SSN verification failed. Please check your Social Security Number.' });
       }
     } else {
@@ -134,15 +135,18 @@ export default async function handler(req, res) {
       // This is not critical enough to prevent user creation, but should be logged.
     }
 
-    // 9️⃣ Update the account status from 'limited' to 'active'
+    // 9️⃣ Update the account status from 'limited' to 'active' and link to auth user
     const { error: accountError } = await supabaseAdmin
       .from('accounts')
-      .update({ status: 'active' })
+      .update({ 
+        status: 'active',
+        user_id: authUser.user?.id || authUser.id // Link accounts to the auth user
+      })
       .eq('application_id', application_id);
 
     if (accountError) {
       console.error('Account update error:', accountError);
-      // Don't fail the enrollment for this, just log it
+      return res.status(500).json({ error: 'Failed to activate accounts. Please contact support.' });
     }
 
     res.status(200).json({
