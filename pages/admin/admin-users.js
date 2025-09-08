@@ -180,17 +180,56 @@ export default function AdminUsers() {
           <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
             {users.map((user, index) => (
               <div key={user.id} style={{
-                padding: '10px',
-                margin: '5px 0',
-                backgroundColor: '#f8f9fa',
-                border: '1px solid #dee2e6',
-                borderRadius: '5px',
+                padding: '12px',
+                margin: '8px 0',
+                backgroundColor: user.status === 'SOFT_DELETED' ? '#fff3cd' : '#f8f9fa',
+                border: `2px solid ${user.status === 'SOFT_DELETED' ? '#ffc107' : '#dee2e6'}`,
+                borderRadius: '8px',
                 fontSize: '14px'
               }}>
-                <strong>{index + 1}.</strong> {user.email} 
-                <span style={{ color: '#6c757d', marginLeft: '10px' }}>
-                  (Created: {new Date(user.created_at).toLocaleDateString()})
-                </span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ marginBottom: '6px' }}>
+                      <strong>{index + 1}.</strong> 
+                      <span style={{ 
+                        padding: '2px 8px', 
+                        marginLeft: '8px',
+                        borderRadius: '12px', 
+                        fontSize: '11px', 
+                        fontWeight: 'bold',
+                        backgroundColor: user.status === 'SOFT_DELETED' ? '#dc3545' : '#28a745',
+                        color: 'white'
+                      }}>
+                        {user.status}
+                      </span>
+                    </div>
+                    
+                    <div style={{ marginBottom: '4px' }}>
+                      <strong>Email:</strong> {user.email}
+                      {user.db_email && user.db_email !== user.email && (
+                        <span style={{ color: '#28a745', marginLeft: '8px' }}>
+                          (DB: {user.db_email})
+                        </span>
+                      )}
+                    </div>
+                    
+                    {user.full_name && (
+                      <div style={{ marginBottom: '4px' }}>
+                        <strong>Name:</strong> {user.full_name}
+                      </div>
+                    )}
+                    
+                    <div style={{ fontSize: '12px', color: '#6c757d' }}>
+                      <div>ID: {user.id.substring(0, 8)}...</div>
+                      <div>Created: {new Date(user.created_at).toLocaleDateString()}</div>
+                      {user.deleted_at && (
+                        <div style={{ color: '#dc3545' }}>
+                          Deleted: {new Date(user.deleted_at).toLocaleDateString()}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
