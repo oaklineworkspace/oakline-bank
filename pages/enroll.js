@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useRouter } from 'next/router';
@@ -21,7 +20,7 @@ export default function EnrollPage() {
     const createAuthUserAndLoadInfo = async () => {
       try {
         setAuthCreationLoading(true);
-        
+
         // 1. Create auth user immediately
         const authResponse = await fetch('/api/create-auth-user', {
           method: 'POST',
@@ -77,9 +76,9 @@ export default function EnrollPage() {
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({ 
-      ...prev, 
-      [name]: type === 'checkbox' ? checked : value 
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
     }));
   };
 
@@ -180,7 +179,7 @@ export default function EnrollPage() {
   return (
     <div style={{ maxWidth: '500px', margin: '2rem auto', padding: '2rem', backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
       <h1 style={{ textAlign: 'center', marginBottom: '2rem', color: '#1e40af' }}>Complete Your Enrollment</h1>
-      
+
       {applicationInfo && (
         <div style={{ backgroundColor: '#f0f9ff', padding: '1rem', borderRadius: '6px', marginBottom: '2rem' }}>
           <h3>Welcome, {applicationInfo.name}!</h3>
@@ -291,9 +290,9 @@ export default function EnrollPage() {
             checked={formData.agreeToTerms}
             onChange={handleInputChange}
             required
-            style={{ 
-              width: '18px', 
-              height: '18px', 
+            style={{
+              width: '18px',
+              height: '18px',
               accentColor: '#22c55e',
               cursor: 'pointer'
             }}

@@ -409,12 +409,12 @@ export default function Apply() {
           'Foreign Currency Account': 'foreign_currency',
           'Cryptocurrency Wallet': 'cryptocurrency_wallet',
           'Loan Repayment Account': 'loan_repayment',
-          'Mortgage Account': 'mortgage_account',
-          'Auto Loan Account': 'auto_loan_account',
-          'Credit Card Account': 'credit_card_account',
-          'Prepaid Card Account': 'prepaid_card_account',
+          'Mortgage Account': 'mortgage',
+          'Auto Loan Account': 'auto_loan',
+          'Credit Card Account': 'credit_card',
+          'Prepaid Card Account': 'prepaid_card',
           'Payroll Account': 'payroll_account',
-          'Nonprofit/Charity Account': 'nonprofit_charity_account',
+          'Nonprofit/Charity Account': 'nonprofit_charity',
           'Escrow Account': 'escrow_account'
         };
 
@@ -750,7 +750,9 @@ export default function Apply() {
       backgroundColor: '#f8fafc',
       borderRadius: '12px',
       border: '2px solid #e2e8f0',
-      marginTop: '1.5rem'
+      marginTop: '1.5rem',
+      position: 'relative',
+      zIndex: 10
     },
     checkbox: {
       width: '20px',
@@ -759,9 +761,8 @@ export default function Apply() {
       cursor: 'pointer',
       accentColor: '#059669',
       transform: 'scale(1.2)',
-      backgroundColor: 'transparent',
-      border: 'none',
-      outline: 'none'
+      position: 'relative',
+      zIndex: 11
     },
     checkboxLabel: {
       fontSize: '15px',
@@ -1367,15 +1368,27 @@ export default function Apply() {
                 </div>
               </div>
 
-              <div style={styles.checkboxContainer}>
-                <input
-                  type="checkbox"
-                  name="agreeToTerms"
-                  checked={formData.agreeToTerms}
-                  onChange={handleInputChange}
-                  style={styles.checkbox}
-                />
-                <label style={styles.checkboxLabel}>
+              <div style={{
+                ...styles.checkboxContainer,
+                borderColor: formData.agreeToTerms ? '#059669' : '#e2e8f0',
+                backgroundColor: formData.agreeToTerms ? '#f0fdf4' : '#f8fafc'
+              }}>
+                <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+                  <input
+                    type="checkbox"
+                    name="agreeToTerms"
+                    checked={formData.agreeToTerms}
+                    onChange={handleInputChange}
+                    style={styles.checkbox}
+                  />
+                  {formData.agreeToTerms && (
+                    <span style={{color: '#059669', fontSize: '16px', fontWeight: 'bold'}}>✓</span>
+                  )}
+                </div>
+                <label 
+                  style={styles.checkboxLabel}
+                  onClick={() => handleInputChange({target: {name: 'agreeToTerms', type: 'checkbox', checked: !formData.agreeToTerms}})}
+                >
                   I agree to the{' '}
                   <Link href="/terms" style={styles.link}>
                     Terms of Service

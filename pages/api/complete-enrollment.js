@@ -146,36 +146,53 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Failed to activate accounts. Please contact support.' });
     }
 
-    // 🔟 Generate and add new 10-digit account numbers if missing
-    const currentAccountNumbers = applicationAccounts.map(acc => acc.account_number);
-    const neededAccountNumbersCount = 10 - currentAccountNumbers.length;
+    // Helper function to check if account number is taken
+    const isAccountNumberTaken = async (num) => {
+      const { data, error } = await supabaseAdmin
+        .from('accounts')
+        .select('account_number')
+        .eq('account_number', num)
+        .single();
+      return !error && data;
+    };
 
-    if (neededAccountNumbersCount > 0) {
-      const newAccountNumbers = [];
-      for (let i = 0; i < neededAccountNumbersCount; i++) {
-        let newAccNum;
-        do {
-          newAccNum = crypto.randomBytes(5).toString('hex'); // Generates 10 hex characters, sufficient for 10 digits
-        } while (currentAccountNumbers.includes(newAccNum) || newAccountNumbers.includes(newAccNum));
-        newAccountNumbers.push(newAccNum);
+    // Generate unique random 10-digit account number
+    const generateAccountNumber = async () => {
+      let num;
+      let attempts = 0;
+      const maxAttempts = 100;
+
+      do {
+        num = '';
+        for (let i = 0; i < 10; i++) {
+          num += Math.floor(Math.random() * 10);
+        }
+        attempts++;
+      } while (await isAccountNumberTaken(num) && attempts < maxAttempts);
+
+      if (attempts === maxAttempts) {
+        throw new Error('Could not generate a unique account number after multiple attempts.');
       }
+      return num;
+    };
 
-      const { error: insertError } = await supabaseAdmin.from('accounts').insert(
-        newAccountNumbers.map(accNum => ({
-          application_id: application_id,
-          account_number: accNum,
-          user_id: authUser.user?.id || authUser.id,
-          account_type: 'default', // Default account type
-          balance: 0 // Default balance
-        }))
-      );
+    // Generate new account numbers for any missing accounts
+    const currentAccountNumbers = applicationAccounts.map(acc => acc.account_number);
+    const accountsNeedingNumbers = applicationAccounts.filter(acc => !acc.account_number || acc.account_number === '');
 
-      if (insertError) {
-        console.error('Error inserting new account numbers:', insertError);
-        // This is not critical enough to prevent user creation, but should be logged.
+    for (const account of accountsNeedingNumbers) {
+      const newAccountNumber = await generateAccountNumber();
+      
+      // Update the existing account with the new account number
+      const { error: updateError } = await supabaseAdmin
+        .from('accounts')
+        .update({ account_number: newAccountNumber })
+        .eq('id', account.id);
+
+      if (updateError) {
+        console.error('Error updating account with new account number:', updateError);
       } else {
-        // Add newly generated account numbers to the list for the email
-        currentAccountNumbers.push(...newAccountNumbers);
+        currentAccountNumbers.push(newAccountNumber);
       }
     }
 
