@@ -32,15 +32,10 @@
       "static/chunks/main.js",
       "static/chunks/pages/admin/admin-users.js"
     ],
-    "/apply": [
+    "/enroll": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/apply.js"
-    ],
-    "/dashboard": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/dashboard.js"
+      "static/chunks/pages/enroll.js"
     ],
     "/login": [
       "static/chunks/webpack.js",
