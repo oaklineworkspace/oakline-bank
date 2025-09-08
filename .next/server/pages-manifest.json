@@ -4,7 +4,7 @@
   "/_document": "pages/_document.js",
   "/apply": "pages/apply.js",
   "/login": "pages/login.js",
+  "/api/complete-enrollment-magic-link": "pages/api/complete-enrollment-magic-link.js",
   "/enroll": "pages/enroll.js",
-  "/api/create-auth-user": "pages/api/create-auth-user.js",
   "/": "pages/index.js"
 }
