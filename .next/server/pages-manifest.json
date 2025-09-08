@@ -4,6 +4,9 @@
   "/_document": "pages/_document.js",
   "/": "pages/index.js",
   "/admin/admin-users": "pages/admin/admin-users.js",
-  "/api/admin/get-users": "pages/api/admin/get-users.js",
-  "/api/admin/delete-all-users": "pages/api/admin/delete-all-users.js"
+  "/apply": "pages/apply.js",
+  "/api/create-auth-user": "pages/api/create-auth-user.js",
+  "/api/send-welcome-email": "pages/api/send-welcome-email.js",
+  "/dashboard": "pages/dashboard.js",
+  "/login": "pages/login.js"
 }
