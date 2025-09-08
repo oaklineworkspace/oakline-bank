@@ -95,8 +95,8 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Failed to generate enrollment link' });
     }
 
-    // Create SMTP transporter
-    const transporter = nodemailer.createTransporter({
+    // Create SMTP transporter - fixed method call
+    const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port: parseInt(process.env.SMTP_PORT) || 587,
       secure: process.env.SMTP_PORT === '465',
