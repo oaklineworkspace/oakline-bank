@@ -322,23 +322,39 @@ export default function EnrollPage() {
     }
 
     try {
-      // Decide which API endpoint to call based on the flow
-      const endpoint = router.query.type === 'magic-link' || step === 'password' ? '/api/complete-enrollment-magic-link' : '/api/complete-enrollment';
-      const bodyData = {
-        token: enrollmentToken, // Use enrollmentToken for traditional flow
-        application_id: applicationId,
-        email: formData.email,
-        password: formData.password,
-        ssn: formData.ssn,
-        id_number: formData.id_number,
-        accountNumber: formData.accountNumber
-      };
-
-      // Add userId for magic link flow if available
+      // Get current session to determine flow
       const { data: { session } } = await supabase.auth.getSession();
-      if (step === 'password' && session?.user) {
-          bodyData.userId = session.user.id;
+      
+      // Decide which API endpoint to call and prepare data
+      let endpoint, bodyData;
+      
+      if (session?.user && step === 'password') {
+        // Magic link flow - user is authenticated
+        endpoint = '/api/complete-enrollment-magic-link';
+        bodyData = {
+          userId: session.user.id,
+          application_id: applicationId,
+          email: formData.email,
+          password: formData.password,
+          ssn: formData.ssn,
+          id_number: formData.id_number,
+          accountNumber: formData.accountNumber
+        };
+      } else {
+        // Traditional token flow
+        endpoint = '/api/complete-enrollment';
+        bodyData = {
+          token: enrollmentToken,
+          application_id: applicationId,
+          email: formData.email,
+          password: formData.password,
+          ssn: formData.ssn,
+          id_number: formData.id_number,
+          accountNumber: formData.accountNumber
+        };
       }
+
+      console.log('Submitting enrollment with:', { endpoint, hasUserId: !!bodyData.userId, hasToken: !!bodyData.token });
 
       const response = await fetch(endpoint, {
         method: 'POST',
