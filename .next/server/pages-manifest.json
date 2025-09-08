@@ -2,9 +2,7 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/apply": "pages/apply.js",
-  "/login": "pages/login.js",
-  "/api/complete-enrollment-magic-link": "pages/api/complete-enrollment-magic-link.js",
-  "/enroll": "pages/enroll.js",
-  "/": "pages/index.js"
+  "/": "pages/index.js",
+  "/api/create-auth-user": "pages/api/create-auth-user.js",
+  "/enroll": "pages/enroll.js"
 }
