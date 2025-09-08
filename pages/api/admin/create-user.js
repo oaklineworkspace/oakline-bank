@@ -1,4 +1,3 @@
-
 import { supabaseAdmin } from '../../../lib/supabaseClient';
 
 export default async function handler(req, res) {
@@ -34,17 +33,18 @@ export default async function handler(req, res) {
     sendEnrollmentEmail = true
   } = req.body;
 
+  // Map frontend field names to expected names
+  const dob = dateOfBirth;
+  const ssnOrId = country === 'US' ? ssn : idNumber;
+  const selectedAccountTypes = accountTypes;
+
   // Validation
-  if (!firstName || !lastName || !email || !dateOfBirth || !address || !city || !state || !zipCode || !accountTypes?.length || !annualIncome || !password) {
-    return res.status(400).json({ error: 'Missing required fields' });
+  if (!firstName || !lastName || !email || !dob || !address || !city || !state || !zipCode || !selectedAccountTypes || !annualIncome || !password) {
+    return res.status(400).json({ error: 'Missing required fields: firstName, lastName, email, dateOfBirth, address, city, state, zipCode, accountTypes, annualIncome, password' });
   }
 
-  if (country === 'US' && !ssn) {
-    return res.status(400).json({ error: 'SSN is required for US residents' });
-  }
-
-  if (country !== 'US' && !idNumber) {
-    return res.status(400).json({ error: 'ID number is required for non-US residents' });
+  if (!ssnOrId) {
+    return res.status(400).json({ error: `Missing required field: ${country === 'US' ? 'SSN' : 'ID Number'} is required` });
   }
 
   try {
