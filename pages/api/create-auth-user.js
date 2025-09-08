@@ -91,7 +91,17 @@ export default async function handler(req, res) {
               first_name: applicationData.first_name,
               last_name: applicationData.last_name,
               middle_name: applicationData.middle_name,
-              application_id: applicationData.id
+              phone: applicationData.phone,
+              date_of_birth: applicationData.date_of_birth,
+              country: applicationData.country,
+              address: applicationData.address,
+              city: applicationData.city,
+              state: applicationData.state,
+              zip_code: applicationData.zip_code,
+              ssn: applicationData.ssn,
+              id_number: applicationData.id_number,
+              application_id: applicationData.id,
+              enrollment_completed: false
             });
             
           if (profileError) {

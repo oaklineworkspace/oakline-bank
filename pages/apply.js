@@ -532,6 +532,7 @@ export default function Apply() {
 
       // Create Supabase Auth user immediately after successful application creation
       try {
+        console.log('Creating auth user for application:', applicationId);
         const authResponse = await fetch('/api/create-auth-user', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -544,12 +545,14 @@ export default function Apply() {
         if (!authResponse.ok) {
           const authError = await authResponse.json();
           console.error('Failed to create auth user:', authError);
+          // Don't fail the entire process for auth user creation issues
         } else {
           const authResult = await authResponse.json();
           console.log('Auth user created successfully:', authResult);
         }
       } catch (authError) {
         console.error('Auth user creation failed:', authError);
+        // Don't fail the entire process for auth user creation issues
       }
 
       // Send welcome email with enrollment link
