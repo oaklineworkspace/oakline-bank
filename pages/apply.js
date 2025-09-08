@@ -1430,6 +1430,24 @@ export default function Apply() {
                       </div>
                       <div style={styles.accountDescription}>{account.description}</div>
                       <div style={styles.accountRate}>{account.rate}</div>
+                      {formData.accountTypes.includes(account.id) && (
+                        <div style={{
+                          position: 'absolute',
+                          top: '12px',
+                          right: '12px',
+                          backgroundColor: '#0070f3',
+                          color: 'white',
+                          borderRadius: '50%',
+                          width: '24px',
+                          height: '24px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '14px'
+                        }}>
+                          ✓
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>

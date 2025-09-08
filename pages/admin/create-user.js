@@ -15,10 +15,29 @@ const COUNTRIES = [
 ];
 
 const ACCOUNT_TYPES = [
-  { id: 'checking', name: 'Checking Account', description: 'Everyday banking account for daily transactions', icon: '💳', features: ['No monthly fees', 'Unlimited transactions', 'Online banking'] },
-  { id: 'savings', name: 'Savings Account', description: 'High-yield savings account to grow your money', icon: '💰', features: ['4.50% APY', 'FDIC insured', 'Monthly interest'] },
-  { id: 'business', name: 'Business Account', description: 'Professional banking for business operations', icon: '🏢', features: ['Business tools', 'Wire transfers', 'Merchant services'] },
-  { id: 'premium', name: 'Premium Account', description: 'Exclusive banking with premium benefits', icon: '⭐', features: ['Personal banker', 'Premium rewards', 'Investment access'] }
+  { id: 1, name: 'Checking Account', description: 'Perfect for everyday banking needs', icon: '💳', rate: '0.01% APY' },
+  { id: 2, name: 'Savings Account', description: 'Grow your money with competitive rates', icon: '💰', rate: '4.50% APY' },
+  { id: 3, name: 'Business Checking', description: 'Designed for business operations', icon: '🏢', rate: '0.01% APY' },
+  { id: 4, name: 'Business Savings', description: 'Business savings with higher yields', icon: '🏦', rate: '4.25% APY' },
+  { id: 5, name: 'Student Checking', description: 'No-fee checking for students', icon: '🎓', rate: '0.01% APY' },
+  { id: 6, name: 'Money Market Account', description: 'Premium savings with higher yields', icon: '📈', rate: '4.75% APY' },
+  { id: 7, name: 'Certificate of Deposit (CD)', description: 'Secure your future with fixed rates', icon: '🔒', rate: '5.25% APY' },
+  { id: 8, name: 'Retirement Account (IRA)', description: 'Plan for your retirement', icon: '🏖️', rate: '4.80% APY' },
+  { id: 9, name: 'Joint Checking Account', description: 'Shared checking for couples', icon: '👫', rate: '0.01% APY' },
+  { id: 10, name: 'Trust Account', description: 'Manage assets for beneficiaries', icon: '🛡️', rate: '3.50% APY' },
+  { id: 11, name: 'Investment Brokerage Account', description: 'Trade stocks, bonds, and more', icon: '📊', rate: 'Variable' },
+  { id: 12, name: 'High-Yield Savings Account', description: 'Maximum earning potential', icon: '💎', rate: '5.00% APY' },
+  { id: 13, name: 'International Checking', description: 'Banking without borders', icon: '🌍', rate: '0.01% APY' },
+  { id: 14, name: 'Foreign Currency Account', description: 'Hold multiple currencies', icon: '💱', rate: 'Variable' },
+  { id: 15, name: 'Cryptocurrency Wallet', description: 'Digital asset storage', icon: '₿', rate: 'Variable' },
+  { id: 16, name: 'Loan Repayment Account', description: 'Streamline your loan payments', icon: '💳', rate: 'N/A' },
+  { id: 17, name: 'Mortgage Account', description: 'Home financing solutions', icon: '🏠', rate: 'Variable' },
+  { id: 18, name: 'Auto Loan Account', description: 'Vehicle financing made easy', icon: '🚗', rate: 'Variable' },
+  { id: 19, name: 'Credit Card Account', description: 'Flexible spending power', icon: '💳', rate: 'Variable APR' },
+  { id: 20, name: 'Prepaid Card Account', description: 'Controlled spending solution', icon: '🎫', rate: 'N/A' },
+  { id: 21, name: 'Payroll Account', description: 'Direct deposit convenience', icon: '💼', rate: '0.01% APY' },
+  { id: 22, name: 'Nonprofit/Charity Account', description: 'Special rates for nonprofits', icon: '❤️', rate: '2.50% APY' },
+  { id: 23, name: 'Escrow Account', description: 'Secure transaction holding', icon: '🔐', rate: '1.50% APY' },
 ];
 
 const EMPLOYMENT_OPTIONS = [
@@ -60,7 +79,7 @@ export default function CreateUser() {
     city: '',
     state: '',
     zipCode: '',
-    accountTypes: ['checking'], // Default to checking account
+    accountTypes: [1], // Default to checking account
     employmentStatus: 'Employed Full-time',
     annualIncome: '',
     password: '',
@@ -300,9 +319,17 @@ export default function CreateUser() {
       transform: 'translateY(-2px)',
       boxShadow: '0 8px 25px rgba(0, 112, 243, 0.15)'
     },
+    accountHeader: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '12px',
+      marginBottom: '8px'
+    },
     accountIcon: {
       fontSize: '24px',
-      marginBottom: '8px'
+      padding: '8px',
+      borderRadius: '10px',
+      backgroundColor: '#f1f5f9'
     },
     accountName: {
       fontSize: '16px',
@@ -315,9 +342,14 @@ export default function CreateUser() {
       color: '#64748b',
       marginBottom: '12px'
     },
-    accountFeatures: {
-      fontSize: '12px',
-      color: '#64748b'
+    accountRate: {
+      fontSize: '14px',
+      fontWeight: '600',
+      color: '#059669',
+      backgroundColor: '#ecfdf5',
+      padding: '4px 8px',
+      borderRadius: '6px',
+      display: 'inline-block'
     },
     submitButton: {
       width: '100%',
@@ -636,14 +668,17 @@ export default function CreateUser() {
                       ...(isSelected ? styles.accountCardSelected : {})
                     }}
                   >
-                    <div style={styles.accountIcon}>{accountType.icon}</div>
-                    <div style={styles.accountName}>{accountType.name}</div>
-                    <div style={styles.accountDescription}>{accountType.description}</div>
-                    <div style={styles.accountFeatures}>
-                      {accountType.features.map((feature, index) => (
-                        <div key={index}>• {feature}</div>
-                      ))}
+                    <div style={styles.accountHeader}>
+                      <div style={{
+                        ...styles.accountIcon,
+                        backgroundColor: formData.accountTypes.includes(accountType.id) ? '#dbeafe' : '#f1f5f9'
+                      }}>
+                        {accountType.icon}
+                      </div>
+                      <div style={styles.accountName}>{accountType.name}</div>
                     </div>
+                    <div style={styles.accountDescription}>{accountType.description}</div>
+                    <div style={styles.accountRate}>{accountType.rate}</div>
                     {isSelected && (
                       <div style={{
                         position: 'absolute',
