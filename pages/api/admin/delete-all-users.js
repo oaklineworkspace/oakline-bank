@@ -39,25 +39,54 @@ export default async function handler(req, res) {
 
     // Delete each user and their related data
     for (const user of users.users) {
-      const userEmail = user.email;
+      // Try multiple sources for email
+      const userEmail = user.email || 
+                       user.user_metadata?.email || 
+                       user.raw_user_meta_data?.email ||
+                       user.identities?.[0]?.identity_data?.email;
       const userId = user.id;
       
       try {
         console.log(`Deleting user: ${userEmail} (${userId})`);
+        console.log('User object:', JSON.stringify(user, null, 2));
 
         // Delete related data in order (to avoid foreign key constraints)
         
-        // 1. Delete enrollments first
-        const { error: enrollmentsError } = await supabaseAdmin
+        // 1. Delete enrollments first (try both email and user_id)
+        let enrollmentsError = null;
+        if (userEmail) {
+          const { error: enrollError1 } = await supabaseAdmin
+            .from('enrollments')
+            .delete()
+            .eq('email', userEmail);
+          enrollmentsError = enrollError1;
+        }
+        
+        // Also try by user_id if exists
+        const { error: enrollError2 } = await supabaseAdmin
           .from('enrollments')
           .delete()
-          .eq('email', userEmail);
+          .eq('user_id', userId);
+        
+        if (!enrollmentsError) enrollmentsError = enrollError2;
 
-        // 2. Delete applications
-        const { error: applicationsError } = await supabaseAdmin
+        // 2. Delete applications (try both email and user_id)
+        let applicationsError = null;
+        if (userEmail) {
+          const { error: appError1 } = await supabaseAdmin
+            .from('applications')
+            .delete()
+            .eq('email', userEmail);
+          applicationsError = appError1;
+        }
+        
+        // Also try by user_id
+        const { error: appError2 } = await supabaseAdmin
           .from('applications')
           .delete()
-          .eq('email', userEmail);
+          .eq('user_id', userId);
+        
+        if (!applicationsError) applicationsError = appError2;
 
         // 3. Try to delete accounts (handle column name issues)
         let accountsError = null;
@@ -101,32 +130,56 @@ export default async function handler(req, res) {
           }
         }
 
-        // 5. Force delete the user from Supabase Auth with retry logic
+        // 5. Force delete the user from Supabase Auth with multiple strategies
         let deleteError = null;
         let authDeleted = false;
         
-        for (let attempt = 1; attempt <= 3; attempt++) {
-          try {
-            const { error } = await supabaseAdmin.auth.admin.deleteUser(userId, true); // shouldSoftDelete = true to bypass constraints
+        // Strategy 1: Normal delete
+        try {
+          const { error } = await supabaseAdmin.auth.admin.deleteUser(userId);
+          if (!error) {
+            console.log(`✅ Auth user deleted normally: ${userEmail}`);
+            authDeleted = true;
+          } else {
+            console.log(`❌ Normal deletion failed: ${error.message}`);
             deleteError = error;
-            
+          }
+        } catch (err) {
+          console.log(`❌ Normal deletion threw error: ${err.message}`);
+          deleteError = err;
+        }
+        
+        // Strategy 2: Force delete with shouldSoftDelete
+        if (!authDeleted) {
+          try {
+            const { error } = await supabaseAdmin.auth.admin.deleteUser(userId, false); // shouldSoftDelete = false for hard delete
             if (!error) {
+              console.log(`✅ Auth user force deleted: ${userEmail}`);
               authDeleted = true;
-              break;
-            }
-            
-            console.log(`Auth deletion attempt ${attempt} failed for ${userEmail}:`, error);
-            
-            if (attempt < 3) {
-              await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
+            } else {
+              console.log(`❌ Force deletion failed: ${error.message}`);
+              deleteError = error;
             }
           } catch (err) {
+            console.log(`❌ Force deletion threw error: ${err.message}`);
             deleteError = err;
-            console.log(`Auth deletion attempt ${attempt} threw error for ${userEmail}:`, err);
+          }
+        }
+        
+        // Strategy 3: Try to mark as deleted if deletion fails
+        if (!authDeleted) {
+          try {
+            const { error } = await supabaseAdmin.auth.admin.updateUserById(userId, {
+              email_confirm: false,
+              banned_until: new Date(Date.now() + 100 * 365 * 24 * 60 * 60 * 1000).toISOString(),
+            });
             
-            if (attempt < 3) {
-              await new Promise(resolve => setTimeout(resolve, 2000));
+            if (!error) {
+              console.log(`⚠️ Auth user disabled instead of deleted: ${userEmail}`);
+              authDeleted = false; // Still mark as failed since not actually deleted
             }
+          } catch (err) {
+            console.log(`❌ Could not disable user: ${err.message}`);
           }
         }
 

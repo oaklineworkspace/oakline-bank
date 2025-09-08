@@ -1,4 +1,3 @@
-
 import { supabaseAdmin } from '../../../lib/supabaseClient';
 
 export default async function handler(req, res) {
@@ -7,8 +6,6 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { email } = req.query;
-
     // Fetch all users from Supabase Auth
     const { data: users, error } = await supabaseAdmin.auth.admin.listUsers();
 
@@ -17,23 +14,38 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Failed to fetch users' });
     }
 
-    // Return user data (only necessary fields for security)
-    let filteredUsers = users.users.map(user => ({
-      id: user.id,
-      email: user.email,
-      created_at: user.created_at,
-      last_sign_in_at: user.last_sign_in_at,
-      email_confirmed_at: user.email_confirmed_at
-    }));
+    console.log('Raw users data:', JSON.stringify(users.users, null, 2));
 
-    // If email query parameter is provided, filter by email
-    if (email) {
-      filteredUsers = filteredUsers.filter(user => 
-        user.email && user.email.toLowerCase().includes(email.toLowerCase())
-      );
-    }
+    // Transform user data for frontend consumption
+    const userData = users.users.map(user => {
+      // Try multiple sources for email
+      const email = user.email || 
+                   user.user_metadata?.email || 
+                   user.raw_user_meta_data?.email ||
+                   user.identities?.[0]?.identity_data?.email ||
+                   'No email found';
 
-    res.status(200).json({ users: filteredUsers });
+      console.log(`User ${user.id} email sources:`, {
+        direct_email: user.email,
+        user_metadata: user.user_metadata,
+        raw_metadata: user.raw_user_meta_data,
+        identities: user.identities
+      });
+
+      return {
+        id: user.id,
+        email: email,
+        created_at: user.created_at,
+        last_sign_in_at: user.last_sign_in_at,
+        confirmed_at: user.confirmed_at,
+        raw_user: user // For debugging
+      };
+    });
+
+    res.status(200).json({
+      users: userData,
+      count: userData.length
+    });
 
   } catch (error) {
     console.error('Get users error:', error);
