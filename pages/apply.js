@@ -319,29 +319,29 @@ export default function Apply() {
             const accountType = ACCOUNT_TYPES.find(at => at.id === id);
             // Convert account type names to enum values expected by database
             const enumMapping = {
-              'Checking Account': 'checking',
-              'Savings Account': 'savings', 
+              'Checking Account': 'checking_account',
+              'Savings Account': 'savings_account', 
               'Business Checking': 'business_checking',
               'Business Savings': 'business_savings',
               'Student Checking': 'student_checking',
               'Money Market Account': 'money_market',
-              'Certificate of Deposit (CD)': 'cd',
-              'Retirement Account (IRA)': 'ira',
+              'Certificate of Deposit (CD)': 'certificate_of_deposit',
+              'Retirement Account (IRA)': 'retirement_ira',
               'Joint Checking Account': 'joint_checking',
-              'Trust Account': 'trust',
-              'Investment Brokerage Account': 'brokerage',
+              'Trust Account': 'trust_account',
+              'Investment Brokerage Account': 'investment_brokerage',
               'High-Yield Savings Account': 'high_yield_savings',
               'International Checking': 'international_checking',
               'Foreign Currency Account': 'foreign_currency',
-              'Cryptocurrency Wallet': 'crypto_wallet',
+              'Cryptocurrency Wallet': 'cryptocurrency_wallet',
               'Loan Repayment Account': 'loan_repayment',
-              'Mortgage Account': 'mortgage',
-              'Auto Loan Account': 'auto_loan',
-              'Credit Card Account': 'credit_card',
-              'Prepaid Card Account': 'prepaid_card',
-              'Payroll Account': 'payroll',
-              'Nonprofit/Charity Account': 'nonprofit',
-              'Escrow Account': 'escrow'
+              'Mortgage Account': 'mortgage_account',
+              'Auto Loan Account': 'auto_loan_account',
+              'Credit Card Account': 'credit_card_account',
+              'Prepaid Card Account': 'prepaid_card_account',
+              'Payroll Account': 'payroll_account',
+              'Nonprofit/Charity Account': 'nonprofit_charity_account',
+              'Escrow Account': 'escrow_account'
             };
             return enumMapping[accountType?.name] || accountType?.name?.toLowerCase().replace(/\s+/g, '_');
           }),
@@ -363,29 +363,29 @@ export default function Apply() {
         const accountNumber = `${Date.now()}${Math.random().toString().slice(2, 8)}`;
         
         const enumMapping = {
-          'Checking Account': 'checking',
-          'Savings Account': 'savings', 
+          'Checking Account': 'checking_account',
+          'Savings Account': 'savings_account', 
           'Business Checking': 'business_checking',
           'Business Savings': 'business_savings',
           'Student Checking': 'student_checking',
           'Money Market Account': 'money_market',
-          'Certificate of Deposit (CD)': 'cd',
-          'Retirement Account (IRA)': 'ira',
+          'Certificate of Deposit (CD)': 'certificate_of_deposit',
+          'Retirement Account (IRA)': 'retirement_ira',
           'Joint Checking Account': 'joint_checking',
-          'Trust Account': 'trust',
-          'Investment Brokerage Account': 'brokerage',
+          'Trust Account': 'trust_account',
+          'Investment Brokerage Account': 'investment_brokerage',
           'High-Yield Savings Account': 'high_yield_savings',
           'International Checking': 'international_checking',
           'Foreign Currency Account': 'foreign_currency',
-          'Cryptocurrency Wallet': 'crypto_wallet',
+          'Cryptocurrency Wallet': 'cryptocurrency_wallet',
           'Loan Repayment Account': 'loan_repayment',
-          'Mortgage Account': 'mortgage',
-          'Auto Loan Account': 'auto_loan',
-          'Credit Card Account': 'credit_card',
-          'Prepaid Card Account': 'prepaid_card',
-          'Payroll Account': 'payroll',
-          'Nonprofit/Charity Account': 'nonprofit',
-          'Escrow Account': 'escrow'
+          'Mortgage Account': 'mortgage_account',
+          'Auto Loan Account': 'auto_loan_account',
+          'Credit Card Account': 'credit_card_account',
+          'Prepaid Card Account': 'prepaid_card_account',
+          'Payroll Account': 'payroll_account',
+          'Nonprofit/Charity Account': 'nonprofit_charity_account',
+          'Escrow Account': 'escrow_account'
         };
 
         const { error: accountError } = await supabase
