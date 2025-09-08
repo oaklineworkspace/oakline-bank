@@ -7,6 +7,18 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  // Check SMTP configuration
+  const requiredEnvVars = ['SMTP_HOST', 'SMTP_PORT', 'SMTP_USER', 'SMTP_PASS'];
+  const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
+  
+  if (missingVars.length > 0) {
+    console.error('Missing SMTP environment variables:', missingVars);
+    return res.status(500).json({ 
+      error: 'Email service not configured',
+      message: `Missing environment variables: ${missingVars.join(', ')}`
+    });
+  }
+
   try {
     const {
       email,
@@ -35,6 +47,19 @@ export default async function handler(req, res) {
         pass: process.env.SMTP_PASS,
       },
     });
+
+    // Test SMTP connection
+    console.log('Testing SMTP connection...');
+    try {
+      await transporter.verify();
+      console.log('SMTP connection verified successfully');
+    } catch (smtpError) {
+      console.error('SMTP connection failed:', smtpError.message);
+      return res.status(500).json({ 
+        error: 'Email service connection failed',
+        message: smtpError.message
+      });
+    }
 
     // Get site URL
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://oaklineworkspac-oakline-bank.repl.co';

@@ -442,10 +442,42 @@ export default function Apply() {
       // Generate enrollment token
       const enrollmentToken = `enroll_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
 
-      // Create enrollment record (handle missing application_id column gracefully)
+      // Create enrollment record with proper error handling
       let enrollmentRecord = null;
-      try {
-        const { data: enrollmentData, error: enrollmentError } = await supabase
+      let enrollmentError = null;
+      
+      console.log('Creating enrollment record for:', formData.email);
+      
+      // First, check if enrollment already exists
+      const { data: existingEnrollment } = await supabase
+        .from('enrollments')
+        .select('*')
+        .eq('email', formData.email.trim().toLowerCase())
+        .single();
+
+      if (existingEnrollment) {
+        // Update existing enrollment with new token
+        const { data: updatedEnrollment, error: updateError } = await supabase
+          .from('enrollments')
+          .update({ 
+            token: enrollmentToken,
+            is_used: false,
+            application_id: applicationId 
+          })
+          .eq('email', formData.email.trim().toLowerCase())
+          .select()
+          .single();
+
+        if (updateError) {
+          console.error('Error updating enrollment record:', updateError);
+          enrollmentError = updateError;
+        } else {
+          enrollmentRecord = updatedEnrollment;
+          console.log('Updated existing enrollment record');
+        }
+      } else {
+        // Create new enrollment record
+        const { data: newEnrollmentData, error: insertError } = await supabase
           .from('enrollments')
           .insert([{
             email: formData.email.trim().toLowerCase(),
@@ -456,30 +488,13 @@ export default function Apply() {
           .select()
           .single();
 
-        if (enrollmentError) {
-          // Try without application_id if the column doesn't exist
-          const { data: fallbackEnrollmentData, error: fallbackError } = await supabase
-            .from('enrollments')
-            .insert([{
-              email: formData.email.trim().toLowerCase(),
-              token: enrollmentToken,
-              is_used: false
-            }])
-            .select()
-            .single();
-
-          if (fallbackError) {
-            console.error('Error creating enrollment record:', fallbackError);
-          } else {
-            enrollmentRecord = fallbackEnrollmentData;
-            console.log('Created enrollment record without application_id');
-          }
+        if (insertError) {
+          console.error('Error creating enrollment record:', insertError);
+          enrollmentError = insertError;
         } else {
-          enrollmentRecord = enrollmentData;
-          console.log('Created enrollment record with application_id');
+          enrollmentRecord = newEnrollmentData;
+          console.log('Created new enrollment record with application_id:', applicationId);
         }
-      } catch (error) {
-        console.error('Unexpected error creating enrollment record:', error);
       }
 
       // Create Supabase Auth user immediately after successful application creation
