@@ -118,6 +118,24 @@ export default function Home() {
   return (
     <div className="page-container">
       <MainMenu user={user} />
+      
+      {/* Top Action Buttons */}
+      <section style={styles.topActionsSection}>
+        <div style={styles.container}>
+          <div style={styles.topActions}>
+            <Link href="/apply" style={styles.primaryActionButton}>
+              <span style={styles.actionButtonIcon}>🏦</span>
+              Open New Account
+            </Link>
+            <EnrollmentButton />
+            <Link href="/login" style={styles.secondaryActionButton}>
+              <span style={styles.actionButtonIcon}>🔐</span>
+              Sign In
+            </Link>
+          </div>
+        </div>
+      </section>
+
       <WelcomeBanner />
 
       <main>
@@ -188,6 +206,50 @@ export default function Home() {
 }
 
 const styles = {
+  topActionsSection: {
+    background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
+    padding: '1.5rem 0',
+    borderBottom: '1px solid #1e40af'
+  },
+  topActions: {
+    display: 'flex',
+    gap: '1rem',
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexWrap: 'wrap'
+  },
+  primaryActionButton: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '8px',
+    padding: '12px 24px',
+    background: 'rgba(255, 255, 255, 0.2)',
+    color: 'white',
+    textDecoration: 'none',
+    borderRadius: '8px',
+    fontSize: '14px',
+    fontWeight: '600',
+    border: '2px solid rgba(255, 255, 255, 0.3)',
+    transition: 'all 0.3s ease',
+    backdropFilter: 'blur(10px)'
+  },
+  secondaryActionButton: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '8px',
+    padding: '12px 24px',
+    background: 'transparent',
+    color: 'white',
+    textDecoration: 'none',
+    borderRadius: '8px',
+    fontSize: '14px',
+    fontWeight: '600',
+    border: '2px solid rgba(255, 255, 255, 0.5)',
+    transition: 'all 0.3s ease'
+  },
+  actionButtonIcon: {
+    fontSize: '16px'
+  },
   enrollmentSection: {
     padding: '4rem 0',
     background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',

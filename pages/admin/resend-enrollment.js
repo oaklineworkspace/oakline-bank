@@ -1,54 +1,55 @@
 
-// pages/admin/resend-enrollment.js
 import { useState, useEffect } from 'react';
 import { supabaseAdmin } from '../../lib/supabaseClient';
 
-export default function ResendEnrollmentAdmin() {
-  const [unenrolledUsers, setUnenrolledUsers] = useState([]);
+export default function ResendEnrollmentPage() {
+  const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [resendLoading, setResendLoading] = useState({});
   const [message, setMessage] = useState('');
-  const [emailInput, setEmailInput] = useState('');
+  const [resendingId, setResendingId] = useState(null);
 
-  // Fetch applications that haven't completed enrollment
   useEffect(() => {
-    fetchUnenrolledUsers();
+    fetchPendingApplications();
   }, []);
 
-  const fetchUnenrolledUsers = async () => {
+  const fetchPendingApplications = async () => {
     try {
-      // Get applications that don't have corresponding auth users yet
-      const { data: applications, error } = await supabaseAdmin
+      setLoading(true);
+      
+      // Get all applications with their enrollment status
+      const { data: applicationsData, error: appsError } = await supabaseAdmin
         .from('applications')
-        .select('id, first_name, last_name, email, created_at')
+        .select(`
+          id,
+          email,
+          first_name,
+          middle_name,
+          last_name,
+          created_at,
+          country
+        `)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (appsError) throw appsError;
 
-      // Filter out applications that already have enrolled users
-      const unenrolledApps = [];
-      
-      if (applications && applications.length > 0) {
-        // Get all auth users to check which emails are already enrolled
-        const { data: authUsers, error: authError } = await supabaseAdmin.auth.admin.listUsers();
-        
-        if (authError) {
-          console.error('Error fetching auth users:', authError);
-          setUnenrolledUsers(applications || []);
-        } else {
-          const enrolledEmails = new Set(authUsers.users.map(user => user.email));
-          
-          // Only include applications where the email hasn't been enrolled yet
-          for (const app of applications) {
-            if (!enrolledEmails.has(app.email)) {
-              unenrolledApps.push(app);
-            }
-          }
-          setUnenrolledUsers(unenrolledApps);
-        }
-      } else {
-        setUnenrolledUsers([]);
-      }
+      // Get enrollment records
+      const { data: enrollmentsData, error: enrollError } = await supabaseAdmin
+        .from('enrollments')
+        .select('application_id, is_used, created_at');
+
+      if (enrollError) throw enrollError;
+
+      // Combine data
+      const enrichedApplications = applicationsData.map(app => {
+        const enrollment = enrollmentsData.find(e => e.application_id === app.id);
+        return {
+          ...app,
+          enrollment_status: enrollment ? (enrollment.is_used ? 'completed' : 'pending') : 'not_sent',
+          enrollment_date: enrollment?.created_at
+        };
+      });
+
+      setApplications(enrichedApplications);
     } catch (error) {
       console.error('Error fetching applications:', error);
       setMessage('Error loading applications: ' + error.message);
@@ -57,219 +58,190 @@ export default function ResendEnrollmentAdmin() {
     }
   };
 
-  const resendEnrollment = async (application) => {
-    setResendLoading({ ...resendLoading, [application.id]: true });
+  const handleResendEnrollment = async (applicationId) => {
+    setResendingId(applicationId);
     setMessage('');
 
     try {
       const response = await fetch('/api/resend-enrollment', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          email: application.email,
-          application_id: application.id 
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ applicationId })
       });
 
       const result = await response.json();
 
       if (response.ok) {
-        setMessage(`✅ Enrollment email sent to ${application.email}`);
-        // Refresh the list to remove this application if it's now enrolled
-        setTimeout(() => fetchUnenrolledUsers(), 1000);
+        setMessage('Enrollment email sent successfully!');
+        fetchPendingApplications(); // Refresh the list
       } else {
-        setMessage(`❌ Error: ${result.error}`);
+        setMessage(`Error: ${result.error}`);
       }
     } catch (error) {
-      setMessage(`❌ Failed to send email: ${error.message}`);
+      console.error('Error resending enrollment:', error);
+      setMessage('Error sending enrollment email');
     } finally {
-      setResendLoading({ ...resendLoading, [application.id]: false });
+      setResendingId(null);
     }
   };
 
-  const resendByEmail = async (e) => {
-    e.preventDefault();
-    if (!emailInput.trim()) return;
-
-    setLoading(true);
-    setMessage('');
-
-    try {
-      const response = await fetch('/api/resend-enrollment', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email: emailInput.trim() })
-      });
-
-      const result = await response.json();
-
-      if (response.ok) {
-        setMessage(`✅ Enrollment email sent to ${emailInput}`);
-        setEmailInput('');
-        // Refresh the list
-        fetchUnenrolledUsers();
-      } else {
-        setMessage(`❌ Error: ${result.error}`);
-      }
-    } catch (error) {
-      setMessage(`❌ Failed to send email: ${error.message}`);
-    } finally {
-      setLoading(false);
-    }
-  };
+  if (loading) {
+    return (
+      <div style={styles.container}>
+        <div style={styles.loading}>Loading applications...</div>
+      </div>
+    );
+  }
 
   return (
-    <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto', fontFamily: 'Arial, sans-serif' }}>
-      <h1 style={{ color: '#0070f3', marginBottom: '30px' }}>Resend Enrollment Links</h1>
-
-      {/* Manual Email Input */}
-      <div style={{ 
-        background: '#f8f9fa', 
-        padding: '20px', 
-        borderRadius: '8px', 
-        marginBottom: '30px',
-        border: '1px solid #dee2e6'
-      }}>
-        <h3 style={{ marginTop: 0 }}>Send by Email Address</h3>
-        <form onSubmit={resendByEmail} style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-          <input
-            type="email"
-            value={emailInput}
-            onChange={(e) => setEmailInput(e.target.value)}
-            placeholder="Enter user's email address"
-            style={{
-              padding: '10px',
-              border: '1px solid #ccc',
-              borderRadius: '4px',
-              flex: 1,
-              maxWidth: '300px'
-            }}
-            required
-          />
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              padding: '10px 20px',
-              background: '#0070f3',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: loading ? 'not-allowed' : 'pointer',
-              opacity: loading ? 0.6 : 1
-            }}
-          >
-            {loading ? 'Sending...' : 'Send Enrollment Link'}
-          </button>
-        </form>
+    <div style={styles.container}>
+      <div style={styles.header}>
+        <h1>Resend Enrollment Links</h1>
+        <p>Manage enrollment links for submitted applications</p>
       </div>
 
-      {/* Status Message */}
       {message && (
         <div style={{
-          padding: '15px',
-          marginBottom: '20px',
-          borderRadius: '4px',
-          background: message.includes('✅') ? '#d4edda' : '#f8d7da',
-          border: `1px solid ${message.includes('✅') ? '#c3e6cb' : '#f5c6cb'}`,
-          color: message.includes('✅') ? '#155724' : '#721c24'
+          ...styles.message,
+          backgroundColor: message.includes('Error') ? '#fee2e2' : '#d1fae5',
+          color: message.includes('Error') ? '#dc2626' : '#059669'
         }}>
           {message}
         </div>
       )}
 
-      {/* Applications List */}
-      <div>
-        <h3>Applications Pending Enrollment ({unenrolledUsers.length})</h3>
-        
-        {loading ? (
-          <p>Loading applications...</p>
-        ) : unenrolledUsers.length === 0 ? (
-          <p style={{ color: '#6c757d', fontStyle: 'italic' }}>
-            No applications found with pending enrollment.
-          </p>
-        ) : (
-          <div style={{ 
-            background: 'white', 
-            border: '1px solid #dee2e6', 
-            borderRadius: '8px',
-            overflow: 'hidden'
-          }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead>
-                <tr style={{ background: '#f8f9fa' }}>
-                  <th style={{ padding: '15px', textAlign: 'left', borderBottom: '1px solid #dee2e6' }}>Name</th>
-                  <th style={{ padding: '15px', textAlign: 'left', borderBottom: '1px solid #dee2e6' }}>Email</th>
-                  <th style={{ padding: '15px', textAlign: 'left', borderBottom: '1px solid #dee2e6' }}>Applied</th>
-                  <th style={{ padding: '15px', textAlign: 'center', borderBottom: '1px solid #dee2e6' }}>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {unenrolledUsers.map((application) => (
-                  <tr key={application.id} style={{ borderBottom: '1px solid #f8f9fa' }}>
-                    <td style={{ padding: '15px' }}>
-                      {application.first_name} {application.last_name}
-                    </td>
-                    <td style={{ padding: '15px' }}>
-                      {application.email}
-                    </td>
-                    <td style={{ padding: '15px', color: '#6c757d' }}>
-                      {new Date(application.created_at).toLocaleDateString()}
-                    </td>
-                    <td style={{ padding: '15px', textAlign: 'center' }}>
-                      <button
-                        onClick={() => resendEnrollment(application)}
-                        disabled={resendLoading[application.id]}
-                        style={{
-                          padding: '8px 16px',
-                          background: '#28a745',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '4px',
-                          cursor: resendLoading[application.id] ? 'not-allowed' : 'pointer',
-                          opacity: resendLoading[application.id] ? 0.6 : 1,
-                          fontSize: '14px'
-                        }}
-                      >
-                        {resendLoading[application.id] ? 'Sending...' : 'Resend Link'}
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      <div style={styles.tableContainer}>
+        <table style={styles.table}>
+          <thead>
+            <tr style={styles.headerRow}>
+              <th style={styles.headerCell}>Name</th>
+              <th style={styles.headerCell}>Email</th>
+              <th style={styles.headerCell}>Application Date</th>
+              <th style={styles.headerCell}>Enrollment Status</th>
+              <th style={styles.headerCell}>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {applications.map((app) => (
+              <tr key={app.id} style={styles.row}>
+                <td style={styles.cell}>
+                  {app.first_name} {app.middle_name ? app.middle_name + ' ' : ''}{app.last_name}
+                </td>
+                <td style={styles.cell}>{app.email}</td>
+                <td style={styles.cell}>
+                  {new Date(app.created_at).toLocaleDateString()}
+                </td>
+                <td style={styles.cell}>
+                  <span style={{
+                    ...styles.statusBadge,
+                    backgroundColor: 
+                      app.enrollment_status === 'completed' ? '#d1fae5' :
+                      app.enrollment_status === 'pending' ? '#fef3c7' : '#fee2e2',
+                    color:
+                      app.enrollment_status === 'completed' ? '#059669' :
+                      app.enrollment_status === 'pending' ? '#d97706' : '#dc2626'
+                  }}>
+                    {app.enrollment_status === 'completed' ? 'Completed' :
+                     app.enrollment_status === 'pending' ? 'Pending' : 'Not Sent'}
+                  </span>
+                </td>
+                <td style={styles.cell}>
+                  <button
+                    onClick={() => handleResendEnrollment(app.id)}
+                    disabled={resendingId === app.id}
+                    style={{
+                      ...styles.button,
+                      opacity: resendingId === app.id ? 0.5 : 1,
+                      cursor: resendingId === app.id ? 'not-allowed' : 'pointer'
+                    }}
+                  >
+                    {resendingId === app.id ? 'Sending...' : 'Resend Link'}
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        {applications.length === 0 && (
+          <div style={styles.noData}>
+            No applications found.
           </div>
         )}
-      </div>
-
-      {/* Refresh Button */}
-      <div style={{ marginTop: '20px', textAlign: 'center' }}>
-        <button
-          onClick={fetchUnenrolledUsers}
-          disabled={loading}
-          style={{
-            padding: '10px 20px',
-            background: '#6c757d',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: loading ? 'not-allowed' : 'pointer',
-            opacity: loading ? 0.6 : 1
-          }}
-        >
-          {loading ? 'Loading...' : 'Refresh List'}
-        </button>
       </div>
     </div>
   );
 }
 
-// This would normally require authentication in a real app
-export async function getServerSideProps(context) {
-  // In a real application, you'd check for admin authentication here
-  return { props: {} };
-}
+const styles = {
+  container: {
+    padding: '2rem',
+    maxWidth: '1200px',
+    margin: '0 auto',
+    fontFamily: 'Arial, sans-serif'
+  },
+  header: {
+    marginBottom: '2rem',
+    textAlign: 'center'
+  },
+  loading: {
+    textAlign: 'center',
+    padding: '2rem',
+    fontSize: '18px'
+  },
+  message: {
+    padding: '1rem',
+    borderRadius: '8px',
+    marginBottom: '1rem',
+    textAlign: 'center',
+    fontWeight: '500'
+  },
+  tableContainer: {
+    backgroundColor: 'white',
+    borderRadius: '12px',
+    boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+    overflow: 'hidden'
+  },
+  table: {
+    width: '100%',
+    borderCollapse: 'collapse'
+  },
+  headerRow: {
+    backgroundColor: '#f8fafc'
+  },
+  headerCell: {
+    padding: '1rem',
+    textAlign: 'left',
+    fontWeight: '600',
+    color: '#374151',
+    borderBottom: '2px solid #e5e7eb'
+  },
+  row: {
+    borderBottom: '1px solid #e5e7eb'
+  },
+  cell: {
+    padding: '1rem',
+    verticalAlign: 'middle'
+  },
+  statusBadge: {
+    padding: '4px 12px',
+    borderRadius: '6px',
+    fontSize: '12px',
+    fontWeight: '600'
+  },
+  button: {
+    padding: '8px 16px',
+    backgroundColor: '#1e40af',
+    color: 'white',
+    border: 'none',
+    borderRadius: '6px',
+    fontSize: '14px',
+    fontWeight: '500',
+    transition: 'background-color 0.2s'
+  },
+  noData: {
+    textAlign: 'center',
+    padding: '2rem',
+    color: '#6b7280'
+  }
+};

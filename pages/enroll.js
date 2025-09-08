@@ -334,12 +334,14 @@ export default function EnrollPage() {
           display: 'flex', 
           alignItems: 'flex-start', 
           gap: '12px',
-          padding: '16px',
-          backgroundColor: '#f8fafc',
-          borderRadius: '8px',
-          border: '2px solid #e2e8f0',
+          padding: '20px',
+          backgroundColor: formData.agreeToTerms ? '#f0fdf4' : '#ffffff',
+          borderRadius: '12px',
+          border: `3px solid ${formData.agreeToTerms ? '#22c55e' : '#e2e8f0'}`,
           position: 'relative',
-          zIndex: 10
+          zIndex: 10,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+          transition: 'all 0.3s ease'
         }}>
           <input
             type="checkbox"
@@ -348,12 +350,15 @@ export default function EnrollPage() {
             onChange={handleInputChange}
             required
             style={{
-              width: '20px',
-              height: '20px',
+              width: '24px',
+              height: '24px',
               accentColor: '#22c55e',
               cursor: 'pointer',
               marginTop: '2px',
-              flexShrink: 0
+              flexShrink: 0,
+              transform: 'scale(1.2)',
+              border: '2px solid #d1d5db',
+              borderRadius: '4px'
             }}
           />
           <label 

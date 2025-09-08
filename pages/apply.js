@@ -439,6 +439,24 @@ export default function Apply() {
         }
       }
 
+      // Generate enrollment token
+      const enrollmentToken = `enroll_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
+
+      // Create enrollment record
+      const { error: enrollmentError } = await supabase
+        .from('enrollments')
+        .insert([{
+          email: formData.email.trim().toLowerCase(),
+          token: enrollmentToken,
+          is_used: false,
+          application_id: applicationId
+        }]);
+
+      if (enrollmentError) {
+        console.error('Error creating enrollment record:', enrollmentError);
+        // Continue with the process even if enrollment record creation fails
+      }
+
       // Send welcome email with enrollment link
       try {
         const emailResponse = await fetch('/api/send-welcome-email', {
@@ -447,18 +465,19 @@ export default function Apply() {
           body: JSON.stringify({
             email: formData.email.trim().toLowerCase(),
             first_name: formData.firstName.trim(),
+            middle_name: formData.middleName.trim(),
             last_name: formData.lastName.trim(),
             account_numbers: accountNumbers,
             account_types: accountTypes,
-            application_id: applicationId
+            application_id: applicationId,
+            country: effectiveCountry,
+            enrollment_token: enrollmentToken
           })
         });
 
         if (!emailResponse.ok) {
-          // Handle the case where the email sending fails, but don't necessarily stop the whole process.
-          // Log the error and potentially set a flag to notify the user later if needed.
           const errorData = await emailResponse.json();
-          console.error('Failed to send welcome email:', errorData.message || emailResponse.statusText);
+          console.error('Failed to send welcome email:', errorData.message || errorResponse.statusText);
         } else {
           console.log('Welcome email sent successfully');
         }
