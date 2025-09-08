@@ -53,39 +53,96 @@ export default async function handler(req, res) {
           .delete()
           .eq('email', userEmail);
 
-        // 2. Delete accounts
-        const { error: accountsError } = await supabaseAdmin
-          .from('accounts')
-          .delete()
-          .eq('email', userEmail);
-
-        // 3. Delete applications
+        // 2. Delete applications
         const { error: applicationsError } = await supabaseAdmin
           .from('applications')
           .delete()
           .eq('email', userEmail);
 
-        // 4. Delete from users table if it exists
-        const { error: usersError } = await supabaseAdmin
-          .from('users')
-          .delete()
-          .eq('email', userEmail);
+        // 3. Try to delete accounts (handle column name issues)
+        let accountsError = null;
+        try {
+          const { error: accError } = await supabaseAdmin
+            .from('accounts')
+            .delete()
+            .eq('email', userEmail);
+          accountsError = accError;
+        } catch (accErr) {
+          // Try with user_email if email column doesn't exist
+          try {
+            const { error: accError2 } = await supabaseAdmin
+              .from('accounts')
+              .delete()
+              .eq('user_email', userEmail);
+            accountsError = accError2;
+          } catch (accErr2) {
+            accountsError = accErr2;
+          }
+        }
 
-        // 5. Finally, delete the user from Supabase Auth
-        const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(userId);
+        // 4. Try to delete from users table if it exists
+        let usersError = null;
+        try {
+          const { error: uError } = await supabaseAdmin
+            .from('users')
+            .delete()
+            .eq('email', userEmail);
+          usersError = uError;
+        } catch (uErr) {
+          // Try with different column name
+          try {
+            const { error: uError2 } = await supabaseAdmin
+              .from('users')
+              .delete()
+              .eq('user_email', userEmail);
+            usersError = uError2;
+          } catch (uErr2) {
+            usersError = uErr2;
+          }
+        }
 
-        if (deleteError) {
-          console.error(`Failed to delete auth user ${userEmail}:`, deleteError);
+        // 5. Force delete the user from Supabase Auth with retry logic
+        let deleteError = null;
+        let authDeleted = false;
+        
+        for (let attempt = 1; attempt <= 3; attempt++) {
+          try {
+            const { error } = await supabaseAdmin.auth.admin.deleteUser(userId, true); // shouldSoftDelete = true to bypass constraints
+            deleteError = error;
+            
+            if (!error) {
+              authDeleted = true;
+              break;
+            }
+            
+            console.log(`Auth deletion attempt ${attempt} failed for ${userEmail}:`, error);
+            
+            if (attempt < 3) {
+              await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
+            }
+          } catch (err) {
+            deleteError = err;
+            console.log(`Auth deletion attempt ${attempt} threw error for ${userEmail}:`, err);
+            
+            if (attempt < 3) {
+              await new Promise(resolve => setTimeout(resolve, 2000));
+            }
+          }
+        }
+
+        if (!authDeleted) {
+          console.error(`Failed to delete auth user ${userEmail} after 3 attempts:`, deleteError);
           results.push({
             userId,
             email: userEmail,
             success: false,
-            error: deleteError.message,
+            error: deleteError?.message || 'Auth deletion failed after retries',
             deletedEnrollments: !enrollmentsError,
             deletedAccounts: !accountsError,
             deletedApplications: !applicationsError,
             deletedUsers: !usersError,
-            deletedAuth: false
+            deletedAuth: false,
+            attempts: 3
           });
         } else {
           console.log(`✅ Successfully deleted user: ${userEmail}`);
