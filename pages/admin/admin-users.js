@@ -68,6 +68,21 @@ export default function AdminUsers() {
       
       <div style={{ marginBottom: '20px' }}>
         <button 
+          onClick={() => router.push('/admin/create-user')}
+          style={{
+            padding: '10px 20px',
+            marginRight: '10px',
+            backgroundColor: '#28a745',
+            color: 'white',
+            border: 'none',
+            borderRadius: '5px',
+            cursor: 'pointer'
+          }}
+        >
+          ➕ Create New User
+        </button>
+
+        <button 
           onClick={fetchUsers}
           disabled={loading}
           style={{
