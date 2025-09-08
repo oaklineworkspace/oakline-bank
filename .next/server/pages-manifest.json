@@ -4,5 +4,5 @@
   "/_document": "pages/_document.js",
   "/": "pages/index.js",
   "/admin/create-user": "pages/admin/create-user.js",
-  "/enroll": "pages/enroll.js"
+  "/api/admin/create-user": "pages/api/admin/create-user.js"
 }
