@@ -27,6 +27,11 @@
       "static/chunks/main.js",
       "static/chunks/pages/_error.js"
     ],
+    "/admin/admin-dashboard": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/admin/admin-dashboard.js"
+    ],
     "/admin/delete-user": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
