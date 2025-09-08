@@ -7,6 +7,8 @@ export default async function handler(req, res) {
   }
 
   try {
+    const { email } = req.query;
+
     // Fetch all users from Supabase Auth
     const { data: users, error } = await supabaseAdmin.auth.admin.listUsers();
 
@@ -16,13 +18,20 @@ export default async function handler(req, res) {
     }
 
     // Return user data (only necessary fields for security)
-    const filteredUsers = users.users.map(user => ({
+    let filteredUsers = users.users.map(user => ({
       id: user.id,
       email: user.email,
       created_at: user.created_at,
       last_sign_in_at: user.last_sign_in_at,
       email_confirmed_at: user.email_confirmed_at
     }));
+
+    // If email query parameter is provided, filter by email
+    if (email) {
+      filteredUsers = filteredUsers.filter(user => 
+        user.email && user.email.toLowerCase().includes(email.toLowerCase())
+      );
+    }
 
     res.status(200).json({ users: filteredUsers });
 

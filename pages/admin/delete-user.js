@@ -33,7 +33,7 @@ export default function DeleteUser() {
     }
   };
 
-  const handleDeleteUser = async (userId) => {
+  const handleDeleteUser = async (userId, email) => {
     try {
       setDeleteLoading(userId);
       const response = await fetch('/api/admin/delete-user', {
@@ -41,7 +41,7 @@ export default function DeleteUser() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ userId }),
+        body: JSON.stringify({ userId, email }),
       });
 
       const data = await response.json();
@@ -58,6 +58,39 @@ export default function DeleteUser() {
     } finally {
       setDeleteLoading(null);
       setConfirmDelete(null);
+    }
+  };
+
+  const handleDeleteByEmail = async () => {
+    if (!searchTerm.trim()) {
+      setMessage({ type: 'error', text: 'Please enter an email address' });
+      return;
+    }
+
+    try {
+      setDeleteLoading('email-search');
+      const response = await fetch('/api/admin/delete-user', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: searchTerm.trim() }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setMessage({ type: 'success', text: 'User deleted successfully' });
+        setSearchTerm('');
+        fetchUsers(); // Refresh the user list
+      } else {
+        setMessage({ type: 'error', text: data.error || 'Failed to delete user' });
+      }
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      setMessage({ type: 'error', text: 'Error deleting user' });
+    } finally {
+      setDeleteLoading(null);
     }
   };
 
@@ -111,19 +144,37 @@ export default function DeleteUser() {
 
       {/* Search Bar */}
       <div style={{ marginBottom: '20px' }}>
-        <input
-          type="text"
-          placeholder="Search users by email..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          style={{
-            width: '100%',
-            padding: '10px',
-            border: '1px solid #ddd',
-            borderRadius: '4px',
-            fontSize: '16px'
-          }}
-        />
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <input
+            type="text"
+            placeholder="Search users by email..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={{
+              flex: 1,
+              padding: '10px',
+              border: '1px solid #ddd',
+              borderRadius: '4px',
+              fontSize: '16px'
+            }}
+          />
+          <button
+            onClick={handleDeleteByEmail}
+            disabled={deleteLoading === 'email-search' || !searchTerm.trim()}
+            style={{
+              padding: '10px 20px',
+              backgroundColor: '#dc3545',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: deleteLoading === 'email-search' || !searchTerm.trim() ? 'not-allowed' : 'pointer',
+              opacity: deleteLoading === 'email-search' || !searchTerm.trim() ? 0.6 : 1,
+              whiteSpace: 'nowrap'
+            }}
+          >
+            {deleteLoading === 'email-search' ? 'Deleting...' : 'Delete by Email'}
+          </button>
+        </div>
       </div>
 
       {loading ? (
@@ -236,7 +287,7 @@ export default function DeleteUser() {
                 Cancel
               </button>
               <button
-                onClick={() => handleDeleteUser(confirmDelete.id)}
+                onClick={() => handleDeleteUser(confirmDelete.id, confirmDelete.email)}
                 disabled={deleteLoading === confirmDelete.id}
                 style={{
                   padding: '10px 20px',
