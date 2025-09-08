@@ -297,50 +297,33 @@ export default function Apply() {
       const effectiveState = getEffectiveState();
       const effectiveCity = getEffectiveCity();
 
-      // Insert user data
-      const { data: userData, error: userError } = await supabase
-        .from('users')
+      // Insert application data
+      const { data: applicationData, error: applicationError } = await supabase
+        .from('applications')
         .insert([{
           first_name: formData.firstName.trim(),
-          middle_name: formData.middleName.trim() || null,
           last_name: formData.lastName.trim(),
-          mothers_maiden_name: formData.mothersMaidenName.trim() || null,
           email: formData.email.trim().toLowerCase(),
           phone: formData.phone.trim(),
-          dob: formData.dateOfBirth,
+          date_of_birth: formData.dateOfBirth,
+          country: effectiveCountry,
           ssn: effectiveCountry === 'US' ? formData.ssn.trim() : null,
           id_number: effectiveCountry !== 'US' ? formData.idNumber.trim() : null,
-          address_line1: formData.address.trim(),
+          address: formData.address.trim(),
           city: effectiveCity,
-          state_province: effectiveState,
+          state: effectiveState,
           zip_code: formData.zipCode.trim(),
-          county: null,
-          country: effectiveCountry
+          employment_status: formData.employmentStatus,
+          annual_income: formData.annualIncome,
+          account_types: formData.accountTypes.map(id => ACCOUNT_TYPES.find(at => at.id === id)?.name),
+          agree_to_terms: formData.agreeToTerms
         }])
         .select()
         .single();
 
-      if (userError) throw userError;
+      if (applicationError) throw applicationError;
 
-      const userId = userData.id;
-
-      // Insert employment data
-      await supabase
-        .from('user_employment')
-        .insert([{
-          user_id: userId,
-          employment_status: formData.employmentStatus,
-          annual_income: formData.annualIncome
-        }]);
-
-      // Insert selected account types
-      if (formData.accountTypes.length > 0) {
-        const accountInserts = formData.accountTypes.map(accountId => ({
-          user_id: userId,
-          account_type_id: accountId
-        }));
-        await supabase.from('user_account_types').insert(accountInserts);
-      }
+      const applicationId = applicationData.id;
 
       // Create accounts for each selected account type
       const accountNumbers = [];
@@ -353,11 +336,10 @@ export default function Apply() {
         const { error: accountError } = await supabase
           .from('accounts')
           .insert([{
-            user_id: userId,
+            application_id: applicationId,
             account_number: accountNumber,
             account_type: accountType.name,
-            balance: 0.00,
-            status: 'limited'
+            balance: 0.00
           }]);
 
         if (accountError) {
@@ -367,15 +349,6 @@ export default function Apply() {
           accountTypes.push(accountType.name);
         }
       }
-
-      // Create application record
-      await supabase
-        .from('applications')
-        .insert([{
-          user_id: userId,
-          status: 'pending',
-          notes: `Application for ${formData.accountTypes.length} account type(s): ${formData.accountTypes.map(id => ACCOUNT_TYPES.find(at => at.id === id)?.name).join(', ')}`
-        }]);
 
       // Send welcome email with enrollment link
       try {
@@ -388,7 +361,7 @@ export default function Apply() {
             last_name: formData.lastName.trim(),
             account_numbers: accountNumbers,
             account_types: accountTypes,
-            temp_user_id: userId
+            application_id: applicationId
           })
         });
 

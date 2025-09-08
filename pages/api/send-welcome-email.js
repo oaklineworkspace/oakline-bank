@@ -1,129 +1,107 @@
-// pages/api/send-welcome-email.js
-import nodemailer from 'nodemailer';
+
+import { supabaseAdmin } from '../../lib/supabaseClient';
+import { sendEmail } from '../../lib/email';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { email, first_name, last_name, account_numbers, account_types, temp_user_id } = req.body;
+  const { email, first_name, last_name, account_numbers, account_types, application_id } = req.body;
 
-  if (!email || !first_name || (!account_numbers && !req.body.account_number) || !temp_user_id) {
+  if (!email || !first_name || !last_name || !application_id) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
-  // Handle both old single account and new multiple accounts format
-  const accountsList = account_numbers || [req.body.account_number];
-  const typesList = account_types || ['Checking'];
-
   try {
-    console.log('Attempting to send welcome email to:', email);
+    // Generate enrollment token
+    const enrollmentToken = `enroll_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
     
-    // Create transporter
-    const transporter = nodemailer.createTransporter({
-      host: process.env.SMTP_HOST,
-      port: parseInt(process.env.SMTP_PORT),
-      secure: process.env.SMTP_PORT === '465',
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-    });
+    // Store enrollment token
+    const { error: enrollmentError } = await supabaseAdmin
+      .from('enrollments')
+      .insert([{
+        email: email,
+        token: enrollmentToken,
+        is_used: false
+      }]);
 
-    // Test the connection
-    try {
-      await transporter.verify();
-      console.log('SMTP connection verified successfully');
-    } catch (verifyError) {
-      console.error('SMTP verification failed:', verifyError);
-      throw new Error(`SMTP configuration error: ${verifyError.message}`);
+    if (enrollmentError) {
+      console.error('Error storing enrollment token:', enrollmentError);
+      return res.status(500).json({ error: 'Failed to create enrollment record' });
     }
 
-    // Get the base URL for enrollment link
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 
-                   (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:5000');
-    
-    const enrollmentLink = `${baseUrl}/enroll?temp_user_id=${temp_user_id}`;
+    const enrollmentLink = `${process.env.NEXT_PUBLIC_SITE_URL}/enroll?token=${enrollmentToken}&application_id=${application_id}`;
 
-    const htmlEmail = `
-    <!DOCTYPE html>
-    <html>
-    <head>
+    const emailHtml = `
+      <!DOCTYPE html>
+      <html>
+      <head>
         <style>
-            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background: #0070f3; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
-            .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 8px 8px; }
-            .account-box { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #0070f3; }
-            .button { display: inline-block; background: #0070f3; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; margin: 15px 0; }
-            .steps { background: white; padding: 20px; border-radius: 8px; margin: 15px 0; }
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
+          .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 8px 8px; }
+          .button { display: inline-block; background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; margin: 20px 0; }
+          .accounts { background: white; padding: 20px; margin: 20px 0; border-radius: 6px; border-left: 4px solid #3b82f6; }
+          .footer { text-align: center; margin-top: 30px; font-size: 12px; color: #666; }
         </style>
-    </head>
-    <body>
+      </head>
+      <body>
         <div class="container">
-            <div class="header">
-                <h1>🎉 Welcome to Oakline Bank!</h1>
-                <p>Your account has been successfully created</p>
+          <div class="header">
+            <h1>🏦 Welcome to Oakline Bank!</h1>
+          </div>
+          <div class="content">
+            <h2>Hello ${first_name} ${last_name},</h2>
+            <p>Congratulations! Your account application has been received and processed successfully.</p>
+            
+            ${account_numbers && account_numbers.length > 0 ? `
+            <div class="accounts">
+              <h3>📋 Your New Account Details:</h3>
+              ${account_numbers.map((num, index) => `
+                <p><strong>${account_types[index]}:</strong> ${num}</p>
+              `).join('')}
+              <p><strong>Routing Number:</strong> 075915826</p>
             </div>
-            <div class="content">
-                <h2>Hello ${first_name} ${last_name},</h2>
-                <p>Congratulations! Your banking application has been approved and your account is ready.</p>
-                
-                <div class="account-box">
-                    <h3>🏦 Your Account Details</h3>
-                    ${accountsList.map((accountNum, index) => `
-                        <div style="margin-bottom: 15px; padding: 10px; background: #f8f9fa; border-radius: 6px;">
-                            <p><strong>${typesList[index] || 'Account'} Account:</strong> ${accountNum}</p>
-                            <p><strong>Routing Number:</strong> 075915826</p>
-                            <p><strong>Status:</strong> Limited Access (pending verification)</p>
-                        </div>
-                    `).join('')}
-                </div>
-
-                <h3>🔐 Complete Your Enrollment</h3>
-                <p>To access your online banking dashboard, please complete your enrollment by clicking the secure link below:</p>
-                
-                <div style="text-align: center;">
-                    <a href="${enrollmentLink}" class="button">Complete Online Banking Setup</a>
-                </div>
-
-                <div class="steps">
-                    <h4>What's Next:</h4>
-                    <p>✅ <strong>Step 1:</strong> Click the enrollment link above<br/>
-                    ✅ <strong>Step 2:</strong> Verify your identity with SSN and account number<br/>
-                    ✅ <strong>Step 3:</strong> Create your online banking password<br/>
-                    ✅ <strong>Step 4:</strong> Access your dashboard immediately</p>
-                </div>
-
-                <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin: 15px 0;">
-                    <p><strong>🔒 Limited Mode:</strong> Your account starts in limited access mode. You can view your balance and account details, but transactions are disabled until our verification process is complete (typically 1-2 business days).</p>
-                </div>
-
-                <p>If you have any questions, please contact our support team.</p>
-                
-                <p>Welcome to the Oakline Bank family!</p>
-                
-                <hr style="margin: 30px 0;">
-                <p style="font-size: 12px; color: #666;">
-                    This enrollment link is secure and expires in 7 days. If you didn't apply for an Oakline Bank account, please ignore this email.
-                </p>
+            ` : ''}
+            
+            <p><strong>🔐 Complete Your Enrollment:</strong></p>
+            <p>To access your online banking account, please complete your enrollment by clicking the button below:</p>
+            
+            <div style="text-align: center;">
+              <a href="${enrollmentLink}" class="button">Complete Enrollment</a>
             </div>
+            
+            <p><em>This link will expire in 7 days for security purposes.</em></p>
+            
+            <p>If you have any questions, please contact our customer support team.</p>
+            
+            <p>Thank you for choosing Oakline Bank!</p>
+            <p><strong>The Oakline Bank Team</strong></p>
+          </div>
+          <div class="footer">
+            <p>© 2024 Oakline Bank. All rights reserved.</p>
+            <p>This email was sent to ${email}</p>
+          </div>
         </div>
-    </body>
-    </html>
+      </body>
+      </html>
     `;
 
-    await transporter.sendMail({
-      from: process.env.SMTP_FROM,
+    await sendEmail({
       to: email,
-      subject: `🎉 Welcome to Oakline Bank - ${accountsList.length > 1 ? `${accountsList.length} Accounts` : `Account #${accountsList[0]}`} Created!`,
-      html: htmlEmail,
+      subject: "Welcome to Oakline Bank - Complete Your Enrollment",
+      html: emailHtml
     });
 
-    res.status(200).json({ message: 'Welcome email sent successfully' });
+    res.status(200).json({ 
+      message: 'Welcome email sent successfully',
+      enrollment_token: enrollmentToken 
+    });
 
   } catch (error) {
-    console.error('Email sending error:', error);
+    console.error('Error sending welcome email:', error);
     res.status(500).json({ error: 'Failed to send welcome email' });
   }
 }

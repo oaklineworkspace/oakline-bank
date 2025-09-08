@@ -1,22 +1,22 @@
-// pages/enroll.js
+
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useRouter } from 'next/router';
 
 export default function EnrollPage() {
   const router = useRouter();
-  const { temp_user_id } = router.query; // from email link
-  const [formData, setFormData] = useState({ email: '', password: '', ssn: '', id_number: '', accountNumber: '' });
-  const [userInfo, setUserInfo] = useState(null);
+  const { token, application_id } = router.query;
+  const [formData, setFormData] = useState({ email: '', password: '', confirmPassword: '', ssn: '', id_number: '', accountNumber: '' });
+  const [applicationInfo, setApplicationInfo] = useState(null);
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
-  const [userExists, setUserExists] = useState(false);
   const [authUserCreated, setAuthUserCreated] = useState(false);
   const [authCreationLoading, setAuthCreationLoading] = useState(true);
+  const [accounts, setAccounts] = useState([]);
 
   // Create auth user immediately when enrollment link is clicked
   useEffect(() => {
-    if (!temp_user_id) return;
+    if (!token || !application_id) return;
 
     const createAuthUserAndLoadInfo = async () => {
       try {
@@ -26,7 +26,7 @@ export default function EnrollPage() {
         const authResponse = await fetch('/api/create-auth-user', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ temp_user_id })
+          body: JSON.stringify({ token, application_id })
         });
 
         const authResult = await authResponse.json();
@@ -36,34 +36,48 @@ export default function EnrollPage() {
           return;
         }
 
-        // 2. Auth user created successfully
         setAuthUserCreated(true);
-        setUserExists(true);
-        setUserInfo(authResult.user);
-        setFormData({ 
-          email: authResult.user.email || '', 
-          password: '', 
-          ssn: '', 
-          id_number: '', 
-          accountNumber: '' 
-        });
+        setApplicationInfo(authResult.user);
 
-        // Show success message for a moment
-        setMessage('✅ Email confirmed! Your account has been created. Please complete your enrollment below.');
+        // 2. Load application data and accounts
+        const { data: appData, error: appError } = await supabase
+          .from('applications')
+          .select('*')
+          .eq('id', application_id)
+          .single();
+
+        if (appError) {
+          setMessage('Error loading application data');
+          return;
+        }
+
+        // 3. Load associated accounts
+        const { data: accountsData, error: accountsError } = await supabase
+          .from('accounts')
+          .select('account_number, account_type')
+          .eq('application_id', application_id);
+
+        if (!accountsError && accountsData) {
+          setAccounts(accountsData);
+        }
+
+        // Pre-fill email
+        setFormData(prev => ({ ...prev, email: appData.email }));
 
       } catch (error) {
-        console.error('Auth user creation error:', error);
-        setMessage('Error creating your account. Please try again.');
+        console.error('Error creating auth user:', error);
+        setMessage('Error setting up enrollment. Please try again.');
       } finally {
         setAuthCreationLoading(false);
       }
     };
 
     createAuthUserAndLoadInfo();
-  }, [temp_user_id]);
+  }, [token, application_id]);
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
@@ -71,17 +85,32 @@ export default function EnrollPage() {
     setLoading(true);
     setMessage('');
 
-    try {
-      if (!temp_user_id) throw new Error('Missing temp user ID');
+    // Validation
+    if (!formData.password || formData.password.length < 8) {
+      setMessage('Password must be at least 8 characters long');
+      setLoading(false);
+      return;
+    }
 
-      // Use server-side API for reliable enrollment
+    if (formData.password !== formData.confirmPassword) {
+      setMessage('Passwords do not match');
+      setLoading(false);
+      return;
+    }
+
+    if (!formData.accountNumber) {
+      setMessage('Please select one of your account numbers');
+      setLoading(false);
+      return;
+    }
+
+    try {
       const response = await fetch('/api/complete-enrollment', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          temp_user_id: temp_user_id,
+          token,
+          application_id,
           email: formData.email,
           password: formData.password,
           ssn: formData.ssn,
@@ -92,190 +121,174 @@ export default function EnrollPage() {
 
       const result = await response.json();
 
-      if (!response.ok) {
-        throw new Error(result.error || 'Enrollment failed');
+      if (response.ok) {
+        setMessage('Enrollment completed successfully! Redirecting to login...');
+        setTimeout(() => {
+          router.push('/login');
+        }, 2000);
+      } else {
+        setMessage(`Error: ${result.error}`);
       }
-
-      setMessage('🎉 Enrollment successful! You can now log in to your dashboard.');
-      setFormData({ email: '', password: '', ssn: '', id_number: '', accountNumber: '' });
-      
-      // Redirect to login page after 2 seconds
-      setTimeout(() => {
-        window.location.href = '/login';
-      }, 2000);
-
-    } catch (err) {
-      setMessage(`Error: ${err.message}`);
+    } catch (error) {
+      console.error('Enrollment error:', error);
+      setMessage('An error occurred during enrollment. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  // Show loading state while creating auth user
   if (authCreationLoading) {
     return (
-      <div style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: '100vh',
-        fontFamily: 'Arial, sans-serif',
-        padding: '2rem',
-        backgroundColor: '#f0f4f8',
-        textAlign: 'center'
-      }}>
-        <div style={{
-          background: 'white',
-          padding: '40px',
-          borderRadius: '12px',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-          maxWidth: '400px'
-        }}>
-          <div style={{
-            width: '40px',
-            height: '40px',
-            border: '4px solid #e3f2fd',
-            borderTop: '4px solid #0070f3',
-            borderRadius: '50%',
-            animation: 'spin 1s linear infinite',
-            margin: '0 auto 20px'
-          }}></div>
-          <h2 style={{ color: '#0070f3', marginBottom: '10px' }}>Confirming Your Email</h2>
-          <p style={{ color: '#666', fontSize: '14px' }}>Creating your secure banking account...</p>
-        </div>
-        <style jsx>{`
-          @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-          }
-        `}</style>
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+        <div>Setting up your enrollment...</div>
       </div>
     );
   }
 
-  if (!userExists) return <p style={{ textAlign: 'center', marginTop: '2rem' }}>{message || 'Invalid enrollment link.'}</p>;
+  if (!token || !application_id) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+        <div>Invalid enrollment link. Please check the link from your email.</div>
+      </div>
+    );
+  }
 
   return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      minHeight: '100vh',
-      fontFamily: 'Arial, sans-serif',
-      padding: '2rem',
-      backgroundColor: '#f0f4f8',
-      textAlign: 'center'
-    }}>
-      <h1 style={{ color: '#0070f3', marginBottom: '1rem' }}>Complete Your Enrollment</h1>
+    <div style={{ maxWidth: '500px', margin: '2rem auto', padding: '2rem', backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
+      <h1 style={{ textAlign: 'center', marginBottom: '2rem', color: '#1e40af' }}>Complete Your Enrollment</h1>
       
-      {authUserCreated && (
-        <div style={{
-          backgroundColor: '#e8f5e8',
-          border: '1px solid #4caf50',
-          borderRadius: '8px',
-          padding: '15px',
-          marginBottom: '20px',
-          color: '#2e7d32'
-        }}>
-          <strong>✅ Email Confirmed!</strong><br/>
-          Your secure banking account has been created. Please set your password and verify your identity below to complete enrollment.
-        </div>
-      )}
-      
-      <p>Complete your enrollment by verifying your identity and setting your online banking credentials:</p>
-
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', width: '350px', gap: '15px' }}>
-        <div style={{ textAlign: 'left' }}>
-          <h3 style={{ margin: '0 0 10px 0', color: '#0070f3', fontSize: '16px' }}>Identity Verification</h3>
-          {userInfo && (
-            <div style={{
-              backgroundColor: '#e3f2fd',
-              padding: '10px',
-              borderRadius: '5px',
-              marginBottom: '15px',
-              fontSize: '14px',
-              color: '#1976d2'
-            }}>
-              <strong>Welcome {userInfo.first_name} {userInfo.last_name}!</strong><br/>
-              Citizenship: {userInfo.country === 'US' ? 'U.S. Citizen' : 'International'}<br/>
-              Please verify your {userInfo.country === 'US' ? 'Social Security Number' : 'Government ID Number'} to complete enrollment.
+      {applicationInfo && (
+        <div style={{ backgroundColor: '#f0f9ff', padding: '1rem', borderRadius: '6px', marginBottom: '2rem' }}>
+          <h3>Welcome, {applicationInfo.name}!</h3>
+          <p>Email: {applicationInfo.email}</p>
+          {accounts.length > 0 && (
+            <div>
+              <p><strong>Your Accounts:</strong></p>
+              {accounts.map((account, index) => (
+                <p key={index}>{account.account_type}: {account.account_number}</p>
+              ))}
             </div>
           )}
-          
-          {/* Conditional Identity Verification */}
-          {userInfo && userInfo.country === 'US' && (
-            <input
-              type="text"
-              name="ssn"
-              placeholder="Social Security Number (XXX-XX-XXXX)"
-              required
-              value={formData.ssn}
-              onChange={handleChange}
-              pattern="[0-9]{3}-?[0-9]{2}-?[0-9]{4}"
-              maxLength="11"
-              style={{ padding: '10px', borderRadius: '5px', border: '1px solid #ccc', width: '100%', boxSizing: 'border-box' }}
-            />
-          )}
-          
-          {userInfo && userInfo.country === 'International' && (
-            <input
-              type="text"
-              name="id_number"
-              placeholder="Government ID Number"
-              required
-              value={formData.id_number}
-              onChange={handleChange}
-              style={{ padding: '10px', borderRadius: '5px', border: '1px solid #ccc', width: '100%', boxSizing: 'border-box' }}
-            />
-          )}
-          <input
-            type="text"
-            name="accountNumber"
-            placeholder="One of your account numbers"
-            required
-            value={formData.accountNumber}
-            onChange={handleChange}
-            style={{ padding: '10px', borderRadius: '5px', border: '1px solid #ccc', width: '100%', boxSizing: 'border-box', marginTop: '10px' }}
-          />
         </div>
-        
-        <div style={{ textAlign: 'left' }}>
-          <h3 style={{ margin: '0 0 10px 0', color: '#0070f3', fontSize: '16px' }}>Online Banking Setup</h3>
+      )}
+
+      <form onSubmit={handleSubmit}>
+        <div style={{ marginBottom: '1rem' }}>
+          <label>Email:</label>
           <input
             type="email"
             name="email"
-            placeholder="Email"
-            required
             value={formData.email}
-            onChange={handleChange}
-            style={{ padding: '10px', borderRadius: '5px', border: '1px solid #ccc', width: '100%', boxSizing: 'border-box' }}
+            onChange={handleInputChange}
+            required
+            disabled
+            style={{ width: '100%', padding: '8px', marginTop: '4px', backgroundColor: '#f3f4f6' }}
           />
+        </div>
+
+        <div style={{ marginBottom: '1rem' }}>
+          <label>Password:</label>
           <input
             type="password"
             name="password"
-            placeholder="Create Password"
-            required
             value={formData.password}
-            onChange={handleChange}
-            minLength="6"
-            style={{ padding: '10px', borderRadius: '5px', border: '1px solid #ccc', width: '100%', boxSizing: 'border-box', marginTop: '10px' }}
+            onChange={handleInputChange}
+            required
+            minLength="8"
+            style={{ width: '100%', padding: '8px', marginTop: '4px' }}
+            placeholder="Enter your password (min 8 characters)"
           />
         </div>
-        <button type="submit" disabled={loading} style={{
-          padding: '10px',
-          backgroundColor: '#0070f3',
-          color: '#fff',
-          border: 'none',
-          borderRadius: '5px',
-          cursor: 'pointer'
-        }}>
-          {loading ? 'Enrolling...' : 'Enroll Now'}
+
+        <div style={{ marginBottom: '1rem' }}>
+          <label>Confirm Password:</label>
+          <input
+            type="password"
+            name="confirmPassword"
+            value={formData.confirmPassword}
+            onChange={handleInputChange}
+            required
+            style={{ width: '100%', padding: '8px', marginTop: '4px' }}
+            placeholder="Confirm your password"
+          />
+        </div>
+
+        {applicationInfo?.country === 'US' ? (
+          <div style={{ marginBottom: '1rem' }}>
+            <label>Social Security Number:</label>
+            <input
+              type="text"
+              name="ssn"
+              value={formData.ssn}
+              onChange={handleInputChange}
+              required
+              style={{ width: '100%', padding: '8px', marginTop: '4px' }}
+              placeholder="XXX-XX-XXXX"
+            />
+          </div>
+        ) : (
+          <div style={{ marginBottom: '1rem' }}>
+            <label>Government ID Number:</label>
+            <input
+              type="text"
+              name="id_number"
+              value={formData.id_number}
+              onChange={handleInputChange}
+              required
+              style={{ width: '100%', padding: '8px', marginTop: '4px' }}
+              placeholder="Enter your ID number"
+            />
+          </div>
+        )}
+
+        <div style={{ marginBottom: '1rem' }}>
+          <label>Select One of Your Account Numbers:</label>
+          <select
+            name="accountNumber"
+            value={formData.accountNumber}
+            onChange={handleInputChange}
+            required
+            style={{ width: '100%', padding: '8px', marginTop: '4px' }}
+          >
+            <option value="">Select an account number</option>
+            {accounts.map((account, index) => (
+              <option key={index} value={account.account_number}>
+                {account.account_type}: {account.account_number}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <button
+          type="submit"
+          disabled={loading || !authUserCreated}
+          style={{
+            width: '100%',
+            padding: '12px',
+            backgroundColor: loading ? '#9ca3af' : '#1e40af',
+            color: 'white',
+            border: 'none',
+            borderRadius: '6px',
+            fontSize: '16px',
+            cursor: loading ? 'not-allowed' : 'pointer'
+          }}
+        >
+          {loading ? 'Completing Enrollment...' : 'Complete Enrollment'}
         </button>
       </form>
 
-      {message && <p style={{ marginTop: '20px', color: message.startsWith('Error') ? 'red' : 'green' }}>{message}</p>}
+      {message && (
+        <div style={{
+          marginTop: '1rem',
+          padding: '12px',
+          borderRadius: '6px',
+          backgroundColor: message.includes('Error') ? '#fee2e2' : '#d1fae5',
+          color: message.includes('Error') ? '#dc2626' : '#059669',
+          textAlign: 'center'
+        }}>
+          {message}
+        </div>
+      )}
     </div>
   );
 }

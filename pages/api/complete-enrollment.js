@@ -6,10 +6,10 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { temp_user_id, email, password, ssn, id_number, accountNumber } = req.body;
+  const { temp_user_id, email, password, ssn, id_number, accountNumber, token, application_id } = req.body;
 
-  if (!temp_user_id || !email || !password || !accountNumber) {
-    return res.status(400).json({ error: 'Missing required fields: temp_user_id, email, password, and accountNumber are required' });
+  if (!application_id || !token || !email || !password || !accountNumber) {
+    return res.status(400).json({ error: 'Missing required fields: application_id, token, email, password, and accountNumber are required' });
   }
 
   // Require either SSN or ID number based on citizenship
@@ -18,119 +18,145 @@ export default async function handler(req, res) {
   }
 
   try {
-    // 1️⃣ Check if user exists and verify identity
-    const { data: existingUser, error: userError } = await supabaseAdmin
-      .from('users')
+    // 1️⃣ Verify enrollment token
+    const { data: enrollmentData, error: enrollmentError } = await supabaseAdmin
+      .from('enrollments')
       .select('*')
-      .eq('id', temp_user_id)
+      .eq('token', token)
+      .eq('is_used', false) // Should not be used yet
       .single();
 
-    if (userError || !existingUser) {
-      return res.status(404).json({ error: 'User not found or invalid enrollment link' });
+    if (enrollmentError || !enrollmentData) {
+      return res.status(404).json({ error: 'Invalid or already used enrollment token' });
     }
 
-    // Verify identity - either SSN or ID number based on citizenship
-    if (existingUser.country === 'US') {
+    // 2️⃣ Get application data
+    const { data: applicationData, error: applicationError } = await supabaseAdmin
+      .from('applications')
+      .select('*')
+      .eq('id', application_id)
+      .single();
+
+    if (applicationError || !applicationData) {
+      return res.status(404).json({ error: 'Application not found' });
+    }
+
+    // 3️⃣ Verify email matches
+    if (enrollmentData.email !== applicationData.email || applicationData.email !== email) {
+      return res.status(400).json({ error: 'Email verification failed' });
+    }
+
+    // 4️⃣ Verify identity - either SSN or ID number based on citizenship
+    if (applicationData.country === 'US') {
       // US citizens - verify SSN
       const cleanSSN = ssn ? ssn.replace(/-/g, '') : '';
-      if (existingUser.ssn && existingUser.ssn !== cleanSSN) {
+      if (applicationData.ssn && applicationData.ssn !== cleanSSN) {
         return res.status(400).json({ error: 'SSN verification failed. Please check your Social Security Number.' });
       }
     } else {
       // International citizens - verify ID number
-      if (existingUser.id_number && existingUser.id_number !== id_number) {
+      if (applicationData.id_number && applicationData.id_number !== id_number) {
         return res.status(400).json({ error: 'ID number verification failed. Please check your Government ID Number.' });
       }
     }
 
-    // Verify account number exists for this user
-    const { data: userAccounts, error: accountsError } = await supabaseAdmin
+    // 5️⃣ Verify account number exists for this application
+    const { data: applicationAccounts, error: accountsError } = await supabaseAdmin
       .from('accounts')
       .select('account_number')
-      .eq('user_id', temp_user_id);
+      .eq('application_id', application_id);
 
     if (accountsError) {
-      console.error('Error fetching user accounts:', accountsError);
+      console.error('Error fetching application accounts:', accountsError);
       return res.status(500).json({ error: 'Error verifying account information' });
     }
 
-    const accountNumbers = userAccounts?.map(acc => acc.account_number) || [];
+    const accountNumbers = applicationAccounts?.map(acc => acc.account_number) || [];
     if (!accountNumbers.includes(accountNumber)) {
       return res.status(400).json({ error: 'Account number verification failed. Please check one of your account numbers.' });
     }
 
-    // Skip auth_id check since column may not exist
-    // if (existingUser.auth_id) {
-    //   return res.status(400).json({ error: 'User has already completed enrollment' });
-    // }
+    // 6️⃣ Create Supabase Auth user if they don't exist
+    let authUser = null;
+    const { data: users, error: listError } = await supabaseAdmin.auth.admin.listUsers({
+      email: email
+    });
 
-    // 2️⃣ Auth user should already exist (created when they clicked enrollment link)
-    // Just find and update their password
-    const { data: existingAuthUsers, error: listError } = await supabaseAdmin.auth.admin.listUsers();
-    const existingAuthUser = existingAuthUsers?.users?.find(user => user.email === email);
-    
-    if (!existingAuthUser) {
-      return res.status(400).json({ error: 'Auth user not found. Please click the enrollment link again to create your account.' });
+    if (listError) {
+      console.error('Error listing users:', listError);
+      return res.status(500).json({ error: 'Error checking for existing user.' });
     }
-    
-    // Update their password to the one they chose
-    try {
-      await supabaseAdmin.auth.admin.updateUserById(existingAuthUser.id, {
-        password: password
-      });
-    } catch (updateError) {
-      console.error('Password update error:', updateError);
-      return res.status(500).json({ error: 'Failed to set your password. Please try again.' });
-    }
-    
-    const authData = { user: existingAuthUser };
 
-    // 3️⃣ Update user record (without auth_id since column doesn't exist)
-    const { data: updateData, error: updateError } = await supabaseAdmin
-      .from('users')
-      .update({ 
-        email: email, // Update email to match auth
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', temp_user_id)
-      .select();
-
-    if (updateError) {
-      console.error('Database update error:', updateError);
-      
-      // If updating user fails, try to clean up the auth user
+    if (users.users.length > 0) {
+      // User already exists
+      authUser = users.users[0];
+      // Optional: Check if they already have a password set or if it needs to be updated.
+      // For simplicity, we'll assume if they exist, they can set their password.
+    } else {
+      // Create a new auth user
       try {
-        await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
-      } catch (cleanupError) {
-        console.error('Cleanup error:', cleanupError);
+        const { data: newUser, error: signUpError } = await supabaseAdmin.auth.admin.createUser({
+          email: email,
+          password: password,
+          email_confirm: true, // Auto-confirm email
+        });
+        if (signUpError) {
+          console.error('Supabase signup error:', signUpError);
+          return res.status(500).json({ error: `Failed to create user account: ${signUpError.message}` });
+        }
+        authUser = newUser;
+      } catch (error) {
+        console.error('Supabase signup try-catch error:', error);
+        return res.status(500).json({ error: 'An unexpected error occurred during user creation.' });
       }
-      
-      return res.status(500).json({ error: `Database error: ${updateError.message}` });
     }
 
-    // 4️⃣ Update account status from 'limited' to 'active'
+    // 7️⃣ Update the auth user's password if it was provided
+    if (password) {
+      try {
+        await supabaseAdmin.auth.admin.updateUserById(authUser.id, {
+          password: password
+        });
+      } catch (updateError) {
+        console.error('Password update error:', updateError);
+        return res.status(500).json({ error: 'Failed to set your password. Please try again.' });
+      }
+    }
+
+    // 8️⃣ Mark the enrollment token as used
+    const { error: tokenUpdateError } = await supabaseAdmin
+      .from('enrollments')
+      .update({ is_used: true })
+      .eq('id', enrollmentData.id);
+
+    if (tokenUpdateError) {
+      console.error('Error marking token as used:', tokenUpdateError);
+      // This is not critical enough to prevent user creation, but should be logged.
+    }
+
+    // 9️⃣ Update the account status from 'limited' to 'active'
     const { error: accountError } = await supabaseAdmin
       .from('accounts')
       .update({ status: 'active' })
-      .eq('user_id', temp_user_id);
+      .eq('application_id', application_id);
 
     if (accountError) {
       console.error('Account update error:', accountError);
       // Don't fail the enrollment for this, just log it
     }
 
-    res.status(200).json({ 
+    res.status(200).json({
       message: 'Enrollment completed successfully',
       user: {
-        id: existingUser.id,
+        id: applicationData.id,
         email: email,
-        name: `${existingUser.first_name} ${existingUser.last_name}`,
-        supabase_auth_id: authData.user.id
+        name: `${applicationData.first_name} ${applicationData.last_name}`,
+        supabase_auth_id: authUser.id
       }
     });
 
   } catch (error) {
-    console.error('Enrollment error:', error);
-    res.status(500).json({ error: 'Internal server error during enrollment' });
+    console.error('Enrollment completion error:', error);
+    res.status(500).json({ error: 'Internal server error during enrollment completion' });
   }
 }
