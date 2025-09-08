@@ -71,18 +71,48 @@ export default async function handler(req, res) {
     // Generate enrollment token
     const enrollmentToken = `enroll_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
 
-    // Store enrollment token
-    const { error: enrollmentError } = await supabaseAdmin
+    // Check if enrollment record already exists for this email
+    const { data: existingEnrollment, error: checkError } = await supabaseAdmin
       .from('enrollments')
-      .insert([{
-        email: application.email,
-        token: enrollmentToken,
-        is_used: false
-      }]);
+      .select('*')
+      .eq('email', application.email)
+      .single();
 
-    if (enrollmentError) {
-      console.error('Error storing enrollment token:', enrollmentError);
-      return res.status(500).json({ error: 'Failed to create enrollment record' });
+    let enrollmentRecord;
+    if (existingEnrollment) {
+      // Update existing enrollment record with new token
+      const { data: updatedEnrollment, error: updateError } = await supabaseAdmin
+        .from('enrollments')
+        .update({ 
+          token: enrollmentToken,
+          is_used: false 
+        })
+        .eq('email', application.email)
+        .select()
+        .single();
+
+      if (updateError) {
+        console.error('Error updating enrollment token:', updateError);
+        return res.status(500).json({ error: 'Failed to update enrollment record' });
+      }
+      enrollmentRecord = updatedEnrollment;
+    } else {
+      // Create new enrollment record
+      const { data: newEnrollment, error: insertError } = await supabaseAdmin
+        .from('enrollments')
+        .insert([{
+          email: application.email,
+          token: enrollmentToken,
+          is_used: false
+        }])
+        .select()
+        .single();
+
+      if (insertError) {
+        console.error('Error storing enrollment token:', insertError);
+        return res.status(500).json({ error: 'Failed to create enrollment record' });
+      }
+      enrollmentRecord = newEnrollment;
     }
 
     // Create enrollment link

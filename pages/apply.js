@@ -301,6 +301,7 @@ export default function Apply() {
         .from('applications')
         .insert([{
           first_name: formData.firstName.trim(),
+          middle_name: formData.middleName.trim(), // Added middle name
           last_name: formData.lastName.trim(),
           email: formData.email.trim().toLowerCase(),
           phone: formData.phone.trim(),
@@ -319,7 +320,7 @@ export default function Apply() {
             // Convert account type names to enum values expected by database
             const enumMapping = {
               'Checking Account': 'checking_account',
-              'Savings Account': 'savings_account', 
+              'Savings Account': 'savings_account',
               'Business Checking': 'business_checking',
               'Business Savings': 'business_savings',
               'Student Checking': 'student_checking',
@@ -394,7 +395,7 @@ export default function Apply() {
 
         const enumMapping = {
           'Checking Account': 'checking_account',
-          'Savings Account': 'savings_account', 
+          'Savings Account': 'savings_account',
           'Business Checking': 'business_checking',
           'Business Savings': 'business_savings',
           'Student Checking': 'student_checking',
@@ -456,10 +457,13 @@ export default function Apply() {
         });
 
         if (!emailResponse.ok) {
-          throw new Error('Failed to send welcome email');
+          // Handle the case where the email sending fails, but don't necessarily stop the whole process.
+          // Log the error and potentially set a flag to notify the user later if needed.
+          const errorData = await emailResponse.json();
+          console.error('Failed to send welcome email:', errorData.message || emailResponse.statusText);
+        } else {
+          console.log('Welcome email sent successfully');
         }
-
-        console.log('Welcome email sent successfully');
       } catch (emailError) {
         console.error('Email sending failed:', emailError);
         // Don't fail the entire process for email issues
@@ -475,7 +479,12 @@ export default function Apply() {
 
     } catch (error) {
       console.error('Application submission error:', error);
-      setErrors({ submit: 'Failed to submit application. Please try again.' });
+      // Check if the error is due to a duplicate email for enrollments
+      if (error.message.includes('duplicate key value violates unique constraint "enrollments_email_key"')) {
+        setErrors({ submit: 'An account with this email already exists. Please try another email or log in.' });
+      } else {
+        setErrors({ submit: 'Failed to submit application. Please try again.' });
+      }
     } finally {
       setLoading(false);
     }
@@ -871,9 +880,9 @@ export default function Apply() {
         {/* Header */}
         <div style={styles.header}>
           <div style={styles.logoContainer}>
-            <img 
-              src="/images/logo-primary.png" 
-              alt="Oakline Bank" 
+            <img
+              src="/images/logo-primary.png"
+              alt="Oakline Bank"
               style={styles.logo}
               onError={(e) => {
                 e.target.style.display = 'none';
@@ -894,7 +903,7 @@ export default function Apply() {
             <div key={step} style={{display: 'flex', alignItems: 'center'}}>
               <div style={{
                 ...styles.progressStep,
-                ...(step === currentStep ? styles.progressStepActive : 
+                ...(step === currentStep ? styles.progressStepActive :
                    step < currentStep ? styles.progressStepCompleted : styles.progressStepPending)
               }}>
                 {step < currentStep ? '✓' : step}
@@ -1385,7 +1394,7 @@ export default function Apply() {
                     <span style={{color: '#059669', fontSize: '16px', fontWeight: 'bold'}}>✓</span>
                   )}
                 </div>
-                <label 
+                <label
                   style={styles.checkboxLabel}
                   onClick={() => handleInputChange({target: {name: 'agreeToTerms', type: 'checkbox', checked: !formData.agreeToTerms}})}
                 >
@@ -1414,7 +1423,7 @@ export default function Apply() {
                 <div style={styles.successAlert}>
                   <div style={styles.successAlertText}>🎉 Application Submitted Successfully!</div>
                   <div style={styles.successMessage}>
-                    Your account has been created and a welcome email with enrollment instructions has been sent to {formData.email}. 
+                    Your account has been created and a welcome email with enrollment instructions has been sent to {formData.email}.
                     Please check your inbox (and spam folder) for the enrollment link.
                   </div>
                 </div>

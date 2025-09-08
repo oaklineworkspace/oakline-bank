@@ -16,18 +16,41 @@ export default async function handler(req, res) {
     // Generate enrollment token
     const enrollmentToken = `enroll_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
 
-    // Store enrollment token
-    const { error: enrollmentError } = await supabaseAdmin
+    // Check if enrollment record already exists for this email
+    const { data: existingEnrollment, error: checkError } = await supabaseAdmin
       .from('enrollments')
-      .insert([{
-        email: email,
-        token: enrollmentToken,
-        is_used: false
-      }]);
+      .select('*')
+      .eq('email', email)
+      .single();
 
-    if (enrollmentError) {
-      console.error('Error storing enrollment token:', enrollmentError);
-      return res.status(500).json({ error: 'Failed to create enrollment record' });
+    if (existingEnrollment) {
+      // Update existing enrollment record with new token
+      const { error: updateError } = await supabaseAdmin
+        .from('enrollments')
+        .update({ 
+          token: enrollmentToken,
+          is_used: false 
+        })
+        .eq('email', email);
+
+      if (updateError) {
+        console.error('Error updating enrollment token:', updateError);
+        return res.status(500).json({ error: 'Failed to update enrollment record' });
+      }
+    } else {
+      // Create new enrollment record
+      const { error: insertError } = await supabaseAdmin
+        .from('enrollments')
+        .insert([{
+          email: email,
+          token: enrollmentToken,
+          is_used: false
+        }]);
+
+      if (insertError) {
+        console.error('Error storing enrollment token:', insertError);
+        return res.status(500).json({ error: 'Failed to create enrollment record' });
+      }
     }
 
     // Get the account numbers for the email
