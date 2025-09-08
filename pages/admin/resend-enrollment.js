@@ -9,14 +9,14 @@ export default function ResendEnrollmentPage() {
   const [resendingId, setResendingId] = useState(null);
 
   useEffect(() => {
-    fetchPendingApplications();
+    fetchApplications();
   }, []);
 
-  const fetchPendingApplications = async () => {
+  const fetchApplications = async () => {
     try {
       setLoading(true);
       
-      // Get all applications with their enrollment status
+      // Get all applications with their user status
       const { data: applicationsData, error: appsError } = await supabaseAdmin
         .from('applications')
         .select(`
@@ -32,20 +32,48 @@ export default function ResendEnrollmentPage() {
 
       if (appsError) throw appsError;
 
+      // Get users table to check auth status
+      const { data: usersData, error: usersError } = await supabaseAdmin
+        .from('users')
+        .select('application_id, email, created_at, is_active');
+
+      if (usersError) {
+        console.warn('Users table query failed:', usersError);
+      }
+
       // Get enrollment records
       const { data: enrollmentsData, error: enrollError } = await supabaseAdmin
         .from('enrollments')
-        .select('application_id, is_used, created_at');
+        .select('application_id, email, is_used, created_at');
 
-      if (enrollError) throw enrollError;
+      if (enrollError) {
+        console.warn('Enrollments table query failed:', enrollError);
+      }
 
+      // Check Supabase Auth users
+      const { data: authUsersData } = await supabaseAdmin.auth.admin.listUsers();
+      
       // Combine data
       const enrichedApplications = applicationsData.map(app => {
-        const enrollment = enrollmentsData.find(e => e.application_id === app.id);
+        const userRecord = usersData?.find(u => u.application_id === app.id);
+        const enrollmentRecord = enrollmentsData?.find(e => e.application_id === app.id || e.email === app.email);
+        const authUser = authUsersData?.users?.find(u => u.email === app.email);
+        
+        let status = 'pending';
+        if (authUser && userRecord?.is_active) {
+          status = 'completed';
+        } else if (authUser) {
+          status = 'auth_created';
+        } else if (enrollmentRecord) {
+          status = 'enrollment_sent';
+        }
+
         return {
           ...app,
-          enrollment_status: enrollment ? (enrollment.is_used ? 'completed' : 'pending') : 'not_sent',
-          enrollment_date: enrollment?.created_at
+          status,
+          user_record: userRecord,
+          enrollment_record: enrollmentRecord,
+          auth_user: authUser
         };
       });
 
@@ -58,30 +86,63 @@ export default function ResendEnrollmentPage() {
     }
   };
 
-  const handleResendEnrollment = async (applicationId) => {
-    setResendingId(applicationId);
+  const handleResendEnrollment = async (application) => {
+    setResendingId(application.id);
     setMessage('');
 
     try {
       const response = await fetch('/api/resend-enrollment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ applicationId })
+        body: JSON.stringify({ 
+          applicationId: application.id,
+          email: application.email,
+          firstName: application.first_name,
+          middleName: application.middle_name,
+          lastName: application.last_name,
+          country: application.country
+        })
       });
 
       const result = await response.json();
 
       if (response.ok) {
-        setMessage('Enrollment email sent successfully!');
-        fetchPendingApplications(); // Refresh the list
+        setMessage(`Enrollment link sent successfully to ${application.email}!`);
+        fetchApplications(); // Refresh the list
       } else {
-        setMessage(`Error: ${result.error}`);
+        setMessage(`Error: ${result.error || 'Failed to send enrollment link'}`);
       }
     } catch (error) {
       console.error('Error resending enrollment:', error);
-      setMessage('Error sending enrollment email');
+      setMessage('Error sending enrollment link');
     } finally {
       setResendingId(null);
+    }
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'completed':
+        return { backgroundColor: '#d1fae5', color: '#059669' };
+      case 'auth_created':
+        return { backgroundColor: '#dbeafe', color: '#1d4ed8' };
+      case 'enrollment_sent':
+        return { backgroundColor: '#fef3c7', color: '#d97706' };
+      default:
+        return { backgroundColor: '#fee2e2', color: '#dc2626' };
+    }
+  };
+
+  const getStatusText = (status) => {
+    switch (status) {
+      case 'completed':
+        return 'Completed';
+      case 'auth_created':
+        return 'Auth Created';
+      case 'enrollment_sent':
+        return 'Link Sent';
+      default:
+        return 'Pending';
     }
   };
 
@@ -97,7 +158,7 @@ export default function ResendEnrollmentPage() {
     <div style={styles.container}>
       <div style={styles.header}>
         <h1>Resend Enrollment Links</h1>
-        <p>Manage enrollment links for submitted applications</p>
+        <p>Generate and send magic links for users to complete their enrollment</p>
       </div>
 
       {message && (
@@ -110,6 +171,21 @@ export default function ResendEnrollmentPage() {
         </div>
       )}
 
+      <div style={styles.stats}>
+        <div style={styles.statCard}>
+          <h3>Total Applications</h3>
+          <p>{applications.length}</p>
+        </div>
+        <div style={styles.statCard}>
+          <h3>Completed</h3>
+          <p>{applications.filter(app => app.status === 'completed').length}</p>
+        </div>
+        <div style={styles.statCard}>
+          <h3>Pending</h3>
+          <p>{applications.filter(app => app.status === 'pending').length}</p>
+        </div>
+      </div>
+
       <div style={styles.tableContainer}>
         <table style={styles.table}>
           <thead>
@@ -117,7 +193,7 @@ export default function ResendEnrollmentPage() {
               <th style={styles.headerCell}>Name</th>
               <th style={styles.headerCell}>Email</th>
               <th style={styles.headerCell}>Application Date</th>
-              <th style={styles.headerCell}>Enrollment Status</th>
+              <th style={styles.headerCell}>Status</th>
               <th style={styles.headerCell}>Actions</th>
             </tr>
           </thead>
@@ -134,20 +210,14 @@ export default function ResendEnrollmentPage() {
                 <td style={styles.cell}>
                   <span style={{
                     ...styles.statusBadge,
-                    backgroundColor: 
-                      app.enrollment_status === 'completed' ? '#d1fae5' :
-                      app.enrollment_status === 'pending' ? '#fef3c7' : '#fee2e2',
-                    color:
-                      app.enrollment_status === 'completed' ? '#059669' :
-                      app.enrollment_status === 'pending' ? '#d97706' : '#dc2626'
+                    ...getStatusColor(app.status)
                   }}>
-                    {app.enrollment_status === 'completed' ? 'Completed' :
-                     app.enrollment_status === 'pending' ? 'Pending' : 'Not Sent'}
+                    {getStatusText(app.status)}
                   </span>
                 </td>
                 <td style={styles.cell}>
                   <button
-                    onClick={() => handleResendEnrollment(app.id)}
+                    onClick={() => handleResendEnrollment(app)}
                     disabled={resendingId === app.id}
                     style={{
                       ...styles.button,
@@ -155,7 +225,7 @@ export default function ResendEnrollmentPage() {
                       cursor: resendingId === app.id ? 'not-allowed' : 'pointer'
                     }}
                   >
-                    {resendingId === app.id ? 'Sending...' : 'Resend Link'}
+                    {resendingId === app.id ? 'Sending...' : 'Send Link'}
                   </button>
                 </td>
               </tr>
@@ -176,7 +246,7 @@ export default function ResendEnrollmentPage() {
 const styles = {
   container: {
     padding: '2rem',
-    maxWidth: '1200px',
+    maxWidth: '1400px',
     margin: '0 auto',
     fontFamily: 'Arial, sans-serif'
   },
@@ -195,6 +265,19 @@ const styles = {
     marginBottom: '1rem',
     textAlign: 'center',
     fontWeight: '500'
+  },
+  stats: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+    gap: '1rem',
+    marginBottom: '2rem'
+  },
+  statCard: {
+    backgroundColor: 'white',
+    padding: '1.5rem',
+    borderRadius: '8px',
+    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+    textAlign: 'center'
   },
   tableContainer: {
     backgroundColor: 'white',
