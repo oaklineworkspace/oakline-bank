@@ -335,12 +335,12 @@ export default function Apply() {
               'Foreign Currency Account': 'foreign_currency',
               'Cryptocurrency Wallet': 'cryptocurrency_wallet',
               'Loan Repayment Account': 'loan_repayment',
-              'Mortgage Account': 'mortgage_account',
-              'Auto Loan Account': 'auto_loan_account',
-              'Credit Card Account': 'credit_card_account',
-              'Prepaid Card Account': 'prepaid_card_account',
+              'Mortgage Account': 'mortgage',
+              'Auto Loan Account': 'auto_loan',
+              'Credit Card Account': 'credit_card',
+              'Prepaid Card Account': 'prepaid_card',
               'Payroll Account': 'payroll_account',
-              'Nonprofit/Charity Account': 'nonprofit_charity_account',
+              'Nonprofit/Charity Account': 'nonprofit_charity',
               'Escrow Account': 'escrow_account'
             };
             return enumMapping[accountType?.name] || accountType?.name?.toLowerCase().replace(/\s+/g, '_');
