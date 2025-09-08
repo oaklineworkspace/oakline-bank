@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useRouter } from 'next/router';
@@ -5,7 +6,15 @@ import { useRouter } from 'next/router';
 export default function EnrollPage() {
   const router = useRouter();
   const { token, application_id } = router.query;
-  const [formData, setFormData] = useState({ email: '', password: '', confirmPassword: '', ssn: '', id_number: '', accountNumber: '', agreeToTerms: false });
+  const [formData, setFormData] = useState({ 
+    email: '', 
+    password: '', 
+    confirmPassword: '', 
+    ssn: '', 
+    id_number: '', 
+    accountNumber: '', 
+    agreeToTerms: false 
+  });
   const [applicationInfo, setApplicationInfo] = useState(null);
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
@@ -13,15 +22,65 @@ export default function EnrollPage() {
   const [authCreationLoading, setAuthCreationLoading] = useState(true);
   const [accounts, setAccounts] = useState([]);
 
-  // Create auth user immediately when enrollment link is clicked
+  // Validate token and load application data
   useEffect(() => {
     if (!token || !application_id) return;
 
-    const createAuthUserAndLoadInfo = async () => {
+    const validateTokenAndLoadData = async () => {
       try {
         setAuthCreationLoading(true);
 
-        // 1. Create auth user immediately
+        // 1. Verify enrollment token
+        const { data: enrollmentData, error: enrollmentError } = await supabase
+          .from('enrollments')
+          .select('*')
+          .eq('token', token)
+          .eq('is_used', false)
+          .single();
+
+        if (enrollmentError || !enrollmentData) {
+          setMessage('Invalid or expired enrollment link. Please request a new enrollment email.');
+          setAuthCreationLoading(false);
+          return;
+        }
+
+        // 2. Load application data
+        const { data: appData, error: appError } = await supabase
+          .from('applications')
+          .select('*')
+          .eq('id', application_id)
+          .single();
+
+        if (appError || !appData) {
+          setMessage('Application not found. Please contact support.');
+          setAuthCreationLoading(false);
+          return;
+        }
+
+        // 3. Verify email matches
+        if (enrollmentData.email !== appData.email) {
+          setMessage('Email verification failed. Invalid enrollment link.');
+          setAuthCreationLoading(false);
+          return;
+        }
+
+        setApplicationInfo(appData);
+
+        // 4. Load associated accounts for this application only
+        const { data: accountsData, error: accountsError } = await supabase
+          .from('accounts')
+          .select('account_number, account_type')
+          .eq('application_id', application_id);
+
+        if (!accountsError && accountsData && accountsData.length > 0) {
+          setAccounts(accountsData);
+        } else {
+          setMessage('No accounts found for this application. Please contact support.');
+          setAuthCreationLoading(false);
+          return;
+        }
+
+        // 5. Create auth user immediately
         const authResponse = await fetch('/api/create-auth-user', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -32,46 +91,24 @@ export default function EnrollPage() {
 
         if (!authResponse.ok) {
           setMessage(`Error: ${authResult.error}`);
+          setAuthCreationLoading(false);
           return;
         }
 
         setAuthUserCreated(true);
-        setApplicationInfo(authResult.user);
-
-        // 2. Load application data and accounts
-        const { data: appData, error: appError } = await supabase
-          .from('applications')
-          .select('*')
-          .eq('id', application_id)
-          .single();
-
-        if (appError) {
-          setMessage('Error loading application data');
-          return;
-        }
-
-        // 3. Load associated accounts
-        const { data: accountsData, error: accountsError } = await supabase
-          .from('accounts')
-          .select('account_number, account_type')
-          .eq('application_id', application_id);
-
-        if (!accountsError && accountsData) {
-          setAccounts(accountsData);
-        }
-
+        
         // Pre-fill email
         setFormData(prev => ({ ...prev, email: appData.email }));
 
       } catch (error) {
-        console.error('Error creating auth user:', error);
-        setMessage('Error setting up enrollment. Please try again.');
+        console.error('Error validating enrollment:', error);
+        setMessage('Error loading enrollment data. Please try again.');
       } finally {
         setAuthCreationLoading(false);
       }
     };
 
-    createAuthUserAndLoadInfo();
+    validateTokenAndLoadData();
   }, [token, application_id]);
 
   const handleInputChange = (e) => {
@@ -171,7 +208,16 @@ export default function EnrollPage() {
   if (!token || !application_id) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
-        <div>Invalid enrollment link. Please check the link from your email.</div>
+        <div>
+          <h2>Invalid enrollment link</h2>
+          <p>Please check the link from your email or request a new enrollment email.</p>
+          <button 
+            onClick={() => router.push('/')} 
+            style={{ padding: '12px 24px', backgroundColor: '#1e40af', color: 'white', border: 'none', borderRadius: '6px' }}
+          >
+            Go to Homepage
+          </button>
+        </div>
       </div>
     );
   }
@@ -182,13 +228,13 @@ export default function EnrollPage() {
 
       {applicationInfo && (
         <div style={{ backgroundColor: '#f0f9ff', padding: '1rem', borderRadius: '6px', marginBottom: '2rem' }}>
-          <h3>Welcome, {applicationInfo.name}!</h3>
+          <h3>Welcome, {applicationInfo.first_name} {applicationInfo.middle_name ? applicationInfo.middle_name + ' ' : ''}{applicationInfo.last_name}!</h3>
           <p>Email: {applicationInfo.email}</p>
           {accounts.length > 0 && (
             <div>
               <p><strong>Your Accounts:</strong></p>
               {accounts.map((account, index) => (
-                <p key={index}>{account.account_type}: {account.account_number}</p>
+                <p key={index}>{account.account_type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}: {account.account_number}</p>
               ))}
             </div>
           )}
@@ -277,7 +323,7 @@ export default function EnrollPage() {
             <option value="">Select an account number</option>
             {accounts.map((account, index) => (
               <option key={index} value={account.account_number}>
-                {account.account_type}: {account.account_number}
+                {account.account_type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}: {account.account_number}
               </option>
             ))}
           </select>
@@ -348,8 +394,8 @@ export default function EnrollPage() {
           marginTop: '1rem',
           padding: '12px',
           borderRadius: '6px',
-          backgroundColor: message.includes('Error') ? '#fee2e2' : '#d1fae5',
-          color: message.includes('Error') ? '#dc2626' : '#059669',
+          backgroundColor: message.includes('Error') || message.includes('Invalid') ? '#fee2e2' : '#d1fae5',
+          color: message.includes('Error') || message.includes('Invalid') ? '#dc2626' : '#059669',
           textAlign: 'center'
         }}>
           {message}

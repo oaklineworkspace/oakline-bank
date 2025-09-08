@@ -1,13 +1,12 @@
 // pages/api/complete-enrollment.js
 import { supabaseAdmin } from '../../lib/supabaseClient';
-import crypto from 'crypto';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { temp_user_id, email, password, ssn, id_number, accountNumber, token, application_id } = req.body;
+  const { email, password, ssn, id_number, accountNumber, token, application_id } = req.body;
 
   if (!application_id || !token || !email || !password || !accountNumber) {
     return res.status(400).json({ error: 'Missing required fields: application_id, token, email, password, and accountNumber are required' });

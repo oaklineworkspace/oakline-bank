@@ -369,13 +369,11 @@ export default function Apply() {
       const generateAccountNumber = async () => {
         let num;
         let attempts = 0;
-        const maxAttempts = 100; // Prevent infinite loops in case of very high collision rate
+        const maxAttempts = 100;
 
         do {
-          num = '';
-          for (let i = 0; i < 10; i++) {
-            num += Math.floor(Math.random() * 10);
-          }
+          // Generate a random 10-digit number (ensuring it doesn't start with 0)
+          num = (Math.floor(Math.random() * 9000000000) + 1000000000).toString();
           attempts++;
         } while (await isAccountNumberTaken(num) && attempts < maxAttempts);
 

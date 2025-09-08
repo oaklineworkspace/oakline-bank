@@ -1,5 +1,3 @@
-
-// pages/api/resend-enrollment.js
 import { supabaseAdmin } from '../../lib/supabaseClient';
 import { sendEmail } from '../../lib/email';
 
@@ -8,67 +6,39 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { email, application_id } = req.body;
+  const { applicationId } = req.body;
 
-  // Validate input - require either email or application_id
-  if (!email && !application_id) {
-    return res.status(400).json({ error: 'Either email or application_id is required' });
+  if (!applicationId) {
+    return res.status(400).json({ error: 'Application ID is required' });
   }
 
   try {
-    let application;
+    // Get application data
+    const { data: application, error: appError } = await supabaseAdmin
+      .from('applications')
+      .select('*')
+      .eq('id', applicationId)
+      .single();
 
-    // Find application by email or application_id
-    if (application_id) {
-      const { data, error } = await supabaseAdmin
-        .from('applications')
-        .select('*')
-        .eq('id', application_id)
-        .single();
-      
-      if (error || !data) {
-        return res.status(404).json({ error: 'Application not found' });
-      }
-      application = data;
-    } else {
-      const { data, error } = await supabaseAdmin
-        .from('applications')
-        .select('*')
-        .eq('email', email)
-        .single();
-      
-      if (error || !data) {
-        return res.status(404).json({ error: 'Application not found' });
-      }
-      application = data;
+    if (appError || !application) {
+      return res.status(404).json({ error: 'Application not found' });
     }
 
-    // Check if user has already enrolled by checking if auth user exists
-    const { data: authUsers, error: authError } = await supabaseAdmin.auth.admin.listUsers();
-    if (authError) {
-      console.error('Error checking auth users:', authError);
-    } else {
-      const existingAuthUser = authUsers.users.find(user => user.email === application.email);
-      if (existingAuthUser) {
-        return res.status(400).json({ error: 'User has already completed enrollment' });
-      }
-    }
-
-    // Get application's account numbers for the email
+    // Get associated accounts
     const { data: accounts, error: accountsError } = await supabaseAdmin
       .from('accounts')
       .select('account_number, account_type')
-      .eq('application_id', application.id);
+      .eq('application_id', applicationId);
 
     if (accountsError) {
       console.error('Error fetching accounts:', accountsError);
-      return res.status(500).json({ error: 'Failed to fetch account information' });
+      return res.status(500).json({ error: 'Failed to fetch account details' });
     }
 
-    const accountNumbers = accounts?.map(acc => acc.account_number) || [];
-    const accountTypes = accounts?.map(acc => acc.account_type) || [];
+    const accountNumbers = accounts ? accounts.map(acc => acc.account_number) : [];
+    const accountTypes = accounts ? accounts.map(acc => acc.account_type) : [];
 
-    // Generate enrollment token
+    // Generate new enrollment token
     const enrollmentToken = `enroll_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
 
     // Check if enrollment record already exists for this email
@@ -103,7 +73,8 @@ export default async function handler(req, res) {
         .insert([{
           email: application.email,
           token: enrollmentToken,
-          is_used: false
+          is_used: false,
+          application_id: applicationId
         }])
         .select()
         .single();
@@ -119,31 +90,35 @@ export default async function handler(req, res) {
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.REPLIT_DEV_DOMAIN 
       ? `https://${process.env.REPLIT_DEV_DOMAIN}`
       : 'https://oaklineworkspac-oakline-bank.repl.co';
-    
+
     const enrollLink = `${siteUrl}/enroll?token=${enrollmentToken}&application_id=${application.id}`;
+
+    // Prepare account details HTML
+    const accountDetailsHtml = accountNumbers.length > 0 ? `
+      <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
+        <h3 style="margin-top: 0; color: #333;">Your Account Numbers:</h3>
+        ${accountNumbers.map((num, index) => `
+          <p style="font-family: monospace; font-size: 16px; margin: 5px 0;">
+            <strong>${accountTypes[index] ? accountTypes[index].replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Account'}:</strong> ${num}
+          </p>
+        `).join('')}
+        <p style="font-family: monospace; font-size: 16px; margin: 5px 0;">
+          <strong>Routing Number:</strong> 075915826
+        </p>
+      </div>
+    ` : '';
 
     // Send enrollment email
     const emailHtml = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #0070f3;">Welcome to Oakline Bank, ${application.first_name}!</h2>
+        <h2 style="color: #0070f3;">Complete Your Oakline Bank Enrollment</h2>
+        <p>Hello ${application.first_name} ${application.middle_name ? application.middle_name + ' ' : ''}${application.last_name},</p>
         <p>Your application has been processed and your accounts are ready for activation.</p>
-        
-        ${accountNumbers.length > 0 ? `
-          <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
-            <h3 style="margin-top: 0; color: #333;">Your Account Numbers:</h3>
-            ${accountNumbers.map((num, index) => `
-              <p style="font-family: monospace; font-size: 16px; margin: 5px 0;">
-                <strong>${accountTypes[index] ? accountTypes[index].replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Account'}:</strong> ${num}
-              </p>
-            `).join('')}
-            <p style="font-family: monospace; font-size: 16px; margin: 5px 0;">
-              <strong>Routing Number:</strong> 075915826
-            </p>
-          </div>
-        ` : ''}
-        
+
+        ${accountDetailsHtml}
+
         <p>To complete your enrollment and activate your accounts, please click the button below:</p>
-        
+
         <div style="text-align: center; margin: 30px 0;">
           <a href="${enrollLink}" 
              style="display: inline-block; padding: 15px 30px; background: #0070f3; color: white; 
@@ -151,36 +126,35 @@ export default async function handler(req, res) {
             Complete Enrollment
           </a>
         </div>
-        
-        <p style="color: #666; font-size: 14px;">
-          If the button doesn't work, you can copy and paste this link into your browser:<br>
-          <a href="${enrollLink}">${enrollLink}</a>
-        </p>
-        
-        <p>If you have any questions, please contact our support team.</p>
-        
-        <p>Best regards,<br>
-        <strong>Oakline Bank Team</strong></p>
+
+        <p><strong>Important:</strong> During enrollment, you'll need to:</p>
+        <ul>
+          <li>Set your account password</li>
+          <li>Provide your ${application.country === 'US' ? 'Social Security Number (SSN)' : 'Government ID Number'}</li>
+          <li>Select one of your account numbers listed above</li>
+          <li>Agree to our Terms of Service and Privacy Policy</li>
+        </ul>
+
+        <p><em>This link will expire in 7 days for security purposes.</em></p>
+
+        <p>If you have any questions, please contact our customer support team.</p>
+        <p>Thank you for choosing Oakline Bank!</p>
+        <p><strong>The Oakline Bank Team</strong></p>
       </div>
     `;
 
     await sendEmail({
       to: application.email,
-      subject: 'Complete Your Oakline Bank Enrollment',
+      subject: "Complete Your Oakline Bank Enrollment",
       html: emailHtml
     });
 
     res.status(200).json({ 
-      message: 'Enrollment email sent successfully',
-      application: {
-        id: application.id,
-        email: application.email,
-        name: `${application.first_name} ${application.last_name}`
-      }
+      message: 'Enrollment email sent successfully' 
     });
 
   } catch (error) {
-    console.error('Error resending enrollment:', error);
-    res.status(500).json({ error: 'Failed to resend enrollment email' });
+    console.error('Error sending enrollment email:', error);
+    res.status(500).json({ error: 'Failed to send enrollment email' });
   }
 }
