@@ -445,9 +445,9 @@ export default function Apply() {
       // Create enrollment record with proper error handling
       let enrollmentRecord = null;
       let enrollmentError = null;
-      
+
       console.log('Creating enrollment record for:', formData.email);
-      
+
       // First, check if enrollment already exists
       const { data: existingEnrollment } = await supabase
         .from('enrollments')

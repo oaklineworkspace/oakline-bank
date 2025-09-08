@@ -42,34 +42,77 @@ export default async function handler(req, res) {
     }
 
     // 4. Check if Supabase Auth user already exists
-    const { data: existingUsers, error: listError } = await supabaseAdmin.auth.admin.listUsers();
-    const existingUser = existingUsers?.users?.find(user => user.email === applicationData.email);
-
     let authUser = null;
-
-    if (!existingUser) {
-      // Create Supabase Auth user with temporary password (will be updated during enrollment completion)
-      const tempPassword = `temp_${Date.now()}_${Math.random().toString(36).substring(2)}`;
-      
-      const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
-        email: applicationData.email,
-        password: tempPassword,
-        email_confirm: true,
-        user_metadata: {
-          first_name: applicationData.first_name,
-          last_name: applicationData.last_name,
-          application_id: applicationData.id
-        }
-      });
-
-      if (createError) {
-        console.error('Error creating auth user:', createError);
-        return res.status(500).json({ error: 'Failed to create user account' });
+    
+    try {
+      const { data: existingUsers, error: listError } = await supabaseAdmin.auth.admin.listUsers();
+      if (listError) {
+        console.error('Error listing users:', listError);
+        return res.status(500).json({ error: 'Failed to check existing users' });
       }
+      
+      const existingUser = existingUsers?.users?.find(user => user.email === applicationData.email);
 
-      authUser = newUser.user;
-    } else {
-      authUser = existingUser;
+      if (!existingUser) {
+        // Create Supabase Auth user with temporary password
+        const tempPassword = `temp_${Date.now()}_${Math.random().toString(36).substring(2)}`;
+        
+        console.log('Creating new auth user for:', applicationData.email);
+        const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
+          email: applicationData.email,
+          password: tempPassword,
+          email_confirm: true,
+          user_metadata: {
+            first_name: applicationData.first_name,
+            last_name: applicationData.last_name,
+            middle_name: applicationData.middle_name,
+            application_id: applicationData.id
+          }
+        });
+
+        if (createError) {
+          console.error('Error creating auth user:', createError);
+          return res.status(500).json({ 
+            error: 'Failed to create user account',
+            details: createError.message 
+          });
+        }
+
+        authUser = newUser.user;
+        console.log('Auth user created successfully:', authUser.id);
+        
+        // Create profile record manually if the trigger didn't work
+        try {
+          const { error: profileError } = await supabaseAdmin
+            .from('profiles')
+            .insert({
+              id: authUser.id,
+              email: applicationData.email,
+              first_name: applicationData.first_name,
+              last_name: applicationData.last_name,
+              middle_name: applicationData.middle_name,
+              application_id: applicationData.id
+            });
+            
+          if (profileError) {
+            console.log('Profile creation error (may be expected if trigger works):', profileError.message);
+          } else {
+            console.log('Profile created successfully');
+          }
+        } catch (profileCreateError) {
+          console.log('Profile creation attempt failed:', profileCreateError.message);
+        }
+        
+      } else {
+        authUser = existingUser;
+        console.log('Using existing auth user:', authUser.id);
+      }
+    } catch (userCreationError) {
+      console.error('Auth user creation process error:', userCreationError);
+      return res.status(500).json({ 
+        error: 'Failed to process user authentication',
+        details: userCreationError.message 
+      });
     }
 
     res.status(200).json({

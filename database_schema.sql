@@ -1,4 +1,3 @@
-
 -- Drop existing tables and types to reset
 DROP TABLE IF EXISTS public.accounts CASCADE;
 DROP TABLE IF EXISTS public.applications CASCADE;
