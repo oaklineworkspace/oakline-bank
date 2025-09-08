@@ -1,3 +1,4 @@
+
 // pages/admin/resend-enrollment.js
 import { useState, useEffect } from 'react';
 import { supabaseAdmin } from '../../lib/supabaseClient';
@@ -9,30 +10,55 @@ export default function ResendEnrollmentAdmin() {
   const [message, setMessage] = useState('');
   const [emailInput, setEmailInput] = useState('');
 
-  // Fetch users who haven't completed enrollment
+  // Fetch applications that haven't completed enrollment
   useEffect(() => {
     fetchUnenrolledUsers();
   }, []);
 
   const fetchUnenrolledUsers = async () => {
     try {
-      const { data, error } = await supabaseAdmin
-        .from('users')
+      // Get applications that don't have corresponding auth users yet
+      const { data: applications, error } = await supabaseAdmin
+        .from('applications')
         .select('id, first_name, last_name, email, created_at')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setUnenrolledUsers(data || []);
+
+      // Filter out applications that already have enrolled users
+      const unenrolledApps = [];
+      
+      if (applications && applications.length > 0) {
+        // Get all auth users to check which emails are already enrolled
+        const { data: authUsers, error: authError } = await supabaseAdmin.auth.admin.listUsers();
+        
+        if (authError) {
+          console.error('Error fetching auth users:', authError);
+          setUnenrolledUsers(applications || []);
+        } else {
+          const enrolledEmails = new Set(authUsers.users.map(user => user.email));
+          
+          // Only include applications where the email hasn't been enrolled yet
+          for (const app of applications) {
+            if (!enrolledEmails.has(app.email)) {
+              unenrolledApps.push(app);
+            }
+          }
+          setUnenrolledUsers(unenrolledApps);
+        }
+      } else {
+        setUnenrolledUsers([]);
+      }
     } catch (error) {
-      console.error('Error fetching users:', error);
-      setMessage('Error loading users: ' + error.message);
+      console.error('Error fetching applications:', error);
+      setMessage('Error loading applications: ' + error.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const resendEnrollment = async (user) => {
-    setResendLoading({ ...resendLoading, [user.id]: true });
+  const resendEnrollment = async (application) => {
+    setResendLoading({ ...resendLoading, [application.id]: true });
     setMessage('');
 
     try {
@@ -41,20 +67,25 @@ export default function ResendEnrollmentAdmin() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ user_id: user.id })
+        body: JSON.stringify({ 
+          email: application.email,
+          application_id: application.id 
+        })
       });
 
       const result = await response.json();
 
       if (response.ok) {
-        setMessage(`✅ Enrollment email sent to ${user.email}`);
+        setMessage(`✅ Enrollment email sent to ${application.email}`);
+        // Refresh the list to remove this application if it's now enrolled
+        setTimeout(() => fetchUnenrolledUsers(), 1000);
       } else {
         setMessage(`❌ Error: ${result.error}`);
       }
     } catch (error) {
       setMessage(`❌ Failed to send email: ${error.message}`);
     } finally {
-      setResendLoading({ ...resendLoading, [user.id]: false });
+      setResendLoading({ ...resendLoading, [application.id]: false });
     }
   };
 
@@ -151,15 +182,15 @@ export default function ResendEnrollmentAdmin() {
         </div>
       )}
 
-      {/* Users List */}
+      {/* Applications List */}
       <div>
-        <h3>Users Pending Enrollment ({unenrolledUsers.length})</h3>
+        <h3>Applications Pending Enrollment ({unenrolledUsers.length})</h3>
         
         {loading ? (
-          <p>Loading users...</p>
+          <p>Loading applications...</p>
         ) : unenrolledUsers.length === 0 ? (
           <p style={{ color: '#6c757d', fontStyle: 'italic' }}>
-            No users found with pending enrollment.
+            No applications found with pending enrollment.
           </p>
         ) : (
           <div style={{ 
@@ -178,33 +209,33 @@ export default function ResendEnrollmentAdmin() {
                 </tr>
               </thead>
               <tbody>
-                {unenrolledUsers.map((user) => (
-                  <tr key={user.id} style={{ borderBottom: '1px solid #f8f9fa' }}>
+                {unenrolledUsers.map((application) => (
+                  <tr key={application.id} style={{ borderBottom: '1px solid #f8f9fa' }}>
                     <td style={{ padding: '15px' }}>
-                      {user.first_name} {user.last_name}
+                      {application.first_name} {application.last_name}
                     </td>
                     <td style={{ padding: '15px' }}>
-                      {user.email}
+                      {application.email}
                     </td>
                     <td style={{ padding: '15px', color: '#6c757d' }}>
-                      {new Date(user.created_at).toLocaleDateString()}
+                      {new Date(application.created_at).toLocaleDateString()}
                     </td>
                     <td style={{ padding: '15px', textAlign: 'center' }}>
                       <button
-                        onClick={() => resendEnrollment(user)}
-                        disabled={resendLoading[user.id]}
+                        onClick={() => resendEnrollment(application)}
+                        disabled={resendLoading[application.id]}
                         style={{
                           padding: '8px 16px',
                           background: '#28a745',
                           color: 'white',
                           border: 'none',
                           borderRadius: '4px',
-                          cursor: resendLoading[user.id] ? 'not-allowed' : 'pointer',
-                          opacity: resendLoading[user.id] ? 0.6 : 1,
+                          cursor: resendLoading[application.id] ? 'not-allowed' : 'pointer',
+                          opacity: resendLoading[application.id] ? 0.6 : 1,
                           fontSize: '14px'
                         }}
                       >
-                        {resendLoading[user.id] ? 'Sending...' : 'Resend Link'}
+                        {resendLoading[application.id] ? 'Sending...' : 'Resend Link'}
                       </button>
                     </td>
                   </tr>
