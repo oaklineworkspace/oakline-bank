@@ -75,6 +75,10 @@ CREATE TABLE public.applications (
   account_types account_type_enum[],
   agree_to_terms boolean DEFAULT false,
   application_status VARCHAR(20) DEFAULT 'pending' CHECK (application_status IN ('pending', 'approved', 'rejected', 'under_review')),
+  created_by_admin boolean DEFAULT false,
+  mothers_maiden_name text,
+  submitted_at timestamp without time zone DEFAULT now(),
+  processed_at timestamp without time zone,
   created_at timestamp without time zone DEFAULT now(),
   CONSTRAINT applications_pkey PRIMARY KEY (id)
 );
