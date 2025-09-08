@@ -3,5 +3,8 @@
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
   "/": "pages/index.js",
+  "/admin/admin-users": "pages/admin/admin-users.js",
+  "/api/admin/get-users": "pages/api/admin/get-users.js",
+  "/api/admin/delete-all-users": "pages/api/admin/delete-all-users.js",
   "/enroll": "pages/enroll.js"
 }
