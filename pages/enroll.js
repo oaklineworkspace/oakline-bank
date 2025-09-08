@@ -25,6 +25,12 @@ export default function EnrollPage() {
 
   // Function to handle magic link authentication and user verification
   const verifyMagicLinkUser = async (user, applicationId) => {
+    // Clear any existing timeout
+    if (window.enrollmentTimeout) {
+      clearTimeout(window.enrollmentTimeout);
+      window.enrollmentTimeout = null;
+    }
+    
     setLoading(true);
     setError('');
     console.log('Verifying magic link user:', user.email, 'for application:', applicationId);
@@ -223,19 +229,20 @@ export default function EnrollPage() {
             setMessage('Invalid enrollment link or session expired. Please request a new enrollment email.');
             setStep('error');
           } else {
-            // Wait for magic link authentication with timeout
+            // Wait for magic link authentication with shorter timeout
             console.log('Waiting for magic link authentication...');
             setMessage('Please wait while we process your enrollment link...');
             setStep('loading');
             
-            // Add timeout to prevent infinite loading
-            setTimeout(() => {
-              if (step === 'loading') {
-                console.log('Timeout waiting for authentication');
-                setError('Authentication timeout. Please try clicking the enrollment link again.');
-                setStep('error');
-              }
-            }, 30000); // 30 second timeout
+            // Add timeout to prevent infinite loading - use a ref to track current step
+            const timeoutId = setTimeout(() => {
+              console.log('Timeout waiting for authentication, current step:', step);
+              setError('Authentication timeout. Please try clicking the enrollment link again.');
+              setStep('error');
+            }, 10000); // 10 second timeout
+            
+            // Store timeout ID to clear it if authentication succeeds
+            window.enrollmentTimeout = timeoutId;
           }
         }
       } catch (error) {
@@ -251,7 +258,14 @@ export default function EnrollPage() {
       checkSession();
     }
 
-    return () => subscription?.unsubscribe();
+    return () => {
+      subscription?.unsubscribe();
+      // Clear timeout on cleanup
+      if (window.enrollmentTimeout) {
+        clearTimeout(window.enrollmentTimeout);
+        window.enrollmentTimeout = null;
+      }
+    };
   }, [router.query, router.isReady]);
 
   const handleInputChange = (e) => {
@@ -362,19 +376,46 @@ export default function EnrollPage() {
     );
   }
 
-  // This check will be handled by the loading state instead
-  if (step === 'error' && message.includes('Invalid enrollment link')) {
+  // Handle error states
+  if (step === 'error') {
      return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
-        <div>
-          <h2>Invalid enrollment link</h2>
-          <p>Please check the link from your email or request a new enrollment email.</p>
-          <button
-            onClick={() => router.push('/')}
-            style={{ padding: '12px 24px', backgroundColor: '#1e40af', color: 'white', border: 'none', borderRadius: '6px' }}
-          >
-            Go to Homepage
-          </button>
+        <div style={{ textAlign: 'center', maxWidth: '500px', padding: '2rem' }}>
+          <h2 style={{ color: '#dc2626', marginBottom: '1rem' }}>Enrollment Error</h2>
+          {error && (
+            <p style={{ marginBottom: '1.5rem', color: '#374151' }}>{error}</p>
+          )}
+          {message && (
+            <p style={{ marginBottom: '1.5rem', color: '#374151' }}>{message}</p>
+          )}
+          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <button
+              onClick={() => window.location.reload()}
+              style={{ 
+                padding: '12px 24px', 
+                backgroundColor: '#059669', 
+                color: 'white', 
+                border: 'none', 
+                borderRadius: '6px',
+                cursor: 'pointer'
+              }}
+            >
+              Try Again
+            </button>
+            <button
+              onClick={() => router.push('/')}
+              style={{ 
+                padding: '12px 24px', 
+                backgroundColor: '#1e40af', 
+                color: 'white', 
+                border: 'none', 
+                borderRadius: '6px',
+                cursor: 'pointer'
+              }}
+            >
+              Go to Homepage
+            </button>
+          </div>
         </div>
       </div>
     );
