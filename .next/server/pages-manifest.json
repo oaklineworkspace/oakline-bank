@@ -2,7 +2,9 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/": "pages/index.js",
-  "/admin/create-user": "pages/admin/create-user.js",
-  "/api/admin/create-user": "pages/api/admin/create-user.js"
+  "/apply": "pages/apply.js",
+  "/login": "pages/login.js",
+  "/enroll": "pages/enroll.js",
+  "/api/create-auth-user": "pages/api/create-auth-user.js",
+  "/": "pages/index.js"
 }
