@@ -155,7 +155,7 @@ export default function Dashboard() {
               padding: '1.5rem',
               borderRadius: '12px',
               boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-              border: account.status === 'limited' ? '2px solid #ffc107' : '2px solid #28a745'
+              border: '2px solid #28a745'
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                 <h3 style={{ margin: 0, color: '#0070f3' }}>{account.account_type} Account</h3>
@@ -164,10 +164,10 @@ export default function Dashboard() {
                   borderRadius: '20px',
                   fontSize: '12px',
                   fontWeight: 'bold',
-                  backgroundColor: account.status === 'active' ? '#28a745' : '#ffc107',
+                  backgroundColor: '#28a745',
                   color: 'white'
                 }}>
-                  {account.status.toUpperCase()}
+                  ACTIVE
                 </span>
               </div>
               

@@ -62,11 +62,11 @@ export default async function handler(req, res) {
             <h2>Hello ${first_name} ${last_name},</h2>
             <p>Congratulations! Your account application has been received and processed successfully.</p>
 
-            ${accountNumbers && accountNumbers.length > 0 ? `
+            ${account_numbers && account_numbers.length > 0 ? `
             <div class="accounts">
               <h3>📋 Your New Account Details:</h3>
-              ${accountNumbers.map((num, index) => `
-                <p><strong>${account_types[index]}:</strong> ${num}</p>
+              ${account_numbers.map((num, index) => `
+                <p><strong>${account_types && account_types[index] ? account_types[index].replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Account'}:</strong> ${num}</p>
               `).join('')}
               <p><strong>Routing Number:</strong> 075915826</p>
             </div>

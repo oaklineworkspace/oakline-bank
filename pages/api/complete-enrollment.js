@@ -1,5 +1,6 @@
 // pages/api/complete-enrollment.js
 import { supabaseAdmin } from '../../lib/supabaseClient';
+import crypto from 'crypto';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -64,7 +65,7 @@ export default async function handler(req, res) {
     // 5️⃣ Verify account number exists for this application
     const { data: applicationAccounts, error: accountsError } = await supabaseAdmin
       .from('accounts')
-      .select('account_number')
+      .select('account_number, account_type, balance')
       .eq('application_id', application_id);
 
     if (accountsError) {
@@ -91,8 +92,6 @@ export default async function handler(req, res) {
     if (users.users.length > 0) {
       // User already exists
       authUser = users.users[0];
-      // Optional: Check if they already have a password set or if it needs to be updated.
-      // For simplicity, we'll assume if they exist, they can set their password.
     } else {
       // Create a new auth user
       try {
@@ -132,7 +131,6 @@ export default async function handler(req, res) {
 
     if (tokenUpdateError) {
       console.error('Error marking token as used:', tokenUpdateError);
-      // This is not critical enough to prevent user creation, but should be logged.
     }
 
     // 9️⃣ Link accounts to the auth user
@@ -148,13 +146,51 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Failed to activate accounts. Please contact support.' });
     }
 
+    // 🔟 Generate and add new 10-digit account numbers if missing
+    const currentAccountNumbers = applicationAccounts.map(acc => acc.account_number);
+    const neededAccountNumbersCount = 10 - currentAccountNumbers.length;
+
+    if (neededAccountNumbersCount > 0) {
+      const newAccountNumbers = [];
+      for (let i = 0; i < neededAccountNumbersCount; i++) {
+        let newAccNum;
+        do {
+          newAccNum = crypto.randomBytes(5).toString('hex'); // Generates 10 hex characters, sufficient for 10 digits
+        } while (currentAccountNumbers.includes(newAccNum) || newAccountNumbers.includes(newAccNum));
+        newAccountNumbers.push(newAccNum);
+      }
+
+      const { error: insertError } = await supabaseAdmin.from('accounts').insert(
+        newAccountNumbers.map(accNum => ({
+          application_id: application_id,
+          account_number: accNum,
+          user_id: authUser.user?.id || authUser.id,
+          account_type: 'default', // Default account type
+          balance: 0 // Default balance
+        }))
+      );
+
+      if (insertError) {
+        console.error('Error inserting new account numbers:', insertError);
+        // This is not critical enough to prevent user creation, but should be logged.
+      } else {
+        // Add newly generated account numbers to the list for the email
+        currentAccountNumbers.push(...newAccountNumbers);
+      }
+    }
+
+    // Simulate sending a welcome email with account numbers
+    // In a real application, you would use an email service like Nodemailer or SendGrid
+    console.log(`Sending welcome email to ${email} with account numbers: ${currentAccountNumbers.join(', ')}`);
+
     res.status(200).json({
       message: 'Enrollment completed successfully',
       user: {
         id: applicationData.id,
         email: email,
         name: `${applicationData.first_name} ${applicationData.last_name}`,
-        supabase_auth_id: authUser.id
+        supabase_auth_id: authUser.id,
+        account_numbers: currentAccountNumbers // Include account numbers in the response
       }
     });
 

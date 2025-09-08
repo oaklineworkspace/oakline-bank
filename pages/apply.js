@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
@@ -195,9 +194,9 @@ export default function Apply() {
         newErrors.phone = 'Invalid phone number';
       }
       if (!formData.dateOfBirth) newErrors.dateOfBirth = 'Date of birth is required';
-      
+
       if (!getEffectiveCountry()) newErrors.country = 'Country is required';
-      
+
       if (getEffectiveCountry() === 'US') {
         if (!formData.ssn.trim()) newErrors.ssn = 'SSN is required';
       } else {
@@ -225,7 +224,7 @@ export default function Apply() {
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    
+
     setFormData(prev => {
       const newData = {
         ...prev,
@@ -361,30 +360,38 @@ export default function Apply() {
           .select('account_number')
           .eq('account_number', num)
           .single();
-        
+
         return !error && data; // Returns true if account number exists
       };
 
       // Generate unique random 10-digit account number
       const generateAccountNumber = async () => {
         let num;
+        let attempts = 0;
+        const maxAttempts = 100; // Prevent infinite loops in case of very high collision rate
+
         do {
           num = '';
           for (let i = 0; i < 10; i++) {
             num += Math.floor(Math.random() * 10);
           }
-        } while (await isAccountNumberTaken(num));
+          attempts++;
+        } while (await isAccountNumberTaken(num) && attempts < maxAttempts);
+
+        if (attempts === maxAttempts) {
+          throw new Error('Could not generate a unique account number after multiple attempts.');
+        }
         return num;
       };
 
       // Create accounts for each selected account type
       const accountNumbers = [];
       const accountTypes = [];
-      
+
       for (const accountTypeId of formData.accountTypes) {
         const accountType = ACCOUNT_TYPES.find(at => at.id === accountTypeId);
         const accountNumber = await generateAccountNumber();
-        
+
         const enumMapping = {
           'Checking Account': 'checking_account',
           'Savings Account': 'savings_account', 
@@ -411,15 +418,19 @@ export default function Apply() {
           'Escrow Account': 'escrow_account'
         };
 
+        const dbAccountType = enumMapping[accountType.name] || accountType.name.toLowerCase().replace(/\s+/g, '_');
+
         const { error: accountError } = await supabase
           .from('accounts')
           .insert([{
             application_id: applicationId,
             account_number: accountNumber,
-            account_type: enumMapping[accountType.name] || accountType.name.toLowerCase().replace(/\s+/g, '_'),
+            account_type: dbAccountType,
             balance: 0.00,
-            status: 'limited' // Start with limited status until enrollment completes
-          }]);
+            routing_number: '075915826'
+          }])
+          .select()
+          .single();
 
         if (accountError) {
           console.error('Account creation error:', accountError);
@@ -854,7 +865,7 @@ export default function Apply() {
   return (
     <div style={styles.container}>
       <div style={styles.backgroundPattern}></div>
-      
+
       <div style={styles.content}>
         {/* Header */}
         <div style={styles.header}>
@@ -1468,7 +1479,7 @@ export default function Apply() {
             transform: translateY(0);
           }
         }
-        
+
         @keyframes spin {
           from {
             transform: rotate(0deg);
@@ -1477,7 +1488,7 @@ export default function Apply() {
             transform: rotate(360deg);
           }
         }
-        
+
         @media (max-width: 768px) {
           .grid-cols-2 {
             grid-template-columns: 1fr !important;
@@ -1486,7 +1497,7 @@ export default function Apply() {
             grid-template-columns: 1fr !important;
           }
         }
-        
+
         input:focus, select:focus {
           outline: none !important;
           border-color: #3b82f6 !important;
