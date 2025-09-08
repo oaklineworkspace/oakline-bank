@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 
 const COUNTRIES = [
@@ -42,7 +41,7 @@ const ACCOUNT_TYPES = [
 
 const EMPLOYMENT_OPTIONS = [
   'Employed Full-time',
-  'Employed Part-time', 
+  'Employed Part-time',
   'Self-employed',
   'Student',
   'Retired',
@@ -88,7 +87,7 @@ export default function CreateUser() {
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    
+
     if (type === 'checkbox' && name === 'sendEnrollmentEmail') {
       setFormData(prev => ({ ...prev, [name]: checked }));
     } else {
@@ -120,66 +119,89 @@ export default function CreateUser() {
 
   const validateForm = () => {
     const newErrors = {};
-    
-    if (!formData.firstName.trim()) newErrors.firstName = 'First name is required';
-    if (!formData.lastName.trim()) newErrors.lastName = 'Last name is required';
-    if (!formData.email.trim()) newErrors.email = 'Email is required';
+
+    // Personal Information
+    if (!formData.firstName?.trim()) newErrors.firstName = 'First name is required';
+    if (!formData.lastName?.trim()) newErrors.lastName = 'Last name is required';
+    if (!formData.email?.trim()) newErrors.email = 'Email is required';
+    if (!formData.phone?.trim()) newErrors.phone = 'Phone number is required';
     if (!formData.dateOfBirth) newErrors.dateOfBirth = 'Date of birth is required';
-    if (!formData.address.trim()) newErrors.address = 'Address is required';
-    if (!formData.city.trim()) newErrors.city = 'City is required';
-    if (!formData.state.trim()) newErrors.state = 'State is required';
-    if (!formData.zipCode.trim()) newErrors.zipCode = 'ZIP code is required';
-    if (formData.accountTypes.length === 0) newErrors.accountTypes = 'At least one account type is required';
-    if (!formData.annualIncome.trim()) newErrors.annualIncome = 'Annual income is required';
-    if (!formData.password.trim()) newErrors.password = 'Password is required';
-    
-    // Validate SSN or ID number based on country
-    if (formData.country === 'US' && !formData.ssn.trim()) {
-      newErrors.ssn = 'SSN is required for US residents';
-    } else if (formData.country !== 'US' && !formData.idNumber.trim()) {
-      newErrors.idNumber = 'ID number is required for non-US residents';
+    if (!formData.country) newErrors.country = 'Country is required';
+
+    // SSN or ID validation
+    if (formData.country === 'US') {
+      if (!formData.ssn?.trim()) newErrors.ssn = 'SSN is required for US residents';
+    } else {
+      if (!formData.idNumber?.trim()) newErrors.idNumber = 'ID number is required for non-US residents';
     }
-    
-    // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (formData.email && !emailRegex.test(formData.email)) {
-      newErrors.email = 'Valid email address is required';
+
+    // Address Information
+    if (!formData.address?.trim()) newErrors.address = 'Address is required';
+    if (!formData.city?.trim()) newErrors.city = 'City is required';
+    if (!formData.state?.trim()) newErrors.state = 'State is required';
+    if (!formData.zipCode?.trim()) newErrors.zipCode = 'ZIP code is required';
+
+    // Account Information
+    if (!formData.accountTypes || formData.accountTypes.length === 0) {
+      newErrors.accountTypes = 'At least one account type must be selected';
     }
-    
+    if (!formData.employmentStatus) newErrors.employmentStatus = 'Employment status is required';
+    if (!formData.annualIncome) newErrors.annualIncome = 'Annual income is required';
+    if (!formData.password?.trim()) newErrors.password = 'Initial password is required';
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       setMessage('❌ Please fix the validation errors below');
       return;
     }
-    
+
     setLoading(true);
     setMessage('Creating user account...');
-    
+
     try {
-      // Submit the application using the existing API
-      const response = await fetch('/api/applications', {
+      // Map form data to match API expectations
+      const apiData = {
+        firstName: formData.firstName,
+        middleName: formData.middleName,
+        lastName: formData.lastName,
+        email: formData.email,
+        phone: formData.phone,
+        dateOfBirth: formData.dateOfBirth, // This will be mapped to 'dob' in API
+        ssn: formData.country === 'US' ? formData.ssn : null,
+        idNumber: formData.country !== 'US' ? formData.idNumber : null,
+        country: formData.country,
+        address: formData.address,
+        city: formData.city,
+        state: formData.state,
+        zipCode: formData.zipCode,
+        accountTypes: formData.accountTypes, // This will be mapped to 'selectedAccountTypes' in API
+        employmentStatus: formData.employmentStatus,
+        annualIncome: formData.annualIncome,
+        password: formData.password,
+        agreeToTerms: true, // Admin creation auto-agrees to terms
+        sendEnrollmentEmail: formData.sendEnrollmentEmail
+      };
+
+      // Submit using the admin API endpoint
+      const response = await fetch('/api/admin/create-user', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          ...formData,
-          agreeToTerms: true, // Admin creation implies terms agreement
-          adminCreated: true
-        })
+        body: JSON.stringify(apiData)
       });
 
       const data = await response.json();
-      
+
       if (response.ok) {
-        setMessage(`✅ User account created successfully!\n\nApplication ID: ${data.application.id}\nGenerated Accounts: ${data.accounts?.length || 0}\nEmail: ${formData.email}\n\n${formData.sendEnrollmentEmail ? 'Enrollment email has been sent.' : 'No enrollment email sent.'}`);
-        
+        setMessage(`✅ User account created successfully!\n\nUser ID: ${data.userId}\nEmail: ${formData.email}\n\n${formData.sendEnrollmentEmail ? 'Enrollment email has been sent.' : 'No enrollment email sent.'}`);
+
         // Reset form
         setFormData({
           firstName: '',
@@ -196,7 +218,7 @@ export default function CreateUser() {
           city: '',
           state: '',
           zipCode: '',
-          accountTypes: ['checking'],
+          accountTypes: [1],
           employmentStatus: 'Employed Full-time',
           annualIncome: '',
           password: '',
@@ -204,12 +226,13 @@ export default function CreateUser() {
         });
         setErrors({});
       } else {
-        setMessage(`❌ Error: ${data.error}`);
+        // Handle specific API errors if available, otherwise a general message
+        setMessage(`❌ Error creating user account: ${data.error || 'An unknown error occurred.'}`);
       }
     } catch (error) {
-      setMessage(`❌ Error: ${error.message}`);
+      setMessage(`❌ An unexpected error occurred: ${error.message}`);
     }
-    
+
     setLoading(false);
   };
 
@@ -407,12 +430,12 @@ export default function CreateUser() {
         <h1 style={{ margin: 0, fontSize: '2rem', fontWeight: '700' }}>👥 Admin - Create User Account</h1>
         <p style={{ margin: '0.5rem 0 0 0', opacity: 0.9 }}>Create a new user account with banking services</p>
       </div>
-      
+
       <form onSubmit={handleSubmit} style={styles.form}>
         {/* Personal Information */}
         <div style={styles.section}>
           <h3 style={styles.sectionTitle}>👤 Personal Information</h3>
-          
+
           <div style={styles.inputGrid}>
             <div style={styles.inputGroup}>
               <label style={styles.label}>First Name *</label>
@@ -430,7 +453,7 @@ export default function CreateUser() {
               />
               {errors.firstName && <div style={styles.errorText}>{errors.firstName}</div>}
             </div>
-            
+
             <div style={styles.inputGroup}>
               <label style={styles.label}>Middle Name</label>
               <input
@@ -442,7 +465,7 @@ export default function CreateUser() {
                 placeholder="Enter middle name (optional)"
               />
             </div>
-            
+
             <div style={styles.inputGroup}>
               <label style={styles.label}>Last Name *</label>
               <input
@@ -460,7 +483,7 @@ export default function CreateUser() {
               {errors.lastName && <div style={styles.errorText}>{errors.lastName}</div>}
             </div>
           </div>
-          
+
           <div style={styles.inputGrid}>
             <div style={styles.inputGroup}>
               <label style={styles.label}>Email Address *</label>
@@ -478,20 +501,25 @@ export default function CreateUser() {
               />
               {errors.email && <div style={styles.errorText}>{errors.email}</div>}
             </div>
-            
+
             <div style={styles.inputGroup}>
-              <label style={styles.label}>Phone Number</label>
+              <label style={styles.label}>Phone Number *</label>
               <input
                 type="tel"
                 name="phone"
                 value={formData.phone}
                 onChange={handleInputChange}
-                style={styles.input}
+                style={{
+                  ...styles.input,
+                  ...(errors.phone ? styles.inputError : {})
+                }}
                 placeholder="Enter phone number"
+                required
               />
+              {errors.phone && <div style={styles.errorText}>{errors.phone}</div>}
             </div>
           </div>
-          
+
           <div style={styles.inputGrid}>
             <div style={styles.inputGroup}>
               <label style={styles.label}>Date of Birth *</label>
@@ -508,22 +536,26 @@ export default function CreateUser() {
               />
               {errors.dateOfBirth && <div style={styles.errorText}>{errors.dateOfBirth}</div>}
             </div>
-            
+
             <div style={styles.inputGroup}>
               <label style={styles.label}>Country *</label>
               <select
                 name="country"
                 value={formData.country}
                 onChange={handleInputChange}
-                style={styles.select}
+                style={{
+                  ...styles.select,
+                  ...(errors.country ? styles.inputError : {})
+                }}
                 required
               >
                 {COUNTRIES.map(country => (
                   <option key={country.code} value={country.code}>{country.name}</option>
                 ))}
               </select>
+              {errors.country && <div style={styles.errorText}>{errors.country}</div>}
             </div>
-            
+
             <div style={styles.inputGroup}>
               <label style={styles.label}>{formData.country === 'US' ? 'SSN *' : 'ID Number *'}</label>
               <input
@@ -543,7 +575,7 @@ export default function CreateUser() {
               )}
             </div>
           </div>
-          
+
           <div style={styles.inputGroup}>
             <label style={styles.label}>Mother's Maiden Name</label>
             <input
@@ -560,7 +592,7 @@ export default function CreateUser() {
         {/* Address Information */}
         <div style={styles.section}>
           <h3 style={styles.sectionTitle}>🏠 Address Information</h3>
-          
+
           <div style={styles.inputGroup}>
             <label style={styles.label}>Street Address *</label>
             <input
@@ -577,7 +609,7 @@ export default function CreateUser() {
             />
             {errors.address && <div style={styles.errorText}>{errors.address}</div>}
           </div>
-          
+
           <div style={styles.inputGrid}>
             <div style={styles.inputGroup}>
               <label style={styles.label}>City *</label>
@@ -595,7 +627,7 @@ export default function CreateUser() {
               />
               {errors.city && <div style={styles.errorText}>{errors.city}</div>}
             </div>
-            
+
             <div style={styles.inputGroup}>
               <label style={styles.label}>State/Province *</label>
               {formData.country === 'US' ? (
@@ -630,7 +662,7 @@ export default function CreateUser() {
               )}
               {errors.state && <div style={styles.errorText}>{errors.state}</div>}
             </div>
-            
+
             <div style={styles.inputGroup}>
               <label style={styles.label}>ZIP/Postal Code *</label>
               <input
@@ -653,7 +685,7 @@ export default function CreateUser() {
         {/* Account & Financial Information */}
         <div style={styles.section}>
           <h3 style={styles.sectionTitle}>💼 Account & Financial Information</h3>
-          
+
           <div style={styles.inputGroup}>
             <label style={styles.label}>Account Types * (Select at least one)</label>
             <div style={styles.accountTypesGrid}>
@@ -703,7 +735,7 @@ export default function CreateUser() {
             </div>
             {errors.accountTypes && <div style={styles.errorText}>{errors.accountTypes}</div>}
           </div>
-          
+
           <div style={styles.inputGrid}>
             <div style={styles.inputGroup}>
               <label style={styles.label}>Employment Status *</label>
@@ -711,15 +743,19 @@ export default function CreateUser() {
                 name="employmentStatus"
                 value={formData.employmentStatus}
                 onChange={handleInputChange}
-                style={styles.select}
+                style={{
+                  ...styles.select,
+                  ...(errors.employmentStatus ? styles.inputError : {})
+                }}
                 required
               >
                 {EMPLOYMENT_OPTIONS.map(option => (
                   <option key={option} value={option}>{option}</option>
                 ))}
               </select>
+              {errors.employmentStatus && <div style={styles.errorText}>{errors.employmentStatus}</div>}
             </div>
-            
+
             <div style={styles.inputGroup}>
               <label style={styles.label}>Annual Income *</label>
               <input
@@ -743,7 +779,7 @@ export default function CreateUser() {
         {/* Account Security */}
         <div style={styles.section}>
           <h3 style={styles.sectionTitle}>🔒 Account Security</h3>
-          
+
           <div style={styles.inputGroup}>
             <label style={styles.label}>Initial Password *</label>
             <input
@@ -760,7 +796,7 @@ export default function CreateUser() {
             />
             {errors.password && <div style={styles.errorText}>{errors.password}</div>}
           </div>
-          
+
           <label style={styles.checkboxLabel}>
             <input
               type="checkbox"
