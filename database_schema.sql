@@ -74,6 +74,7 @@ CREATE TABLE public.applications (
   annual_income annual_income_enum,
   account_types account_type_enum[],
   agree_to_terms boolean DEFAULT false,
+  application_status VARCHAR(20) DEFAULT 'pending' CHECK (application_status IN ('pending', 'approved', 'rejected', 'under_review')),
   created_at timestamp without time zone DEFAULT now(),
   CONSTRAINT applications_pkey PRIMARY KEY (id)
 );
