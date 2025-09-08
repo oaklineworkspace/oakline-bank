@@ -1,4 +1,3 @@
-
 import { supabaseAdmin } from '../../lib/supabaseClient';
 import { sendEmail } from '../../lib/email';
 
@@ -16,7 +15,7 @@ export default async function handler(req, res) {
   try {
     // Generate enrollment token
     const enrollmentToken = `enroll_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
-    
+
     // Store enrollment token
     const { error: enrollmentError } = await supabaseAdmin
       .from('enrollments')
@@ -31,7 +30,14 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Failed to create enrollment record' });
     }
 
-    const enrollmentLink = `${process.env.NEXT_PUBLIC_SITE_URL}/enroll?token=${enrollmentToken}&application_id=${application_id}`;
+    // Get the account numbers for the email
+    const accountNumbers = account_numbers || [];
+
+    // Generate enrollment link
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.REPLIT_DEV_DOMAIN 
+      ? `https://${process.env.REPLIT_DEV_DOMAIN}`
+      : 'https://oaklineworkspac-oakline-bank.repl.co';
+    const enrollLink = `${siteUrl}/enroll?token=${enrollmentToken}&application_id=${application_id}`;
 
     const emailHtml = `
       <!DOCTYPE html>
@@ -55,28 +61,28 @@ export default async function handler(req, res) {
           <div class="content">
             <h2>Hello ${first_name} ${last_name},</h2>
             <p>Congratulations! Your account application has been received and processed successfully.</p>
-            
-            ${account_numbers && account_numbers.length > 0 ? `
+
+            ${accountNumbers && accountNumbers.length > 0 ? `
             <div class="accounts">
               <h3>📋 Your New Account Details:</h3>
-              ${account_numbers.map((num, index) => `
+              ${accountNumbers.map((num, index) => `
                 <p><strong>${account_types[index]}:</strong> ${num}</p>
               `).join('')}
               <p><strong>Routing Number:</strong> 075915826</p>
             </div>
             ` : ''}
-            
+
             <p><strong>🔐 Complete Your Enrollment:</strong></p>
             <p>To access your online banking account, please complete your enrollment by clicking the button below:</p>
-            
+
             <div style="text-align: center;">
               <a href="${enrollmentLink}" class="button">Complete Enrollment</a>
             </div>
-            
+
             <p><em>This link will expire in 7 days for security purposes.</em></p>
-            
+
             <p>If you have any questions, please contact our customer support team.</p>
-            
+
             <p>Thank you for choosing Oakline Bank!</p>
             <p><strong>The Oakline Bank Team</strong></p>
           </div>

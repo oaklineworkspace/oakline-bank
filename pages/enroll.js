@@ -6,7 +6,7 @@ import { useRouter } from 'next/router';
 export default function EnrollPage() {
   const router = useRouter();
   const { token, application_id } = router.query;
-  const [formData, setFormData] = useState({ email: '', password: '', confirmPassword: '', ssn: '', id_number: '', accountNumber: '' });
+  const [formData, setFormData] = useState({ email: '', password: '', confirmPassword: '', ssn: '', id_number: '', accountNumber: '', agreeToTerms: false });
   const [applicationInfo, setApplicationInfo] = useState(null);
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
@@ -76,8 +76,11 @@ export default function EnrollPage() {
   }, [token, application_id]);
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({ 
+      ...prev, 
+      [name]: type === 'checkbox' ? checked : value 
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -117,6 +120,12 @@ export default function EnrollPage() {
         setLoading(false);
         return;
       }
+    }
+
+    if (!formData.agreeToTerms) {
+      setMessage('You must agree to the Terms of Service and Privacy Policy');
+      setLoading(false);
+      return;
     }
 
     try {
@@ -237,7 +246,7 @@ export default function EnrollPage() {
               value={formData.ssn}
               onChange={handleInputChange}
               required
-              style={{ width: '100%', padding: '8px', marginTop: '4px' }}
+              style={{ width: '100%', padding: '8px', marginTop: '4px', border: '1px solid #d1d5db', borderRadius: '4px' }}
               placeholder="XXX-XX-XXXX"
               maxLength="11"
             />
@@ -251,7 +260,7 @@ export default function EnrollPage() {
               value={formData.id_number}
               onChange={handleInputChange}
               required
-              style={{ width: '100%', padding: '8px', marginTop: '4px' }}
+              style={{ width: '100%', padding: '8px', marginTop: '4px', border: '1px solid #d1d5db', borderRadius: '4px' }}
               placeholder="Enter your government ID number"
             />
           </div>
@@ -264,7 +273,7 @@ export default function EnrollPage() {
             value={formData.accountNumber}
             onChange={handleInputChange}
             required
-            style={{ width: '100%', padding: '8px', marginTop: '4px' }}
+            style={{ width: '100%', padding: '8px', marginTop: '4px', border: '1px solid #d1d5db', borderRadius: '4px' }}
           >
             <option value="">Select an account number</option>
             {accounts.map((account, index) => (
@@ -273,6 +282,26 @@ export default function EnrollPage() {
               </option>
             ))}
           </select>
+        </div>
+
+        <div style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <input
+            type="checkbox"
+            name="agreeToTerms"
+            checked={formData.agreeToTerms}
+            onChange={handleInputChange}
+            required
+            style={{ 
+              width: '18px', 
+              height: '18px', 
+              accentColor: '#22c55e',
+              cursor: 'pointer'
+            }}
+          />
+          <label style={{ fontSize: '14px', color: '#374151', cursor: 'pointer' }}>
+            I agree to the Terms of Service and Privacy Policy <span style={{color: '#ef4444'}}>*</span>
+            {formData.agreeToTerms && <span style={{ color: '#22c55e', marginLeft: '5px' }}>✓</span>}
+          </label>
         </div>
 
         <button

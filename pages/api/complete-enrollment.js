@@ -135,11 +135,10 @@ export default async function handler(req, res) {
       // This is not critical enough to prevent user creation, but should be logged.
     }
 
-    // 9️⃣ Update the account status from 'limited' to 'active' and link to auth user
+    // 9️⃣ Link accounts to the auth user
     const { error: accountError } = await supabaseAdmin
       .from('accounts')
       .update({ 
-        status: 'active',
         user_id: authUser.user?.id || authUser.id // Link accounts to the auth user
       })
       .eq('application_id', application_id);
