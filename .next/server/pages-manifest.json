@@ -3,7 +3,6 @@
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
   "/": "pages/index.js",
-  "/apply": "pages/apply.js",
   "/admin/create-user": "pages/admin/create-user.js",
-  "/api/applications": "pages/api/applications.js"
+  "/api/admin/create-user": "pages/api/admin/create-user.js"
 }
