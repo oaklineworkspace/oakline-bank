@@ -5,27 +5,26 @@ import ServicesSection from '../components/ServicesSection';
 import FeaturesSection from '../components/FeaturesSection';
 import LoanApprovalSection from '../components/LoanApprovalSection';
 import TestimonialsSection from '../components/TestimonialsSection';
-import Testimonials from '../components/Testimonials';
 import CTA from '../components/CTA';
 import Footer from '../components/Footer';
 import Link from 'next/link';
 
 export default function Home() {
-  // Check if user is logged in (you can replace this with actual auth logic)
-  const user = null; // Set to user object when logged in
+  // Check if user is logged in (replace with actual auth logic)
+  const user = null;
 
   return (
     <div className="page-container">
       <MainMenu user={user} />
       <WelcomeBanner />
-      
+
       <main>
         <HeroSection />
         <ServicesSection />
         <FeaturesSection />
         <LoanApprovalSection />
         <TestimonialsSection />
-        
+
         {/* Online Banking Enrollment Section */}
         <section style={styles.enrollmentSection}>
           <div style={styles.container}>
@@ -64,7 +63,7 @@ export default function Home() {
             </div>
           </div>
         </section>
-        
+
         {/* New Account Opening CTA */}
         <CTA
           title="New to Oakline Bank?"
@@ -73,7 +72,7 @@ export default function Home() {
           buttonLink="/apply"
           variant="primary"
         />
-        
+
         {/* Existing Customer CTA */}
         <CTA
           title="Ready to Start Your Financial Journey?"
@@ -83,7 +82,7 @@ export default function Home() {
           variant="secondary"
         />
       </main>
-      
+
       <Footer />
     </div>
   );
@@ -181,8 +180,4 @@ const styles = {
   featureIcon: {
     fontSize: '18px'
   }
-}
-
-const styles = {
-  // Modern homepage with enhanced long-scrolling experience
 };
