@@ -238,7 +238,7 @@ export default function EnrollPage() {
 
         {applicationInfo?.country === 'US' ? (
           <div style={{ marginBottom: '1rem' }}>
-            <label>Social Security Number <span style={{color: '#ef4444'}}>*</span>:</label>
+            <label>Social Security Number (SSN) <span style={{color: '#ef4444'}}>*</span>:</label>
             <input
               type="text"
               name="ssn"
@@ -283,7 +283,18 @@ export default function EnrollPage() {
           </select>
         </div>
 
-        <div style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div style={{ 
+          marginBottom: '1rem', 
+          display: 'flex', 
+          alignItems: 'flex-start', 
+          gap: '12px',
+          padding: '16px',
+          backgroundColor: '#f8fafc',
+          borderRadius: '8px',
+          border: '2px solid #e2e8f0',
+          position: 'relative',
+          zIndex: 10
+        }}>
           <input
             type="checkbox"
             name="agreeToTerms"
@@ -291,15 +302,26 @@ export default function EnrollPage() {
             onChange={handleInputChange}
             required
             style={{
-              width: '18px',
-              height: '18px',
+              width: '20px',
+              height: '20px',
               accentColor: '#22c55e',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              marginTop: '2px',
+              flexShrink: 0
             }}
           />
-          <label style={{ fontSize: '14px', color: '#374151', cursor: 'pointer' }}>
+          <label 
+            style={{ 
+              fontSize: '14px', 
+              color: '#374151', 
+              cursor: 'pointer',
+              lineHeight: '1.5',
+              userSelect: 'none'
+            }}
+            onClick={() => handleInputChange({target: {name: 'agreeToTerms', type: 'checkbox', checked: !formData.agreeToTerms}})}
+          >
             I agree to the Terms of Service and Privacy Policy <span style={{color: '#ef4444'}}>*</span>
-            {formData.agreeToTerms && <span style={{ color: '#22c55e', marginLeft: '5px' }}>✓</span>}
+            {formData.agreeToTerms && <span style={{ color: '#22c55e', marginLeft: '8px', fontSize: '16px', fontWeight: 'bold' }}>✓ Agreed</span>}
           </label>
         </div>
 

@@ -62,9 +62,16 @@ export default async function handler(req, res) {
     // 5️⃣ Create Supabase Auth user with proper user metadata
     const userMetadata = {
       first_name: applicationData.first_name,
+      middle_name: applicationData.middle_name || '',
       last_name: applicationData.last_name,
+      full_name: `${applicationData.first_name} ${applicationData.middle_name || ''} ${applicationData.last_name}`.trim(),
       country: applicationData.country,
-      application_id: applicationData.id
+      application_id: applicationData.id,
+      phone: applicationData.phone,
+      address: applicationData.address,
+      city: applicationData.city,
+      state: applicationData.state,
+      zip_code: applicationData.zip_code
     };
 
     // Add the appropriate ID field based on country
@@ -75,8 +82,8 @@ export default async function handler(req, res) {
     }
 
     const { data: newAuthData, error: authError } = await supabaseAdmin.auth.admin.createUser({
-      email: applicationData.email,
-      password: 'temp_password_' + Date.now(), // Temporary password
+      email: applicationData.email.toLowerCase().trim(),
+      password: 'temp_password_' + Date.now() + '_' + Math.random().toString(36).substring(7), // More secure temporary password
       email_confirm: true,
       user_metadata: userMetadata
     });

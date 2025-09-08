@@ -73,6 +73,65 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Error verifying account information' });
     }
 
+    if (!applicationAccounts || applicationAccounts.length === 0) {
+      return res.status(404).json({ error: 'No accounts found for this application' });
+    }
+
+    // Verify the selected account number belongs to this application
+    const selectedAccount = applicationAccounts.find(acc => acc.account_number === accountNumber);
+    if (!selectedAccount) {
+      return res.status(400).json({ error: 'Invalid account number selected' });
+    }
+
+    // 6️⃣ Update the user's password in Supabase Auth
+    const { data: existingAuthUsers, error: listError } = await supabaseAdmin.auth.admin.listUsers();
+    const existingAuthUser = existingAuthUsers?.users?.find(user => user.email === applicationData.email);
+
+    if (!existingAuthUser) {
+      return res.status(404).json({ error: 'Auth user not found. Please contact support.' });
+    }
+
+    // Update the auth user's password
+    const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
+      existingAuthUser.id,
+      { password: password }
+    );
+
+    if (updateError) {
+      console.error('Error updating user password:', updateError);
+      return res.status(500).json({ error: 'Failed to set password' });
+    }
+
+    // 7️⃣ Mark enrollment as completed
+    const { error: enrollmentUpdateError } = await supabaseAdmin
+      .from('enrollments')
+      .update({ 
+        is_used: true,
+        completed_at: new Date().toISOString(),
+        selected_account_number: accountNumber
+      })
+      .eq('token', token);
+
+    if (enrollmentUpdateError) {
+      console.error('Error updating enrollment record:', enrollmentUpdateError);
+      // Don't fail the process for this
+    }
+
+    res.status(200).json({
+      message: 'Enrollment completed successfully',
+      user: {
+        id: applicationData.id,
+        email: applicationData.email,
+        name: `${applicationData.first_name} ${applicationData.last_name}`,
+        selected_account: selectedAccount
+      }
+    });
+
+  } catch (error) {
+    console.error('Complete enrollment error:', error);
+    res.status(500).json({ error: 'Internal server error during enrollment completion' });formation' });
+    }
+
     const accountNumbers = applicationAccounts?.map(acc => acc.account_number) || [];
     if (!accountNumbers.includes(accountNumber)) {
       return res.status(400).json({ error: 'Account number verification failed. Please check one of your account numbers.' });
