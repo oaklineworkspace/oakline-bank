@@ -2,10 +2,6 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/admin/resend-enrollment": "pages/admin/resend-enrollment.js",
   "/apply": "pages/apply.js",
-  "/": "pages/index.js",
-  "/api/resend-enrollment": "pages/api/resend-enrollment.js",
-  "/admin/admin-users": "pages/admin/admin-users.js",
-  "/api/admin/get-users": "pages/api/admin/get-users.js"
+  "/": "pages/index.js"
 }
