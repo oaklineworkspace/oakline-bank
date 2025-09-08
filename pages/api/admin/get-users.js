@@ -20,7 +20,7 @@ export default async function handler(req, res) {
     const userData = users.users.map(user => {
       // Check if user is soft-deleted
       const isDeleted = user.deleted_at !== null;
-      
+
       // Try multiple sources for email
       const email = user.email || 
                    user.user_metadata?.email || 
@@ -55,24 +55,80 @@ export default async function handler(req, res) {
 
     // Also try to get users from our database tables for cross-reference
     try {
-      const { data: dbUsers, error: dbError } = await supabaseAdmin
-        .from('applications')
-        .select('email, full_name, created_at')
-        .order('created_at', { ascending: false });
+      // Try to get users from different sources
+      let usersData = [];
+      let error = null;
 
-      if (!dbError && dbUsers) {
-        console.log('Database users found:', dbUsers.length);
-        userData.forEach(authUser => {
-          const matchingDbUser = dbUsers.find(dbUser => 
-            dbUser.email && authUser.email && 
-            !authUser.email.startsWith('[ENCRYPTED]') &&
-            dbUser.email.toLowerCase() === authUser.email.toLowerCase()
-          );
-          if (matchingDbUser) {
-            authUser.db_email = matchingDbUser.email;
-            authUser.full_name = matchingDbUser.full_name;
+      // Try profiles table first
+      try {
+        const { data: profileData, error: profileError } = await supabaseAdmin
+          .from('profiles')
+          .select(`
+            *,
+            applications (
+              first_name,
+              middle_name, 
+              last_name,
+              phone,
+              created_at
+            )
+          `)
+          .order('created_at', { ascending: false });
+
+        if (profileError) {
+          console.log('Profiles table query failed:', profileError);
+        } else if (profileData && profileData.length > 0) {
+          usersData = profileData.map(profile => ({
+            id: profile.user_id,
+            email: profile.email,
+            full_name: `${profile.first_name || ''} ${profile.middle_name ? profile.middle_name + ' ' : ''}${profile.last_name || ''}`.trim(),
+            created_at: profile.created_at,
+            phone_number: profile.phone,
+            source: 'profiles_table'
+          }));
+        }
+      } catch (e) {
+        console.log('Profiles table access error:', e.message);
+      }
+
+      // If no users found, try enrollments table
+      if (usersData.length === 0) {
+        try {
+          const { data: enrollmentData, error: enrollmentError } = await supabaseAdmin
+            .from('enrollments')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+          if (enrollmentError) {
+            console.log('Enrollments table query failed:', enrollmentError);
+          } else if (enrollmentData && enrollmentData.length > 0) {
+            // Get application data for each enrollment
+            for (const enrollment of enrollmentData) {
+              try {
+                const { data: appData } = await supabaseAdmin
+                  .from('applications')
+                  .select('*')
+                  .eq('id', enrollment.application_id)
+                  .single();
+
+                if (appData) {
+                  usersData.push({
+                    id: enrollment.id,
+                    email: enrollment.email,
+                    full_name: appData.first_name + (appData.middle_name ? ' ' + appData.middle_name : '') + ' ' + appData.last_name,
+                    created_at: enrollment.created_at,
+                    phone_number: appData.phone,
+                    source: 'enrollments_table'
+                  });
+                }
+              } catch (err) {
+                console.log('Error fetching application for enrollment:', err.message);
+              }
+            }
           }
-        });
+        } catch (e) {
+          console.log('Enrollments table access error:', e.message);
+        }
       }
     } catch (dbError) {
       console.log('Could not fetch database users for cross-reference:', dbError.message);

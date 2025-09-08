@@ -3,7 +3,9 @@
 DROP POLICY IF EXISTS "Allow anonymous insert on applications" ON applications;
 DROP POLICY IF EXISTS "Allow anonymous insert on accounts" ON accounts;
 DROP POLICY IF EXISTS "Allow anonymous insert on enrollments" ON enrollments;
+DROP POLICY IF EXISTS "Allow anonymous insert on profiles" ON profiles;
 
+DROP TABLE IF EXISTS profiles CASCADE;
 DROP TABLE IF EXISTS enrollments CASCADE;
 DROP TABLE IF EXISTS accounts CASCADE;
 DROP TABLE IF EXISTS applications CASCADE;
@@ -62,6 +64,30 @@ CREATE TABLE applications (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Profiles table - stores user profile information linked to auth users
+CREATE TABLE profiles (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID UNIQUE NOT NULL, -- Links to Supabase Auth user ID
+    application_id UUID REFERENCES applications(id) ON DELETE CASCADE,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    first_name VARCHAR(100),
+    middle_name VARCHAR(100),
+    last_name VARCHAR(100),
+    phone VARCHAR(20),
+    date_of_birth DATE,
+    country VARCHAR(100),
+    address TEXT,
+    city VARCHAR(100),
+    state VARCHAR(100),
+    zip_code VARCHAR(20),
+    ssn VARCHAR(20),
+    id_number VARCHAR(50),
+    is_verified BOOLEAN DEFAULT false,
+    enrollment_completed BOOLEAN DEFAULT false,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- Accounts table - stores actual bank accounts linked to applications
 CREATE TABLE accounts (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -79,22 +105,27 @@ CREATE TABLE accounts (
 -- Enrollments table - manages enrollment tokens and process
 CREATE TABLE enrollments (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    email VARCHAR(255) UNIQUE NOT NULL,
+    email VARCHAR(255) NOT NULL,
     application_id UUID REFERENCES applications(id) ON DELETE CASCADE,
-    token VARCHAR(255) UNIQUE NOT NULL,
+    token VARCHAR(500) UNIQUE NOT NULL,
     is_used BOOLEAN DEFAULT false,
     expires_at TIMESTAMP WITH TIME ZONE DEFAULT (NOW() + INTERVAL '7 days'),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE(email, application_id)
 );
 
 -- Enable Row Level Security
 ALTER TABLE applications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE accounts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE enrollments ENABLE ROW LEVEL SECURITY;
 
 -- Create policies for anonymous access (needed for form submission)
 CREATE POLICY "Allow anonymous insert on applications" ON applications
+    FOR INSERT TO anon WITH CHECK (true);
+
+CREATE POLICY "Allow anonymous insert on profiles" ON profiles
     FOR INSERT TO anon WITH CHECK (true);
 
 CREATE POLICY "Allow anonymous insert on accounts" ON accounts
@@ -107,6 +138,9 @@ CREATE POLICY "Allow anonymous insert on enrollments" ON enrollments
 CREATE POLICY "Allow service role all operations on applications" ON applications
     FOR ALL TO service_role WITH CHECK (true);
 
+CREATE POLICY "Allow service role all operations on profiles" ON profiles
+    FOR ALL TO service_role WITH CHECK (true);
+
 CREATE POLICY "Allow service role all operations on accounts" ON accounts
     FOR ALL TO service_role WITH CHECK (true);
 
@@ -117,6 +151,12 @@ CREATE POLICY "Allow service role all operations on enrollments" ON enrollments
 CREATE POLICY "Users can view own applications" ON applications
     FOR SELECT USING (auth.uid()::text = id::text OR email = auth.email());
 
+CREATE POLICY "Users can view own profiles" ON profiles
+    FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own profiles" ON profiles
+    FOR UPDATE USING (auth.uid() = user_id);
+
 CREATE POLICY "Users can view own accounts" ON accounts
     FOR SELECT USING (auth.uid() = user_id);
 
@@ -126,6 +166,9 @@ CREATE POLICY "Users can view own enrollments" ON enrollments
 -- Create indexes for better performance
 CREATE INDEX idx_applications_email ON applications(email);
 CREATE INDEX idx_applications_id ON applications(id);
+CREATE INDEX idx_profiles_user_id ON profiles(user_id);
+CREATE INDEX idx_profiles_application_id ON profiles(application_id);
+CREATE INDEX idx_profiles_email ON profiles(email);
 CREATE INDEX idx_accounts_application_id ON accounts(application_id);
 CREATE INDEX idx_accounts_user_id ON accounts(user_id);
 CREATE INDEX idx_accounts_account_number ON accounts(account_number);

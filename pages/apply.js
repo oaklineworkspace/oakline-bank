@@ -453,6 +453,7 @@ export default function Apply() {
         .from('enrollments')
         .select('*')
         .eq('email', formData.email.trim().toLowerCase())
+        .eq('application_id', applicationId)
         .single();
 
       if (existingEnrollment) {
@@ -461,10 +462,10 @@ export default function Apply() {
           .from('enrollments')
           .update({ 
             token: enrollmentToken,
-            is_used: false,
-            application_id: applicationId 
+            is_used: false
           })
           .eq('email', formData.email.trim().toLowerCase())
+          .eq('application_id', applicationId)
           .select()
           .single();
 
@@ -495,6 +496,38 @@ export default function Apply() {
           enrollmentRecord = newEnrollmentData;
           console.log('Created new enrollment record with application_id:', applicationId);
         }
+      }
+
+      // Create a preliminary profile record (will be completed during enrollment)
+      try {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert([{
+            application_id: applicationId,
+            email: formData.email.trim().toLowerCase(),
+            first_name: formData.firstName.trim(),
+            middle_name: formData.middleName.trim(),
+            last_name: formData.lastName.trim(),
+            phone: formData.phone.trim(),
+            date_of_birth: formData.dateOfBirth,
+            country: effectiveCountry,
+            address: formData.address.trim(),
+            city: effectiveCity,
+            state: effectiveState,
+            zip_code: formData.zipCode.trim(),
+            ssn: effectiveCountry === 'US' ? formData.ssn.trim() : null,
+            id_number: effectiveCountry !== 'US' ? formData.idNumber.trim() : null,
+            enrollment_completed: false
+          }])
+          .single();
+
+        if (profileError && profileError.code !== '23505') { // Ignore duplicate key errors
+          console.error('Error creating profile record:', profileError);
+        } else {
+          console.log('Profile record created or already exists');
+        }
+      } catch (profileInsertError) {
+        console.log('Profile creation skipped:', profileInsertError.message);
       }
 
       // Create Supabase Auth user immediately after successful application creation

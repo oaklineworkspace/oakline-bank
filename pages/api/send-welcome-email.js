@@ -1,4 +1,3 @@
-
 import { supabaseAdmin } from '../../lib/supabaseAdmin';
 import nodemailer from 'nodemailer';
 
@@ -10,7 +9,7 @@ export default async function handler(req, res) {
   // Check SMTP configuration
   const requiredEnvVars = ['SMTP_HOST', 'SMTP_PORT', 'SMTP_USER', 'SMTP_PASS'];
   const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
-  
+
   if (missingVars.length > 0) {
     console.error('Missing SMTP environment variables:', missingVars);
     return res.status(500).json({ 
@@ -37,8 +36,8 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    // Create SMTP transporter
-    const transporter = nodemailer.createTransporter({
+    // SMTP transporter
+  const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port: parseInt(process.env.SMTP_PORT) || 587,
       secure: process.env.SMTP_PORT === '465',
