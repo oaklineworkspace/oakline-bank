@@ -45,37 +45,47 @@ export default async function handler(req, res) {
       try {
         console.log(`Deleting user: ${userEmail} (${userId})`);
 
-        // Delete related applications
-        const { error: applicationsError } = await supabaseAdmin
-          .from('applications')
-          .delete()
-          .eq('email', userEmail);
-
-        // Delete related accounts
-        const { error: accountsError } = await supabaseAdmin
-          .from('accounts')
-          .delete()
-          .eq('email', userEmail);
-
-        // Delete related enrollments
+        // Delete related data in order (to avoid foreign key constraints)
+        
+        // 1. Delete enrollments first
         const { error: enrollmentsError } = await supabaseAdmin
           .from('enrollments')
           .delete()
           .eq('email', userEmail);
 
-        // Delete the user from Supabase Auth
+        // 2. Delete accounts
+        const { error: accountsError } = await supabaseAdmin
+          .from('accounts')
+          .delete()
+          .eq('email', userEmail);
+
+        // 3. Delete applications
+        const { error: applicationsError } = await supabaseAdmin
+          .from('applications')
+          .delete()
+          .eq('email', userEmail);
+
+        // 4. Delete from users table if it exists
+        const { error: usersError } = await supabaseAdmin
+          .from('users')
+          .delete()
+          .eq('email', userEmail);
+
+        // 5. Finally, delete the user from Supabase Auth
         const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(userId);
 
         if (deleteError) {
-          console.error(`Failed to delete user ${userEmail}:`, deleteError);
+          console.error(`Failed to delete auth user ${userEmail}:`, deleteError);
           results.push({
             userId,
             email: userEmail,
             success: false,
             error: deleteError.message,
-            deletedApplications: !applicationsError,
+            deletedEnrollments: !enrollmentsError,
             deletedAccounts: !accountsError,
-            deletedEnrollments: !enrollmentsError
+            deletedApplications: !applicationsError,
+            deletedUsers: !usersError,
+            deletedAuth: false
           });
         } else {
           console.log(`✅ Successfully deleted user: ${userEmail}`);
@@ -83,9 +93,11 @@ export default async function handler(req, res) {
             userId,
             email: userEmail,
             success: true,
-            deletedApplications: !applicationsError,
+            deletedEnrollments: !enrollmentsError,
             deletedAccounts: !accountsError,
-            deletedEnrollments: !enrollmentsError
+            deletedApplications: !applicationsError,
+            deletedUsers: !usersError,
+            deletedAuth: true
           });
         }
 
