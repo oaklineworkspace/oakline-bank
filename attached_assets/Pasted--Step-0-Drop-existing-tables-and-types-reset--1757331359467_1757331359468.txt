@@ -1,0 +1,105 @@
+-- ---------------------------
+-- Step 0: Drop existing tables and types (reset)
+-- ---------------------------
+drop table if exists accounts cascade;
+drop table if exists applications cascade;
+drop table if exists enrollments cascade;
+
+drop type if exists account_type_enum cascade;
+drop type if exists employment_status_enum cascade;
+drop type if exists annual_income_enum cascade;
+
+-- ---------------------------
+-- Step 1: Create ENUM types
+-- ---------------------------
+create type account_type_enum as enum (
+  'checking_account',
+  'savings_account',
+  'business_checking',
+  'business_savings',
+  'student_checking',
+  'money_market',
+  'certificate_of_deposit',
+  'retirement_ira',
+  'joint_checking',
+  'trust_account',
+  'investment_brokerage',
+  'high_yield_savings',
+  'international_checking',
+  'foreign_currency',
+  'cryptocurrency_wallet',
+  'loan_repayment',
+  'mortgage',
+  'auto_loan',
+  'credit_card',
+  'prepaid_card',
+  'payroll_account',
+  'nonprofit_charity',
+  'escrow_account'
+);
+
+create type employment_status_enum as enum (
+  'employed_fulltime',
+  'employed_parttime',
+  'self_employed',
+  'retired',
+  'student',
+  'unemployed'
+);
+
+create type annual_income_enum as enum (
+  'under_25k',
+  '25k_50k',
+  '50k_75k',
+  '75k_100k',
+  '100k_150k',
+  'over_150k'
+);
+
+-- ---------------------------
+-- Step 2: Create Applications Table
+-- ---------------------------
+create table applications (
+  id uuid primary key default gen_random_uuid(),
+  first_name text not null,
+  last_name text not null,
+  email text not null unique,
+  phone text,
+  date_of_birth date,
+  country text,
+  ssn text,
+  id_number text,
+  address text,
+  city text,
+  state text,
+  zip_code text,
+  employment_status employment_status_enum,
+  annual_income annual_income_enum,
+  account_types account_type_enum[],
+  agree_to_terms boolean default false,
+  created_at timestamp default now()
+);
+
+-- ---------------------------
+-- Step 3: Create Accounts Table
+-- ---------------------------
+create table accounts (
+  id uuid primary key default gen_random_uuid(),
+  application_id uuid references applications(id) on delete cascade,
+  account_number text unique not null,
+  routing_number text not null default '075915826',
+  account_type account_type_enum not null,
+  balance numeric default 0,
+  created_at timestamp default now()
+);
+
+-- ---------------------------
+-- Step 4: Create Enrollments Table
+-- ---------------------------
+create table enrollments (
+  id uuid primary key default gen_random_uuid(),
+  email text not null unique,
+  token text not null,
+  is_used boolean default false,
+  created_at timestamp default now()
+);
