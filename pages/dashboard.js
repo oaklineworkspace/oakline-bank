@@ -1040,7 +1040,7 @@ export default function Dashboard() {
                   <option value="">Select account to send from</option>
                   {accounts.map(account => (
                     <option key={account.id} value={account.id}>
-                      {account.account_number} ({account.account_type}) - {formatCurrency(account.balance || 0)}
+                      {account.account_name || account.account_type?.replace('_', ' ')?.toUpperCase()} - ****{account.account_number?.slice(-4)} - {formatCurrency(account.balance || 0)}
                     </option>
                   ))}
                 </select>
@@ -1082,7 +1082,7 @@ export default function Dashboard() {
                     <option value="">Select account to send to</option>
                     {accounts.filter(acc => acc.id !== transferData.fromAccount).map(account => (
                       <option key={account.id} value={account.id}>
-                        {account.account_name}
+                        {account.account_name || account.account_type?.replace('_', ' ')?.toUpperCase()} - ****{account.account_number?.slice(-4)} - {formatCurrency(account.balance || 0)}
                       </option>
                     ))}
                   </select>
@@ -1257,7 +1257,7 @@ export default function Dashboard() {
                   <option value="">Select account to withdraw from</option>
                   {accounts.map(account => (
                     <option key={account.id} value={account.id}>
-                      {account.account_name} - {formatCurrency(account.balance)}
+                      {account.account_name || account.account_type?.replace('_', ' ')?.toUpperCase()} - ****{account.account_number?.slice(-4)} - {formatCurrency(account.balance || 0)}
                     </option>
                   ))}
                 </select>

@@ -410,19 +410,19 @@ const styles = {
   container: {
     minHeight: '100vh',
     backgroundColor: '#f8fafc',
-    padding: '20px',
+    padding: '10px',
     fontFamily: 'system-ui, -apple-system, sans-serif'
   },
   header: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: '30px',
+    marginBottom: '20px',
     flexWrap: 'wrap',
-    gap: '15px'
+    gap: '10px'
   },
   title: {
-    fontSize: '32px',
+    fontSize: 'clamp(24px, 5vw, 32px)',
     fontWeight: 'bold',
     color: '#1e293b',
     margin: 0
@@ -461,14 +461,14 @@ const styles = {
   },
   grid: {
     display: 'grid',
-    gap: '25px',
+    gap: '15px',
     maxWidth: '1200px',
     margin: '0 auto'
   },
   section: {
     backgroundColor: 'white',
     borderRadius: '12px',
-    padding: '25px',
+    padding: 'clamp(15px, 4vw, 25px)',
     boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
   },
   sectionHeader: {
@@ -499,8 +499,8 @@ const styles = {
   },
   formGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-    gap: '15px'
+    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+    gap: '10px'
   },
   formGroup: {
     display: 'flex',
@@ -545,8 +545,8 @@ const styles = {
   },
   infoGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-    gap: '15px'
+    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+    gap: '10px'
   },
   infoItem: {
     display: 'flex',
@@ -568,8 +568,8 @@ const styles = {
   },
   summaryCard: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-    gap: '20px'
+    gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+    gap: '15px'
   },
   summaryItem: {
     textAlign: 'center',
@@ -658,8 +658,8 @@ const styles = {
   },
   securityOptions: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-    gap: '15px'
+    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+    gap: '10px'
   },
   securityButton: {
     padding: '15px 20px',

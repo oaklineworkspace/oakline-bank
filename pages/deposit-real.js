@@ -187,8 +187,7 @@ function DepositForm() {
               <option value="">Choose an account...</option>
               {accounts.map(account => (
                 <option key={account.id} value={account.id}>
-                  {account.account_number} - {account.account_type} 
-                  (Balance: ${parseFloat(account.balance || 0).toFixed(2)})
+                  {account.account_name || account.account_type?.replace('_', ' ')?.toUpperCase()} - ****{account.account_number?.slice(-4)} (Balance: ${parseFloat(account.balance || 0).toFixed(2)})
                 </option>
               ))}
             </select>
