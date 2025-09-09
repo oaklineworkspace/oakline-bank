@@ -6,17 +6,7 @@ export default function AdminDashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [bankStats, setBankStats] = useState({
-    totalUsers: 0,
-    totalAccounts: 0,
-    totalBalance: 0,
-    pendingTransactions: 0,
-    activeLoans: 0,
-    totalDeposits: 0,
-    totalWithdrawals: 0,
-    newUsersToday: 0,
-    totalTransactions: 0
-  });
+  const [bankStats, setBankStats] = useState(null);
 
   const [recentUsers, setRecentUsers] = useState([]);
   const [recentTransactions, setRecentTransactions] = useState([]);
@@ -179,28 +169,28 @@ export default function AdminDashboard() {
           <div style={styles.statCard}>
             <div style={styles.statIcon}>👥</div>
             <div style={styles.statInfo}>
-              <h3>{bankStats?.totalUsers?.toLocaleString() || 0}</h3>
+              <h3>{bankStats ? (bankStats.totalUsers || 0).toLocaleString() : 'Loading...'}</h3>
               <p>Total Users</p>
             </div>
           </div>
           <div style={styles.statCard}>
             <div style={styles.statIcon}>💰</div>
             <div style={styles.statInfo}>
-              <h3>${bankStats?.totalDeposits?.toLocaleString() || 0}</h3>
+              <h3>{bankStats ? `$${(bankStats.totalDeposits || 0).toLocaleString()}` : 'Loading...'}</h3>
               <p>Total Deposits</p>
             </div>
           </div>
           <div style={styles.statCard}>
             <div style={styles.statIcon}>📊</div>
             <div style={styles.statInfo}>
-              <h3>{bankStats?.totalTransactions?.toLocaleString() || 0}</h3>
+              <h3>{bankStats ? (bankStats.totalTransactions || 0).toLocaleString() : 'Loading...'}</h3>
               <p>Total Transactions</p>
             </div>
           </div>
           <div style={styles.statCard}>
             <div style={styles.statIcon}>🏦</div>
             <div style={styles.statInfo}>
-              <h3>{bankStats?.totalAccounts?.toLocaleString() || 0}</h3>
+              <h3>{bankStats ? (bankStats.totalAccounts || 0).toLocaleString() : 'Loading...'}</h3>
               <p>Total Accounts</p>
             </div>
           </div>

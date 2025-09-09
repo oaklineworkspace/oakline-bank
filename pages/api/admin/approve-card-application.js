@@ -101,3 +101,79 @@ function generateExpiryDate() {
 function generateCVV() {
   return Math.floor(Math.random() * 900) + 100;
 }
+import { supabase } from '../../../lib/supabaseClient';
+
+export default async function handler(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ message: 'Method not allowed' });
+  }
+
+  const { applicationId, action } = req.body;
+
+  if (!applicationId || !action) {
+    return res.status(400).json({ 
+      success: false,
+      error: 'Missing applicationId or action' 
+    });
+  }
+
+  try {
+    const updateData = {
+      status: action === 'approve' ? 'approved' : 'rejected',
+    };
+
+    if (action === 'approve') {
+      updateData.approved_at = new Date().toISOString();
+      // Generate card details
+      updateData.card_number = generateCardNumber();
+      updateData.cvv = generateCVV();
+      updateData.expiry_date = generateExpiryDate();
+    } else {
+      updateData.rejected_at = new Date().toISOString();
+    }
+
+    const { data, error } = await supabase
+      .from('card_applications')
+      .update(updateData)
+      .eq('id', applicationId)
+      .select();
+
+    if (error) {
+      console.error('Error updating application:', error);
+      return res.status(500).json({ 
+        success: false,
+        error: 'Failed to update application' 
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: `Application ${action}d successfully`,
+      application: data[0]
+    });
+  } catch (error) {
+    console.error('Server error:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Internal server error'
+    });
+  }
+}
+
+// Helper functions
+function generateCardNumber() {
+  // Generate a fake card number starting with 4 (Visa)
+  const prefix = '4532';
+  const suffix = Array.from({length: 12}, () => Math.floor(Math.random() * 10)).join('');
+  return prefix + suffix;
+}
+
+function generateCVV() {
+  return Array.from({length: 3}, () => Math.floor(Math.random() * 10)).join('');
+}
+
+function generateExpiryDate() {
+  const currentDate = new Date();
+  const futureDate = new Date(currentDate.getFullYear() + 4, currentDate.getMonth());
+  return `${(futureDate.getMonth() + 1).toString().padStart(2, '0')}/${futureDate.getFullYear().toString().slice(2)}`;
+}

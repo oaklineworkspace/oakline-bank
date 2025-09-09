@@ -144,3 +144,63 @@ export default async function handler(req, res) {
     res.status(500).json({ error: 'Internal server error' });
   }
 }
+import { supabase } from '../../../lib/supabaseClient';
+
+export default async function handler(req, res) {
+  if (req.method !== 'GET') {
+    return res.status(405).json({ message: 'Method not allowed' });
+  }
+
+  try {
+    // Try to get users from auth.users first
+    let { data: users, error } = await supabase.auth.admin.listUsers();
+    
+    if (error || !users) {
+      // Fallback to applications table if auth.users is not accessible
+      const { data: applications, error: appError } = await supabase
+        .from('applications')
+        .select('id, email, first_name, last_name, created_at')
+        .order('created_at', { ascending: false });
+
+      if (appError) {
+        console.error('Error fetching users from applications:', appError);
+        return res.status(200).json({
+          success: true,
+          users: [] // Return empty array instead of error
+        });
+      }
+
+      // Format applications as users
+      const formattedUsers = applications?.map(app => ({
+        id: app.id,
+        email: app.email,
+        name: `${app.first_name} ${app.last_name}`,
+        created_at: app.created_at
+      })) || [];
+
+      return res.status(200).json({
+        success: true,
+        users: formattedUsers
+      });
+    }
+
+    // Format auth users
+    const formattedUsers = users.users?.map(user => ({
+      id: user.id,
+      email: user.email,
+      name: user.user_metadata?.name || user.email?.split('@')[0] || 'User',
+      created_at: user.created_at
+    })) || [];
+
+    return res.status(200).json({
+      success: true,
+      users: formattedUsers
+    });
+  } catch (error) {
+    console.error('Server error:', error);
+    return res.status(200).json({
+      success: true,
+      users: [] // Return empty array instead of error
+    });
+  }
+}

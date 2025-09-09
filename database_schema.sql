@@ -253,22 +253,35 @@ CREATE POLICY "Users can manage their own crypto portfolio" ON crypto_portfolio
 
 -- Card Applications Table
 CREATE TABLE IF NOT EXISTS card_applications (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-    account_id UUID REFERENCES accounts(id) ON DELETE CASCADE,
-    card_type VARCHAR(50) NOT NULL DEFAULT 'Visa Debit',
-    cardholder_name VARCHAR(100) NOT NULL,
-    status VARCHAR(20) DEFAULT 'pending', -- pending, approved, rejected
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    approved_at TIMESTAMP WITH TIME ZONE,
-    approved_by VARCHAR(100),
-    rejected_at TIMESTAMP WITH TIME ZONE,
-    rejected_by VARCHAR(100),
-    rejection_reason TEXT
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  account_id UUID REFERENCES accounts(id) ON DELETE CASCADE,
+  card_type VARCHAR(50) DEFAULT 'debit',
+  cardholder_name VARCHAR(255) NOT NULL,
+  card_number VARCHAR(16), -- Generated upon approval
+  cvv VARCHAR(3), -- Generated upon approval
+  expiry_date VARCHAR(5), -- Generated upon approval (MM/YY)
+  status VARCHAR(20) DEFAULT 'pending', -- pending, approved, rejected, cancelled
+  applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  approved_at TIMESTAMP,
+  rejected_at TIMESTAMP,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Enable RLS
+-- Users Table (for admin dashboard)
+CREATE TABLE IF NOT EXISTS users (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  phone VARCHAR(20),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Enable RLS for card_applications and users
 ALTER TABLE card_applications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 
 -- Policies for card_applications
 CREATE POLICY "Users can view their own card applications" ON card_applications
@@ -276,3 +289,10 @@ CREATE POLICY "Users can view their own card applications" ON card_applications
 
 CREATE POLICY "Users can insert their own card applications" ON card_applications
     FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+-- Policies for users (adjust as needed for admin access)
+CREATE POLICY "Allow all on users for services role" ON users
+    FOR ALL USING (pg_has_role('services')); -- Example: Granting access to a 'services' role
+
+CREATE POLICY "Allow select on users for authenticated users" ON users
+    FOR SELECT USING (auth.role() = 'authenticated');

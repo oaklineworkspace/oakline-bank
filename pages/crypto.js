@@ -69,17 +69,24 @@ export default function Crypto() {
     try {
       // Using CoinGecko API for real crypto prices
       const response = await fetch(
-        'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,binancecoin,cardano,solana,polkadot,dogecoin,avalanche-2,polygon,chainlink&vs_currencies=usd&include_24hr_change=true&include_market_cap=true'
+        'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,binancecoin,cardano,solana,polkadot,dogecoin,avalanche-2,polygon,chainlink&vs_currencies=usd&include_24hr_change=true&include_market_cap=true',
+        {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json'
+          }
+        }
       );
 
       if (response.ok) {
         const data = await response.json();
+        console.log('Crypto API Response:', data);
 
         const formattedData = Object.entries(data).map(([id, info]) => ({
           id,
           name: getCryptoName(id),
           symbol: getCryptoSymbol(id),
-          price: info.usd,
+          price: info.usd || 0,
           change24h: info.usd_24h_change || 0,
           marketCap: info.usd_market_cap || 0,
           icon: getCryptoIcon(id)
@@ -87,7 +94,7 @@ export default function Crypto() {
 
         setCryptoData(formattedData);
       } else {
-        // Fallback data if API fails
+        console.log('API request failed, using fallback data');
         setCryptoData(getFallbackCryptoData());
       }
     } catch (error) {
