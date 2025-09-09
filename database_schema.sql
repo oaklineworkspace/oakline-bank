@@ -54,6 +54,15 @@ CREATE TYPE account_type_enum AS ENUM (
   'escrow_account'
 );
 
+-- Account Status Enum
+CREATE TYPE account_status_enum AS ENUM (
+  'pending',
+  'active',
+  'inactive',
+  'frozen',
+  'closed'
+);
+
 -- Create applications table
 CREATE TABLE public.applications (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -91,7 +100,7 @@ CREATE TABLE public.accounts (
   routing_number text NOT NULL DEFAULT '075915826'::text,
   account_type account_type_enum NOT NULL,
   balance numeric DEFAULT 0,
-  status text DEFAULT 'active',
+  status account_status_enum DEFAULT 'active',
   created_at timestamp without time zone DEFAULT now(),
   CONSTRAINT accounts_pkey PRIMARY KEY (id),
   CONSTRAINT accounts_application_id_fkey FOREIGN KEY (application_id) REFERENCES public.applications(id) ON DELETE CASCADE

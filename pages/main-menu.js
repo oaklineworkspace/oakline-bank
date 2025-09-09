@@ -7,36 +7,65 @@ export default function MainMenu() {
   const [user, setUser] = useState(null);
   const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [authLoading, setAuthLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
     checkUser();
+    
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN') {
+        setUser(session?.user || null);
+        if (session?.user) {
+          fetchUserAccounts(session.user.id, session.user.email);
+        }
+      } else if (event === 'SIGNED_OUT') {
+        setUser(null);
+        setAccounts([]);
+      }
+      setAuthLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const checkUser = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        router.push('/login');
-        return;
-      }
       setUser(user);
-      await fetchUserAccounts(user.id);
+      if (user) {
+        await fetchUserAccounts(user.id, user.email);
+      }
     } catch (error) {
       console.error('Error checking user:', error);
-      router.push('/login');
+      setUser(null);
     } finally {
       setLoading(false);
+      setAuthLoading(false);
     }
   };
 
-  const fetchUserAccounts = async (userId) => {
+  const fetchUserAccounts = async (userId, email) => {
     try {
+      // First try to get accounts by user_id
       let { data, error } = await supabase
         .from('accounts')
         .select('*')
         .eq('user_id', userId);
 
+      // If no accounts found by user_id, try by email
+      if (!data || data.length === 0) {
+        const { data: emailAccounts, error: emailError } = await supabase
+          .from('accounts')
+          .select('*')
+          .eq('email', email);
+        
+        data = emailAccounts;
+        error = emailError;
+      }
+
+      // If still no accounts, check via profiles table
       if (!data || data.length === 0) {
         const { data: profile } = await supabase
           .from('profiles')
@@ -59,6 +88,18 @@ export default function MainMenu() {
       setAccounts(data || []);
     } catch (error) {
       console.error('Error fetching accounts:', error);
+      setAccounts([]);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      setUser(null);
+      setAccounts([]);
+      router.push('/');
+    } catch (error) {
+      console.error('Error logging out:', error);
     }
   };
 
@@ -111,14 +152,98 @@ export default function MainMenu() {
     }
   ];
 
-  if (loading) {
+  if (loading || authLoading) {
     return (
       <div style={styles.container}>
-        <div style={styles.loading}>Loading menu...</div>
+        <div style={styles.loading}>Loading...</div>
       </div>
     );
   }
 
+  // Guest user view
+  if (!user) {
+    return (
+      <div style={styles.container}>
+        {/* Header */}
+        <header style={styles.header}>
+          <div style={styles.headerContent}>
+            <div style={styles.logo}>
+              <span>🏦</span>
+              Oakline Bank
+            </div>
+            <div style={styles.guestActions}>
+              <button
+                onClick={() => router.push('/login')}
+                style={styles.loginButton}
+              >
+                Login
+              </button>
+            </div>
+          </div>
+        </header>
+
+        {/* Guest Welcome */}
+        <section style={styles.guestWelcomeSection}>
+          <h1 style={styles.guestWelcomeTitle}>Welcome to Oakline Bank</h1>
+          <p style={styles.guestSubtitle}>
+            Your trusted financial partner for all your banking needs
+          </p>
+          <div style={styles.guestActionButtons}>
+            <button
+              onClick={() => router.push('/apply')}
+              style={styles.primaryGuestButton}
+            >
+              <span style={styles.buttonIcon}>🏦</span>
+              Open New Account
+            </button>
+            <button
+              onClick={() => router.push('/login')}
+              style={styles.secondaryGuestButton}
+            >
+              <span style={styles.buttonIcon}>🔐</span>
+              Sign In
+            </button>
+            <button
+              onClick={() => router.push('/')}
+              style={styles.secondaryGuestButton}
+            >
+              <span style={styles.buttonIcon}>📝</span>
+              Enroll Online
+            </button>
+          </div>
+        </section>
+
+        {/* Guest Services */}
+        <section style={styles.guestServicesSection}>
+          <h2 style={styles.sectionTitle}>Our Services</h2>
+          <div style={styles.serviceGrid}>
+            <div style={styles.serviceCard}>
+              <div style={styles.serviceIcon}>💳</div>
+              <h3>Personal Banking</h3>
+              <p>Checking, savings, and money market accounts</p>
+            </div>
+            <div style={styles.serviceCard}>
+              <div style={styles.serviceIcon}>🏠</div>
+              <h3>Loans & Mortgages</h3>
+              <p>Home, auto, and personal loans</p>
+            </div>
+            <div style={styles.serviceCard}>
+              <div style={styles.serviceIcon}>📈</div>
+              <h3>Investments</h3>
+              <p>Build your wealth with our investment options</p>
+            </div>
+            <div style={styles.serviceCard}>
+              <div style={styles.serviceIcon}>📱</div>
+              <h3>Mobile Banking</h3>
+              <p>Bank anywhere, anytime with our mobile app</p>
+            </div>
+          </div>
+        </section>
+      </div>
+    );
+  }
+
+  // Logged-in user view
   return (
     <div style={styles.container}>
       {/* Header */}
@@ -128,20 +253,35 @@ export default function MainMenu() {
             <span>🏦</span>
             Oakline Bank
           </div>
-          <button
-            onClick={() => router.push('/dashboard')}
-            style={styles.backButton}
-          >
-            ← Dashboard
-          </button>
+          <div style={styles.userActions}>
+            <button
+              onClick={() => router.push('/')}
+              style={styles.navButton}
+            >
+              Home
+            </button>
+            <button
+              onClick={() => router.push('/dashboard')}
+              style={styles.navButton}
+            >
+              Dashboard
+            </button>
+            <button
+              onClick={handleLogout}
+              style={styles.logoutButton}
+            >
+              Logout
+            </button>
+          </div>
         </div>
       </header>
 
       {/* User Welcome */}
       <section style={styles.welcomeSection}>
         <h1 style={styles.welcomeTitle}>
-          Welcome, {user?.user_metadata?.first_name || user?.email?.split('@')[0]}!
+          Welcome back, {user?.user_metadata?.first_name || user?.email?.split('@')[0]}!
         </h1>
+        <p style={styles.userEmail}>Logged in as: {user.email}</p>
         <div style={styles.balanceCard}>
           <div style={styles.balanceInfo}>
             <span style={styles.balanceLabel}>Total Balance</span>
@@ -248,9 +388,39 @@ const styles = {
     alignItems: 'center',
     gap: '0.5rem'
   },
-  backButton: {
+  guestActions: {
+    display: 'flex',
+    gap: '1rem',
+    alignItems: 'center'
+  },
+  userActions: {
+    display: 'flex',
+    gap: '1rem',
+    alignItems: 'center'
+  },
+  loginButton: {
     background: 'rgba(255,255,255,0.15)',
     border: '1px solid rgba(255,255,255,0.2)',
+    color: 'white',
+    padding: '0.5rem 1rem',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    fontSize: '0.9rem',
+    fontWeight: '500'
+  },
+  navButton: {
+    background: 'rgba(255,255,255,0.15)',
+    border: '1px solid rgba(255,255,255,0.2)',
+    color: 'white',
+    padding: '0.5rem 1rem',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    fontSize: '0.9rem',
+    fontWeight: '500'
+  },
+  logoutButton: {
+    background: 'rgba(220, 38, 38, 0.8)',
+    border: '1px solid rgba(220, 38, 38, 0.9)',
     color: 'white',
     padding: '0.5rem 1rem',
     borderRadius: '8px',
@@ -266,6 +436,82 @@ const styles = {
     fontSize: '1.2rem',
     color: '#64748b'
   },
+  guestWelcomeSection: {
+    padding: 'clamp(2rem, 6vw, 4rem)',
+    maxWidth: '1200px',
+    margin: '0 auto',
+    textAlign: 'center'
+  },
+  guestWelcomeTitle: {
+    fontSize: 'clamp(2rem, 5vw, 3rem)',
+    fontWeight: '700',
+    color: '#1e293b',
+    marginBottom: '1rem'
+  },
+  guestSubtitle: {
+    fontSize: '1.2rem',
+    color: '#64748b',
+    marginBottom: '2.5rem',
+    lineHeight: '1.6'
+  },
+  guestActionButtons: {
+    display: 'flex',
+    gap: '1rem',
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexWrap: 'wrap'
+  },
+  primaryGuestButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    padding: '1rem 2rem',
+    background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
+    color: 'white',
+    border: 'none',
+    borderRadius: '12px',
+    fontSize: '1rem',
+    fontWeight: '600',
+    cursor: 'pointer',
+    boxShadow: '0 4px 14px rgba(30, 64, 175, 0.3)'
+  },
+  secondaryGuestButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    padding: '1rem 2rem',
+    background: 'transparent',
+    color: '#1e40af',
+    border: '2px solid #1e40af',
+    borderRadius: '12px',
+    fontSize: '1rem',
+    fontWeight: '600',
+    cursor: 'pointer'
+  },
+  buttonIcon: {
+    fontSize: '1.1rem'
+  },
+  guestServicesSection: {
+    padding: 'clamp(2rem, 6vw, 4rem)',
+    maxWidth: '1200px',
+    margin: '0 auto'
+  },
+  serviceGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+    gap: '2rem'
+  },
+  serviceCard: {
+    backgroundColor: 'white',
+    padding: '2rem',
+    borderRadius: '16px',
+    textAlign: 'center',
+    boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+  },
+  serviceIcon: {
+    fontSize: '3rem',
+    marginBottom: '1rem'
+  },
   welcomeSection: {
     padding: 'clamp(1rem, 4vw, 2rem)',
     maxWidth: '1200px',
@@ -275,8 +521,14 @@ const styles = {
     fontSize: 'clamp(1.8rem, 4vw, 2.5rem)',
     fontWeight: '700',
     color: '#1e293b',
-    marginBottom: '1.5rem',
+    marginBottom: '0.5rem',
     textAlign: 'center'
+  },
+  userEmail: {
+    fontSize: '1rem',
+    color: '#64748b',
+    textAlign: 'center',
+    marginBottom: '1.5rem'
   },
   balanceCard: {
     background: 'linear-gradient(135deg, #064e3b 0%, #047857 50%, #10b981 100%)',
