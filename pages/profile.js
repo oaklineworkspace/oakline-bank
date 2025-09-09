@@ -315,6 +315,22 @@ export default function Profile() {
               <span style={styles.infoLabel}>Member Since</span>
               <span style={styles.infoValue}>{formatDate(application?.created_at)}</span>
             </div>
+            <div style={styles.infoItem}>
+              <span style={styles.infoLabel}>Account Status</span>
+              <span style={{...styles.infoValue, color: application?.status === 'approved' ? '#10b981' : '#f59e0b'}}>
+                {application?.status ? application.status.charAt(0).toUpperCase() + application.status.slice(1) : 'Pending'}
+              </span>
+            </div>
+            <div style={styles.infoItem}>
+              <span style={styles.infoLabel}>Country</span>
+              <span style={styles.infoValue}>{application?.country || 'N/A'}</span>
+            </div>
+            {application?.middle_name && (
+              <div style={styles.infoItem}>
+                <span style={styles.infoLabel}>Middle Name</span>
+                <span style={styles.infoValue}>{application.middle_name}</span>
+              </div>
+            )}
           </div>
         )}
       </div>

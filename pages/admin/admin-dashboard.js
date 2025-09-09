@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import { supabase } from '../../lib/supabaseClient';
 
 export default function AdminDashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -48,12 +49,22 @@ export default function AdminDashboard() {
       // Initialize with default values
       let users = [], accounts = [], transactions = [];
 
-      // Fetch users data
+      // Fetch users data from applications table (real bank customers)
       try {
-        const usersResponse = await fetch('/api/admin/get-users');
-        const usersData = await usersResponse.json();
-        if (usersData.success) {
-          users = usersData.users || [];
+        const { data: applications, error: appError } = await supabase
+          .from('applications')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (!appError && applications) {
+          users = applications.map(app => ({
+            id: app.id,
+            email: app.email,
+            name: `${app.first_name || ''} ${app.middle_name ? app.middle_name + ' ' : ''}${app.last_name || ''}`.trim(),
+            created_at: app.created_at,
+            phone: app.phone,
+            status: app.status || 'pending'
+          }));
         }
       } catch (error) {
         console.error('Error fetching users:', error);
@@ -61,10 +72,13 @@ export default function AdminDashboard() {
 
       // Fetch accounts data
       try {
-        const accountsResponse = await fetch('/api/admin/get-accounts');
-        const accountsData = await accountsResponse.json();
-        if (accountsData.success) {
-          accounts = accountsData.accounts || [];
+        const { data: accountsData, error: accountsError } = await supabase
+          .from('accounts')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (!accountsError && accountsData) {
+          accounts = accountsData;
         }
       } catch (error) {
         console.error('Error fetching accounts:', error);
@@ -72,10 +86,14 @@ export default function AdminDashboard() {
 
       // Fetch transactions data
       try {
-        const transactionsResponse = await fetch('/api/admin/get-transactions');
-        const transactionsData = await transactionsResponse.json();
-        if (transactionsData.success) {
-          transactions = transactionsData.transactions || [];
+        const { data: transactionsData, error: transactionsError } = await supabase
+          .from('transactions')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(100);
+
+        if (!transactionsError && transactionsData) {
+          transactions = transactionsData;
         }
       } catch (error) {
         console.error('Error fetching transactions:', error);
@@ -169,29 +187,29 @@ export default function AdminDashboard() {
           <div style={styles.statCard}>
             <div style={styles.statIcon}>👥</div>
             <div style={styles.statInfo}>
-              <h3>{bankStats ? (bankStats.totalUsers || 0).toLocaleString() : 'Loading...'}</h3>
-              <p>Total Users</p>
+              <h3 style={styles.statNumber}>{bankStats ? (bankStats.totalUsers || 0).toLocaleString() : 'Loading...'}</h3>
+              <p style={styles.statLabel}>Total Users</p>
             </div>
           </div>
           <div style={styles.statCard}>
             <div style={styles.statIcon}>💰</div>
             <div style={styles.statInfo}>
-              <h3>{bankStats ? `$${(bankStats.totalDeposits || 0).toLocaleString()}` : 'Loading...'}</h3>
-              <p>Total Deposits</p>
+              <h3 style={styles.statNumber}>{bankStats ? `$${(bankStats.totalBalance || 0).toLocaleString()}` : 'Loading...'}</h3>
+              <p style={styles.statLabel}>Total Balance</p>
             </div>
           </div>
           <div style={styles.statCard}>
             <div style={styles.statIcon}>📊</div>
             <div style={styles.statInfo}>
-              <h3>{bankStats ? (bankStats.totalTransactions || 0).toLocaleString() : 'Loading...'}</h3>
-              <p>Total Transactions</p>
+              <h3 style={styles.statNumber}>{bankStats ? (bankStats.totalTransactions || 0).toLocaleString() : 'Loading...'}</h3>
+              <p style={styles.statLabel}>Total Transactions</p>
             </div>
           </div>
           <div style={styles.statCard}>
             <div style={styles.statIcon}>🏦</div>
             <div style={styles.statInfo}>
-              <h3>{bankStats ? (bankStats.totalAccounts || 0).toLocaleString() : 'Loading...'}</h3>
-              <p>Total Accounts</p>
+              <h3 style={styles.statNumber}>{bankStats ? (bankStats.totalAccounts || 0).toLocaleString() : 'Loading...'}</h3>
+              <p style={styles.statLabel}>Total Accounts</p>
             </div>
           </div>
         </div>
@@ -400,7 +418,7 @@ const styles = {
   },
   container: {
     minHeight: '100vh',
-    background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+    background: 'linear-gradient(135deg, #1e3a5f 0%, #2c5282 100%)',
     padding: '20px'
   },
   header: {
@@ -469,11 +487,38 @@ const styles = {
     marginBottom: '30px'
   },
   statCard: {
-    background: 'white',
+    background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
     padding: '25px',
-    borderRadius: '12px',
+    borderRadius: '16px',
     textAlign: 'center',
-    boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+    boxShadow: '0 8px 25px rgba(0,0,0,0.1)',
+    border: '1px solid rgba(30, 58, 95, 0.1)',
+    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+    cursor: 'pointer'
+  },
+  statIcon: {
+    fontSize: '2.5rem',
+    marginBottom: '10px',
+    display: 'block'
+  },
+  statInfo: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '5px'
+  },
+  statNumber: {
+    fontSize: '28px',
+    fontWeight: 'bold',
+    color: '#1e3a5f',
+    margin: '0'
+  },
+  statLabel: {
+    fontSize: '14px',
+    color: '#64748b',
+    fontWeight: '500',
+    margin: '0',
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px'
   },
   statNumber: {
     fontSize: '32px',

@@ -204,14 +204,20 @@ export default function Home() {
         </div>
       </section>
 
-      <WelcomeBanner />
+      {/* Only show welcome banner for guests */}
+      {!user && <WelcomeBanner />}
 
       <main>
-        <HeroSection />
-        <ServicesSection />
-        <FeaturesSection />
-        <LoanApprovalSection />
-        <TestimonialsSection />
+        {/* Only show hero sections for guests */}
+        {!user && (
+          <>
+            <HeroSection />
+            <ServicesSection />
+            <FeaturesSection />
+            <LoanApprovalSection />
+            <TestimonialsSection />
+          </>
+        )}
 
         {/* Conditional Enrollment/Dashboard Section */}
         {!user ? (
