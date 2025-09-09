@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useRouter } from 'next/router';
@@ -19,7 +18,7 @@ export default function Crypto() {
   useEffect(() => {
     checkUser();
     fetchCryptoData();
-    
+
     // Set up real-time price updates every 30 seconds
     const interval = setInterval(fetchCryptoData, 30000);
     return () => clearInterval(interval);
@@ -72,10 +71,10 @@ export default function Crypto() {
       const response = await fetch(
         'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,binancecoin,cardano,solana,polkadot,dogecoin,avalanche-2,polygon,chainlink&vs_currencies=usd&include_24hr_change=true&include_market_cap=true'
       );
-      
+
       if (response.ok) {
         const data = await response.json();
-        
+
         const formattedData = Object.entries(data).map(([id, info]) => ({
           id,
           name: getCryptoName(id),
@@ -85,7 +84,7 @@ export default function Crypto() {
           marketCap: info.usd_market_cap || 0,
           icon: getCryptoIcon(id)
         }));
-        
+
         setCryptoData(formattedData);
       } else {
         // Fallback data if API fails
@@ -192,10 +191,10 @@ export default function Crypto() {
 
       // In a real implementation, you would process the trade here
       console.log(`${tradeType.toUpperCase()} ${amount} ${selectedCrypto.symbol} for ${formatCurrency(totalCost)}`);
-      
+
       // For demo, just show success message
       alert(`Trade successful! ${tradeType.toUpperCase()} ${amount} ${selectedCrypto.symbol} for ${formatCurrency(totalCost)}`);
-      
+
       setSelectedCrypto(null);
       setTradeAmount('');
       await fetchUserPortfolio(user.id);
@@ -292,7 +291,7 @@ export default function Crypto() {
             <div style={styles.tradingCard}>
               <h3>Trade {selectedCrypto.name} ({selectedCrypto.symbol})</h3>
               <p>Current Price: {formatCurrency(selectedCrypto.price)}</p>
-              
+
               <div style={styles.tradeForm}>
                 <div style={styles.tradeTypeSelector}>
                   <button
@@ -314,7 +313,7 @@ export default function Crypto() {
                     Sell
                   </button>
                 </div>
-                
+
                 <input
                   type="number"
                   value={tradeAmount}
@@ -322,11 +321,11 @@ export default function Crypto() {
                   placeholder="Amount to trade"
                   style={styles.tradeInput}
                 />
-                
+
                 <div style={styles.tradeInfo}>
                   Total: {tradeAmount ? formatCurrency(parseFloat(tradeAmount) * selectedCrypto.price) : '$0.00'}
                 </div>
-                
+
                 <div style={styles.tradeButtons}>
                   <button
                     onClick={handleTrade}

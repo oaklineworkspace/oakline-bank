@@ -118,34 +118,24 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    checkAuthState();
+    checkUser();
 
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
-        checkAuthState();
-      }
+      setUser(session?.user || null);
+      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-
-  const checkAuthState = async () => {
+  const checkUser = async () => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
       const { data: { user } } = await supabase.auth.getUser();
-
-      // Double check - if we have session but no user, or vice versa
-      if (session && user) {
-        setUser(user);
-      } else {
-        setUser(null);
-      }
+      setUser(user);
+      setLoading(false);
     } catch (error) {
-      console.error('Error checking auth:', error);
-      setUser(null);
-    } finally {
+      console.error('Error checking user:', error);
       setLoading(false);
     }
   };

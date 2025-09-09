@@ -14,7 +14,8 @@ export default function AdminDashboard() {
     activeLoans: 0,
     totalDeposits: 0,
     totalWithdrawals: 0,
-    newUsersToday: 0
+    newUsersToday: 0,
+    totalTransactions: 0
   });
 
   const [recentUsers, setRecentUsers] = useState([]);
@@ -54,44 +55,73 @@ export default function AdminDashboard() {
     try {
       setLoading(true);
 
+      // Initialize with default values
+      let users = [], accounts = [], transactions = [];
+
       // Fetch users data
-      const usersResponse = await fetch('/api/admin/get-users');
-      const usersData = await usersResponse.json();
+      try {
+        const usersResponse = await fetch('/api/admin/get-users');
+        const usersData = await usersResponse.json();
+        if (usersData.success) {
+          users = usersData.users || [];
+        }
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      }
 
       // Fetch accounts data
-      const accountsResponse = await fetch('/api/admin/get-accounts');
-      const accountsData = await accountsResponse.json();
+      try {
+        const accountsResponse = await fetch('/api/admin/get-accounts');
+        const accountsData = await accountsResponse.json();
+        if (accountsData.success) {
+          accounts = accountsData.accounts || [];
+        }
+      } catch (error) {
+        console.error('Error fetching accounts:', error);
+      }
 
       // Fetch transactions data
-      const transactionsResponse = await fetch('/api/admin/get-transactions');
-      const transactionsData = await transactionsResponse.json();
+      try {
+        const transactionsResponse = await fetch('/api/admin/get-transactions');
+        const transactionsData = await transactionsResponse.json();
+        if (transactionsData.success) {
+          transactions = transactionsData.transactions || [];
+        }
+      } catch (error) {
+        console.error('Error fetching transactions:', error);
+      }
 
-      if (usersData.success && accountsData.success && transactionsData.success) {
-        const totalBalance = accountsData.accounts.reduce((sum, acc) => sum + (acc.balance || 0), 0);
-        const todayUsers = usersData.users.filter(user => {
+      // Calculate stats with safe defaults
+      const totalBalance = accounts.reduce((sum, acc) => sum + (parseFloat(acc.balance) || 0), 0);
+      const todayUsers = users.filter(user => {
+        try {
           const userDate = new Date(user.created_at).toDateString();
           const today = new Date().toDateString();
           return userDate === today;
-        }).length;
+        } catch {
+          return false;
+        }
+      }).length;
 
-        setBankStats({
-          totalUsers: usersData.users.length,
-          totalAccounts: accountsData.accounts.length,
-          totalBalance: totalBalance,
-          pendingTransactions: transactionsData.transactions.filter(t => t.status === 'pending').length,
-          activeLoans: 0, // Add loan counting logic when loans table is ready
-          totalDeposits: transactionsData.transactions
-            .filter(t => t.type === 'deposit')
-            .reduce((sum, t) => sum + (t.amount || 0), 0),
-          totalWithdrawals: transactionsData.transactions
-            .filter(t => t.type === 'withdrawal')
-            .reduce((sum, t) => sum + (t.amount || 0), 0),
-          newUsersToday: todayUsers
-        });
+      setBankStats({
+        totalUsers: users.length,
+        totalAccounts: accounts.length,
+        totalBalance: totalBalance,
+        totalTransactions: transactions.length,
+        pendingTransactions: transactions.filter(t => t.status === 'pending').length,
+        activeLoans: 0,
+        totalDeposits: transactions
+          .filter(t => t.type === 'deposit')
+          .reduce((sum, t) => sum + (parseFloat(t.amount) || 0), 0),
+        totalWithdrawals: transactions
+          .filter(t => t.type === 'withdrawal')
+          .reduce((sum, t) => sum + (parseFloat(t.amount) || 0), 0),
+        newUsersToday: todayUsers
+      });
 
-        setRecentUsers(usersData.users.slice(-5));
-        setRecentTransactions(transactionsData.transactions.slice(-10));
-      }
+      setRecentUsers(users.slice(-5));
+      setRecentTransactions(transactions.slice(-10));
+
     } catch (error) {
       console.error('Error fetching bank data:', error);
     } finally {

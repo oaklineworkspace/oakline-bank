@@ -1,4 +1,3 @@
-
 import { supabaseAdmin } from '../../../lib/supabaseClient';
 
 export default async function handler(req, res) {
@@ -13,10 +12,9 @@ export default async function handler(req, res) {
       .select(`
         *,
         applications:application_id (
-          first_name,
-          last_name,
           email,
-          phone
+          first_name,
+          last_name
         )
       `)
       .order('created_at', { ascending: false });
