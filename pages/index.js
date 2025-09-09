@@ -188,11 +188,11 @@ export default function Home() {
               // Logged-in user buttons
               <>
                 <div style={styles.userGreeting}>
-                  Welcome back, {user.email}!
+                  Welcome back, {user.email?.split('@')[0] || 'User'}!
                 </div>
-                <Link href="/" style={styles.loggedInButton}>
+                <Link href="/main-menu" style={styles.loggedInButton}>
                   <span style={styles.actionButtonIcon}>🏠</span>
-                  Home
+                  Main Menu
                 </Link>
                 <Link href="/dashboard" style={styles.loggedInButton}>
                   <span style={styles.actionButtonIcon}>📊</span>

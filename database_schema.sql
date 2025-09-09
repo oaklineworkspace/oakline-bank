@@ -200,3 +200,53 @@ CREATE INDEX IF NOT EXISTS idx_transactions_created_at ON transactions(created_a
 CREATE INDEX IF NOT EXISTS idx_transactions_type ON transactions(type);
 
 -- End of schema
+
+
+-- Debit Cards Table
+CREATE TABLE IF NOT EXISTS debit_cards (
+    id SERIAL PRIMARY KEY,
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+    account_id INTEGER REFERENCES accounts(id) ON DELETE CASCADE,
+    card_number VARCHAR(20) UNIQUE NOT NULL,
+    cardholder_name VARCHAR(100) NOT NULL,
+    expiry_date VARCHAR(5) NOT NULL, -- MM/YY format
+    cvv VARCHAR(4) NOT NULL,
+    card_type VARCHAR(20) DEFAULT 'Visa',
+    status VARCHAR(20) DEFAULT 'active',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Crypto Portfolio Table
+CREATE TABLE IF NOT EXISTS crypto_portfolio (
+    id SERIAL PRIMARY KEY,
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+    crypto_symbol VARCHAR(10) NOT NULL,
+    crypto_name VARCHAR(50) NOT NULL,
+    amount DECIMAL(20, 8) NOT NULL DEFAULT 0,
+    purchase_price DECIMAL(15, 2),
+    current_value DECIMAL(15, 2),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Enable Row Level Security
+ALTER TABLE debit_cards ENABLE ROW LEVEL SECURITY;
+ALTER TABLE crypto_portfolio ENABLE ROW LEVEL SECURITY;
+
+-- Policies for debit_cards
+CREATE POLICY "Users can view their own debit cards" ON debit_cards
+    FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert their own debit cards" ON debit_cards
+    FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own debit cards" ON debit_cards
+    FOR UPDATE USING (auth.uid() = user_id);
+
+-- Policies for crypto_portfolio
+CREATE POLICY "Users can view their own crypto portfolio" ON crypto_portfolio
+    FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can manage their own crypto portfolio" ON crypto_portfolio
+    FOR ALL USING (auth.uid() = user_id);

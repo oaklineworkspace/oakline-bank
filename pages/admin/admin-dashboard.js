@@ -146,31 +146,35 @@ export default function AdminDashboard() {
 
       {/* Statistics Cards */}
       <div style={styles.statsGrid}>
-        <div style={styles.statCard}>
-          <h3>👥 Total Users</h3>
-          <p style={styles.statNumber}>{bankStats.totalUsers.toLocaleString()}</p>
+          <div style={styles.statCard}>
+            <div style={styles.statIcon}>👥</div>
+            <div style={styles.statInfo}>
+              <h3>{bankStats?.totalUsers?.toLocaleString() || 0}</h3>
+              <p>Total Users</p>
+            </div>
+          </div>
+          <div style={styles.statCard}>
+            <div style={styles.statIcon}>💰</div>
+            <div style={styles.statInfo}>
+              <h3>${bankStats?.totalDeposits?.toLocaleString() || 0}</h3>
+              <p>Total Deposits</p>
+            </div>
+          </div>
+          <div style={styles.statCard}>
+            <div style={styles.statIcon}>📊</div>
+            <div style={styles.statInfo}>
+              <h3>{bankStats?.totalTransactions?.toLocaleString() || 0}</h3>
+              <p>Total Transactions</p>
+            </div>
+          </div>
+          <div style={styles.statCard}>
+            <div style={styles.statIcon}>🏦</div>
+            <div style={styles.statInfo}>
+              <h3>{bankStats?.totalAccounts?.toLocaleString() || 0}</h3>
+              <p>Total Accounts</p>
+            </div>
+          </div>
         </div>
-        <div style={styles.statCard}>
-          <h3>🏦 Total Accounts</h3>
-          <p style={styles.statNumber}>{bankStats.totalAccounts.toLocaleString()}</p>
-        </div>
-        <div style={styles.statCard}>
-          <h3>💸 Transactions</h3>
-          <p style={styles.statNumber}>{bankStats.totalTransactions.toLocaleString()}</p>
-        </div>
-        <div style={styles.statCard}>
-          <h3>💰 Total Balance</h3>
-          <p style={styles.statNumber}>${bankStats.totalBalance.toLocaleString()}</p>
-        </div>
-        <div style={styles.statCard}>
-          <h3>🏠 Active Loans</h3>
-          <p style={styles.statNumber}>{bankStats.activeLoans.toLocaleString()}</p>
-        </div>
-        <div style={styles.statCard}>
-          <h3>📈 Investments</h3>
-          <p style={styles.statNumber}>{bankStats.totalInvestments.toLocaleString()}</p>
-        </div>
-      </div>
 
       {/* Quick Actions */}
       <div style={styles.quickActions}>
