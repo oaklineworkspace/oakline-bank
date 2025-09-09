@@ -491,9 +491,57 @@ export default function Dashboard() {
 
   const handleTransfer = async (e) => {
     e.preventDefault();
-    console.log('Transfer:', transferData);
-    setShowTransferModal(false);
-    await fetchUserData(user.id);
+    
+    try {
+      setLoading(true);
+      
+      // For real money transfers, you'll integrate Plaid or Stripe here
+      const transferPayload = {
+        ...transferData,
+        user_id: user.id,
+        // Add metadata for payment processor
+        payment_method: transferData.transferType === 'between_accounts' ? 'internal' : 'external',
+        // For external transfers, you'll need to specify the processor
+        processor: transferData.transferType !== 'between_accounts' ? 'plaid' : null
+      };
+
+      // Call your transfer API endpoint
+      const response = await fetch('/api/process-transfer', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(transferPayload)
+      });
+
+      const result = await response.json();
+      
+      if (result.success) {
+        // Refresh user data and close modal
+        await fetchUserData(user.id);
+        setShowTransferModal(false);
+        setTransferData({
+          fromAccount: '',
+          transferType: 'between_accounts',
+          toAccount: '',
+          recipientName: '',
+          recipientEmail: '',
+          bankName: '',
+          routingNumber: '',
+          swiftCode: '',
+          amount: '',
+          description: '',
+          country: ''
+        });
+      } else {
+        setError(result.error || 'Transfer failed');
+      }
+    } catch (error) {
+      console.error('Transfer error:', error);
+      setError('Failed to process transfer');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleWithdrawal = async (e) => {
@@ -615,7 +663,7 @@ export default function Dashboard() {
                 style={styles.actionButton}
                 className="action-button"
               >
-                <span>💸</span> Transfer
+                <span>💸</span> Quick Transfer
               </button>
               <button 
                 onClick={() => setShowWithdrawalModal(true)}
@@ -972,11 +1020,20 @@ export default function Dashboard() {
                   Cancel
                 </button>
                 <button 
+                  type="button" 
+                  onClick={() => router.push('/transfer')} 
+                  style={{...styles.secondaryButton, backgroundColor: '#e0f2fe', color: '#0277bd'}}
+                  className="secondary-button"
+                >
+                  Advanced Transfer
+                </button>
+                <button 
                   type="submit" 
                   style={styles.primaryButton}
                   className="primary-button"
+                  disabled={loading}
                 >
-                  Transfer
+                  {loading ? 'Processing...' : 'Transfer'}
                 </button>
               </div>
             </form>
