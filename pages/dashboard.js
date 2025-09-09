@@ -10,6 +10,7 @@ export default function Dashboard() {
   const [error, setError] = useState('');
   const [selectedAccount, setSelectedAccount] = useState(null);
   const [userProfile, setUserProfile] = useState(null); // Added to store user profile
+  const [showDropdown, setShowDropdown] = useState(false);
   const [showTransferModal, setShowTransferModal] = useState(false);
   const [showWithdrawalModal, setShowWithdrawalModal] = useState(false);
   const [showPayModal, setShowPayModal] = useState(false);
@@ -87,6 +88,49 @@ export default function Dashboard() {
       transition: 'all 0.2s',
       fontSize: '0.9rem',
       fontWeight: '500'
+    },
+    dropdown: {
+      position: 'relative'
+    },
+    dropdownButton: {
+      background: 'rgba(255,255,255,0.15)',
+      border: '1px solid rgba(255,255,255,0.2)',
+      color: 'white',
+      padding: '0.5rem 1rem',
+      borderRadius: '8px',
+      cursor: 'pointer',
+      transition: 'all 0.2s',
+      fontSize: '0.9rem',
+      fontWeight: '500'
+    },
+    dropdownContent: {
+      position: 'absolute',
+      top: '100%',
+      right: 0,
+      backgroundColor: 'white',
+      borderRadius: '12px',
+      boxShadow: '0 10px 40px rgba(0,0,0,0.15)',
+      border: '1px solid #e2e8f0',
+      minWidth: '200px',
+      zIndex: 1000,
+      marginTop: '8px'
+    },
+    dropdownItem: {
+      display: 'block',
+      width: '100%',
+      padding: '12px 16px',
+      background: 'none',
+      border: 'none',
+      textAlign: 'left',
+      cursor: 'pointer',
+      fontSize: '14px',
+      color: '#374151',
+      transition: 'background-color 0.2s'
+    },
+    dropdownDivider: {
+      margin: '8px 0',
+      border: 'none',
+      borderTop: '1px solid #e2e8f0'
     },
     main: {
       maxWidth: '1400px',
@@ -818,13 +862,41 @@ export default function Dashboard() {
           </div>
           <div style={styles.userInfo}>
             <span>Welcome, {user?.user_metadata?.first_name || user?.email}</span>
-            <button
-              onClick={handleLogout}
-              style={styles.logoutButton}
-              className="action-button"
-            >
-              Logout
-            </button>
+            <div style={styles.dropdown}>
+              <button
+                onClick={() => setShowDropdown(!showDropdown)}
+                style={styles.dropdownButton}
+                className="action-button"
+              >
+                ☰ Menu
+              </button>
+              {showDropdown && (
+                <div style={styles.dropdownContent}>
+                  <button onClick={() => router.push('/main-menu')} style={styles.dropdownItem}>
+                    🏠 Main Menu
+                  </button>
+                  <button onClick={() => router.push('/profile')} style={styles.dropdownItem}>
+                    👤 Profile
+                  </button>
+                  <button onClick={() => router.push('/transactions')} style={styles.dropdownItem}>
+                    📊 Transactions
+                  </button>
+                  <button onClick={() => router.push('/cards')} style={styles.dropdownItem}>
+                    💳 Cards
+                  </button>
+                  <button onClick={() => router.push('/loans')} style={styles.dropdownItem}>
+                    🏠 Loans
+                  </button>
+                  <button onClick={() => router.push('/support')} style={styles.dropdownItem}>
+                    🆘 Support
+                  </button>
+                  <hr style={styles.dropdownDivider} />
+                  <button onClick={handleLogout} style={styles.dropdownItem}>
+                    🚪 Logout
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </header>

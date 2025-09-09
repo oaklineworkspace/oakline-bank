@@ -57,14 +57,12 @@ export default function Profile() {
 
   const fetchUserAccounts = async (userId) => {
     try {
-      // First try to get accounts linked via user_id
       let { data, error } = await supabase
         .from('accounts')
         .select('*')
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
 
-      // If no accounts found via user_id, try via profile/application relationship
       if (!data || data.length === 0) {
         const { data: profile } = await supabase
           .from('profiles')
@@ -93,7 +91,6 @@ export default function Profile() {
 
   const fetchApplicationData = async (userId) => {
     try {
-      // Try to get application data via profile
       const { data: profile } = await supabase
         .from('profiles')
         .select('application_id')
@@ -169,21 +166,35 @@ export default function Profile() {
   if (loading) {
     return (
       <div style={styles.container}>
-        <div style={styles.loading}>Loading your profile...</div>
+        <div style={styles.loading}>
+          <div style={styles.spinner}></div>
+          <p>Loading your profile...</p>
+        </div>
       </div>
     );
   }
 
   return (
     <div style={styles.container}>
+      {/* Mobile-optimized header */}
       <div style={styles.header}>
-        <h1 style={styles.title}>My Profile</h1>
-        <button 
-          style={styles.backButton}
-          onClick={() => router.push('/dashboard')}
-        >
-          ← Back to Dashboard
-        </button>
+        <div style={styles.headerTop}>
+          <h1 style={styles.title}>My Profile</h1>
+          <button 
+            style={styles.menuButton}
+            onClick={() => router.push('/main-menu')}
+          >
+            ☰
+          </button>
+        </div>
+        <div style={styles.headerActions}>
+          <button 
+            style={styles.backButton}
+            onClick={() => router.push('/dashboard')}
+          >
+            ← Dashboard
+          </button>
+        </div>
       </div>
 
       {error && (
@@ -194,214 +205,211 @@ export default function Profile() {
         <div style={styles.message}>{message}</div>
       )}
 
-      <div style={styles.grid}>
-        {/* Personal Information Section */}
-        <section style={styles.section}>
-          <div style={styles.sectionHeader}>
-            <h2 style={styles.sectionTitle}>Personal Information</h2>
-            {!editMode && application && (
+      {/* Personal Information Card */}
+      <div style={styles.card}>
+        <div style={styles.cardHeader}>
+          <h2 style={styles.cardTitle}>Personal Information</h2>
+          {!editMode && application && (
+            <button 
+              style={styles.editButton}
+              onClick={() => setEditMode(true)}
+            >
+              Edit
+            </button>
+          )}
+        </div>
+
+        {editMode ? (
+          <form onSubmit={handleUpdateProfile} style={styles.form}>
+            <div style={styles.formGrid}>
+              <div style={styles.formGroup}>
+                <label style={styles.label}>Phone</label>
+                <input
+                  type="tel"
+                  style={styles.input}
+                  value={editData.phone || ''}
+                  onChange={(e) => setEditData({...editData, phone: e.target.value})}
+                />
+              </div>
+              <div style={styles.formGroup}>
+                <label style={styles.label}>Address</label>
+                <input
+                  type="text"
+                  style={styles.input}
+                  value={editData.address || ''}
+                  onChange={(e) => setEditData({...editData, address: e.target.value})}
+                />
+              </div>
+              <div style={styles.formGroup}>
+                <label style={styles.label}>City</label>
+                <input
+                  type="text"
+                  style={styles.input}
+                  value={editData.city || ''}
+                  onChange={(e) => setEditData({...editData, city: e.target.value})}
+                />
+              </div>
+              <div style={styles.formGroup}>
+                <label style={styles.label}>State</label>
+                <input
+                  type="text"
+                  style={styles.input}
+                  value={editData.state || ''}
+                  onChange={(e) => setEditData({...editData, state: e.target.value})}
+                />
+              </div>
+              <div style={styles.formGroup}>
+                <label style={styles.label}>ZIP Code</label>
+                <input
+                  type="text"
+                  style={styles.input}
+                  value={editData.zip_code || ''}
+                  onChange={(e) => setEditData({...editData, zip_code: e.target.value})}
+                />
+              </div>
+            </div>
+            <div style={styles.formActions}>
+              <button type="submit" style={styles.saveButton}>Save</button>
               <button 
-                style={styles.editButton}
-                onClick={() => setEditMode(true)}
+                type="button" 
+                style={styles.cancelButton}
+                onClick={() => {
+                  setEditMode(false);
+                  setEditData(application || {});
+                }}
               >
-                Edit
+                Cancel
               </button>
-            )}
-          </div>
-
-          {editMode ? (
-            <form onSubmit={handleUpdateProfile} style={styles.form}>
-              <div style={styles.formGrid}>
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>Phone</label>
-                  <input
-                    type="tel"
-                    style={styles.input}
-                    value={editData.phone || ''}
-                    onChange={(e) => setEditData({...editData, phone: e.target.value})}
-                  />
-                </div>
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>Address</label>
-                  <input
-                    type="text"
-                    style={styles.input}
-                    value={editData.address || ''}
-                    onChange={(e) => setEditData({...editData, address: e.target.value})}
-                  />
-                </div>
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>City</label>
-                  <input
-                    type="text"
-                    style={styles.input}
-                    value={editData.city || ''}
-                    onChange={(e) => setEditData({...editData, city: e.target.value})}
-                  />
-                </div>
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>State</label>
-                  <input
-                    type="text"
-                    style={styles.input}
-                    value={editData.state || ''}
-                    onChange={(e) => setEditData({...editData, state: e.target.value})}
-                  />
-                </div>
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>ZIP Code</label>
-                  <input
-                    type="text"
-                    style={styles.input}
-                    value={editData.zip_code || ''}
-                    onChange={(e) => setEditData({...editData, zip_code: e.target.value})}
-                  />
-                </div>
-              </div>
-              <div style={styles.formActions}>
-                <button type="submit" style={styles.saveButton}>Save Changes</button>
-                <button 
-                  type="button" 
-                  style={styles.cancelButton}
-                  onClick={() => {
-                    setEditMode(false);
-                    setEditData(application || {});
-                  }}
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          ) : (
-            <div style={styles.infoGrid}>
-              <div style={styles.infoItem}>
-                <span style={styles.infoLabel}>Full Name:</span>
-                <span style={styles.infoValue}>
-                  {application ? `${application.first_name} ${application.last_name}` : 'N/A'}
-                </span>
-              </div>
-              <div style={styles.infoItem}>
-                <span style={styles.infoLabel}>Email:</span>
-                <span style={styles.infoValue}>{user?.email || 'N/A'}</span>
-              </div>
-              <div style={styles.infoItem}>
-                <span style={styles.infoLabel}>Phone:</span>
-                <span style={styles.infoValue}>{application?.phone || 'N/A'}</span>
-              </div>
-              <div style={styles.infoItem}>
-                <span style={styles.infoLabel}>Date of Birth:</span>
-                <span style={styles.infoValue}>{formatDate(application?.date_of_birth)}</span>
-              </div>
-              <div style={styles.infoItem}>
-                <span style={styles.infoLabel}>Address:</span>
-                <span style={styles.infoValue}>
-                  {application?.address ? 
-                    `${application.address}, ${application.city}, ${application.state} ${application.zip_code}` : 
-                    'N/A'
-                  }
-                </span>
-              </div>
-              <div style={styles.infoItem}>
-                <span style={styles.infoLabel}>Member Since:</span>
-                <span style={styles.infoValue}>{formatDate(application?.created_at)}</span>
-              </div>
             </div>
-          )}
-        </section>
-
-        {/* Account Summary */}
-        <section style={styles.section}>
-          <h2 style={styles.sectionTitle}>Account Summary</h2>
-          <div style={styles.summaryCard}>
-            <div style={styles.summaryItem}>
-              <span style={styles.summaryLabel}>Total Accounts:</span>
-              <span style={styles.summaryValue}>{accounts.length}</span>
+          </form>
+        ) : (
+          <div style={styles.infoGrid}>
+            <div style={styles.infoItem}>
+              <span style={styles.infoLabel}>Full Name</span>
+              <span style={styles.infoValue}>
+                {application ? `${application.first_name} ${application.last_name}` : 'N/A'}
+              </span>
             </div>
-            <div style={styles.summaryItem}>
-              <span style={styles.summaryLabel}>Total Balance:</span>
-              <span style={styles.summaryValueLarge}>{formatCurrency(getTotalBalance())}</span>
+            <div style={styles.infoItem}>
+              <span style={styles.infoLabel}>Email</span>
+              <span style={styles.infoValue}>{user?.email || 'N/A'}</span>
+            </div>
+            <div style={styles.infoItem}>
+              <span style={styles.infoLabel}>Phone</span>
+              <span style={styles.infoValue}>{application?.phone || 'N/A'}</span>
+            </div>
+            <div style={styles.infoItem}>
+              <span style={styles.infoLabel}>Date of Birth</span>
+              <span style={styles.infoValue}>{formatDate(application?.date_of_birth)}</span>
+            </div>
+            <div style={styles.infoItem}>
+              <span style={styles.infoLabel}>Address</span>
+              <span style={styles.infoValue}>
+                {application?.address ? 
+                  `${application.address}, ${application.city}, ${application.state} ${application.zip_code}` : 
+                  'N/A'
+                }
+              </span>
+            </div>
+            <div style={styles.infoItem}>
+              <span style={styles.infoLabel}>Member Since</span>
+              <span style={styles.infoValue}>{formatDate(application?.created_at)}</span>
             </div>
           </div>
-        </section>
-
-        {/* Accounts Details */}
-        <section style={styles.section}>
-          <h2 style={styles.sectionTitle}>My Accounts ({accounts.length})</h2>
-          {accounts.length === 0 ? (
-            <div style={styles.noAccounts}>
-              <p>No accounts found. Please contact support if this seems incorrect.</p>
-            </div>
-          ) : (
-            <div style={styles.accountsList}>
-              {accounts.map(account => (
-                <div key={account.id} style={styles.accountCard}>
-                  <div style={styles.accountHeader}>
-                    <h3 style={styles.accountTitle}>
-                      {account.account_name || `${account.account_type} Account`}
-                    </h3>
-                    <span style={styles.accountType}>{account.account_type}</span>
-                  </div>
-                  <div style={styles.accountDetails}>
-                    <div style={styles.accountItem}>
-                      <span style={styles.accountLabel}>Account Number:</span>
-                      <span style={styles.accountValue}>****{account.account_number?.slice(-4)}</span>
-                    </div>
-                    <div style={styles.accountItem}>
-                      <span style={styles.accountLabel}>Routing Number:</span>
-                      <span style={styles.accountValue}>{account.routing_number || 'N/A'}</span>
-                    </div>
-                    <div style={styles.accountItem}>
-                      <span style={styles.accountLabel}>Balance:</span>
-                      <span style={styles.accountBalanceValue}>
-                        {formatCurrency(account.balance)}
-                      </span>
-                    </div>
-                    <div style={styles.accountItem}>
-                      <span style={styles.accountLabel}>Status:</span>
-                      <span style={{
-                        ...styles.accountValue,
-                        color: account.status === 'active' ? '#10b981' : '#ef4444',
-                        fontWeight: 'bold'
-                      }}>
-                        {account.status || 'Active'}
-                      </span>
-                    </div>
-                    <div style={styles.accountItem}>
-                      <span style={styles.accountLabel}>Opened:</span>
-                      <span style={styles.accountValue}>{formatDate(account.created_at)}</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
-
-        {/* Security Settings */}
-        <section style={styles.section}>
-          <h2 style={styles.sectionTitle}>Security</h2>
-          <div style={styles.securityOptions}>
-            <button 
-              style={styles.securityButton}
-              onClick={() => router.push('/reset-password')}
-            >
-              🔐 Change Password
-            </button>
-            <button 
-              style={styles.securityButton}
-              onClick={() => router.push('/mfa-setup')}
-            >
-              🛡️ Two-Factor Authentication
-            </button>
-            <button 
-              style={styles.securityButton}
-              onClick={() => router.push('/security')}
-            >
-              🔒 Security Settings
-            </button>
-          </div>
-        </section>
+        )}
       </div>
+
+      {/* Account Summary Card */}
+      <div style={styles.card}>
+        <h2 style={styles.cardTitle}>Account Summary</h2>
+        <div style={styles.summaryGrid}>
+          <div style={styles.summaryItem}>
+            <span style={styles.summaryLabel}>Total Accounts</span>
+            <span style={styles.summaryValue}>{accounts.length}</span>
+          </div>
+          <div style={styles.summaryItem}>
+            <span style={styles.summaryLabel}>Total Balance</span>
+            <span style={styles.summaryValueLarge}>{formatCurrency(getTotalBalance())}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Accounts List */}
+      <div style={styles.card}>
+        <h2 style={styles.cardTitle}>My Accounts ({accounts.length})</h2>
+        {accounts.length === 0 ? (
+          <div style={styles.noAccounts}>
+            <p>No accounts found. Please contact support.</p>
+          </div>
+        ) : (
+          <div style={styles.accountsList}>
+            {accounts.map(account => (
+              <div key={account.id} style={styles.accountCard}>
+                <div style={styles.accountHeader}>
+                  <h3 style={styles.accountTitle}>
+                    {account.account_name || `${account.account_type} Account`}
+                  </h3>
+                  <span style={styles.accountType}>{account.account_type}</span>
+                </div>
+                <div style={styles.accountDetails}>
+                  <div style={styles.accountRow}>
+                    <span style={styles.accountLabel}>Account Number:</span>
+                    <span style={styles.accountValue}>****{account.account_number?.slice(-4)}</span>
+                  </div>
+                  <div style={styles.accountRow}>
+                    <span style={styles.accountLabel}>Balance:</span>
+                    <span style={styles.accountBalance}>
+                      {formatCurrency(account.balance)}
+                    </span>
+                  </div>
+                  <div style={styles.accountRow}>
+                    <span style={styles.accountLabel}>Status:</span>
+                    <span style={{
+                      ...styles.accountValue,
+                      color: account.status === 'active' ? '#10b981' : '#ef4444',
+                      fontWeight: 'bold'
+                    }}>
+                      {account.status || 'Active'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Security Settings */}
+      <div style={styles.card}>
+        <h2 style={styles.cardTitle}>Security & Settings</h2>
+        <div style={styles.securityGrid}>
+          <button 
+            style={styles.securityButton}
+            onClick={() => router.push('/reset-password')}
+          >
+            🔐 Change Password
+          </button>
+          <button 
+            style={styles.securityButton}
+            onClick={() => router.push('/mfa-setup')}
+          >
+            🛡️ Two-Factor Auth
+          </button>
+          <button 
+            style={styles.securityButton}
+            onClick={() => router.push('/security')}
+          >
+            🔒 Security Settings
+          </button>
+        </div>
+      </div>
+
+      <style jsx>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 }
@@ -410,10 +418,95 @@ const styles = {
   container: {
     minHeight: '100vh',
     backgroundColor: '#f8fafc',
-    padding: '10px',
+    padding: '0',
     fontFamily: 'system-ui, -apple-system, sans-serif'
   },
   header: {
+    background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
+    color: 'white',
+    padding: '15px',
+    position: 'sticky',
+    top: 0,
+    zIndex: 100,
+    boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
+  },
+  headerTop: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '10px'
+  },
+  title: {
+    fontSize: '20px',
+    fontWeight: 'bold',
+    margin: 0
+  },
+  menuButton: {
+    background: 'rgba(255,255,255,0.2)',
+    border: 'none',
+    color: 'white',
+    padding: '8px 12px',
+    borderRadius: '6px',
+    fontSize: '16px',
+    cursor: 'pointer'
+  },
+  headerActions: {
+    display: 'flex',
+    gap: '10px'
+  },
+  backButton: {
+    background: 'rgba(255,255,255,0.2)',
+    border: 'none',
+    color: 'white',
+    padding: '8px 16px',
+    borderRadius: '6px',
+    fontSize: '14px',
+    cursor: 'pointer'
+  },
+  loading: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: '70vh',
+    color: '#64748b'
+  },
+  spinner: {
+    width: '40px',
+    height: '40px',
+    border: '4px solid #e2e8f0',
+    borderTop: '4px solid #3b82f6',
+    borderRadius: '50%',
+    animation: 'spin 1s linear infinite',
+    marginBottom: '15px'
+  },
+  error: {
+    backgroundColor: '#fee2e2',
+    border: '1px solid #fecaca',
+    color: '#dc2626',
+    padding: '12px 15px',
+    borderRadius: '8px',
+    margin: '15px',
+    fontSize: '14px'
+  },
+  message: {
+    backgroundColor: '#dcfce7',
+    border: '1px solid #bbf7d0',
+    color: '#166534',
+    padding: '12px 15px',
+    borderRadius: '8px',
+    margin: '15px',
+    fontSize: '14px'
+  },
+  card: {
+    backgroundColor: 'white',
+    margin: '15px',
+    borderRadius: '12px',
+    padding: '20px',
+    boxShadow: '0 2px 10px rgba(0,0,0,0.08)',
+    border: '1px solid #e2e8f0'
+  },
+  cardHeader: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -421,86 +514,29 @@ const styles = {
     flexWrap: 'wrap',
     gap: '10px'
   },
-  title: {
-    fontSize: 'clamp(24px, 5vw, 32px)',
-    fontWeight: 'bold',
-    color: '#1e293b',
-    margin: 0
-  },
-  backButton: {
-    padding: '10px 20px',
-    backgroundColor: '#64748b',
-    color: 'white',
-    border: 'none',
-    borderRadius: '8px',
-    fontSize: '14px',
-    cursor: 'pointer',
-    transition: 'background-color 0.2s'
-  },
-  loading: {
-    textAlign: 'center',
-    padding: '40px',
+  cardTitle: {
     fontSize: '18px',
-    color: '#64748b'
-  },
-  error: {
-    backgroundColor: '#fee2e2',
-    border: '1px solid #fecaca',
-    color: '#dc2626',
-    padding: '15px',
-    borderRadius: '8px',
-    marginBottom: '20px'
-  },
-  message: {
-    backgroundColor: '#dcfce7',
-    border: '1px solid #bbf7d0',
-    color: '#166534',
-    padding: '15px',
-    borderRadius: '8px',
-    marginBottom: '20px'
-  },
-  grid: {
-    display: 'grid',
-    gap: '15px',
-    maxWidth: '1200px',
-    margin: '0 auto'
-  },
-  section: {
-    backgroundColor: 'white',
-    borderRadius: '12px',
-    padding: 'clamp(15px, 4vw, 25px)',
-    boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-  },
-  sectionHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '20px'
-  },
-  sectionTitle: {
-    fontSize: '20px',
     fontWeight: 'bold',
     color: '#1e293b',
     margin: 0
   },
   editButton: {
-    padding: '8px 16px',
+    padding: '6px 12px',
     backgroundColor: '#3b82f6',
     color: 'white',
     border: 'none',
     borderRadius: '6px',
-    fontSize: '14px',
+    fontSize: '12px',
     cursor: 'pointer'
   },
   form: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '20px'
+    gap: '15px'
   },
   formGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-    gap: '10px'
+    gap: '15px'
   },
   formGroup: {
     display: 'flex',
@@ -516,15 +552,18 @@ const styles = {
     padding: '10px',
     border: '1px solid #d1d5db',
     borderRadius: '6px',
-    fontSize: '14px'
+    fontSize: '16px',
+    width: '100%',
+    boxSizing: 'border-box'
   },
   formActions: {
     display: 'flex',
     gap: '10px',
-    justifyContent: 'flex-start'
+    marginTop: '10px'
   },
   saveButton: {
-    padding: '12px 24px',
+    flex: 1,
+    padding: '12px',
     backgroundColor: '#10b981',
     color: 'white',
     border: 'none',
@@ -534,7 +573,8 @@ const styles = {
     cursor: 'pointer'
   },
   cancelButton: {
-    padding: '12px 24px',
+    flex: 1,
+    padding: '12px',
     backgroundColor: '#6b7280',
     color: 'white',
     border: 'none',
@@ -545,8 +585,7 @@ const styles = {
   },
   infoGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-    gap: '10px'
+    gap: '15px'
   },
   infoItem: {
     display: 'flex',
@@ -557,65 +596,69 @@ const styles = {
     borderRadius: '8px'
   },
   infoLabel: {
-    fontSize: '14px',
+    fontSize: '12px',
     fontWeight: '500',
-    color: '#6b7280'
+    color: '#6b7280',
+    textTransform: 'uppercase'
   },
   infoValue: {
-    fontSize: '16px',
+    fontSize: '14px',
     color: '#1e293b',
     fontWeight: '500'
   },
-  summaryCard: {
+  summaryGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+    gridTemplateColumns: '1fr 1fr',
     gap: '15px'
   },
   summaryItem: {
     textAlign: 'center',
-    padding: '20px',
+    padding: '20px 10px',
     backgroundColor: '#f1f5f9',
     borderRadius: '10px'
   },
   summaryLabel: {
     display: 'block',
-    fontSize: '14px',
+    fontSize: '12px',
     color: '#64748b',
-    marginBottom: '5px'
+    marginBottom: '8px',
+    fontWeight: '500'
   },
   summaryValue: {
-    fontSize: '24px',
+    fontSize: '20px',
     fontWeight: 'bold',
     color: '#1e293b'
   },
   summaryValueLarge: {
-    fontSize: '28px',
+    fontSize: '18px',
     fontWeight: 'bold',
     color: '#059669'
   },
   noAccounts: {
     textAlign: 'center',
-    padding: '40px',
+    padding: '30px',
     color: '#64748b'
   },
   accountsList: {
     display: 'grid',
-    gap: '20px'
+    gap: '15px'
   },
   accountCard: {
     border: '1px solid #e2e8f0',
     borderRadius: '10px',
-    padding: '20px',
+    padding: '15px',
     backgroundColor: '#fafafa'
   },
   accountHeader: {
     display: 'flex',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '15px'
+    alignItems: 'flex-start',
+    marginBottom: '12px',
+    flexWrap: 'wrap',
+    gap: '8px'
   },
   accountTitle: {
-    fontSize: '18px',
+    fontSize: '16px',
     fontWeight: 'bold',
     color: '#1e293b',
     margin: 0
@@ -623,46 +666,45 @@ const styles = {
   accountType: {
     backgroundColor: '#dbeafe',
     color: '#1d4ed8',
-    padding: '4px 12px',
-    borderRadius: '20px',
-    fontSize: '12px',
+    padding: '3px 8px',
+    borderRadius: '12px',
+    fontSize: '10px',
     fontWeight: '500',
     textTransform: 'uppercase'
   },
   accountDetails: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-    gap: '15px'
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px'
   },
-  accountItem: {
+  accountRow: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: '8px 0',
+    paddingBottom: '8px',
     borderBottom: '1px solid #e2e8f0'
   },
   accountLabel: {
-    fontSize: '14px',
+    fontSize: '13px',
     color: '#64748b',
     fontWeight: '500'
   },
   accountValue: {
-    fontSize: '14px',
+    fontSize: '13px',
     color: '#1e293b',
     fontWeight: '500'
   },
-  accountBalanceValue: {
-    fontSize: '16px',
+  accountBalance: {
+    fontSize: '14px',
     color: '#059669',
     fontWeight: 'bold'
   },
-  securityOptions: {
+  securityGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
     gap: '10px'
   },
   securityButton: {
-    padding: '15px 20px',
+    padding: '15px',
     backgroundColor: '#f8fafc',
     border: '1px solid #e2e8f0',
     borderRadius: '8px',
@@ -670,7 +712,6 @@ const styles = {
     fontWeight: '500',
     color: '#374151',
     cursor: 'pointer',
-    transition: 'all 0.2s',
     textAlign: 'left'
   }
 };
