@@ -12,11 +12,6 @@
   ],
   "rootMainFiles": [],
   "pages": {
-    "/": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/index.js"
-    ],
     "/_app": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
@@ -27,15 +22,25 @@
       "static/chunks/main.js",
       "static/chunks/pages/_error.js"
     ],
+    "/cards": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/cards.js"
+    ],
+    "/crypto": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/crypto.js"
+    ],
     "/main-menu": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
       "static/chunks/pages/main-menu.js"
     ],
-    "/withdrawal": [
+    "/profile": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/withdrawal.js"
+      "static/chunks/pages/profile.js"
     ]
   },
   "ampFirstPages": []

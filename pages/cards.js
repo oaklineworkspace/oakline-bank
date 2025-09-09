@@ -1,59 +1,93 @@
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
+import { supabase } from '../lib/supabaseClient';
+import { useRouter } from 'next/router';
 
 export default function Cards() {
+  const [user, setUser] = useState(null);
   const [cards, setCards] = useState([]);
+  const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('overview');
+  const [showApplicationModal, setShowApplicationModal] = useState(false);
+  const [selectedCardType, setSelectedCardType] = useState('');
+  const router = useRouter();
 
   useEffect(() => {
-    fetchCards();
+    checkUser();
   }, []);
 
-  const fetchCards = async () => {
+  const checkUser = async () => {
     try {
-      // Mock data - replace with actual API call
-      setCards([
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        router.push('/login');
+        return;
+      }
+      setUser(user);
+      await fetchUserData(user.email);
+    } catch (error) {
+      console.error('Error checking user:', error);
+      router.push('/login');
+    }
+  };
+
+  const fetchUserData = async (email) => {
+    try {
+      // Fetch user accounts
+      const { data: accountsData, error: accountsError } = await supabase
+        .from('accounts')
+        .select('*')
+        .eq('email', email);
+
+      if (accountsError) throw accountsError;
+      setAccounts(accountsData || []);
+
+      // Fetch user cards (you'll need to create a cards table)
+      // For now, we'll simulate some cards
+      const simulatedCards = [
         {
           id: 1,
-          type: 'Debit',
-          number: '**** **** **** 4567',
-          balance: 2450.75,
+          type: 'Debit Card',
+          number: '**** **** **** 1234',
           status: 'Active',
-          expiry: '12/27',
-          cardHolder: 'Christopher Hite',
-          lastUsed: '2025-01-15'
-        },
-        {
-          id: 2,
-          type: 'Credit',
-          number: '**** **** **** 8901',
-          balance: -850.25,
-          creditLimit: 5000,
-          status: 'Active',
-          expiry: '08/26',
-          cardHolder: 'Christopher Hite',
-          lastUsed: '2025-01-14'
+          expiryDate: '12/26',
+          accountId: accountsData?.[0]?.id
         }
-      ]);
+      ];
+      setCards(simulatedCards);
     } catch (error) {
-      console.error('Error fetching cards:', error);
+      console.error('Error fetching user data:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCardAction = (action, cardId) => {
-    console.log(`${action} card ${cardId}`);
-    // Implement card actions
+  const cardTypes = [
+    { value: 'debit', label: 'Debit Card', description: 'Access your checking account funds' },
+    { value: 'credit', label: 'Credit Card', description: 'Build credit with responsible use' },
+    { value: 'prepaid', label: 'Prepaid Card', description: 'Load funds for controlled spending' },
+    { value: 'business', label: 'Business Card', description: 'For business expenses and rewards' }
+  ];
+
+  const handleCardApplication = async () => {
+    if (!selectedCardType) return;
+
+    try {
+      // Here you would typically submit the card application
+      // For now, we'll just show success
+      alert(`${selectedCardType} card application submitted successfully!`);
+      setShowApplicationModal(false);
+      setSelectedCardType('');
+    } catch (error) {
+      console.error('Error submitting card application:', error);
+      alert('Error submitting application. Please try again.');
+    }
   };
 
   if (loading) {
     return (
-      <div style={styles.loadingContainer}>
-        <div style={styles.spinner}></div>
-        <p>Loading your cards...</p>
+      <div style={styles.container}>
+        <div style={styles.loading}>Loading your cards...</div>
       </div>
     );
   }
@@ -61,191 +95,101 @@ export default function Cards() {
   return (
     <div style={styles.container}>
       {/* Header */}
-      <div style={styles.header}>
-        <div>
-          <h1 style={styles.title}>💳 My Cards</h1>
-          <p style={styles.subtitle}>Manage your debit and credit cards</p>
-        </div>
-        <Link href="/main-menu" style={styles.backButton}>
-          ← Back to Menu
-        </Link>
-      </div>
-
-      {/* Navigation Tabs */}
-      <div style={styles.tabs}>
-        <button
-          style={activeTab === 'overview' ? {...styles.tab, ...styles.activeTab} : styles.tab}
-          onClick={() => setActiveTab('overview')}
-        >
-          Overview
+      <header style={styles.header}>
+        <button onClick={() => router.push('/dashboard')} style={styles.backButton}>
+          ← Back to Dashboard
         </button>
-        <button
-          style={activeTab === 'transactions' ? {...styles.tab, ...styles.activeTab} : styles.tab}
-          onClick={() => setActiveTab('transactions')}
-        >
-          Transactions
+        <h1 style={styles.title}>My Cards</h1>
+        <button onClick={() => router.push('/main-menu')} style={styles.menuButton}>
+          ☰ Menu
         </button>
-        <button
-          style={activeTab === 'settings' ? {...styles.tab, ...styles.activeTab} : styles.tab}
-          onClick={() => setActiveTab('settings')}
-        >
-          Settings
-        </button>
-      </div>
+      </header>
 
-      {activeTab === 'overview' && (
-        <div>
-          {/* Quick Actions */}
-          <div style={styles.quickActions}>
-            <button style={styles.actionButton}>
-              ➕ Request New Card
-            </button>
-            <button style={styles.actionButton}>
-              🔒 Freeze All Cards
-            </button>
-            <button style={styles.actionButton}>
-              📊 View Statement
-            </button>
-            <button style={styles.actionButton}>
-              🎯 Set Limits
-            </button>
-          </div>
-
-          {/* Cards Grid */}
+      {/* Current Cards */}
+      <section style={styles.section}>
+        <h2 style={styles.sectionTitle}>Your Cards</h2>
+        {cards.length > 0 ? (
           <div style={styles.cardsGrid}>
-            {cards.map(card => (
-              <div key={card.id} style={styles.cardContainer}>
-                <div style={card.type === 'Credit' ? styles.creditCard : styles.debitCard}>
-                  <div style={styles.cardHeader}>
-                    <span style={styles.cardType}>{card.type} Card</span>
-                    <span style={styles.cardStatus}>{card.status}</span>
-                  </div>
+            {cards.map((card) => (
+              <div key={card.id} style={styles.cardItem}>
+                <div style={styles.cardVisual}>
+                  <div style={styles.cardType}>{card.type}</div>
                   <div style={styles.cardNumber}>{card.number}</div>
                   <div style={styles.cardDetails}>
-                    <div>
-                      <p style={styles.cardLabel}>Balance</p>
-                      <p style={styles.cardValue}>
-                        ${Math.abs(card.balance).toFixed(2)}
-                        {card.type === 'Credit' && card.balance < 0 && ' (owed)'}
-                      </p>
-                    </div>
-                    <div>
-                      <p style={styles.cardLabel}>Expires</p>
-                      <p style={styles.cardValue}>{card.expiry}</p>
-                    </div>
-                  </div>
-                  <div style={styles.cardFooter}>
-                    <span style={styles.cardHolder}>{card.cardHolder}</span>
-                    {card.type === 'Credit' && (
-                      <span style={styles.creditLimit}>
-                        Limit: ${card.creditLimit.toLocaleString()}
-                      </span>
-                    )}
+                    <span>Expires: {card.expiryDate}</span>
+                    <span style={card.status === 'Active' ? styles.statusActive : styles.statusInactive}>
+                      {card.status}
+                    </span>
                   </div>
                 </div>
-
-                {/* Card Actions */}
                 <div style={styles.cardActions}>
-                  <button 
-                    style={styles.cardActionBtn}
-                    onClick={() => handleCardAction('freeze', card.id)}
-                  >
-                    ❄️ Freeze
-                  </button>
-                  <button 
-                    style={styles.cardActionBtn}
-                    onClick={() => handleCardAction('settings', card.id)}
-                  >
-                    ⚙️ Settings
-                  </button>
-                  <button 
-                    style={styles.cardActionBtn}
-                    onClick={() => handleCardAction('replace', card.id)}
-                  >
-                    🔄 Replace
-                  </button>
+                  <button style={styles.actionButton}>Freeze Card</button>
+                  <button style={styles.actionButton}>View PIN</button>
+                  <button style={styles.actionButton}>Transaction History</button>
                 </div>
               </div>
             ))}
           </div>
-
-          {/* Card Benefits */}
-          <div style={styles.benefitsSection}>
-            <h2 style={styles.sectionTitle}>Card Benefits & Features</h2>
-            <div style={styles.benefitsGrid}>
-              <div style={styles.benefitCard}>
-                <span style={styles.benefitIcon}>🛡️</span>
-                <h3>Fraud Protection</h3>
-                <p>24/7 monitoring and instant alerts for suspicious activity</p>
-              </div>
-              <div style={styles.benefitCard}>
-                <span style={styles.benefitIcon}>💰</span>
-                <h3>Cashback Rewards</h3>
-                <p>Earn up to 2% cashback on all purchases</p>
-              </div>
-              <div style={styles.benefitCard}>
-                <span style={styles.benefitIcon}>🌍</span>
-                <h3>Global Acceptance</h3>
-                <p>Use your card anywhere Visa is accepted worldwide</p>
-              </div>
-              <div style={styles.benefitCard}>
-                <span style={styles.benefitIcon}>📱</span>
-                <h3>Mobile Payments</h3>
-                <p>Compatible with Apple Pay, Google Pay, and Samsung Pay</p>
-              </div>
-            </div>
+        ) : (
+          <div style={styles.noCards}>
+            <p>You don't have any cards yet.</p>
+            <button 
+              style={styles.applyButton}
+              onClick={() => setShowApplicationModal(true)}
+            >
+              Apply for Your First Card
+            </button>
           </div>
-        </div>
-      )}
+        )}
+      </section>
 
-      {activeTab === 'transactions' && (
-        <div style={styles.transactionSection}>
-          <h2 style={styles.sectionTitle}>Recent Card Transactions</h2>
-          <div style={styles.transactionList}>
-            <div style={styles.transactionItem}>
-              <div style={styles.transactionInfo}>
-                <span style={styles.merchant}>Amazon Purchase</span>
-                <span style={styles.transactionDate}>Jan 15, 2025</span>
-              </div>
-              <span style={styles.transactionAmount}>-$45.67</span>
+      {/* Apply for New Card */}
+      <section style={styles.section}>
+        <h2 style={styles.sectionTitle}>Apply for a New Card</h2>
+        <div style={styles.cardTypesGrid}>
+          {cardTypes.map((cardType) => (
+            <div key={cardType.value} style={styles.cardTypeItem}>
+              <h3 style={styles.cardTypeTitle}>{cardType.label}</h3>
+              <p style={styles.cardTypeDescription}>{cardType.description}</p>
+              <button 
+                style={styles.applyButton}
+                onClick={() => {
+                  setSelectedCardType(cardType.label);
+                  setShowApplicationModal(true);
+                }}
+              >
+                Apply Now
+              </button>
             </div>
-            <div style={styles.transactionItem}>
-              <div style={styles.transactionInfo}>
-                <span style={styles.merchant}>Gas Station</span>
-                <span style={styles.transactionDate}>Jan 14, 2025</span>
-              </div>
-              <span style={styles.transactionAmount}>-$32.50</span>
-            </div>
-            <div style={styles.transactionItem}>
-              <div style={styles.transactionInfo}>
-                <span style={styles.merchant}>Cashback Reward</span>
-                <span style={styles.transactionDate}>Jan 13, 2025</span>
-              </div>
-              <span style={{...styles.transactionAmount, color: '#28a745'}}>+$2.50</span>
-            </div>
-          </div>
+          ))}
         </div>
-      )}
+      </section>
 
-      {activeTab === 'settings' && (
-        <div style={styles.settingsSection}>
-          <h2 style={styles.sectionTitle}>Card Settings</h2>
-          <div style={styles.settingsList}>
-            <div style={styles.settingItem}>
-              <span>Transaction Alerts</span>
-              <button style={styles.toggleButton}>ON</button>
-            </div>
-            <div style={styles.settingItem}>
-              <span>International Transactions</span>
-              <button style={styles.toggleButton}>OFF</button>
-            </div>
-            <div style={styles.settingItem}>
-              <span>Online Purchases</span>
-              <button style={styles.toggleButton}>ON</button>
-            </div>
-            <div style={styles.settingItem}>
-              <span>ATM Withdrawals</span>
-              <button style={styles.toggleButton}>ON</button>
+      {/* Application Modal */}
+      {showApplicationModal && (
+        <div style={styles.modal}>
+          <div style={styles.modalContent}>
+            <h3 style={styles.modalTitle}>Apply for {selectedCardType}</h3>
+            <p style={styles.modalText}>
+              Are you sure you want to apply for a {selectedCardType}? 
+              Your application will be reviewed and you'll receive a response within 2-3 business days.
+            </p>
+            <div style={styles.modalActions}>
+              <button 
+                style={styles.confirmButton}
+                onClick={handleCardApplication}
+              >
+                Confirm Application
+              </button>
+              <button 
+                style={styles.cancelButton}
+                onClick={() => {
+                  setShowApplicationModal(false);
+                  setSelectedCardType('');
+                }}
+              >
+                Cancel
+              </button>
             </div>
           </div>
         </div>
@@ -257,278 +201,206 @@ export default function Cards() {
 const styles = {
   container: {
     minHeight: '100vh',
-    background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
-    padding: '20px'
-  },
-  loadingContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: '100vh',
-    background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)'
-  },
-  spinner: {
-    width: '40px',
-    height: '40px',
-    border: '4px solid #f3f3f3',
-    borderTop: '4px solid #1e3c72',
-    borderRadius: '50%',
-    animation: 'spin 1s linear infinite'
+    backgroundColor: '#f8fafc',
+    padding: '0',
   },
   header: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: '30px',
-    background: 'white',
-    padding: '25px',
-    borderRadius: '12px',
-    boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-  },
-  title: {
-    fontSize: '28px',
-    fontWeight: 'bold',
-    color: '#1e3c72',
-    margin: 0
-  },
-  subtitle: {
-    color: '#666',
-    marginTop: '5px',
-    margin: 0
+    padding: '20px',
+    backgroundColor: '#1e3a8a',
+    color: 'white',
   },
   backButton: {
-    background: '#6c757d',
+    padding: '8px 16px',
+    backgroundColor: 'transparent',
     color: 'white',
-    textDecoration: 'none',
-    padding: '10px 20px',
-    borderRadius: '8px',
-    fontSize: '14px',
-    fontWeight: '500'
+    border: '1px solid white',
+    borderRadius: '6px',
+    cursor: 'pointer',
   },
-  tabs: {
+  title: {
+    fontSize: '24px',
+    fontWeight: 'bold',
+    margin: 0,
+  },
+  menuButton: {
+    padding: '8px 16px',
+    backgroundColor: 'transparent',
+    color: 'white',
+    border: '1px solid white',
+    borderRadius: '6px',
+    cursor: 'pointer',
+  },
+  loading: {
     display: 'flex',
-    background: 'white',
-    borderRadius: '12px',
-    padding: '5px',
-    marginBottom: '25px',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '50vh',
+    fontSize: '18px',
+    color: '#64748b',
   },
-  tab: {
-    flex: 1,
-    padding: '12px 20px',
-    border: 'none',
-    background: 'transparent',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    fontSize: '14px',
-    fontWeight: '500',
-    color: '#666',
-    transition: 'all 0.3s'
+  section: {
+    padding: '20px',
+    marginBottom: '20px',
   },
-  activeTab: {
-    background: '#1e3c72',
-    color: 'white'
-  },
-  quickActions: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-    gap: '15px',
-    marginBottom: '30px'
-  },
-  actionButton: {
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    color: 'white',
-    border: 'none',
-    padding: '15px 20px',
-    borderRadius: '12px',
-    cursor: 'pointer',
-    fontSize: '14px',
-    fontWeight: '500',
-    transition: 'transform 0.2s'
+  sectionTitle: {
+    fontSize: '20px',
+    fontWeight: 'bold',
+    color: '#1e293b',
+    marginBottom: '16px',
   },
   cardsGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
-    gap: '25px',
-    marginBottom: '40px'
+    gap: '20px',
   },
-  cardContainer: {
-    background: 'white',
-    borderRadius: '16px',
+  cardItem: {
+    backgroundColor: 'white',
+    borderRadius: '12px',
     padding: '20px',
-    boxShadow: '0 8px 16px rgba(0,0,0,0.1)'
+    boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
   },
-  debitCard: {
-    background: 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)',
-    color: 'white',
-    padding: '25px',
+  cardVisual: {
+    background: 'linear-gradient(135deg, #1e3a8a, #3b82f6)',
     borderRadius: '12px',
-    marginBottom: '15px'
-  },
-  creditCard: {
-    background: 'linear-gradient(135deg, #c31432 0%, #240b36 100%)',
+    padding: '20px',
     color: 'white',
-    padding: '25px',
-    borderRadius: '12px',
-    marginBottom: '15px'
-  },
-  cardHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '20px'
+    marginBottom: '16px',
   },
   cardType: {
     fontSize: '14px',
     fontWeight: '500',
-    opacity: 0.9
-  },
-  cardStatus: {
-    fontSize: '12px',
-    background: 'rgba(255,255,255,0.2)',
-    padding: '4px 8px',
-    borderRadius: '4px'
+    marginBottom: '12px',
   },
   cardNumber: {
-    fontSize: '20px',
+    fontSize: '18px',
     fontWeight: 'bold',
     letterSpacing: '2px',
-    marginBottom: '20px'
+    marginBottom: '16px',
   },
   cardDetails: {
     display: 'flex',
     justifyContent: 'space-between',
-    marginBottom: '20px'
-  },
-  cardLabel: {
     fontSize: '12px',
-    opacity: 0.8,
-    margin: '0 0 5px 0'
   },
-  cardValue: {
-    fontSize: '14px',
-    fontWeight: '500',
-    margin: 0
+  statusActive: {
+    color: '#10b981',
+    fontWeight: 'bold',
   },
-  cardFooter: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center'
-  },
-  cardHolder: {
-    fontSize: '14px',
-    fontWeight: '500'
-  },
-  creditLimit: {
-    fontSize: '12px',
-    opacity: 0.8
+  statusInactive: {
+    color: '#ef4444',
+    fontWeight: 'bold',
   },
   cardActions: {
     display: 'flex',
-    gap: '10px'
+    gap: '10px',
+    flexWrap: 'wrap',
   },
-  cardActionBtn: {
-    flex: 1,
-    background: '#f8f9fa',
-    border: '1px solid #dee2e6',
-    padding: '10px 15px',
-    borderRadius: '8px',
+  actionButton: {
+    padding: '8px 16px',
+    backgroundColor: '#e2e8f0',
+    color: '#1e293b',
+    border: 'none',
+    borderRadius: '6px',
     cursor: 'pointer',
-    fontSize: '12px',
-    fontWeight: '500',
-    color: '#495057',
-    transition: 'all 0.2s'
+    fontSize: '14px',
   },
-  benefitsSection: {
-    background: 'white',
-    padding: '30px',
-    borderRadius: '16px',
-    boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-    marginBottom: '30px'
-  },
-  sectionTitle: {
-    fontSize: '22px',
-    fontWeight: 'bold',
-    color: '#1e3c72',
-    marginBottom: '25px'
-  },
-  benefitsGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-    gap: '20px'
-  },
-  benefitCard: {
+  noCards: {
     textAlign: 'center',
-    padding: '20px'
+    padding: '40px',
+    backgroundColor: 'white',
+    borderRadius: '12px',
+    boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
   },
-  benefitIcon: {
-    fontSize: '40px',
-    marginBottom: '15px',
-    display: 'block'
+  cardTypesGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+    gap: '16px',
   },
-  transactionSection: {
-    background: 'white',
-    padding: '30px',
-    borderRadius: '16px',
-    boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+  cardTypeItem: {
+    backgroundColor: 'white',
+    borderRadius: '12px',
+    padding: '20px',
+    boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+    textAlign: 'center',
   },
-  transactionList: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '15px'
-  },
-  transactionItem: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: '15px',
-    background: '#f8f9fa',
-    borderRadius: '8px'
-  },
-  transactionInfo: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '5px'
-  },
-  merchant: {
-    fontWeight: '500',
-    color: '#1e3c72'
-  },
-  transactionDate: {
-    fontSize: '12px',
-    color: '#666'
-  },
-  transactionAmount: {
+  cardTypeTitle: {
+    fontSize: '18px',
     fontWeight: 'bold',
-    color: '#dc3545'
+    color: '#1e293b',
+    marginBottom: '8px',
   },
-  settingsSection: {
-    background: 'white',
-    padding: '30px',
-    borderRadius: '16px',
-    boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+  cardTypeDescription: {
+    fontSize: '14px',
+    color: '#64748b',
+    marginBottom: '16px',
   },
-  settingsList: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '20px'
-  },
-  settingItem: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: '15px 0',
-    borderBottom: '1px solid #e9ecef'
-  },
-  toggleButton: {
-    background: '#28a745',
+  applyButton: {
+    padding: '12px 24px',
+    backgroundColor: '#1e3a8a',
     color: 'white',
     border: 'none',
-    padding: '6px 12px',
-    borderRadius: '4px',
-    fontSize: '12px',
+    borderRadius: '6px',
+    cursor: 'pointer',
+    fontSize: '14px',
     fontWeight: '500',
-    cursor: 'pointer'
-  }
+  },
+  modal: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    borderRadius: '12px',
+    padding: '30px',
+    maxWidth: '400px',
+    width: '90%',
+    textAlign: 'center',
+  },
+  modalTitle: {
+    fontSize: '20px',
+    fontWeight: 'bold',
+    marginBottom: '16px',
+    color: '#1e293b',
+  },
+  modalText: {
+    fontSize: '14px',
+    color: '#64748b',
+    marginBottom: '24px',
+    lineHeight: '1.5',
+  },
+  modalActions: {
+    display: 'flex',
+    gap: '12px',
+    justifyContent: 'center',
+  },
+  confirmButton: {
+    padding: '12px 24px',
+    backgroundColor: '#10b981',
+    color: 'white',
+    border: 'none',
+    borderRadius: '6px',
+    cursor: 'pointer',
+    fontSize: '14px',
+    fontWeight: '500',
+  },
+  cancelButton: {
+    padding: '12px 24px',
+    backgroundColor: '#e2e8f0',
+    color: '#1e293b',
+    border: 'none',
+    borderRadius: '6px',
+    cursor: 'pointer',
+    fontSize: '14px',
+    fontWeight: '500',
+  },
 };

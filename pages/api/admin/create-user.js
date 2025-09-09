@@ -62,7 +62,7 @@ export default async function handler(req, res) {
     // Map account type IDs to enum values
     const ACCOUNT_TYPE_MAPPING = {
       1: 'checking_account',
-      2: 'savings_account', 
+      2: 'savings_account',
       3: 'business_checking',
       4: 'business_savings',
       5: 'student_checking',
@@ -87,6 +87,21 @@ export default async function handler(req, res) {
     };
 
     const mappedAccountTypes = accountTypes.map(id => ACCOUNT_TYPE_MAPPING[id]).filter(Boolean);
+
+    // Validate employment status
+    const validEmploymentStatuses = [
+      'Employed Full-time',
+      'Employed Part-time',
+      'Self-employed',
+      'Unemployed',
+      'Retired',
+      'Student'
+    ];
+
+    if (!validEmploymentStatuses.includes(employmentStatus)) {
+      return res.status(400).json({ error: 'Invalid employment status provided' });
+    }
+
 
     // 2. Create application record
     const applicationData = {

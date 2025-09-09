@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
@@ -7,15 +6,20 @@ export default function AdminDashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [stats, setStats] = useState({
+  const [bankStats, setBankStats] = useState({
     totalUsers: 0,
     totalAccounts: 0,
-    totalTransactions: 0,
     totalBalance: 0,
-    totalLoans: 0,
-    totalInvestments: 0
+    pendingTransactions: 0,
+    activeLoans: 0,
+    totalDeposits: 0,
+    totalWithdrawals: 0,
+    newUsersToday: 0
   });
-  const [loading, setLoading] = useState(false);
+
+  const [recentUsers, setRecentUsers] = useState([]);
+  const [recentTransactions, setRecentTransactions] = useState([]);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   const ADMIN_PASSWORD = 'Chrismorgan23$';
@@ -24,7 +28,7 @@ export default function AdminDashboard() {
     const adminAuth = localStorage.getItem('adminAuthenticated');
     if (adminAuth === 'true') {
       setIsAuthenticated(true);
-      fetchStats();
+      fetchBankData();
     }
   }, []);
 
@@ -34,7 +38,7 @@ export default function AdminDashboard() {
       setIsAuthenticated(true);
       localStorage.setItem('adminAuthenticated', 'true');
       setError('');
-      fetchStats();
+      fetchBankData();
     } else {
       setError('Invalid password');
     }
@@ -46,58 +50,50 @@ export default function AdminDashboard() {
     setPassword('');
   };
 
-  const fetchStats = async () => {
-    setLoading(true);
+  const fetchBankData = async () => {
     try {
-      // Fetch real statistics from your database
-      const [usersRes, accountsRes, transactionsRes] = await Promise.all([
-        fetch('/api/admin/get-users'),
-        fetch('/api/admin/get-accounts'),
-        fetch('/api/admin/get-transactions')
-      ]);
+      setLoading(true);
 
-      let totalUsers = 0;
-      let totalAccounts = 0;
-      let totalTransactions = 0;
-      let totalBalance = 0;
+      // Fetch users data
+      const usersResponse = await fetch('/api/admin/get-users');
+      const usersData = await usersResponse.json();
 
-      if (usersRes.ok) {
-        const userData = await usersRes.json();
-        totalUsers = userData.users ? userData.users.length : 0;
+      // Fetch accounts data
+      const accountsResponse = await fetch('/api/admin/get-accounts');
+      const accountsData = await accountsResponse.json();
+
+      // Fetch transactions data
+      const transactionsResponse = await fetch('/api/admin/get-transactions');
+      const transactionsData = await transactionsResponse.json();
+
+      if (usersData.success && accountsData.success && transactionsData.success) {
+        const totalBalance = accountsData.accounts.reduce((sum, acc) => sum + (acc.balance || 0), 0);
+        const todayUsers = usersData.users.filter(user => {
+          const userDate = new Date(user.created_at).toDateString();
+          const today = new Date().toDateString();
+          return userDate === today;
+        }).length;
+
+        setBankStats({
+          totalUsers: usersData.users.length,
+          totalAccounts: accountsData.accounts.length,
+          totalBalance: totalBalance,
+          pendingTransactions: transactionsData.transactions.filter(t => t.status === 'pending').length,
+          activeLoans: 0, // Add loan counting logic when loans table is ready
+          totalDeposits: transactionsData.transactions
+            .filter(t => t.type === 'deposit')
+            .reduce((sum, t) => sum + (t.amount || 0), 0),
+          totalWithdrawals: transactionsData.transactions
+            .filter(t => t.type === 'withdrawal')
+            .reduce((sum, t) => sum + (t.amount || 0), 0),
+          newUsersToday: todayUsers
+        });
+
+        setRecentUsers(usersData.users.slice(-5));
+        setRecentTransactions(transactionsData.transactions.slice(-10));
       }
-
-      if (accountsRes.ok) {
-        const accountData = await accountsRes.json();
-        if (accountData.accounts) {
-          totalAccounts = accountData.accounts.length;
-          totalBalance = accountData.accounts.reduce((sum, acc) => sum + parseFloat(acc.balance || 0), 0);
-        }
-      }
-
-      if (transactionsRes.ok) {
-        const transactionData = await transactionsRes.json();
-        totalTransactions = transactionData.transactions ? transactionData.transactions.length : 0;
-      }
-
-      setStats({
-        totalUsers,
-        totalAccounts,
-        totalTransactions,
-        totalBalance,
-        totalLoans: Math.floor(totalUsers * 0.3), // Estimated
-        totalInvestments: Math.floor(totalUsers * 0.4) // Estimated
-      });
     } catch (error) {
-      console.error('Error fetching stats:', error);
-      // Set default values on error
-      setStats({
-        totalUsers: 0,
-        totalAccounts: 0,
-        totalTransactions: 0,
-        totalBalance: 0,
-        totalLoans: 0,
-        totalInvestments: 0
-      });
+      console.error('Error fetching bank data:', error);
     } finally {
       setLoading(false);
     }
@@ -133,9 +129,13 @@ export default function AdminDashboard() {
   return (
     <div style={styles.container}>
       <div style={styles.header}>
-        <h1 style={styles.title}>🏦 Oakline Bank Admin Dashboard</h1>
+        <div style={styles.welcomeSection}>
+          <h1 style={styles.title}>🏦 Admin Dashboard</h1>
+          <p style={styles.subtitle}>Oakline Bank Management System</p>
+          {loading && <p style={styles.loadingText}>Loading bank data...</p>}
+        </div>
         <div style={styles.headerActions}>
-          <button onClick={fetchStats} style={styles.refreshButton} disabled={loading}>
+          <button onClick={fetchBankData} style={styles.refreshButton} disabled={loading}>
             {loading ? '🔄 Loading...' : '🔄 Refresh'}
           </button>
           <button onClick={handleLogout} style={styles.logoutButton}>
@@ -148,27 +148,113 @@ export default function AdminDashboard() {
       <div style={styles.statsGrid}>
         <div style={styles.statCard}>
           <h3>👥 Total Users</h3>
-          <p style={styles.statNumber}>{stats.totalUsers.toLocaleString()}</p>
+          <p style={styles.statNumber}>{bankStats.totalUsers.toLocaleString()}</p>
         </div>
         <div style={styles.statCard}>
           <h3>🏦 Total Accounts</h3>
-          <p style={styles.statNumber}>{stats.totalAccounts.toLocaleString()}</p>
+          <p style={styles.statNumber}>{bankStats.totalAccounts.toLocaleString()}</p>
         </div>
         <div style={styles.statCard}>
           <h3>💸 Transactions</h3>
-          <p style={styles.statNumber}>{stats.totalTransactions.toLocaleString()}</p>
+          <p style={styles.statNumber}>{bankStats.totalTransactions.toLocaleString()}</p>
         </div>
         <div style={styles.statCard}>
           <h3>💰 Total Balance</h3>
-          <p style={styles.statNumber}>${stats.totalBalance.toLocaleString()}</p>
+          <p style={styles.statNumber}>${bankStats.totalBalance.toLocaleString()}</p>
         </div>
         <div style={styles.statCard}>
           <h3>🏠 Active Loans</h3>
-          <p style={styles.statNumber}>{stats.totalLoans.toLocaleString()}</p>
+          <p style={styles.statNumber}>{bankStats.activeLoans.toLocaleString()}</p>
         </div>
         <div style={styles.statCard}>
           <h3>📈 Investments</h3>
-          <p style={styles.statNumber}>{stats.totalInvestments.toLocaleString()}</p>
+          <p style={styles.statNumber}>{bankStats.totalInvestments.toLocaleString()}</p>
+        </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div style={styles.quickActions}>
+        <button
+          style={styles.actionButton}
+          onClick={() => router.push('/admin/admin-users')}
+        >
+          👥 Manage Users
+        </button>
+        <button
+          style={styles.actionButton}
+          onClick={() => router.push('/admin/manual-transactions')}
+        >
+          💰 Manual Transactions
+        </button>
+        <button
+          style={styles.actionButton}
+          onClick={() => router.push('/admin/bulk-transactions')}
+        >
+          📦 Bulk Transactions
+        </button>
+        <button
+          style={styles.actionButton}
+          onClick={() => router.push('/admin/create-user')}
+        >
+          ➕ Create User
+        </button>
+        <button
+          style={styles.actionButton}
+          onClick={() => router.push('/admin/admin-loans')}
+        >
+          🏠 Manage Loans
+        </button>
+        <button
+          style={styles.actionButton}
+          onClick={() => router.push('/admin/admin-investments')}
+        >
+          📈 Manage Investments
+        </button>
+        <button
+          style={styles.actionButton}
+          onClick={() => router.push('/admin/admin-crypto')}
+        >
+          ₿ Manage Crypto
+        </button>
+        <button
+          style={styles.actionButton}
+          onClick={() => router.push('/admin/admin-balance')}
+        >
+          💳 Balance Management
+        </button>
+      </div>
+
+      {/* Recent Activity */}
+      <div style={styles.activityGrid}>
+        <div style={styles.section}>
+          <h2 style={styles.sectionTitle}>👥 Recent Users</h2>
+          {recentUsers.length === 0 ? (
+            <p>No recent users</p>
+          ) : (
+            <ul style={styles.activityList}>
+              {recentUsers.map((user) => (
+                <li key={user.id} style={styles.activityItem}>
+                  <span>{user.name}</span>
+                  <span>{new Date(user.created_at).toLocaleDateString()}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+        <div style={styles.section}>
+          <h2 style={styles.sectionTitle}>💸 Recent Transactions</h2>
+          {recentTransactions.length === 0 ? (
+            <p>No recent transactions</p>
+          ) : (
+            <ul style={styles.activityList}>
+              {recentTransactions.map((tx) => (
+                <li key={tx.id} style={styles.activityItem}>
+                  <span>{tx.type} - ${tx.amount.toLocaleString()}</span>
+                  <span>{tx.status}</span>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </div>
 
@@ -294,11 +380,26 @@ const styles = {
     borderRadius: '12px',
     boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
   },
+  welcomeSection: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '5px'
+  },
   title: {
     fontSize: '28px',
     fontWeight: 'bold',
     color: '#1e3c72',
     margin: 0
+  },
+  subtitle: {
+    fontSize: '16px',
+    color: '#555',
+    margin: 0
+  },
+  loadingText: {
+    fontSize: '14px',
+    color: '#666',
+    fontStyle: 'italic'
   },
   headerActions: {
     display: 'flex',
@@ -347,10 +448,36 @@ const styles = {
     color: '#1e3c72',
     margin: '10px 0 0 0'
   },
-  adminGrid: {
+  quickActions: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
-    gap: '25px'
+    gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+    gap: '15px',
+    marginBottom: '30px'
+  },
+  actionButton: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '8px',
+    padding: '12px 16px',
+    background: 'linear-gradient(135deg, #43cea2 0%, #18b590 100%)',
+    color: 'white',
+    border: 'none',
+    borderRadius: '8px',
+    fontSize: '14px',
+    fontWeight: '500',
+    cursor: 'pointer',
+    transition: 'transform 0.2s, box-shadow 0.2s',
+    ':hover': {
+      transform: 'translateY(-2px)',
+      boxShadow: '0 4px 8px rgba(0,0,0,0.2)'
+    }
+  },
+  activityGrid: {
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap: '25px',
+    marginBottom: '30px'
   },
   section: {
     background: 'white',
@@ -363,6 +490,26 @@ const styles = {
     fontWeight: 'bold',
     color: '#1e3c72',
     marginBottom: '20px'
+  },
+  activityList: {
+    listStyle: 'none',
+    padding: 0,
+    margin: 0,
+    maxHeight: '300px',
+    overflowY: 'auto'
+  },
+  activityItem: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    padding: '10px 0',
+    borderBottom: '1px solid #eee',
+    fontSize: '14px',
+    color: '#333'
+  },
+  adminGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
+    gap: '25px'
   },
   buttonGrid: {
     display: 'grid',

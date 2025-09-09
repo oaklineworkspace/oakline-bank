@@ -1,4 +1,3 @@
-
 import { supabase } from '../../../lib/supabaseClient';
 
 export default async function handler(req, res) {
@@ -14,7 +13,13 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    if (amount <= 0) {
+    // Validate amount is a number
+    const numericAmount = parseFloat(amount);
+    if (isNaN(numericAmount)) {
+      return res.status(400).json({ error: 'Amount must be a valid number' });
+    }
+
+    if (numericAmount <= 0) {
       return res.status(400).json({ error: 'Amount must be greater than 0' });
     }
 
@@ -40,18 +45,18 @@ export default async function handler(req, res) {
       case 'interest':
       case 'bonus':
       case 'refund':
-        transactionAmount = amount;
-        newBalance = currentBalance + amount;
+        transactionAmount = numericAmount;
+        newBalance = currentBalance + numericAmount;
         break;
       case 'withdrawal':
       case 'fee':
-        transactionAmount = -amount;
-        newBalance = currentBalance - amount;
+        transactionAmount = -numericAmount;
+        newBalance = currentBalance - numericAmount;
         break;
       case 'adjustment':
         // For adjustments, determine if adding or subtracting based on amount sign
-        transactionAmount = amount;
-        newBalance = currentBalance + amount;
+        transactionAmount = numericAmount;
+        newBalance = currentBalance + numericAmount;
         break;
       default:
         return res.status(400).json({ error: 'Invalid transaction type' });
@@ -102,7 +107,7 @@ export default async function handler(req, res) {
           updated_at: new Date().toISOString()
         })
         .eq('id', accountId);
-      
+
       throw transactionError;
     }
 
