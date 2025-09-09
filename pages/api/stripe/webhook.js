@@ -1,4 +1,3 @@
-
 import Stripe from 'stripe';
 import { supabaseAdmin } from '../../../lib/supabaseClient';
 
@@ -76,7 +75,10 @@ async function handlePaymentSuccess(paymentIntent) {
 
     const { error: balanceError } = await supabaseAdmin
       .from('accounts')
-      .update({ balance: newBalance })
+      .update({ 
+        balance: newBalance.toFixed(2),
+        updated_at: new Date().toISOString()
+      })
       .eq('id', accountId);
 
     if (balanceError) {

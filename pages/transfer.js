@@ -31,11 +31,32 @@ export default function Transfer() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { data, error } = await supabase
+      // First try to get accounts linked via user_id
+      let { data, error } = await supabase
         .from('accounts')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: true });
+
+      // If no accounts found via user_id, try via profile/application relationship
+      if (!data || data.length === 0) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('application_id')
+          .eq('id', user.id)
+          .single();
+
+        if (profile?.application_id) {
+          const { data: accountsData, error: accountsError } = await supabase
+            .from('accounts')
+            .select('*')
+            .eq('application_id', profile.application_id)
+            .order('created_at', { ascending: true });
+
+          data = accountsData;
+          error = accountsError;
+        }
+      }
 
       if (error) throw error;
       setAccounts(data || []);

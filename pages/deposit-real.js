@@ -45,10 +45,40 @@ function DepositForm() {
 
   const fetchUserAccounts = async (userId) => {
     try {
-      const { data, error } = await supabase
+      // First try to get accounts linked via user_id
+      let { data, error } = await supabase
         .from('accounts')
         .select('*')
         .eq('user_id', userId);
+
+      // If no accounts found via user_id, try via profile/application relationship
+      if (!data || data.length === 0) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('application_id')
+          .eq('id', userId)
+          .single();
+
+        if (profile?.application_id) {
+          const { data: accountsData, error: accountsError } = await supabase
+            .from('accounts')
+            .select('*')
+            .eq('application_id', profile.application_id);
+
+          data = accountsData;
+          error = accountsError;
+          
+          // Update accounts to link them to the user for future queries
+          if (data && data.length > 0) {
+            for (const account of data) {
+              await supabase
+                .from('accounts')
+                .update({ user_id: userId })
+                .eq('id', account.id);
+            }
+          }
+        }
+      }
 
       if (error) throw error;
       setAccounts(data || []);
