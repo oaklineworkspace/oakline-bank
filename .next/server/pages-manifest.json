@@ -2,11 +2,8 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/dashboard": "pages/dashboard.js",
   "/": "pages/index.js",
-  "/apply": "pages/apply.js",
-  "/admin/admin-dashboard": "pages/admin/admin-dashboard.js",
-  "/api/admin/get-users": "pages/api/admin/get-users.js",
-  "/api/admin/get-accounts": "pages/api/admin/get-accounts.js",
-  "/api/admin/get-transactions": "pages/api/admin/get-transactions.js"
+  "/login": "pages/login.js",
+  "/dashboard": "pages/dashboard.js",
+  "/cards": "pages/cards.js"
 }
