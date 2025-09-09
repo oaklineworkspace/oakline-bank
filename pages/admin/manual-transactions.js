@@ -3,294 +3,350 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 
 export default function ManualTransactions() {
-  const [users, setUsers] = useState([]);
-  const [selectedUser, setSelectedUser] = useState('');
   const [accounts, setAccounts] = useState([]);
-  const [selectedAccount, setSelectedAccount] = useState('');
-  const [transactionType, setTransactionType] = useState('deposit');
-  const [amount, setAmount] = useState('');
-  const [description, setDescription] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [processing, setProcessing] = useState(false);
   const [message, setMessage] = useState('');
+  const [formData, setFormData] = useState({
+    accountId: '',
+    type: 'deposit',
+    amount: '',
+    description: ''
+  });
 
   useEffect(() => {
-    fetchUsers();
+    fetchAccounts();
   }, []);
 
-  useEffect(() => {
-    if (selectedUser) {
-      fetchUserAccounts(selectedUser);
-    }
-  }, [selectedUser]);
-
-  const fetchUsers = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id, email, first_name, last_name')
-        .order('first_name');
-
-      if (error) throw error;
-      setUsers(data || []);
-    } catch (error) {
-      console.error('Error fetching users:', error);
-      setMessage('Error fetching users');
-    }
-  };
-
-  const fetchUserAccounts = async (userId) => {
+  const fetchAccounts = async () => {
     try {
       const { data, error } = await supabase
         .from('accounts')
-        .select('*')
-        .eq('user_id', userId)
-        .order('account_name');
+        .select(`
+          id,
+          account_number,
+          account_type,
+          balance,
+          applications (
+            first_name,
+            last_name,
+            email
+          )
+        `)
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
       setAccounts(data || []);
-      setSelectedAccount('');
     } catch (error) {
       console.error('Error fetching accounts:', error);
-      setMessage('Error fetching user accounts');
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!selectedAccount || !amount || parseFloat(amount) <= 0) {
-      setMessage('Please fill all fields with valid values');
-      return;
-    }
-
-    setLoading(true);
-    setMessage('');
-
-    try {
-      const response = await fetch('/api/admin/manual-transaction', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          accountId: selectedAccount,
-          userId: selectedUser,
-          type: transactionType,
-          amount: parseFloat(amount),
-          description: description || `Manual ${transactionType}`,
-        }),
-      });
-
-      const result = await response.json();
-
-      if (response.ok) {
-        setMessage('Transaction added successfully!');
-        setAmount('');
-        setDescription('');
-        // Refresh accounts to show updated balance
-        fetchUserAccounts(selectedUser);
-      } else {
-        setMessage(`Error: ${result.error}`);
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      setMessage('Failed to add transaction');
+      setMessage('Failed to load accounts');
     } finally {
       setLoading(false);
     }
   };
 
-  const transactionTypes = [
-    { value: 'deposit', label: 'Deposit (Add Money)' },
-    { value: 'withdrawal', label: 'Withdrawal (Remove Money)' },
-    { value: 'fee', label: 'Fee (Remove Money)' },
-    { value: 'interest', label: 'Interest (Add Money)' },
-    { value: 'bonus', label: 'Bonus (Add Money)' },
-    { value: 'refund', label: 'Refund (Add Money)' },
-    { value: 'adjustment', label: 'Manual Adjustment' }
-  ];
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setProcessing(true);
+    setMessage('');
 
-  const selectedAccountData = accounts.find(acc => acc.id === selectedAccount);
+    try {
+      const response = await fetch('/api/admin/manual-transaction', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        setMessage('Transaction processed successfully!');
+        setFormData({ accountId: '', type: 'deposit', amount: '', description: '' });
+        fetchAccounts(); // Refresh accounts to show updated balances
+      } else {
+        setMessage(result.error || 'Failed to process transaction');
+      }
+    } catch (error) {
+      console.error('Error processing transaction:', error);
+      setMessage('Failed to process transaction');
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div style={styles.container}>
+        <div style={styles.loading}>Loading accounts...</div>
+      </div>
+    );
+  }
 
   return (
     <div style={styles.container}>
-      <h1 style={styles.title}>Manual Transaction Management</h1>
-      
-      <form onSubmit={handleSubmit} style={styles.form}>
-        <div style={styles.formGroup}>
-          <label style={styles.label}>Select User:</label>
-          <select
-            value={selectedUser}
-            onChange={(e) => setSelectedUser(e.target.value)}
-            style={styles.select}
-            required
-          >
-            <option value="">Choose a user...</option>
-            {users.map(user => (
-              <option key={user.id} value={user.id}>
-                {user.first_name} {user.last_name} ({user.email})
-              </option>
-            ))}
-          </select>
-        </div>
+      <div style={styles.header}>
+        <h1 style={styles.title}>Manual Transactions</h1>
+        <p style={styles.subtitle}>Process deposits, withdrawals, and adjustments</p>
+      </div>
 
-        {selectedUser && (
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Select Account:</label>
-            <select
-              value={selectedAccount}
-              onChange={(e) => setSelectedAccount(e.target.value)}
-              style={styles.select}
-              required
-            >
-              <option value="">Choose an account...</option>
-              {accounts.map(account => (
-                <option key={account.id} value={account.id}>
-                  {account.account_name} - {account.account_number} (Balance: ${account.balance})
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
-
-        {selectedAccount && (
-          <>
-            <div style={styles.accountInfo}>
-              <h3>Current Account Balance: ${selectedAccountData?.balance}</h3>
-            </div>
-
-            <div style={styles.formGroup}>
-              <label style={styles.label}>Transaction Type:</label>
+      <div style={styles.content}>
+        <div style={styles.formSection}>
+          <h2 style={styles.sectionTitle}>Process Transaction</h2>
+          <form onSubmit={handleSubmit} style={styles.form}>
+            <div style={styles.field}>
+              <label style={styles.label}>Select Account</label>
               <select
-                value={transactionType}
-                onChange={(e) => setTransactionType(e.target.value)}
-                style={styles.select}
+                value={formData.accountId}
+                onChange={(e) => setFormData({...formData, accountId: e.target.value})}
                 required
+                style={styles.select}
               >
-                {transactionTypes.map(type => (
-                  <option key={type.value} value={type.value}>
-                    {type.label}
+                <option value="">Choose an account...</option>
+                {accounts.map(account => (
+                  <option key={account.id} value={account.id}>
+                    {account.account_number} - {account.account_type} 
+                    ({account.applications?.first_name} {account.applications?.last_name}) 
+                    - Balance: ${parseFloat(account.balance || 0).toFixed(2)}
                   </option>
                 ))}
               </select>
             </div>
 
-            <div style={styles.formGroup}>
-              <label style={styles.label}>Amount ($):</label>
+            <div style={styles.field}>
+              <label style={styles.label}>Transaction Type</label>
+              <select
+                value={formData.type}
+                onChange={(e) => setFormData({...formData, type: e.target.value})}
+                style={styles.select}
+              >
+                <option value="deposit">Deposit</option>
+                <option value="withdrawal">Withdrawal</option>
+                <option value="adjustment">Balance Adjustment</option>
+              </select>
+            </div>
+
+            <div style={styles.field}>
+              <label style={styles.label}>Amount ($)</label>
               <input
                 type="number"
                 step="0.01"
                 min="0.01"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                style={styles.input}
-                placeholder="Enter amount"
+                value={formData.amount}
+                onChange={(e) => setFormData({...formData, amount: e.target.value})}
                 required
+                style={styles.input}
+                placeholder="0.00"
               />
             </div>
 
-            <div style={styles.formGroup}>
-              <label style={styles.label}>Description:</label>
+            <div style={styles.field}>
+              <label style={styles.label}>Description</label>
               <input
                 type="text"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                value={formData.description}
+                onChange={(e) => setFormData({...formData, description: e.target.value})}
+                required
                 style={styles.input}
-                placeholder="Optional description"
+                placeholder="Transaction description..."
               />
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
+            <button 
+              type="submit" 
+              disabled={processing}
               style={{
                 ...styles.button,
-                backgroundColor: loading ? '#ccc' : '#007bff'
+                opacity: processing ? 0.6 : 1,
+                cursor: processing ? 'not-allowed' : 'pointer'
               }}
             >
-              {loading ? 'Processing...' : 'Add Transaction'}
+              {processing ? 'Processing...' : 'Process Transaction'}
             </button>
-          </>
-        )}
-      </form>
+          </form>
 
-      {message && (
-        <div
-          style={{
-            ...styles.message,
-            backgroundColor: message.includes('Error') ? '#ffebee' : '#e8f5e8',
-            color: message.includes('Error') ? '#c62828' : '#2e7d32'
-          }}
-        >
-          {message}
+          {message && (
+            <div style={{
+              ...styles.message,
+              backgroundColor: message.includes('success') ? '#d1fae5' : '#fee2e2',
+              color: message.includes('success') ? '#059669' : '#dc2626'
+            }}>
+              {message}
+            </div>
+          )}
         </div>
-      )}
+
+        <div style={styles.accountsSection}>
+          <h2 style={styles.sectionTitle}>All Accounts ({accounts.length})</h2>
+          <div style={styles.accountsList}>
+            {accounts.map(account => (
+              <div key={account.id} style={styles.accountCard}>
+                <div style={styles.accountHeader}>
+                  <span style={styles.accountNumber}>{account.account_number}</span>
+                  <span style={styles.accountType}>{account.account_type}</span>
+                </div>
+                <div style={styles.accountInfo}>
+                  <p style={styles.accountOwner}>
+                    {account.applications?.first_name} {account.applications?.last_name}
+                  </p>
+                  <p style={styles.accountEmail}>{account.applications?.email}</p>
+                  <p style={styles.balance}>
+                    Balance: <strong>${parseFloat(account.balance || 0).toFixed(2)}</strong>
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
 
 const styles = {
   container: {
-    maxWidth: '600px',
-    margin: '0 auto',
-    padding: '20px',
-    fontFamily: 'Arial, sans-serif'
+    minHeight: '100vh',
+    backgroundColor: '#f8fafc',
+    padding: '20px'
+  },
+  header: {
+    backgroundColor: 'white',
+    padding: '30px',
+    borderRadius: '12px',
+    marginBottom: '30px',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
   },
   title: {
-    color: '#1a365d',
-    textAlign: 'center',
-    marginBottom: '30px'
+    fontSize: '32px',
+    fontWeight: 'bold',
+    color: '#1e293b',
+    margin: '0 0 8px 0'
   },
-  form: {
-    backgroundColor: '#f8f9fa',
+  subtitle: {
+    color: '#64748b',
+    fontSize: '16px',
+    margin: 0
+  },
+  content: {
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap: '30px'
+  },
+  formSection: {
+    backgroundColor: 'white',
     padding: '30px',
-    borderRadius: '8px',
-    boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
+    borderRadius: '12px',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
   },
-  formGroup: {
+  accountsSection: {
+    backgroundColor: 'white',
+    padding: '30px',
+    borderRadius: '12px',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+  },
+  sectionTitle: {
+    fontSize: '20px',
+    fontWeight: 'bold',
+    color: '#1e293b',
     marginBottom: '20px'
   },
-  label: {
-    display: 'block',
-    marginBottom: '5px',
-    fontWeight: 'bold',
-    color: '#333'
+  form: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '20px'
   },
-  select: {
-    width: '100%',
-    padding: '10px',
-    border: '1px solid #ddd',
-    borderRadius: '4px',
-    fontSize: '16px'
+  field: {
+    display: 'flex',
+    flexDirection: 'column'
+  },
+  label: {
+    fontSize: '14px',
+    fontWeight: '500',
+    color: '#374151',
+    marginBottom: '6px'
   },
   input: {
-    width: '100%',
-    padding: '10px',
-    border: '1px solid #ddd',
-    borderRadius: '4px',
-    fontSize: '16px'
+    padding: '12px',
+    border: '1px solid #d1d5db',
+    borderRadius: '8px',
+    fontSize: '16px',
+    outline: 'none',
+    transition: 'border-color 0.2s'
+  },
+  select: {
+    padding: '12px',
+    border: '1px solid #d1d5db',
+    borderRadius: '8px',
+    fontSize: '16px',
+    outline: 'none',
+    backgroundColor: 'white'
   },
   button: {
-    width: '100%',
-    padding: '12px',
-    backgroundColor: '#007bff',
+    padding: '14px 28px',
+    backgroundColor: '#3b82f6',
     color: 'white',
     border: 'none',
-    borderRadius: '4px',
+    borderRadius: '8px',
     fontSize: '16px',
-    cursor: 'pointer',
-    fontWeight: 'bold'
+    fontWeight: '500',
+    transition: 'background-color 0.2s'
   },
   message: {
-    padding: '10px',
-    borderRadius: '4px',
+    padding: '12px',
+    borderRadius: '6px',
     marginTop: '20px',
-    textAlign: 'center'
+    fontSize: '14px'
+  },
+  loading: {
+    textAlign: 'center',
+    padding: '40px',
+    fontSize: '18px',
+    color: '#64748b'
+  },
+  accountsList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '12px',
+    maxHeight: '500px',
+    overflowY: 'auto'
+  },
+  accountCard: {
+    border: '1px solid #e5e7eb',
+    borderRadius: '8px',
+    padding: '16px',
+    backgroundColor: '#f9fafb'
+  },
+  accountHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '8px'
+  },
+  accountNumber: {
+    fontWeight: 'bold',
+    color: '#1e293b'
+  },
+  accountType: {
+    backgroundColor: '#dbeafe',
+    color: '#1d4ed8',
+    padding: '4px 8px',
+    borderRadius: '4px',
+    fontSize: '12px',
+    fontWeight: '500'
   },
   accountInfo: {
-    backgroundColor: '#e3f2fd',
-    padding: '15px',
-    borderRadius: '4px',
-    marginBottom: '20px',
-    textAlign: 'center'
+    fontSize: '14px'
+  },
+  accountOwner: {
+    fontWeight: '500',
+    margin: '4px 0',
+    color: '#374151'
+  },
+  accountEmail: {
+    color: '#6b7280',
+    margin: '4px 0'
+  },
+  balance: {
+    margin: '4px 0',
+    color: '#059669'
   }
 };
