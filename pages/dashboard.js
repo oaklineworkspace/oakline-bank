@@ -26,125 +26,7 @@ export default function Dashboard() {
   });
   const router = useRouter();
 
-  useEffect(() => {
-    checkUser();
-  }, []);
-
-  const checkUser = async () => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        router.push('/login');
-        return;
-      }
-
-      setUser(session.user);
-      await fetchUserData(session.user.id);
-    } catch (error) {
-      console.error('Error checking user:', error);
-      setError('Failed to load user data');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchUserData = async (userId) => {
-    try {
-      // Fetch accounts
-      const { data: accountsData, error: accountsError } = await supabase
-        .from('accounts')
-        .select('*')
-        .eq('user_id', userId)
-        .eq('status', 'active');
-
-      if (accountsError) throw accountsError;
-      
-      setAccounts(accountsData || []);
-      if (accountsData && accountsData.length > 0) {
-        setSelectedAccount(accountsData[0]);
-      }
-
-      // Fetch recent transactions
-      const { data: transactionsData, error: transactionsError } = await supabase
-        .from('transactions')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false })
-        .limit(10);
-
-      if (transactionsError) throw transactionsError;
-      setTransactions(transactionsData || []);
-
-    } catch (error) {
-      console.error('Error fetching user data:', error);
-      setError('Failed to load account information');
-    }
-  };
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.push('/');
-  };
-
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(amount);
-  };
-
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  };
-
-  const getTotalBalance = () => {
-    return accounts.reduce((total, account) => total + parseFloat(account.balance || 0), 0);
-  };
-
-  const handleTransfer = async (e) => {
-    e.preventDefault();
-    // This would implement actual transfer logic
-    console.log('Transfer:', transferData);
-    setShowTransferModal(false);
-    // Refresh data after transfer
-    await fetchUserData(user.id);
-  };
-
-  const handlePayment = async (e) => {
-    e.preventDefault();
-    // This would implement actual payment logic
-    console.log('Payment:', paymentData);
-    setShowPayModal(false);
-    // Refresh data after payment
-    await fetchUserData(user.id);
-  };
-
-  if (loading) {
-    return (
-      <div style={styles.loadingContainer}>
-        <div style={styles.spinner}></div>
-        <p>Loading your dashboard...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div style={styles.errorContainer}>
-        <h2>Error</h2>
-        <p>{error}</p>
-        <button onClick={() => window.location.reload()} style={styles.retryButton}>
-          Try Again
-        </button>
-      </div>
-    );
-  }
-
+  // Define styles at the top to avoid initialization errors
   const styles = {
     container: {
       minHeight: '100vh',
@@ -449,7 +331,127 @@ export default function Dashboard() {
     }
   };
 
+  useEffect(() => {
+    checkUser();
+  }, []);
+
+  const checkUser = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        router.push('/login');
+        return;
+      }
+
+      setUser(session.user);
+      await fetchUserData(session.user.id);
+    } catch (error) {
+      console.error('Error checking user:', error);
+      setError('Failed to load user data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchUserData = async (userId) => {
+    try {
+      // Fetch accounts
+      const { data: accountsData, error: accountsError } = await supabase
+        .from('accounts')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('status', 'active');
+
+      if (accountsError) throw accountsError;
+      
+      setAccounts(accountsData || []);
+      if (accountsData && accountsData.length > 0) {
+        setSelectedAccount(accountsData[0]);
+      }
+
+      // Fetch recent transactions
+      const { data: transactionsData, error: transactionsError } = await supabase
+        .from('transactions')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (transactionsError) throw transactionsError;
+      setTransactions(transactionsData || []);
+
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+      setError('Failed to load account information');
+    }
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push('/');
+  };
+
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(amount);
+  };
+
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
+  const getTotalBalance = () => {
+    return accounts.reduce((total, account) => total + parseFloat(account.balance || 0), 0);
+  };
+
+  const handleTransfer = async (e) => {
+    e.preventDefault();
+    // This would implement actual transfer logic
+    console.log('Transfer:', transferData);
+    setShowTransferModal(false);
+    // Refresh data after transfer
+    await fetchUserData(user.id);
+  };
+
+  const handlePayment = async (e) => {
+    e.preventDefault();
+    // This would implement actual payment logic
+    console.log('Payment:', paymentData);
+    setShowPayModal(false);
+    // Refresh data after payment
+    await fetchUserData(user.id);
+  };
+
+  if (loading) {
+    return (
+      <div style={styles.loadingContainer}>
+        <div style={styles.spinner}></div>
+        <p>Loading your dashboard...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div style={styles.errorContainer}>
+        <h2>Error</h2>
+        <p>{error}</p>
+        <button onClick={() => window.location.reload()} style={styles.retryButton}>
+          Try Again
+        </button>
+      </div>
+    );
+  }
+
   return (
+    
     <div style={styles.container}>
       <style jsx>{`
         @keyframes spin {
