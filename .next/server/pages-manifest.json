@@ -3,5 +3,8 @@
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
   "/": "pages/index.js",
-  "/admin/admin-dashboard": "pages/admin/admin-dashboard.js"
+  "/main-menu": "pages/main-menu.js",
+  "/admin/admin-dashboard": "pages/admin/admin-dashboard.js",
+  "/admin/admin-loans": "pages/admin/admin-loans.js",
+  "/admin/admin-balance": "pages/admin/admin-balance.js"
 }
