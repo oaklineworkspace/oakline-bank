@@ -32,10 +32,15 @@
       "static/chunks/main.js",
       "static/chunks/pages/dashboard.js"
     ],
-    "/transfer": [
+    "/loans": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/transfer.js"
+      "static/chunks/pages/loans.js"
+    ],
+    "/login": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/login.js"
     ]
   },
   "ampFirstPages": []
