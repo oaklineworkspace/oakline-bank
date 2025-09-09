@@ -2,5 +2,8 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/": "pages/index.js"
+  "/admin/admin-dashboard": "pages/admin/admin-dashboard.js",
+  "/admin/admin-balance": "pages/admin/admin-balance.js",
+  "/admin/manual-transactions": "pages/admin/manual-transactions.js",
+  "/api/admin/manual-transaction": "pages/api/admin/manual-transaction.js"
 }
