@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
@@ -67,7 +66,7 @@ function DepositForm() {
 
           data = accountsData;
           error = accountsError;
-          
+
           // Update accounts to link them to the user for future queries
           if (data && data.length > 0) {
             for (const account of data) {
@@ -89,7 +88,7 @@ function DepositForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!stripe || !elements) {
       return;
     }
@@ -145,7 +144,7 @@ function DepositForm() {
         setMessage('Deposit successful! Your account will be updated shortly.');
         setFormData({ accountId: '', amount: '', description: '' });
         elements.getElement(CardElement).clear();
-        
+
         // Refresh accounts after successful deposit
         setTimeout(() => {
           fetchUserAccounts(user.id);

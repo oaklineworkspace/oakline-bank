@@ -1040,7 +1040,7 @@ export default function Dashboard() {
                   <option value="">Select account to send from</option>
                   {accounts.map(account => (
                     <option key={account.id} value={account.id}>
-                      {account.account_name} - {formatCurrency(account.balance)}
+                      {account.account_number} ({account.account_type}) - {formatCurrency(account.balance || 0)}
                     </option>
                   ))}
                 </select>

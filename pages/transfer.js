@@ -483,9 +483,10 @@ export default function Transfer() {
           onChange={(e) => setFromAccount(e.target.value)}
           required
         >
+          <option value="">Choose account to transfer from</option>
           {accounts.map(account => (
             <option key={account.id} value={account.id}>
-              {account.account_number} ({account.account_type}) - ${parseFloat(account.balance).toFixed(2)}
+              {account.account_number} ({account.account_type}) - Balance: ${parseFloat(account.balance || 0).toFixed(2)}
             </option>
           ))}
         </select>
