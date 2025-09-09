@@ -1,3 +1,4 @@
+
 // pages/api/complete-enrollment.js
 import { supabaseAdmin } from '../../lib/supabaseClient';
 
@@ -82,23 +83,42 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Invalid account number selected' });
     }
 
-    // 6️⃣ Update the user's password in Supabase Auth
-    const { data: existingAuthUsers, error: listError } = await supabaseAdmin.auth.admin.listUsers();
-    const existingAuthUser = existingAuthUsers?.users?.find(user => user.email === applicationData.email);
-
-    if (!existingAuthUser) {
-      return res.status(404).json({ error: 'Auth user not found. Please contact support.' });
+    // 6️⃣ Create or update Supabase Auth user
+    let authUser = null;
+    const { data: users, error: listError } = await supabaseAdmin.auth.admin.listUsers();
+    
+    if (listError) {
+      console.error('Error listing users:', listError);
+      return res.status(500).json({ error: 'Error checking for existing user.' });
     }
 
-    // Update the auth user's password
-    const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
-      existingAuthUser.id,
-      { password: password }
-    );
+    const existingAuthUser = users.users.find(user => user.email === email);
 
-    if (updateError) {
-      console.error('Error updating user password:', updateError);
-      return res.status(500).json({ error: 'Failed to set password' });
+    if (existingAuthUser) {
+      // User already exists, update password
+      authUser = existingAuthUser;
+      const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
+        existingAuthUser.id,
+        { password: password }
+      );
+
+      if (updateError) {
+        console.error('Error updating user password:', updateError);
+        return res.status(500).json({ error: 'Failed to set password' });
+      }
+    } else {
+      // Create a new auth user
+      const { data: newUser, error: signUpError } = await supabaseAdmin.auth.admin.createUser({
+        email: email,
+        password: password,
+        email_confirm: true, // Auto-confirm email
+      });
+
+      if (signUpError) {
+        console.error('Supabase signup error:', signUpError);
+        return res.status(500).json({ error: `Failed to create user account: ${signUpError.message}` });
+      }
+      authUser = newUser.user;
     }
 
     // 7️⃣ Mark enrollment as completed
@@ -116,6 +136,19 @@ export default async function handler(req, res) {
       // Don't fail the process for this
     }
 
+    // 8️⃣ Link accounts to the auth user
+    const { error: accountError } = await supabaseAdmin
+      .from('accounts')
+      .update({ 
+        user_id: authUser.id // Link accounts to the auth user
+      })
+      .eq('application_id', application_id);
+
+    if (accountError) {
+      console.error('Account update error:', accountError);
+      return res.status(500).json({ error: 'Failed to activate accounts. Please contact support.' });
+    }
+
     res.status(200).json({
       message: 'Enrollment completed successfully',
       user: {
@@ -128,149 +161,6 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error('Complete enrollment error:', error);
-    res.status(500).json({ error: 'Internal server error during enrollment completion' });
-    }
-
-    const accountNumbers = applicationAccounts?.map(acc => acc.account_number) || [];
-    if (!accountNumbers.includes(accountNumber)) {
-      return res.status(400).json({ error: 'Account number verification failed. Please check one of your account numbers.' });
-    }
-
-    // 6️⃣ Create Supabase Auth user if they don't exist
-    let authUser = null;
-    const { data: users, error: listError } = await supabaseAdmin.auth.admin.listUsers({
-      email: email
-    });
-
-    if (listError) {
-      console.error('Error listing users:', listError);
-      return res.status(500).json({ error: 'Error checking for existing user.' });
-    }
-
-    if (users.users.length > 0) {
-      // User already exists
-      authUser = users.users[0];
-    } else {
-      // Create a new auth user
-      try {
-        const { data: newUser, error: signUpError } = await supabaseAdmin.auth.admin.createUser({
-          email: email,
-          password: password,
-          email_confirm: true, // Auto-confirm email
-        });
-        if (signUpError) {
-          console.error('Supabase signup error:', signUpError);
-          return res.status(500).json({ error: `Failed to create user account: ${signUpError.message}` });
-        }
-        authUser = newUser;
-      } catch (error) {
-        console.error('Supabase signup try-catch error:', error);
-        return res.status(500).json({ error: 'An unexpected error occurred during user creation.' });
-      }
-    }
-
-    // 7️⃣ Update the auth user's password if it was provided
-    if (password) {
-      try {
-        await supabaseAdmin.auth.admin.updateUserById(authUser.id, {
-          password: password
-        });
-      } catch (updateError) {
-        console.error('Password update error:', updateError);
-        return res.status(500).json({ error: 'Failed to set your password. Please try again.' });
-      }
-    }
-
-    // 8️⃣ Mark the enrollment token as used
-    const { error: tokenUpdateError } = await supabaseAdmin
-      .from('enrollments')
-      .update({ is_used: true })
-      .eq('id', enrollmentData.id);
-
-    if (tokenUpdateError) {
-      console.error('Error marking token as used:', tokenUpdateError);
-    }
-
-    // 9️⃣ Link accounts to the auth user
-    const { error: accountError } = await supabaseAdmin
-      .from('accounts')
-      .update({ 
-        user_id: authUser.user?.id || authUser.id // Link accounts to the auth user
-      })
-      .eq('application_id', application_id);
-
-    if (accountError) {
-      console.error('Account update error:', accountError);
-      return res.status(500).json({ error: 'Failed to activate accounts. Please contact support.' });
-    }
-
-    // Helper function to check if account number is taken
-    const isAccountNumberTaken = async (num) => {
-      const { data, error } = await supabaseAdmin
-        .from('accounts')
-        .select('account_number')
-        .eq('account_number', num)
-        .single();
-      return !error && data;
-    };
-
-    // Generate unique random 10-digit account number
-    const generateAccountNumber = async () => {
-      let num;
-      let attempts = 0;
-      const maxAttempts = 100;
-
-      do {
-        num = '';
-        for (let i = 0; i < 10; i++) {
-          num += Math.floor(Math.random() * 10);
-        }
-        attempts++;
-      } while (await isAccountNumberTaken(num) && attempts < maxAttempts);
-
-      if (attempts === maxAttempts) {
-        throw new Error('Could not generate a unique account number after multiple attempts.');
-      }
-      return num;
-    };
-
-    // Generate new account numbers for any missing accounts
-    const currentAccountNumbers = applicationAccounts.map(acc => acc.account_number);
-    const accountsNeedingNumbers = applicationAccounts.filter(acc => !acc.account_number || acc.account_number === '');
-
-    for (const account of accountsNeedingNumbers) {
-      const newAccountNumber = await generateAccountNumber();
-      
-      // Update the existing account with the new account number
-      const { error: updateError } = await supabaseAdmin
-        .from('accounts')
-        .update({ account_number: newAccountNumber })
-        .eq('id', account.id);
-
-      if (updateError) {
-        console.error('Error updating account with new account number:', updateError);
-      } else {
-        currentAccountNumbers.push(newAccountNumber);
-      }
-    }
-
-    // Simulate sending a welcome email with account numbers
-    // In a real application, you would use an email service like Nodemailer or SendGrid
-    console.log(`Sending welcome email to ${email} with account numbers: ${currentAccountNumbers.join(', ')}`);
-
-    res.status(200).json({
-      message: 'Enrollment completed successfully',
-      user: {
-        id: applicationData.id,
-        email: email,
-        name: `${applicationData.first_name} ${applicationData.last_name}`,
-        supabase_auth_id: authUser.id,
-        account_numbers: currentAccountNumbers // Include account numbers in the response
-      }
-    });
-
-  } catch (error) {
-    console.error('Enrollment completion error:', error);
     res.status(500).json({ error: 'Internal server error during enrollment completion' });
   }
 }
