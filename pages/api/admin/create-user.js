@@ -106,12 +106,34 @@ export default async function handler(req, res) {
       zip_code: zipCode,
       account_types: mappedAccountTypes,
       employment_status: employmentStatus,
-      annual_income: parseFloat(annualIncome),
+      annual_income: annualIncome || 'under_25k',
       application_status: 'approved', // Admin created applications are pre-approved
       created_by_admin: true,
       submitted_at: new Date().toISOString(),
       processed_at: new Date().toISOString()
     };
+
+    console.log('Creating application with data:', {
+      first_name: firstName,
+      last_name: lastName,
+      email: email.toLowerCase(),
+      phone: phone || null,
+      date_of_birth: dateOfBirth,
+      ssn: country === 'US' ? ssn : null,
+      id_number: country !== 'US' ? idNumber : null,
+      country: country,
+      address: address,
+      city: city,
+      state: state,
+      zip_code: zipCode,
+      account_types: mappedAccountTypes,
+      employment_status: employmentStatus,
+      annual_income: annualIncome || 'under_25k',
+      application_status: 'approved',
+      created_by_admin: true,
+      submitted_at: new Date().toISOString(),
+      processed_at: new Date().toISOString()
+    });
 
     const { data: application, error: applicationError } = await supabaseAdmin
       .from('applications')
@@ -123,6 +145,8 @@ export default async function handler(req, res) {
       console.error('Application creation error:', applicationError);
       return res.status(500).json({ error: 'Failed to create application record' });
     }
+
+    console.log('Application created successfully:', application);
 
     // 3. Create accounts for each selected account type
     const accountsData = mappedAccountTypes.map(accountType => {

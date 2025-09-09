@@ -758,19 +758,25 @@ export default function CreateUser() {
 
             <div style={styles.inputGroup}>
               <label style={styles.label}>Annual Income *</label>
-              <input
-                type="number"
+              <select
                 name="annualIncome"
                 value={formData.annualIncome}
                 onChange={handleInputChange}
                 style={{
-                  ...styles.input,
+                  ...styles.select,
                   ...(errors.annualIncome ? styles.inputError : {})
                 }}
-                placeholder="Enter annual income"
-                min="0"
                 required
-              />
+              >
+                <option value="">Select annual income range</option>
+                <option value="under_25k">Under $25,000</option>
+                <option value="25k_50k">$25,000 - $50,000</option>
+                <option value="50k_75k">$50,000 - $75,000</option>
+                <option value="75k_100k">$75,000 - $100,000</option>
+                <option value="100k_150k">$100,000 - $150,000</option>
+                <option value="150k_200k">$150,000 - $200,000</option>
+                <option value="over_200k">Over $200,000</option>
+              </select>
               {errors.annualIncome && <div style={styles.errorText}>{errors.annualIncome}</div>}
             </div>
           </div>

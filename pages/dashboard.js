@@ -363,23 +363,36 @@ export default function Dashboard() {
         .eq('user_id', userId)
         .eq('status', 'active');
 
-      if (accountsError) throw accountsError;
-      
-      setAccounts(accountsData || []);
-      if (accountsData && accountsData.length > 0) {
-        setSelectedAccount(accountsData[0]);
+      if (accountsError) {
+        console.error('Error fetching accounts:', accountsError);
+        // If accounts table doesn't exist, try to get user profile info
+        setAccounts([]);
+      } else {
+        setAccounts(accountsData || []);
+        if (accountsData && accountsData.length > 0) {
+          setSelectedAccount(accountsData[0]);
+        }
       }
 
-      // Fetch recent transactions
-      const { data: transactionsData, error: transactionsError } = await supabase
-        .from('transactions')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false })
-        .limit(10);
+      // Try to fetch recent transactions, but don't fail if table doesn't exist
+      try {
+        const { data: transactionsData, error: transactionsError } = await supabase
+          .from('transactions')
+          .select('*')
+          .eq('user_id', userId)
+          .order('created_at', { ascending: false })
+          .limit(10);
 
-      if (transactionsError) throw transactionsError;
-      setTransactions(transactionsData || []);
+        if (!transactionsError) {
+          setTransactions(transactionsData || []);
+        } else {
+          console.log('Transactions table not available:', transactionsError);
+          setTransactions([]);
+        }
+      } catch (transactionError) {
+        console.log('Transactions table not available:', transactionError);
+        setTransactions([]);
+      }
 
     } catch (error) {
       console.error('Error fetching user data:', error);

@@ -166,3 +166,28 @@ CREATE INDEX idx_enrollments_email ON public.enrollments(email);
 CREATE INDEX idx_enrollments_token ON public.enrollments(token);
 CREATE INDEX idx_enrollments_application_id ON public.enrollments(application_id);
 CREATE INDEX idx_profiles_email ON public.profiles(email);
+
+-- Transactions table
+CREATE TABLE IF NOT EXISTS transactions (
+  id SERIAL PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  account_id INTEGER REFERENCES accounts(id) ON DELETE CASCADE,
+  type VARCHAR(20) CHECK (type IN ('credit', 'debit', 'transfer_in', 'transfer_out', 'deposit', 'withdrawal', 'fee', 'interest')),
+  amount DECIMAL(15,2) NOT NULL,
+  description TEXT,
+  reference_number VARCHAR(50),
+  status VARCHAR(20) DEFAULT 'completed' CHECK (status IN ('pending', 'completed', 'failed', 'cancelled')),
+  category VARCHAR(50),
+  merchant_name VARCHAR(100),
+  location VARCHAR(200),
+  created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT now(),
+  updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT now()
+);
+
+-- Index for faster queries
+CREATE INDEX IF NOT EXISTS idx_transactions_user_id ON transactions(user_id);
+CREATE INDEX IF NOT EXISTS idx_transactions_account_id ON transactions(account_id);
+CREATE INDEX IF NOT EXISTS idx_transactions_created_at ON transactions(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_transactions_type ON transactions(type);
+
+-- End of schema
