@@ -27,10 +27,10 @@
       "static/chunks/main.js",
       "static/chunks/pages/_error.js"
     ],
-    "/enroll": [
+    "/admin/create-user": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/enroll.js"
+      "static/chunks/pages/admin/create-user.js"
     ]
   },
   "ampFirstPages": []
