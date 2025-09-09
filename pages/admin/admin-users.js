@@ -1,265 +1,236 @@
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 
 export default function AdminUsers() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [deleteLoading, setDeleteLoading] = useState(false);
-  const [message, setMessage] = useState('');
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const router = useRouter();
 
-  // Fetch all users
+  useEffect(() => {
+    const adminAuth = localStorage.getItem('adminAuthenticated');
+    if (adminAuth === 'true') {
+      setIsAuthenticated(true);
+      fetchUsers();
+    } else {
+      router.push('/admin/admin-dashboard');
+    }
+  }, []);
+
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/admin/get-users');
-      const data = await response.json();
-      
-      if (response.ok) {
-        setUsers(data.users);
-        setMessage(`Found ${data.users.length} users`);
-      } else {
-        setMessage(`Error: ${data.error}`);
-      }
+      // Mock user data - replace with actual API call
+      setUsers([
+        { id: 1, name: 'John Doe', email: 'john@example.com', accounts: 2, balance: 15000, status: 'Active' },
+        { id: 2, name: 'Jane Smith', email: 'jane@example.com', accounts: 3, balance: 25000, status: 'Active' },
+        { id: 3, name: 'Bob Johnson', email: 'bob@example.com', accounts: 1, balance: 5000, status: 'Suspended' }
+      ]);
     } catch (error) {
-      setMessage(`Error: ${error.message}`);
+      console.error('Error fetching users:', error);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
-  // Delete all users
-  const deleteAllUsers = async () => {
-    if (!window.confirm('⚠️ WARNING: This will delete ALL users permanently. Are you absolutely sure?')) {
-      return;
-    }
-
-    setDeleteLoading(true);
-    try {
-      const response = await fetch('/api/admin/delete-all-users', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          confirmation: 'DELETE_ALL_USERS'
-        })
-      });
-
-      const data = await response.json();
-      
-      if (response.ok) {
-        setMessage(`✅ ${data.message}. Successfully deleted: ${data.summary.successful}, Failed: ${data.summary.failed}`);
-        setUsers([]); // Clear the users list
-        setShowDeleteConfirm(false);
-      } else {
-        setMessage(`❌ Error: ${data.error}`);
-      }
-    } catch (error) {
-      setMessage(`❌ Error: ${error.message}`);
-    }
-    setDeleteLoading(false);
-  };
+  if (!isAuthenticated) {
+    return <div>Redirecting to admin login...</div>;
+  }
 
   return (
-    <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
-      <h1>Admin - User Management</h1>
-      
-      <div style={{ marginBottom: '20px' }}>
-        <button 
-          onClick={() => router.push('/admin/create-user')}
-          style={{
-            padding: '10px 20px',
-            marginRight: '10px',
-            backgroundColor: '#28a745',
-            color: 'white',
-            border: 'none',
-            borderRadius: '5px',
-            cursor: 'pointer'
-          }}
-        >
-          ➕ Create New User
-        </button>
-
-        <button 
-          onClick={fetchUsers}
-          disabled={loading}
-          style={{
-            padding: '10px 20px',
-            marginRight: '10px',
-            backgroundColor: '#0070f3',
-            color: 'white',
-            border: 'none',
-            borderRadius: '5px',
-            cursor: loading ? 'not-allowed' : 'pointer'
-          }}
-        >
-          {loading ? 'Loading...' : 'Fetch All Users'}
-        </button>
-
-        <button 
-          onClick={() => setShowDeleteConfirm(true)}
-          disabled={deleteLoading || users.length === 0}
-          style={{
-            padding: '10px 20px',
-            backgroundColor: '#dc3545',
-            color: 'white',
-            border: 'none',
-            borderRadius: '5px',
-            cursor: (deleteLoading || users.length === 0) ? 'not-allowed' : 'pointer'
-          }}
-        >
-          {deleteLoading ? 'Deleting...' : 'Delete All Users'}
-        </button>
+    <div style={styles.container}>
+      <div style={styles.header}>
+        <h1 style={styles.title}>👥 User Management</h1>
+        <Link href="/admin/admin-dashboard" style={styles.backButton}>
+          ← Back to Dashboard
+        </Link>
       </div>
 
-      {/* Delete Confirmation Modal */}
-      {showDeleteConfirm && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000
-        }}>
-          <div style={{
-            backgroundColor: 'white',
-            padding: '30px',
-            borderRadius: '10px',
-            maxWidth: '500px',
-            textAlign: 'center'
-          }}>
-            <h2 style={{ color: '#dc3545' }}>⚠️ DANGER ZONE</h2>
-            <p>You are about to delete <strong>ALL {users.length} users</strong> permanently.</p>
-            <p>This action <strong>CANNOT BE UNDONE</strong>.</p>
-            
-            <div style={{ marginTop: '20px' }}>
-              <button 
-                onClick={() => setShowDeleteConfirm(false)}
-                style={{
-                  padding: '10px 20px',
-                  marginRight: '10px',
-                  backgroundColor: '#6c757d',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '5px',
-                  cursor: 'pointer'
-                }}
-              >
-                Cancel
-              </button>
-              <button 
-                onClick={deleteAllUsers}
-                disabled={deleteLoading}
-                style={{
-                  padding: '10px 20px',
-                  backgroundColor: '#dc3545',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '5px',
-                  cursor: deleteLoading ? 'not-allowed' : 'pointer'
-                }}
-              >
-                {deleteLoading ? 'Deleting...' : 'YES, DELETE ALL USERS'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <div style={styles.actionsBar}>
+        <Link href="/admin/create-user" style={styles.actionButton}>
+          ➕ Create New User
+        </Link>
+        <Link href="/admin/bulk-transactions" style={styles.actionButton}>
+          📦 Bulk Operations
+        </Link>
+      </div>
 
-      {/* Status Message */}
-      {message && (
-        <div style={{
-          padding: '10px',
-          margin: '10px 0',
-          backgroundColor: message.includes('Error') || message.includes('❌') ? '#f8d7da' : '#d1edff',
-          border: '1px solid',
-          borderColor: message.includes('Error') || message.includes('❌') ? '#f5c6cb' : '#bee5eb',
-          borderRadius: '5px',
-          color: message.includes('Error') || message.includes('❌') ? '#721c24' : '#0c5460'
-        }}>
-          {message}
-        </div>
-      )}
-
-      {/* Users List */}
-      {users.length > 0 && (
-        <div>
-          <h3>Current Users ({users.length})</h3>
-          <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
-            {users.map((user, index) => (
-              <div key={user.id} style={{
-                padding: '12px',
-                margin: '8px 0',
-                backgroundColor: user.status === 'SOFT_DELETED' ? '#fff3cd' : '#f8f9fa',
-                border: `2px solid ${user.status === 'SOFT_DELETED' ? '#ffc107' : '#dee2e6'}`,
-                borderRadius: '8px',
-                fontSize: '14px'
-              }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ marginBottom: '6px' }}>
-                      <strong>{index + 1}.</strong> 
-                      <span style={{ 
-                        padding: '2px 8px', 
-                        marginLeft: '8px',
-                        borderRadius: '12px', 
-                        fontSize: '11px', 
-                        fontWeight: 'bold',
-                        backgroundColor: user.status === 'SOFT_DELETED' ? '#dc3545' : '#28a745',
-                        color: 'white'
-                      }}>
+      <div style={styles.usersTable}>
+        <h2 style={styles.sectionTitle}>All Users</h2>
+        {loading ? (
+          <div style={styles.loading}>Loading users...</div>
+        ) : (
+          <div style={styles.tableContainer}>
+            <table style={styles.table}>
+              <thead>
+                <tr style={styles.tableHeader}>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Accounts</th>
+                  <th>Total Balance</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {users.map((user) => (
+                  <tr key={user.id} style={styles.tableRow}>
+                    <td style={styles.tableCell}>{user.name}</td>
+                    <td style={styles.tableCell}>{user.email}</td>
+                    <td style={styles.tableCell}>{user.accounts}</td>
+                    <td style={styles.tableCell}>${user.balance.toLocaleString()}</td>
+                    <td style={styles.tableCell}>
+                      <span style={user.status === 'Active' ? styles.activeStatus : styles.suspendedStatus}>
                         {user.status}
                       </span>
-                    </div>
-                    
-                    <div style={{ marginBottom: '4px' }}>
-                      <strong>Email:</strong> {user.email}
-                      {user.db_email && user.db_email !== user.email && (
-                        <span style={{ color: '#28a745', marginLeft: '8px' }}>
-                          (DB: {user.db_email})
-                        </span>
-                      )}
-                    </div>
-                    
-                    {user.full_name && (
-                      <div style={{ marginBottom: '4px' }}>
-                        <strong>Name:</strong> {user.full_name}
+                    </td>
+                    <td style={styles.tableCell}>
+                      <div style={styles.actionButtons}>
+                        <button style={styles.editButton}>Edit</button>
+                        <button style={styles.viewButton}>View</button>
+                        <button style={styles.deleteButton}>Delete</button>
                       </div>
-                    )}
-                    
-                    <div style={{ fontSize: '12px', color: '#6c757d' }}>
-                      <div>ID: {user.id.substring(0, 8)}...</div>
-                      <div>Created: {new Date(user.created_at).toLocaleDateString()}</div>
-                      {user.deleted_at && (
-                        <div style={{ color: '#dc3545' }}>
-                          Deleted: {new Date(user.deleted_at).toLocaleDateString()}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        </div>
-      )}
-
-      <div style={{ marginTop: '30px', padding: '15px', backgroundColor: '#fff3cd', border: '1px solid #ffeaa7', borderRadius: '5px' }}>
-        <h4>🛡️ Security Notes:</h4>
-        <ul>
-          <li>This interface provides admin access to user management</li>
-          <li>Always fetch users first to see what will be deleted</li>
-          <li>The delete operation includes all related data (applications, accounts, enrollments)</li>
-          <li>Deleted users cannot be recovered</li>
-        </ul>
+        )}
       </div>
     </div>
   );
 }
+
+const styles = {
+  container: {
+    minHeight: '100vh',
+    background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+    padding: '20px'
+  },
+  header: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '30px',
+    background: 'white',
+    padding: '20px',
+    borderRadius: '12px',
+    boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+  },
+  title: {
+    fontSize: '28px',
+    fontWeight: 'bold',
+    color: '#1e3c72',
+    margin: 0
+  },
+  backButton: {
+    background: '#6c757d',
+    color: 'white',
+    padding: '10px 20px',
+    borderRadius: '8px',
+    textDecoration: 'none',
+    fontSize: '14px',
+    fontWeight: '500'
+  },
+  actionsBar: {
+    display: 'flex',
+    gap: '15px',
+    marginBottom: '30px',
+    flexWrap: 'wrap'
+  },
+  actionButton: {
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    color: 'white',
+    padding: '12px 24px',
+    borderRadius: '8px',
+    textDecoration: 'none',
+    fontSize: '14px',
+    fontWeight: '500'
+  },
+  usersTable: {
+    background: 'white',
+    padding: '25px',
+    borderRadius: '12px',
+    boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+  },
+  sectionTitle: {
+    fontSize: '20px',
+    fontWeight: 'bold',
+    color: '#1e3c72',
+    marginBottom: '20px'
+  },
+  loading: {
+    textAlign: 'center',
+    padding: '40px',
+    color: '#666'
+  },
+  tableContainer: {
+    overflowX: 'auto'
+  },
+  table: {
+    width: '100%',
+    borderCollapse: 'collapse'
+  },
+  tableHeader: {
+    background: '#f8f9fa',
+    fontWeight: 'bold',
+    color: '#333'
+  },
+  tableRow: {
+    borderBottom: '1px solid #dee2e6'
+  },
+  tableCell: {
+    padding: '12px',
+    textAlign: 'left',
+    fontSize: '14px'
+  },
+  activeStatus: {
+    background: '#d4edda',
+    color: '#155724',
+    padding: '4px 8px',
+    borderRadius: '4px',
+    fontSize: '12px',
+    fontWeight: '500'
+  },
+  suspendedStatus: {
+    background: '#f8d7da',
+    color: '#721c24',
+    padding: '4px 8px',
+    borderRadius: '4px',
+    fontSize: '12px',
+    fontWeight: '500'
+  },
+  actionButtons: {
+    display: 'flex',
+    gap: '8px'
+  },
+  editButton: {
+    background: '#28a745',
+    color: 'white',
+    border: 'none',
+    padding: '6px 12px',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    fontSize: '12px'
+  },
+  viewButton: {
+    background: '#17a2b8',
+    color: 'white',
+    border: 'none',
+    padding: '6px 12px',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    fontSize: '12px'
+  },
+  deleteButton: {
+    background: '#dc3545',
+    color: 'white',
+    border: 'none',
+    padding: '6px 12px',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    fontSize: '12px'
+  }
+};
