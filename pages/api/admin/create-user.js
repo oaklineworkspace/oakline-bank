@@ -59,6 +59,35 @@ export default async function handler(req, res) {
       return res.status(409).json({ error: 'User with this email already exists' });
     }
 
+    // Map account type IDs to enum values
+    const ACCOUNT_TYPE_MAPPING = {
+      1: 'checking_account',
+      2: 'savings_account', 
+      3: 'business_checking',
+      4: 'business_savings',
+      5: 'student_checking',
+      6: 'money_market',
+      7: 'certificate_of_deposit',
+      8: 'retirement_ira',
+      9: 'joint_checking',
+      10: 'trust_account',
+      11: 'investment_brokerage',
+      12: 'high_yield_savings',
+      13: 'international_checking',
+      14: 'foreign_currency',
+      15: 'cryptocurrency_wallet',
+      16: 'loan_repayment',
+      17: 'mortgage',
+      18: 'auto_loan',
+      19: 'credit_card',
+      20: 'prepaid_card',
+      21: 'payroll_account',
+      22: 'nonprofit_charity',
+      23: 'escrow_account'
+    };
+
+    const mappedAccountTypes = accountTypes.map(id => ACCOUNT_TYPE_MAPPING[id]).filter(Boolean);
+
     // 2. Create application record
     const applicationData = {
       first_name: firstName,
@@ -75,7 +104,7 @@ export default async function handler(req, res) {
       city: city,
       state: state,
       zip_code: zipCode,
-      account_types: accountTypes,
+      account_types: mappedAccountTypes,
       employment_status: employmentStatus,
       annual_income: parseFloat(annualIncome),
       application_status: 'approved', // Admin created applications are pre-approved
@@ -96,12 +125,31 @@ export default async function handler(req, res) {
     }
 
     // 3. Create accounts for each selected account type
-    const accountsData = accountTypes.map(accountType => {
+    const accountsData = mappedAccountTypes.map(accountType => {
       const accountTypeConfig = {
-        'checking': { name: 'Checking Account', initialBalance: 100.00 },
-        'savings': { name: 'Savings Account', initialBalance: 0.00 },
-        'business': { name: 'Business Account', initialBalance: 500.00 },
-        'premium': { name: 'Premium Account', initialBalance: 1000.00 }
+        'checking_account': { name: 'Checking Account', initialBalance: 100.00 },
+        'savings_account': { name: 'Savings Account', initialBalance: 0.00 },
+        'business_checking': { name: 'Business Checking', initialBalance: 500.00 },
+        'business_savings': { name: 'Business Savings', initialBalance: 250.00 },
+        'student_checking': { name: 'Student Checking', initialBalance: 25.00 },
+        'money_market': { name: 'Money Market Account', initialBalance: 1000.00 },
+        'certificate_of_deposit': { name: 'Certificate of Deposit', initialBalance: 5000.00 },
+        'retirement_ira': { name: 'IRA Account', initialBalance: 0.00 },
+        'joint_checking': { name: 'Joint Checking', initialBalance: 100.00 },
+        'trust_account': { name: 'Trust Account', initialBalance: 10000.00 },
+        'investment_brokerage': { name: 'Investment Account', initialBalance: 2500.00 },
+        'high_yield_savings': { name: 'High-Yield Savings', initialBalance: 500.00 },
+        'international_checking': { name: 'International Checking', initialBalance: 100.00 },
+        'foreign_currency': { name: 'Foreign Currency Account', initialBalance: 0.00 },
+        'cryptocurrency_wallet': { name: 'Crypto Wallet', initialBalance: 0.00 },
+        'loan_repayment': { name: 'Loan Repayment Account', initialBalance: 0.00 },
+        'mortgage': { name: 'Mortgage Account', initialBalance: 0.00 },
+        'auto_loan': { name: 'Auto Loan Account', initialBalance: 0.00 },
+        'credit_card': { name: 'Credit Card Account', initialBalance: 0.00 },
+        'prepaid_card': { name: 'Prepaid Card', initialBalance: 50.00 },
+        'payroll_account': { name: 'Payroll Account', initialBalance: 0.00 },
+        'nonprofit_charity': { name: 'Nonprofit Account', initialBalance: 100.00 },
+        'escrow_account': { name: 'Escrow Account', initialBalance: 0.00 }
       };
 
       const config = accountTypeConfig[accountType] || { name: 'Standard Account', initialBalance: 0.00 };
@@ -116,6 +164,7 @@ export default async function handler(req, res) {
         account_name: config.name,
         balance: config.initialBalance,
         status: 'active',
+        routing_number: '075915826',
         created_at: new Date().toISOString()
       };
     });
@@ -213,6 +262,7 @@ export default async function handler(req, res) {
     // 8. Success response
     res.status(201).json({
       message: 'User account created successfully',
+      userId: authUser.user.id,
       user: {
         id: application.id,
         auth_id: authUser.user.id,
