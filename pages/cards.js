@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useRouter } from 'next/router';
@@ -10,6 +9,8 @@ export default function Cards() {
   const [loading, setLoading] = useState(true);
   const [showApplicationModal, setShowApplicationModal] = useState(false);
   const [selectedCardType, setSelectedCardType] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [message, setMessage] = useState('');
   const router = useRouter();
 
   useEffect(() => {
@@ -70,17 +71,54 @@ export default function Cards() {
   ];
 
   const handleCardApplication = async () => {
-    if (!selectedCardType) return;
-
     try {
-      // Here you would typically submit the card application
-      // For now, we'll just show success
-      alert(`${selectedCardType} card application submitted successfully!`);
+      setIsSubmitting(true);
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setMessage('Please log in to apply for a card.');
+        return;
+      }
+
+      // Get user's first account
+      const { data: accounts } = await supabase
+        .from('accounts')
+        .select('*')
+        .eq('user_id', user.id)
+        .limit(1);
+
+      if (!accounts || accounts.length === 0) {
+        setMessage('No accounts found. Please contact support.');
+        return;
+      }
+
+      // Submit application to database
+      const { error } = await supabase
+        .from('card_applications')
+        .insert([{
+          user_id: user.id,
+          account_id: accounts[0].id,
+          card_type: selectedCardType,
+          cardholder_name: accounts[0].account_holder || 'Card Holder',
+          status: 'pending',
+          created_at: new Date().toISOString()
+        }]);
+
+      if (error) {
+        console.error('Error submitting application:', error);
+        setMessage('Error submitting application. Please try again.');
+        return;
+      }
+
       setShowApplicationModal(false);
       setSelectedCardType('');
+      setMessage(`Your ${selectedCardType} application has been submitted successfully! You'll receive a response within 2-3 business days.`);
+
     } catch (error) {
-      console.error('Error submitting card application:', error);
-      alert('Error submitting application. Please try again.');
+      console.error('Error:', error);
+      setMessage('Error submitting application. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -104,6 +142,13 @@ export default function Cards() {
           ☰ Menu
         </button>
       </header>
+
+      {/* Display submission message if any */}
+      {message && (
+        <div style={{ padding: '20px', color: message.includes('Error') ? 'red' : 'green', textAlign: 'center' }}>
+          {message}
+        </div>
+      )}
 
       {/* Current Cards */}
       <section style={styles.section}>
@@ -135,7 +180,10 @@ export default function Cards() {
             <p>You don't have any cards yet.</p>
             <button 
               style={styles.applyButton}
-              onClick={() => setShowApplicationModal(true)}
+              onClick={() => {
+                setSelectedCardType('Debit Card'); // Default to Debit Card
+                setShowApplicationModal(true);
+              }}
             >
               Apply for Your First Card
             </button>
@@ -178,15 +226,18 @@ export default function Cards() {
               <button 
                 style={styles.confirmButton}
                 onClick={handleCardApplication}
+                disabled={isSubmitting}
               >
-                Confirm Application
+                {isSubmitting ? 'Submitting...' : 'Confirm Application'}
               </button>
               <button 
                 style={styles.cancelButton}
                 onClick={() => {
                   setShowApplicationModal(false);
                   setSelectedCardType('');
+                  setMessage(''); // Clear message when closing modal
                 }}
+                disabled={isSubmitting}
               >
                 Cancel
               </button>

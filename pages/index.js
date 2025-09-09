@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
@@ -79,13 +78,13 @@ function EnrollmentButton() {
             <button type="submit" disabled={loading} style={styles.submitButton}>
               {loading ? 'Sending...' : 'Send Enrollment Link'}
             </button>
-            <button 
-              type="button" 
+            <button
+              type="button"
               onClick={() => {
                 setShowEmailInput(false);
                 setMessage('');
                 setEmail('');
-              }} 
+              }}
               style={styles.cancelButton}
             >
               Cancel
@@ -119,31 +118,38 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    checkUser();
-    
-    // Listen for auth changes
+    checkAuthState();
+
+    // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN') {
-        setUser(session?.user || null);
-      } else if (event === 'SIGNED_OUT') {
-        setUser(null);
+      if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
+        checkAuthState();
       }
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  const checkUser = async () => {
+
+  const checkAuthState = async () => {
     try {
+      const { data: { session } } = await supabase.auth.getSession();
       const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
+
+      // Double check - if we have session but no user, or vice versa
+      if (session && user) {
+        setUser(user);
+      } else {
+        setUser(null);
+      }
     } catch (error) {
-      console.error('Error checking user:', error);
+      console.error('Error checking auth:', error);
       setUser(null);
     } finally {
       setLoading(false);
     }
   };
+
 
   const handleLogout = async () => {
     try {
@@ -166,7 +172,7 @@ export default function Home() {
   return (
     <div className="page-container">
       <MainMenu user={user} />
-      
+
       {/* Top Action Buttons */}
       <section style={styles.topActionsSection}>
         <div style={styles.container}>
@@ -279,6 +285,10 @@ export default function Home() {
                   <Link href="/transactions" style={styles.quickAccessCard}>
                     <span style={styles.quickAccessIcon}>📋</span>
                     <span>Transactions</span>
+                  </Link>
+                  <Link href="/admin/admin-dashboard" style={styles.quickAccessCard}>
+                    <span style={styles.quickAccessIcon}>👑</span>
+                    <span>Admin Dashboard</span>
                   </Link>
                 </div>
               </div>

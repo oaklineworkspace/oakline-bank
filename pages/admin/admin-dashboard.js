@@ -222,6 +222,12 @@ export default function AdminDashboard() {
         </button>
         <button
           style={styles.actionButton}
+          onClick={() => router.push('/admin/admin-card-applications')}
+        >
+          💳 Card Applications
+        </button>
+        <button
+          style={styles.actionButton}
           onClick={() => router.push('/admin/admin-balance')}
         >
           💳 Balance Management
@@ -332,6 +338,9 @@ export default function AdminDashboard() {
             </Link>
             <Link href="/admin/admin-notifications" style={styles.adminButton}>
               🔔 Send Notifications
+            </Link>
+            <Link href="/admin/admin-card-applications" style={styles.adminButton}>
+              💳 Card Applications
             </Link>
           </div>
         </div>

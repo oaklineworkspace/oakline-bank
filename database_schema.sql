@@ -250,3 +250,29 @@ CREATE POLICY "Users can view their own crypto portfolio" ON crypto_portfolio
 
 CREATE POLICY "Users can manage their own crypto portfolio" ON crypto_portfolio
     FOR ALL USING (auth.uid() = user_id);
+
+-- Card Applications Table
+CREATE TABLE IF NOT EXISTS card_applications (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+    account_id UUID REFERENCES accounts(id) ON DELETE CASCADE,
+    card_type VARCHAR(50) NOT NULL DEFAULT 'Visa Debit',
+    cardholder_name VARCHAR(100) NOT NULL,
+    status VARCHAR(20) DEFAULT 'pending', -- pending, approved, rejected
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    approved_at TIMESTAMP WITH TIME ZONE,
+    approved_by VARCHAR(100),
+    rejected_at TIMESTAMP WITH TIME ZONE,
+    rejected_by VARCHAR(100),
+    rejection_reason TEXT
+);
+
+-- Enable RLS
+ALTER TABLE card_applications ENABLE ROW LEVEL SECURITY;
+
+-- Policies for card_applications
+CREATE POLICY "Users can view their own card applications" ON card_applications
+    FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert their own card applications" ON card_applications
+    FOR INSERT WITH CHECK (auth.uid() = user_id);
