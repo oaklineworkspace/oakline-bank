@@ -11,11 +11,29 @@ export default function Dashboard() {
   const [error, setError] = useState('');
   const [selectedAccount, setSelectedAccount] = useState(null);
   const [showTransferModal, setShowTransferModal] = useState(false);
+  const [showWithdrawalModal, setShowWithdrawalModal] = useState(false);
   const [showPayModal, setShowPayModal] = useState(false);
   const [transferData, setTransferData] = useState({
     fromAccount: '',
+    transferType: 'between_accounts',
     toAccount: '',
+    recipientName: '',
+    recipientEmail: '',
+    bankName: '',
+    routingNumber: '',
+    swiftCode: '',
     amount: '',
+    description: '',
+    country: ''
+  });
+  const [withdrawalData, setWithdrawalData] = useState({
+    fromAccount: '',
+    withdrawalMethod: 'atm',
+    amount: '',
+    recipientAccount: '',
+    recipientName: '',
+    routingNumber: '',
+    bankName: '',
     description: ''
   });
   const [paymentData, setPaymentData] = useState({
@@ -26,21 +44,22 @@ export default function Dashboard() {
   });
   const router = useRouter();
 
-  // Define styles at the top to avoid initialization errors
+  // Enhanced mature banking color scheme
   const styles = {
     container: {
       minHeight: '100vh',
-      backgroundColor: '#f8fafc',
-      fontFamily: 'system-ui, -apple-system, sans-serif'
+      backgroundColor: '#f7f9fc',
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
     },
     header: {
-      background: 'linear-gradient(135deg, #0070f3 0%, #0051a5 100%)',
+      background: 'linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%)',
       color: 'white',
-      padding: '1.5rem 2rem',
-      boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
+      padding: '1rem 2rem',
+      boxShadow: '0 4px 20px rgba(30, 58, 138, 0.3)',
+      borderBottom: '1px solid rgba(255,255,255,0.1)'
     },
     headerContent: {
-      maxWidth: '1200px',
+      maxWidth: '1400px',
       margin: '0 auto',
       display: 'flex',
       justifyContent: 'space-between',
@@ -48,7 +67,10 @@ export default function Dashboard() {
     },
     logo: {
       fontSize: '1.5rem',
-      fontWeight: 'bold'
+      fontWeight: '700',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '0.5rem'
     },
     userInfo: {
       display: 'flex',
@@ -56,16 +78,18 @@ export default function Dashboard() {
       gap: '1rem'
     },
     logoutButton: {
-      background: 'rgba(255,255,255,0.2)',
-      border: '1px solid rgba(255,255,255,0.3)',
+      background: 'rgba(255,255,255,0.15)',
+      border: '1px solid rgba(255,255,255,0.2)',
       color: 'white',
       padding: '0.5rem 1rem',
-      borderRadius: '6px',
+      borderRadius: '8px',
       cursor: 'pointer',
-      transition: 'all 0.2s'
+      transition: 'all 0.2s',
+      fontSize: '0.9rem',
+      fontWeight: '500'
     },
     main: {
-      maxWidth: '1200px',
+      maxWidth: '1400px',
       margin: '0 auto',
       padding: '2rem'
     },
@@ -73,76 +97,111 @@ export default function Dashboard() {
       marginBottom: '2rem'
     },
     welcomeTitle: {
-      fontSize: '2rem',
-      fontWeight: 'bold',
+      fontSize: '2.2rem',
+      fontWeight: '700',
       color: '#1e293b',
       marginBottom: '0.5rem'
     },
     balanceCard: {
-      background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+      background: 'linear-gradient(135deg, #064e3b 0%, #047857 50%, #10b981 100%)',
       color: 'white',
-      padding: '2rem',
-      borderRadius: '16px',
+      padding: '2.5rem',
+      borderRadius: '20px',
       marginBottom: '2rem',
-      boxShadow: '0 8px 32px rgba(16, 185, 129, 0.3)'
+      boxShadow: '0 10px 40px rgba(16, 185, 129, 0.25)',
+      position: 'relative',
+      overflow: 'hidden'
+    },
+    balanceCardOverlay: {
+      position: 'absolute',
+      top: 0,
+      right: 0,
+      width: '200px',
+      height: '200px',
+      background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)',
+      borderRadius: '50%',
+      transform: 'translate(50%, -50%)'
     },
     totalBalance: {
-      fontSize: '0.9rem',
+      fontSize: '1rem',
       opacity: 0.9,
-      marginBottom: '0.5rem'
+      marginBottom: '0.5rem',
+      fontWeight: '500'
     },
     balanceAmount: {
-      fontSize: '2.5rem',
-      fontWeight: 'bold',
-      marginBottom: '1rem'
+      fontSize: '3rem',
+      fontWeight: '800',
+      marginBottom: '1.5rem'
     },
     balanceActions: {
       display: 'flex',
-      gap: '1rem'
+      gap: '1rem',
+      flexWrap: 'wrap'
     },
     actionButton: {
-      background: 'rgba(255,255,255,0.2)',
-      border: '1px solid rgba(255,255,255,0.3)',
+      background: 'rgba(255,255,255,0.15)',
+      border: '1px solid rgba(255,255,255,0.2)',
       color: 'white',
       padding: '0.75rem 1.5rem',
-      borderRadius: '8px',
+      borderRadius: '12px',
       cursor: 'pointer',
       fontSize: '0.9rem',
-      fontWeight: '500',
-      transition: 'all 0.2s'
-    },
-    grid: {
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
-      gap: '2rem'
-    },
-    section: {
-      backgroundColor: 'white',
-      borderRadius: '12px',
-      padding: '1.5rem',
-      boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
-      border: '1px solid #e2e8f0'
-    },
-    sectionTitle: {
-      fontSize: '1.25rem',
       fontWeight: '600',
-      color: '#1e293b',
-      marginBottom: '1rem',
+      transition: 'all 0.2s',
       display: 'flex',
       alignItems: 'center',
       gap: '0.5rem'
     },
-    accountCard: {
-      border: '1px solid #e2e8f0',
-      borderRadius: '8px',
-      padding: '1rem',
-      marginBottom: '0.75rem',
+    grid: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
+      gap: '2rem'
+    },
+    section: {
+      backgroundColor: 'white',
+      borderRadius: '16px',
+      padding: '2rem',
+      boxShadow: '0 4px 30px rgba(0,0,0,0.08)',
+      border: '1px solid #e2e8f0'
+    },
+    sectionTitle: {
+      fontSize: '1.5rem',
+      fontWeight: '700',
+      color: '#1e293b',
+      marginBottom: '1.5rem',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '0.75rem'
+    },
+    accountSelector: {
+      marginBottom: '1.5rem'
+    },
+    select: {
+      width: '100%',
+      padding: '0.75rem 1rem',
+      border: '2px solid #e2e8f0',
+      borderRadius: '12px',
+      fontSize: '1rem',
+      backgroundColor: 'white',
+      color: '#1e293b',
+      fontWeight: '500',
       cursor: 'pointer',
       transition: 'all 0.2s'
     },
+    accountCard: {
+      background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
+      border: '2px solid #e2e8f0',
+      borderRadius: '16px',
+      padding: '1.5rem',
+      marginBottom: '1rem',
+      cursor: 'pointer',
+      transition: 'all 0.3s'
+    },
     accountCardSelected: {
-      borderColor: '#0070f3',
-      backgroundColor: '#f0f9ff'
+      borderColor: '#3b82f6',
+      background: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)',
+      transform: 'translateY(-2px)',
+      boxShadow: '0 8px 30px rgba(59, 130, 246, 0.15)'
     },
     accountHeader: {
       display: 'flex',
@@ -151,49 +210,53 @@ export default function Dashboard() {
       marginBottom: '0.5rem'
     },
     accountName: {
-      fontWeight: '600',
-      color: '#1e293b'
+      fontWeight: '700',
+      color: '#1e293b',
+      fontSize: '1.1rem'
     },
     accountNumber: {
-      fontSize: '0.8rem',
-      color: '#64748b'
+      fontSize: '0.85rem',
+      color: '#64748b',
+      fontFamily: 'monospace'
     },
     accountBalance: {
-      fontSize: '1.1rem',
-      fontWeight: '600',
-      color: '#059669'
+      fontSize: '1.3rem',
+      fontWeight: '700',
+      color: '#047857'
     },
     transactionItem: {
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
-      padding: '0.75rem 0',
+      padding: '1rem 0',
       borderBottom: '1px solid #f1f5f9'
     },
     transactionIcon: {
-      width: '40px',
-      height: '40px',
-      borderRadius: '50%',
+      width: '48px',
+      height: '48px',
+      borderRadius: '12px',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       fontSize: '1.2rem',
-      marginRight: '0.75rem'
+      marginRight: '1rem',
+      fontWeight: '600'
     },
     transactionDetails: {
       flex: 1
     },
     transactionDescription: {
-      fontWeight: '500',
+      fontWeight: '600',
       color: '#1e293b',
       marginBottom: '0.25rem'
     },
     transactionDate: {
-      fontSize: '0.8rem',
+      fontSize: '0.85rem',
       color: '#64748b'
     },
     transactionAmount: {
-      fontWeight: '600'
+      fontWeight: '700',
+      fontSize: '1.1rem'
     },
     modal: {
       position: 'fixed',
@@ -201,77 +264,75 @@ export default function Dashboard() {
       left: 0,
       right: 0,
       bottom: 0,
-      backgroundColor: 'rgba(0,0,0,0.5)',
+      backgroundColor: 'rgba(0,0,0,0.6)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      zIndex: 1000
+      zIndex: 1000,
+      padding: '1rem'
     },
     modalContent: {
       backgroundColor: 'white',
-      borderRadius: '12px',
+      borderRadius: '20px',
       padding: '2rem',
-      maxWidth: '400px',
-      width: '90%',
+      maxWidth: '500px',
+      width: '100%',
       maxHeight: '90vh',
-      overflow: 'auto'
+      overflow: 'auto',
+      boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
     },
     modalTitle: {
-      fontSize: '1.5rem',
-      fontWeight: 'bold',
-      marginBottom: '1rem',
+      fontSize: '1.8rem',
+      fontWeight: '700',
+      marginBottom: '1.5rem',
       color: '#1e293b'
     },
     formGroup: {
-      marginBottom: '1rem'
+      marginBottom: '1.5rem'
     },
     label: {
       display: 'block',
       marginBottom: '0.5rem',
-      fontWeight: '500',
+      fontWeight: '600',
       color: '#374151'
     },
     input: {
       width: '100%',
-      padding: '0.75rem',
-      border: '1px solid #d1d5db',
-      borderRadius: '6px',
+      padding: '0.875rem 1rem',
+      border: '2px solid #e2e8f0',
+      borderRadius: '12px',
       fontSize: '1rem',
-      boxSizing: 'border-box'
-    },
-    select: {
-      width: '100%',
-      padding: '0.75rem',
-      border: '1px solid #d1d5db',
-      borderRadius: '6px',
-      fontSize: '1rem',
-      backgroundColor: 'white',
-      boxSizing: 'border-box'
+      boxSizing: 'border-box',
+      transition: 'all 0.2s'
     },
     modalActions: {
       display: 'flex',
       gap: '1rem',
-      marginTop: '1.5rem'
+      marginTop: '2rem'
     },
     primaryButton: {
-      backgroundColor: '#0070f3',
+      backgroundColor: '#1e40af',
       color: 'white',
       border: 'none',
-      padding: '0.75rem 1.5rem',
-      borderRadius: '6px',
+      padding: '1rem 2rem',
+      borderRadius: '12px',
       cursor: 'pointer',
-      fontWeight: '500',
-      flex: 1
+      fontWeight: '600',
+      flex: 1,
+      fontSize: '1rem',
+      transition: 'all 0.2s'
     },
     secondaryButton: {
       backgroundColor: '#f1f5f9',
       color: '#64748b',
-      border: 'none',
-      padding: '0.75rem 1.5rem',
-      borderRadius: '6px',
+      border: '2px solid #e2e8f0',
+      padding: '1rem 2rem',
+      borderRadius: '12px',
       cursor: 'pointer',
-      fontWeight: '500',
-      flex: 1
+      fontWeight: '600',
+      flex: 1,
+      fontSize: '1rem',
+      transition: 'all 0.2s'
     },
     loadingContainer: {
       display: 'flex',
@@ -279,13 +340,13 @@ export default function Dashboard() {
       alignItems: 'center',
       justifyContent: 'center',
       minHeight: '100vh',
-      backgroundColor: '#f8fafc'
+      backgroundColor: '#f7f9fc'
     },
     spinner: {
-      width: '40px',
-      height: '40px',
-      border: '4px solid #f3f4f6',
-      borderTop: '4px solid #0070f3',
+      width: '48px',
+      height: '48px',
+      border: '4px solid #e2e8f0',
+      borderTop: '4px solid #1e40af',
       borderRadius: '50%',
       animation: 'spin 1s linear infinite',
       marginBottom: '1rem'
@@ -296,38 +357,45 @@ export default function Dashboard() {
       alignItems: 'center',
       justifyContent: 'center',
       minHeight: '100vh',
-      backgroundColor: '#f8fafc',
+      backgroundColor: '#f7f9fc',
       textAlign: 'center',
       padding: '2rem'
     },
     retryButton: {
-      backgroundColor: '#0070f3',
+      backgroundColor: '#1e40af',
       color: 'white',
       border: 'none',
-      padding: '0.75rem 1.5rem',
-      borderRadius: '6px',
+      padding: '1rem 2rem',
+      borderRadius: '12px',
       cursor: 'pointer',
       fontSize: '1rem',
-      marginTop: '1rem'
+      marginTop: '1rem',
+      fontWeight: '600'
     },
     quickActions: {
       display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
       gap: '1rem',
-      marginTop: '1rem'
+      marginTop: '1.5rem'
     },
     quickActionCard: {
       textAlign: 'center',
-      padding: '1rem',
-      border: '1px solid #e2e8f0',
-      borderRadius: '8px',
+      padding: '1.5rem 1rem',
+      border: '2px solid #e2e8f0',
+      borderRadius: '16px',
       cursor: 'pointer',
-      transition: 'all 0.2s'
+      transition: 'all 0.3s',
+      backgroundColor: 'white'
     },
     quickActionIcon: {
-      fontSize: '2rem',
-      marginBottom: '0.5rem',
+      fontSize: '2.5rem',
+      marginBottom: '0.75rem',
       display: 'block'
+    },
+    quickActionText: {
+      fontSize: '0.9rem',
+      fontWeight: '600',
+      color: '#1e293b'
     }
   };
 
@@ -356,7 +424,6 @@ export default function Dashboard() {
 
   const fetchUserData = async (userId) => {
     try {
-      // Fetch accounts
       const { data: accountsData, error: accountsError } = await supabase
         .from('accounts')
         .select('*')
@@ -365,7 +432,6 @@ export default function Dashboard() {
 
       if (accountsError) {
         console.error('Error fetching accounts:', accountsError);
-        // If accounts table doesn't exist, try to get user profile info
         setAccounts([]);
       } else {
         setAccounts(accountsData || []);
@@ -374,7 +440,6 @@ export default function Dashboard() {
         }
       }
 
-      // Try to fetch recent transactions, but don't fail if table doesn't exist
       try {
         const { data: transactionsData, error: transactionsError } = await supabase
           .from('transactions')
@@ -426,19 +491,22 @@ export default function Dashboard() {
 
   const handleTransfer = async (e) => {
     e.preventDefault();
-    // This would implement actual transfer logic
     console.log('Transfer:', transferData);
     setShowTransferModal(false);
-    // Refresh data after transfer
+    await fetchUserData(user.id);
+  };
+
+  const handleWithdrawal = async (e) => {
+    e.preventDefault();
+    console.log('Withdrawal:', withdrawalData);
+    setShowWithdrawalModal(false);
     await fetchUserData(user.id);
   };
 
   const handlePayment = async (e) => {
     e.preventDefault();
-    // This would implement actual payment logic
     console.log('Payment:', paymentData);
     setShowPayModal(false);
-    // Refresh data after payment
     await fetchUserData(user.id);
   };
 
@@ -464,7 +532,6 @@ export default function Dashboard() {
   }
 
   return (
-    
     <div style={styles.container}>
       <style jsx>{`
         @keyframes spin {
@@ -473,25 +540,49 @@ export default function Dashboard() {
         }
         
         .action-button:hover {
-          background: rgba(255,255,255,0.3) !important;
+          background: rgba(255,255,255,0.25) !important;
+          transform: translateY(-1px);
         }
         
         .account-card:hover {
           border-color: #94a3b8 !important;
-          transform: translateY(-1px);
+          transform: translateY(-2px);
         }
         
         .quick-action:hover {
-          border-color: #0070f3 !important;
-          transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(0,112,243,0.15) !important;
+          border-color: #3b82f6 !important;
+          transform: translateY(-3px);
+          box-shadow: 0 8px 25px rgba(59, 130, 246, 0.2) !important;
+        }
+        
+        .select:focus {
+          border-color: #3b82f6 !important;
+          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .input:focus {
+          border-color: #3b82f6 !important;
+          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .primary-button:hover {
+          background-color: #1e3a8a !important;
+          transform: translateY(-1px);
+        }
+        
+        .secondary-button:hover {
+          background-color: #e2e8f0 !important;
+          transform: translateY(-1px);
         }
       `}</style>
 
       {/* Header */}
       <header style={styles.header}>
         <div style={styles.headerContent}>
-          <div style={styles.logo}>🏦 Oakline Bank</div>
+          <div style={styles.logo}>
+            <span>🏦</span>
+            Oakline Bank
+          </div>
           <div style={styles.userInfo}>
             <span>Welcome, {user?.user_metadata?.first_name || user?.email}</span>
             <button 
@@ -515,6 +606,7 @@ export default function Dashboard() {
           
           {/* Total Balance Card */}
           <div style={styles.balanceCard}>
+            <div style={styles.balanceCardOverlay}></div>
             <div style={styles.totalBalance}>Total Balance</div>
             <div style={styles.balanceAmount}>{formatCurrency(getTotalBalance())}</div>
             <div style={styles.balanceActions}>
@@ -523,21 +615,28 @@ export default function Dashboard() {
                 style={styles.actionButton}
                 className="action-button"
               >
-                💸 Transfer Money
+                <span>💸</span> Transfer
+              </button>
+              <button 
+                onClick={() => setShowWithdrawalModal(true)}
+                style={styles.actionButton}
+                className="action-button"
+              >
+                <span>💳</span> Withdraw
               </button>
               <button 
                 onClick={() => setShowPayModal(true)}
                 style={styles.actionButton}
                 className="action-button"
               >
-                💳 Pay Bills
+                <span>💰</span> Pay Bills
               </button>
               <button 
                 onClick={() => router.push('/deposit')}
                 style={styles.actionButton}
                 className="action-button"
               >
-                💰 Deposit
+                <span>📥</span> Deposit
               </button>
             </div>
           </div>
@@ -548,8 +647,29 @@ export default function Dashboard() {
           {/* Accounts Section */}
           <section style={styles.section}>
             <h2 style={styles.sectionTitle}>
-              💳 Your Accounts
+              <span>💳</span> Your Accounts
             </h2>
+            
+            {/* Account Selector Dropdown */}
+            {accounts.length > 0 && (
+              <div style={styles.accountSelector}>
+                <select 
+                  style={styles.select}
+                  className="select"
+                  value={selectedAccount?.id || ''}
+                  onChange={(e) => {
+                    const account = accounts.find(acc => acc.id === e.target.value);
+                    setSelectedAccount(account);
+                  }}
+                >
+                  {accounts.map(account => (
+                    <option key={account.id} value={account.id}>
+                      {account.account_name} - {formatCurrency(account.balance)} (****{account.account_number?.slice(-4)})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
             
             {accounts.length === 0 ? (
               <p style={{ color: '#64748b', textAlign: 'center', padding: '2rem' }}>
@@ -589,7 +709,7 @@ export default function Dashboard() {
                 className="quick-action"
               >
                 <span style={styles.quickActionIcon}>📊</span>
-                <div>Statements</div>
+                <div style={styles.quickActionText}>Statements</div>
               </div>
               <div 
                 onClick={() => router.push('/cards')}
@@ -597,7 +717,7 @@ export default function Dashboard() {
                 className="quick-action"
               >
                 <span style={styles.quickActionIcon}>💳</span>
-                <div>Cards</div>
+                <div style={styles.quickActionText}>Cards</div>
               </div>
               <div 
                 onClick={() => router.push('/loans')}
@@ -605,7 +725,7 @@ export default function Dashboard() {
                 className="quick-action"
               >
                 <span style={styles.quickActionIcon}>🏠</span>
-                <div>Loans</div>
+                <div style={styles.quickActionText}>Loans</div>
               </div>
             </div>
           </section>
@@ -613,7 +733,7 @@ export default function Dashboard() {
           {/* Recent Transactions */}
           <section style={styles.section}>
             <h2 style={styles.sectionTitle}>
-              📈 Recent Activity
+              <span>📈</span> Recent Activity
             </h2>
             
             {transactions.length === 0 ? (
@@ -657,6 +777,7 @@ export default function Dashboard() {
                 marginTop: '1rem',
                 width: '100%'
               }}
+              className="primary-button"
             >
               View All Transactions
             </button>
@@ -664,7 +785,7 @@ export default function Dashboard() {
         </div>
       </main>
 
-      {/* Transfer Modal */}
+      {/* Enhanced Transfer Modal */}
       {showTransferModal && (
         <div style={styles.modal} onClick={() => setShowTransferModal(false)}>
           <div style={styles.modalContent} onClick={e => e.stopPropagation()}>
@@ -674,6 +795,7 @@ export default function Dashboard() {
                 <label style={styles.label}>From Account</label>
                 <select 
                   style={styles.select}
+                  className="select"
                   value={transferData.fromAccount}
                   onChange={e => setTransferData({...transferData, fromAccount: e.target.value})}
                   required
@@ -688,16 +810,131 @@ export default function Dashboard() {
               </div>
               
               <div style={styles.formGroup}>
-                <label style={styles.label}>To Account/Recipient</label>
-                <input 
-                  type="text"
-                  style={styles.input}
-                  placeholder="Account number or email"
-                  value={transferData.toAccount}
-                  onChange={e => setTransferData({...transferData, toAccount: e.target.value})}
+                <label style={styles.label}>Transfer Type</label>
+                <select 
+                  style={styles.select}
+                  className="select"
+                  value={transferData.transferType}
+                  onChange={e => setTransferData({...transferData, transferType: e.target.value})}
                   required
-                />
+                >
+                  <option value="between_accounts">Between My Accounts</option>
+                  <option value="domestic">Domestic Transfer</option>
+                  <option value="international">International Transfer</option>
+                  <option value="wire">Wire Transfer</option>
+                  <option value="ach">ACH Transfer</option>
+                </select>
               </div>
+
+              {transferData.transferType === 'between_accounts' && (
+                <div style={styles.formGroup}>
+                  <label style={styles.label}>To Account</label>
+                  <select 
+                    style={styles.select}
+                    className="select"
+                    value={transferData.toAccount}
+                    onChange={e => setTransferData({...transferData, toAccount: e.target.value})}
+                    required
+                  >
+                    <option value="">Select account</option>
+                    {accounts.filter(acc => acc.id !== transferData.fromAccount).map(account => (
+                      <option key={account.id} value={account.id}>
+                        {account.account_name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {transferData.transferType !== 'between_accounts' && (
+                <>
+                  <div style={styles.formGroup}>
+                    <label style={styles.label}>Recipient Name</label>
+                    <input 
+                      type="text"
+                      style={styles.input}
+                      className="input"
+                      placeholder="Full name of recipient"
+                      value={transferData.recipientName}
+                      onChange={e => setTransferData({...transferData, recipientName: e.target.value})}
+                      required
+                    />
+                  </div>
+                  
+                  <div style={styles.formGroup}>
+                    <label style={styles.label}>Recipient Account Number</label>
+                    <input 
+                      type="text"
+                      style={styles.input}
+                      className="input"
+                      placeholder="Account number"
+                      value={transferData.toAccount}
+                      onChange={e => setTransferData({...transferData, toAccount: e.target.value})}
+                      required
+                    />
+                  </div>
+
+                  {(transferData.transferType === 'domestic' || transferData.transferType === 'ach' || transferData.transferType === 'wire') && (
+                    <>
+                      <div style={styles.formGroup}>
+                        <label style={styles.label}>Bank Name</label>
+                        <input 
+                          type="text"
+                          style={styles.input}
+                          className="input"
+                          placeholder="Recipient's bank name"
+                          value={transferData.bankName}
+                          onChange={e => setTransferData({...transferData, bankName: e.target.value})}
+                          required
+                        />
+                      </div>
+                      
+                      <div style={styles.formGroup}>
+                        <label style={styles.label}>Routing Number</label>
+                        <input 
+                          type="text"
+                          style={styles.input}
+                          className="input"
+                          placeholder="9-digit routing number"
+                          value={transferData.routingNumber}
+                          onChange={e => setTransferData({...transferData, routingNumber: e.target.value})}
+                          required
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  {transferData.transferType === 'international' && (
+                    <>
+                      <div style={styles.formGroup}>
+                        <label style={styles.label}>SWIFT Code</label>
+                        <input 
+                          type="text"
+                          style={styles.input}
+                          className="input"
+                          placeholder="SWIFT/BIC code"
+                          value={transferData.swiftCode}
+                          onChange={e => setTransferData({...transferData, swiftCode: e.target.value})}
+                          required
+                        />
+                      </div>
+                      
+                      <div style={styles.formGroup}>
+                        <label style={styles.label}>Country</label>
+                        <input 
+                          type="text"
+                          style={styles.input}
+                          className="input"
+                          placeholder="Recipient's country"
+                          value={transferData.country}
+                          onChange={e => setTransferData({...transferData, country: e.target.value})}
+                          required
+                        />
+                      </div>
+                    </>
+                  )}
+                </>
+              )}
               
               <div style={styles.formGroup}>
                 <label style={styles.label}>Amount</label>
@@ -705,6 +942,7 @@ export default function Dashboard() {
                   type="number"
                   step="0.01"
                   style={styles.input}
+                  className="input"
                   placeholder="0.00"
                   value={transferData.amount}
                   onChange={e => setTransferData({...transferData, amount: e.target.value})}
@@ -717,6 +955,7 @@ export default function Dashboard() {
                 <input 
                   type="text"
                   style={styles.input}
+                  className="input"
                   placeholder="What's this for?"
                   value={transferData.description}
                   onChange={e => setTransferData({...transferData, description: e.target.value})}
@@ -724,11 +963,151 @@ export default function Dashboard() {
               </div>
               
               <div style={styles.modalActions}>
-                <button type="button" onClick={() => setShowTransferModal(false)} style={styles.secondaryButton}>
+                <button 
+                  type="button" 
+                  onClick={() => setShowTransferModal(false)} 
+                  style={styles.secondaryButton}
+                  className="secondary-button"
+                >
                   Cancel
                 </button>
-                <button type="submit" style={styles.primaryButton}>
+                <button 
+                  type="submit" 
+                  style={styles.primaryButton}
+                  className="primary-button"
+                >
                   Transfer
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Withdrawal Modal */}
+      {showWithdrawalModal && (
+        <div style={styles.modal} onClick={() => setShowWithdrawalModal(false)}>
+          <div style={styles.modalContent} onClick={e => e.stopPropagation()}>
+            <h3 style={styles.modalTitle}>Withdraw Money</h3>
+            <form onSubmit={handleWithdrawal}>
+              <div style={styles.formGroup}>
+                <label style={styles.label}>From Account</label>
+                <select 
+                  style={styles.select}
+                  className="select"
+                  value={withdrawalData.fromAccount}
+                  onChange={e => setWithdrawalData({...withdrawalData, fromAccount: e.target.value})}
+                  required
+                >
+                  <option value="">Select account</option>
+                  {accounts.map(account => (
+                    <option key={account.id} value={account.id}>
+                      {account.account_name} - {formatCurrency(account.balance)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              
+              <div style={styles.formGroup}>
+                <label style={styles.label}>Withdrawal Method</label>
+                <select 
+                  style={styles.select}
+                  className="select"
+                  value={withdrawalData.withdrawalMethod}
+                  onChange={e => setWithdrawalData({...withdrawalData, withdrawalMethod: e.target.value})}
+                  required
+                >
+                  <option value="atm">ATM Withdrawal</option>
+                  <option value="bank_transfer">Bank Transfer</option>
+                  <option value="check">Check Request</option>
+                  <option value="wire_transfer">Wire Transfer</option>
+                </select>
+              </div>
+
+              {withdrawalData.withdrawalMethod === 'bank_transfer' && (
+                <>
+                  <div style={styles.formGroup}>
+                    <label style={styles.label}>Recipient Account Number</label>
+                    <input 
+                      type="text"
+                      style={styles.input}
+                      className="input"
+                      placeholder="Account number"
+                      value={withdrawalData.recipientAccount}
+                      onChange={e => setWithdrawalData({...withdrawalData, recipientAccount: e.target.value})}
+                      required
+                    />
+                  </div>
+                  
+                  <div style={styles.formGroup}>
+                    <label style={styles.label}>Bank Name</label>
+                    <input 
+                      type="text"
+                      style={styles.input}
+                      className="input"
+                      placeholder="Bank name"
+                      value={withdrawalData.bankName}
+                      onChange={e => setWithdrawalData({...withdrawalData, bankName: e.target.value})}
+                      required
+                    />
+                  </div>
+                  
+                  <div style={styles.formGroup}>
+                    <label style={styles.label}>Routing Number</label>
+                    <input 
+                      type="text"
+                      style={styles.input}
+                      className="input"
+                      placeholder="9-digit routing number"
+                      value={withdrawalData.routingNumber}
+                      onChange={e => setWithdrawalData({...withdrawalData, routingNumber: e.target.value})}
+                      required
+                    />
+                  </div>
+                </>
+              )}
+              
+              <div style={styles.formGroup}>
+                <label style={styles.label}>Amount</label>
+                <input 
+                  type="number"
+                  step="0.01"
+                  style={styles.input}
+                  className="input"
+                  placeholder="0.00"
+                  value={withdrawalData.amount}
+                  onChange={e => setWithdrawalData({...withdrawalData, amount: e.target.value})}
+                  required
+                />
+              </div>
+              
+              <div style={styles.formGroup}>
+                <label style={styles.label}>Description (Optional)</label>
+                <input 
+                  type="text"
+                  style={styles.input}
+                  className="input"
+                  placeholder="Purpose of withdrawal"
+                  value={withdrawalData.description}
+                  onChange={e => setWithdrawalData({...withdrawalData, description: e.target.value})}
+                />
+              </div>
+              
+              <div style={styles.modalActions}>
+                <button 
+                  type="button" 
+                  onClick={() => setShowWithdrawalModal(false)} 
+                  style={styles.secondaryButton}
+                  className="secondary-button"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit" 
+                  style={styles.primaryButton}
+                  className="primary-button"
+                >
+                  Withdraw
                 </button>
               </div>
             </form>
@@ -747,6 +1126,7 @@ export default function Dashboard() {
                 <input 
                   type="text"
                   style={styles.input}
+                  className="input"
                   placeholder="Company or person name"
                   value={paymentData.payee}
                   onChange={e => setPaymentData({...paymentData, payee: e.target.value})}
@@ -760,6 +1140,7 @@ export default function Dashboard() {
                   type="number"
                   step="0.01"
                   style={styles.input}
+                  className="input"
                   placeholder="0.00"
                   value={paymentData.amount}
                   onChange={e => setPaymentData({...paymentData, amount: e.target.value})}
@@ -772,6 +1153,7 @@ export default function Dashboard() {
                 <input 
                   type="date"
                   style={styles.input}
+                  className="input"
                   value={paymentData.dueDate}
                   onChange={e => setPaymentData({...paymentData, dueDate: e.target.value})}
                   required
@@ -783,6 +1165,7 @@ export default function Dashboard() {
                 <input 
                   type="text"
                   style={styles.input}
+                  className="input"
                   placeholder="Account number or memo"
                   value={paymentData.description}
                   onChange={e => setPaymentData({...paymentData, description: e.target.value})}
@@ -790,10 +1173,19 @@ export default function Dashboard() {
               </div>
               
               <div style={styles.modalActions}>
-                <button type="button" onClick={() => setShowPayModal(false)} style={styles.secondaryButton}>
+                <button 
+                  type="button" 
+                  onClick={() => setShowPayModal(false)} 
+                  style={styles.secondaryButton}
+                  className="secondary-button"
+                >
                   Cancel
                 </button>
-                <button type="submit" style={styles.primaryButton}>
+                <button 
+                  type="submit" 
+                  style={styles.primaryButton}
+                  className="primary-button"
+                >
                   Schedule Payment
                 </button>
               </div>
