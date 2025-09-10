@@ -58,34 +58,34 @@ export default function Dashboard() {
         const { data: emailAccounts, error: emailError } = await supabase
           .from('accounts')
           .select('*')
-          .eq('email', user.email);
+          .eq('user_email', user.email);
         
         accountsData = emailAccounts;
         accountsError = emailError;
       }
 
-      // If still no accounts, create sample accounts
+      // If still no accounts, create sample accounts with proper structure
       if (!accountsData || accountsData.length === 0) {
         accountsData = [
           {
             id: 1,
-            type: 'Checking',
-            name: 'Premier Checking',
+            account_type: 'checking',
+            account_name: 'Premier Checking',
             balance: 0.00,
             account_number: `****${Math.floor(1000 + Math.random() * 9000)}`,
             status: 'Active',
             user_id: user.id,
-            email: user.email
+            user_email: user.email
           },
           {
             id: 2,
-            type: 'Savings',
-            name: 'High Yield Savings',
+            account_type: 'savings',
+            account_name: 'High Yield Savings',
             balance: 0.00,
             account_number: `****${Math.floor(1000 + Math.random() * 9000)}`,
             status: 'Active',
             user_id: user.id,
-            email: user.email
+            user_email: user.email
           }
         ];
       }
@@ -317,10 +317,14 @@ export default function Dashboard() {
               {accounts.map(account => (
                 <div key={account.id} style={styles.accountCard}>
                   <div style={styles.accountHeader}>
-                    <div style={styles.accountType}>{account.type}</div>
+                    <div style={styles.accountType}>
+                      {(account.account_type || account.type || 'Account').replace('_', ' ').toUpperCase()}
+                    </div>
                     <div style={styles.accountStatus}>{account.status || 'Active'}</div>
                   </div>
-                  <div style={styles.accountName}>{account.name || `${account.type} Account`}</div>
+                  <div style={styles.accountName}>
+                    {account.account_name || account.name || `${(account.account_type || account.type || 'Account').replace('_', ' ')} Account`}
+                  </div>
                   <div style={styles.accountNumber}>{account.account_number}</div>
                   <div style={{
                     ...styles.accountBalance,
@@ -332,7 +336,7 @@ export default function Dashboard() {
                     View Details
                   </Link>
                 </div>
-              ))}
+              ))}</div>
             </div>
           </div>
         )}
