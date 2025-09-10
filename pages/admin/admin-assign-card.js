@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { supabase } from '../../lib/supabaseClient';
 
-export default function AdminBalance() {
+export default function AdminAssignCard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -13,8 +13,8 @@ export default function AdminBalance() {
   const [message, setMessage] = useState('');
   const [selectedUser, setSelectedUser] = useState('');
   const [selectedAccount, setSelectedAccount] = useState('');
-  const [balanceAmount, setBalanceAmount] = useState('');
-  const [operation, setOperation] = useState('set'); // 'set', 'add', 'subtract'
+  const [cardType, setCardType] = useState('debit');
+  const [cardName, setCardName] = useState('');
   const router = useRouter();
 
   const ADMIN_PASSWORD = 'Chrismorgan23$';
@@ -74,20 +74,40 @@ export default function AdminBalance() {
     setSelectedUser(userId);
     setSelectedAccount('');
     
-    // Filter accounts for selected user
-    const userAccounts = accounts.filter(acc => 
-      acc.application_id === userId || acc.user_id === userId
-    );
-    
-    if (userAccounts.length === 1) {
-      setSelectedAccount(userAccounts[0].id);
+    // Auto-populate card name if user is selected
+    const selectedUserData = users.find(u => u.id === userId);
+    if (selectedUserData) {
+      setCardName(`${selectedUserData.first_name} ${selectedUserData.last_name}`);
     }
   };
 
-  const updateBalance = async (e) => {
+  const generateCardNumber = () => {
+    // Generate a realistic-looking card number (not for real use)
+    const prefix = '4532'; // Visa-like prefix for demo
+    let cardNumber = prefix;
+    
+    for (let i = 0; i < 12; i++) {
+      cardNumber += Math.floor(Math.random() * 10);
+    }
+    
+    return cardNumber.match(/.{1,4}/g).join(' ');
+  };
+
+  const generateExpiryDate = () => {
+    const now = new Date();
+    const expiryYear = now.getFullYear() + 3; // 3 years from now
+    const expiryMonth = String(now.getMonth() + 1).padStart(2, '0');
+    return `${expiryMonth}/${expiryYear.toString().slice(-2)}`;
+  };
+
+  const generateCVV = () => {
+    return Math.floor(100 + Math.random() * 900).toString();
+  };
+
+  const assignCard = async (e) => {
     e.preventDefault();
-    if (!selectedAccount || !balanceAmount) {
-      setError('Please select an account and enter an amount');
+    if (!selectedAccount || !cardName) {
+      setError('Please select an account and enter cardholder name');
       return;
     }
 
@@ -96,56 +116,52 @@ export default function AdminBalance() {
     setError('');
 
     try {
-      // Get current account with user info
-      const { data: currentAccount, error: fetchError } = await supabase
-        .from('accounts')
-        .select('balance, account_number, account_type, application_id')
-        .eq('id', selectedAccount)
-        .single();
+      // Get account and user details
+      const selectedAccountData = accounts.find(acc => acc.id === selectedAccount);
+      const selectedUserData = users.find(user => user.id === selectedUser);
 
-      if (fetchError) throw fetchError;
-
-      let newBalance;
-      const amount = parseFloat(balanceAmount);
-      const currentBalance = parseFloat(currentAccount.balance) || 0;
-
-      switch (operation) {
-        case 'set':
-          newBalance = amount;
-          break;
-        case 'add':
-          newBalance = currentBalance + amount;
-          break;
-        case 'subtract':
-          newBalance = Math.max(0, currentBalance - amount); // Prevent negative balance
-          break;
-        default:
-          newBalance = amount;
+      if (!selectedAccountData || !selectedUserData) {
+        throw new Error('Account or user not found');
       }
 
-      // Update balance in accounts table
-      const { error: updateError } = await supabase
-        .from('accounts')
-        .update({ 
-          balance: newBalance.toFixed(2),
+      // Generate card details
+      const cardNumber = generateCardNumber();
+      const expiryDate = generateExpiryDate();
+      const cvv = generateCVV();
+
+      // Insert card into database
+      const { data: cardData, error: cardError } = await supabase
+        .from('cards')
+        .insert({
+          user_id: selectedUserData.email, // Using email as user_id for consistency
+          account_id: selectedAccount,
+          account_number: selectedAccountData.account_number,
+          card_number: cardNumber,
+          cardholder_name: cardName.toUpperCase(),
+          expiry_date: expiryDate,
+          cvv: cvv,
+          card_type: cardType,
+          status: 'active',
+          daily_limit: 2000.00,
+          monthly_limit: 10000.00,
+          created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         })
-        .eq('id', selectedAccount);
+        .select()
+        .single();
 
-      if (updateError) throw updateError;
+      if (cardError) throw cardError;
 
-      // Create transaction record
-      const transactionAmount = operation === 'set' ? newBalance : Math.abs(amount);
+      // Create transaction record for card assignment
       const { error: transactionError } = await supabase
         .from('transactions')
         .insert({
           account_id: selectedAccount,
-          account_number: currentAccount.account_number,
-          type: operation === 'subtract' ? 'debit' : 'credit',
-          amount: transactionAmount,
-          description: `Admin ${operation} balance: ${operation === 'set' ? 'Set to' : operation === 'add' ? 'Added' : 'Subtracted'} $${amount.toFixed(2)}`,
+          account_number: selectedAccountData.account_number,
+          type: 'credit',
+          amount: 0,
+          description: `New ${cardType} card assigned: ****${cardNumber.slice(-4)}`,
           status: 'completed',
-          balance_after: newBalance.toFixed(2),
           created_at: new Date().toISOString()
         });
 
@@ -153,31 +169,20 @@ export default function AdminBalance() {
         console.error('Transaction record error:', transactionError);
       }
 
-      // Log the admin action for audit trail
-      const adminAction = {
-        action: 'balance_update',
-        account_id: selectedAccount,
-        account_number: currentAccount.account_number,
-        operation: operation,
-        amount: amount,
-        previous_balance: currentBalance,
-        new_balance: newBalance,
-        admin_timestamp: new Date().toISOString()
-      };
-
-      // You can also insert into an audit_logs table if you have one
-      console.log('Admin Action:', adminAction);
-
-      setMessage(`✅ Balance updated successfully! 
-        Previous: $${currentBalance.toLocaleString()} 
-        New: $${newBalance.toLocaleString()}`);
-      setBalanceAmount('');
+      setMessage(`✅ ${cardType} card successfully assigned! 
+        Card Number: ${cardNumber}
+        Expiry: ${expiryDate}
+        CVV: ${cvv}
+        Cardholder: ${cardName}`);
+      
+      // Reset form
+      setCardName('');
       setSelectedAccount('');
       setSelectedUser('');
-      await fetchData(); // Refresh data
+      
     } catch (error) {
-      console.error('Error updating balance:', error);
-      setError(`❌ Failed to update balance: ${error.message}`);
+      console.error('Error assigning card:', error);
+      setError(`❌ Failed to assign card: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -193,7 +198,7 @@ export default function AdminBalance() {
     return (
       <div style={styles.loginContainer}>
         <div style={styles.loginCard}>
-          <h1 style={styles.title}>🏦 Admin Balance Management</h1>
+          <h1 style={styles.title}>💳 Admin Card Assignment</h1>
           <form onSubmit={handleLogin} style={styles.form}>
             <div style={styles.inputGroup}>
               <label style={styles.label}>Admin Password</label>
@@ -208,7 +213,7 @@ export default function AdminBalance() {
             </div>
             {error && <div style={styles.error}>{error}</div>}
             <button type="submit" style={styles.loginButton}>
-              🔐 Access Balance Management
+              🔐 Access Card Assignment
             </button>
           </form>
         </div>
@@ -219,7 +224,7 @@ export default function AdminBalance() {
   return (
     <div style={styles.container}>
       <div style={styles.header}>
-        <h1 style={styles.title}>💰 Admin Balance Management</h1>
+        <h1 style={styles.title}>💳 Assign Debit Card</h1>
         <button onClick={() => router.push('/admin/admin-dashboard')} style={styles.backButton}>
           ← Back to Dashboard
         </button>
@@ -229,8 +234,8 @@ export default function AdminBalance() {
       {error && <div style={styles.error}>{error}</div>}
 
       <div style={styles.card}>
-        <h2 style={styles.cardTitle}>Update User Balance</h2>
-        <form onSubmit={updateBalance} style={styles.form}>
+        <h2 style={styles.cardTitle}>Assign New Card to User</h2>
+        <form onSubmit={assignCard} style={styles.form}>
           <div style={styles.formGrid}>
             <div style={styles.inputGroup}>
               <label style={styles.label}>Select User</label>
@@ -262,7 +267,7 @@ export default function AdminBalance() {
                   {getUserAccounts(selectedUser).map(account => (
                     <option key={account.id} value={account.id}>
                       {account.account_type} - ****{account.account_number?.slice(-4)} 
-                      (Current: ${parseFloat(account.balance || 0).toLocaleString()})
+                      (Balance: ${parseFloat(account.balance || 0).toLocaleString()})
                     </option>
                   ))}
                 </select>
@@ -270,30 +275,50 @@ export default function AdminBalance() {
             )}
 
             <div style={styles.inputGroup}>
-              <label style={styles.label}>Operation</label>
+              <label style={styles.label}>Card Type</label>
               <select
-                value={operation}
-                onChange={(e) => setOperation(e.target.value)}
+                value={cardType}
+                onChange={(e) => setCardType(e.target.value)}
                 style={styles.select}
               >
-                <option value="set">Set Balance To</option>
-                <option value="add">Add To Balance</option>
-                <option value="subtract">Subtract From Balance</option>
+                <option value="debit">Debit Card</option>
+                <option value="credit">Credit Card</option>
+                <option value="prepaid">Prepaid Card</option>
               </select>
             </div>
 
             <div style={styles.inputGroup}>
-              <label style={styles.label}>Amount ($)</label>
+              <label style={styles.label}>Cardholder Name</label>
               <input
-                type="number"
-                step="0.01"
-                min="0"
-                value={balanceAmount}
-                onChange={(e) => setBalanceAmount(e.target.value)}
+                type="text"
+                value={cardName}
+                onChange={(e) => setCardName(e.target.value)}
                 style={styles.input}
-                placeholder="Enter amount"
+                placeholder="Enter name as it should appear on card"
                 required
               />
+            </div>
+          </div>
+
+          <div style={styles.cardPreview}>
+            <h3>Card Preview</h3>
+            <div style={styles.virtualCard}>
+              <div style={styles.cardHeader}>
+                <span style={styles.bankName}>OAKLINE BANK</span>
+                <span style={styles.cardTypeLabel}>{cardType.toUpperCase()}</span>
+              </div>
+              <div style={styles.cardChip}></div>
+              <div style={styles.cardNumber}>#### #### #### ####</div>
+              <div style={styles.cardDetails}>
+                <div>
+                  <div style={styles.cardLabel}>VALID THRU</div>
+                  <div style={styles.cardValue}>MM/YY</div>
+                </div>
+                <div>
+                  <div style={styles.cardLabel}>CARDHOLDER</div>
+                  <div style={styles.cardValue}>{cardName.toUpperCase() || 'CARD HOLDER'}</div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -306,30 +331,9 @@ export default function AdminBalance() {
               cursor: (loading || !selectedAccount) ? 'not-allowed' : 'pointer'
             }}
           >
-            {loading ? 'Updating...' : `${operation.charAt(0).toUpperCase() + operation.slice(1)} Balance`}
+            {loading ? 'Assigning Card...' : `Assign ${cardType} Card`}
           </button>
         </form>
-      </div>
-
-      {/* Account Summary */}
-      <div style={styles.card}>
-        <h2 style={styles.cardTitle}>Account Summary</h2>
-        <div style={styles.summaryGrid}>
-          <div style={styles.summaryItem}>
-            <span style={styles.summaryNumber}>{users.length}</span>
-            <span style={styles.summaryLabel}>Total Users</span>
-          </div>
-          <div style={styles.summaryItem}>
-            <span style={styles.summaryNumber}>{accounts.length}</span>
-            <span style={styles.summaryLabel}>Total Accounts</span>
-          </div>
-          <div style={styles.summaryItem}>
-            <span style={styles.summaryNumber}>
-              ${accounts.reduce((sum, acc) => sum + parseFloat(acc.balance || 0), 0).toLocaleString()}
-            </span>
-            <span style={styles.summaryLabel}>Total Balance</span>
-          </div>
-        </div>
       </div>
     </div>
   );
@@ -402,6 +406,7 @@ const styles = {
   },
   formGrid: {
     display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
     gap: '16px'
   },
   inputGroup: {
@@ -456,7 +461,8 @@ const styles = {
     padding: '12px 16px',
     borderRadius: '8px',
     marginBottom: '20px',
-    fontSize: '14px'
+    fontSize: '14px',
+    whiteSpace: 'pre-line'
   },
   error: {
     background: '#fee2e2',
@@ -467,27 +473,64 @@ const styles = {
     marginBottom: '20px',
     fontSize: '14px'
   },
-  summaryGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-    gap: '16px'
+  cardPreview: {
+    marginTop: '20px',
+    textAlign: 'center'
   },
-  summaryItem: {
-    textAlign: 'center',
+  virtualCard: {
+    width: '320px',
+    height: '200px',
+    background: 'linear-gradient(135deg, #1e3a8a 0%, #3730a3 100%)',
+    borderRadius: '16px',
     padding: '20px',
-    background: '#f8fafc',
-    borderRadius: '8px'
+    color: 'white',
+    margin: '0 auto',
+    position: 'relative',
+    boxShadow: '0 8px 25px rgba(30, 58, 138, 0.3)'
   },
-  summaryNumber: {
-    display: 'block',
-    fontSize: '24px',
+  cardHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '20px'
+  },
+  bankName: {
+    fontSize: '14px',
     fontWeight: 'bold',
-    color: '#1e3a8a',
-    marginBottom: '4px'
+    letterSpacing: '1px'
   },
-  summaryLabel: {
+  cardTypeLabel: {
     fontSize: '12px',
-    color: '#64748b',
-    fontWeight: '500'
+    fontWeight: 'bold',
+    background: 'rgba(255,255,255,0.2)',
+    padding: '4px 8px',
+    borderRadius: '4px'
+  },
+  cardChip: {
+    width: '30px',
+    height: '24px',
+    background: 'linear-gradient(45deg, #ffd700, #ffa500)',
+    borderRadius: '4px',
+    marginBottom: '20px'
+  },
+  cardNumber: {
+    fontSize: '18px',
+    letterSpacing: '2px',
+    marginBottom: '20px',
+    fontFamily: 'monospace'
+  },
+  cardDetails: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end'
+  },
+  cardLabel: {
+    fontSize: '8px',
+    marginBottom: '2px',
+    opacity: 0.8
+  },
+  cardValue: {
+    fontSize: '12px',
+    fontWeight: 'bold'
   }
 };
