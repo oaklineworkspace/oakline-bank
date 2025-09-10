@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
@@ -14,6 +13,12 @@ export default function Cards() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('cards');
   const router = useRouter();
+
+  // State for card application form
+  const [selectedAccount, setSelectedAccount] = useState(null);
+  const [message, setMessage] = useState('');
+  const [applyLoading, setApplyLoading] = useState(false);
+
 
   useEffect(() => {
     checkUser();
@@ -66,7 +71,7 @@ export default function Cards() {
     try {
       const response = await fetch('/api/get-user-cards');
       const data = await response.json();
-      
+
       if (data.success) {
         setCards(data.cards || []);
         setApplications(data.applications || []);
@@ -94,7 +99,60 @@ export default function Cards() {
       case 'rejected':
         return '#ef4444';
       default:
-        return '#6b7280';
+        return '#64748b';
+    }
+  };
+
+  // Function to handle card application
+  const applyForCard = async () => {
+    if (!user) {
+      setMessage('Please log in to apply for a card');
+      return;
+    }
+
+    if (!selectedAccount) {
+      setMessage('Please select an account for the card application');
+      return;
+    }
+
+    setApplyLoading(true);
+    setMessage('');
+
+    try {
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+      if (sessionError || !session?.access_token) {
+        console.error('Session error:', sessionError);
+        setMessage('Please log in again to apply for a card');
+        setApplyLoading(false);
+        return;
+      }
+
+      const response = await fetch('/api/apply-card', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({
+          account_id: selectedAccount
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setMessage('Card application submitted successfully!');
+        fetchCardsData(); // Refresh data after applying
+        setActiveTab('applications'); // Navigate to applications tab
+      } else {
+        setMessage(data.message || 'Failed to apply for card. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error applying for card:', error);
+      setMessage('An error occurred. Please try again.');
+    } finally {
+      setApplyLoading(false);
     }
   };
 
@@ -153,7 +211,7 @@ export default function Cards() {
               <h2 style={styles.sectionTitle}>Active Cards</h2>
               <p style={styles.sectionDesc}>Manage your active debit cards and their settings</p>
             </div>
-            
+
             {cards.length > 0 ? (
               <div style={styles.cardsGrid}>
                 {cards.map(card => (
@@ -194,7 +252,7 @@ export default function Cards() {
               <h2 style={styles.sectionTitle}>Card Applications</h2>
               <p style={styles.sectionDesc}>Track the status of your card applications</p>
             </div>
-            
+
             {applications.length > 0 ? (
               <div style={styles.applicationsList}>
                 {applications.map(application => (
@@ -213,7 +271,7 @@ export default function Cards() {
                         {application.status.toUpperCase()}
                       </span>
                     </div>
-                    
+
                     <div style={styles.applicationDetails}>
                       <div style={styles.detailRow}>
                         <span style={styles.detailLabel}>Cardholder Name:</span>
@@ -278,18 +336,18 @@ export default function Cards() {
               <h2 style={styles.sectionTitle}>Apply for Debit Card</h2>
               <p style={styles.sectionDesc}>Choose an account to link your new debit card</p>
             </div>
-            
+
             {accounts.length > 0 ? (
               <div style={styles.accountsGrid}>
                 {accounts.map(account => (
-                  <div key={account.id} style={styles.accountCard}>
+                  <div key={account.id} style={styles.accountCard} onClick={() => setSelectedAccount(account.id)}>
                     <DebitCard
                       user={user}
                       userProfile={userProfile}
                       account={account}
                       showDetails={true}
                       showControls={true}
-                      onApplyCard={fetchCardsData}
+                      isSelected={selectedAccount === account.id}
                     />
                   </div>
                 ))}
@@ -304,6 +362,18 @@ export default function Cards() {
                 <Link href="/apply" style={styles.emptyButton}>
                   Open New Account
                 </Link>
+              </div>
+            )}
+            {selectedAccount && (
+              <div style={styles.applySection}>
+                {message && <p style={styles.message}>{message}</p>}
+                <button
+                  onClick={applyForCard}
+                  style={styles.applyButton}
+                  disabled={applyLoading}
+                >
+                  {applyLoading ? 'Processing...' : 'Confirm Application'}
+                </button>
               </div>
             )}
           </div>
@@ -446,7 +516,29 @@ const styles = {
     padding: '2rem',
     borderRadius: '16px',
     boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-    border: '1px solid #e2e8f0'
+    border: '1px solid #e2e8f0',
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+    position: 'relative' // Added for the checkmark
+  },
+  accountCardHover: { // Add this style for hover effect if needed
+    borderColor: '#1e40af',
+    boxShadow: '0 6px 20px rgba(30, 64, 175, 0.15)'
+  },
+  selectedAccountIndicator: { // Style for the checkmark or border indicating selection
+    position: 'absolute',
+    top: '10px',
+    right: '10px',
+    width: '24px',
+    height: '24px',
+    borderRadius: '50%',
+    backgroundColor: '#10b981',
+    color: 'white',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontWeight: 'bold',
+    fontSize: '0.9rem'
   },
   applicationsList: {
     display: 'flex',
@@ -576,5 +668,34 @@ const styles = {
     border: 'none',
     cursor: 'pointer',
     transition: 'all 0.2s'
+  },
+  applySection: {
+    marginTop: '2rem',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '1rem'
+  },
+  message: {
+    color: '#ef4444', // Default to error color
+    fontSize: '0.9rem',
+    fontWeight: '600'
+  },
+  applyButton: {
+    display: 'inline-block',
+    padding: '0.75rem 2rem',
+    backgroundColor: '#10b981', // Green color for apply button
+    color: 'white',
+    borderRadius: '10px',
+    fontSize: '1rem',
+    fontWeight: '600',
+    border: 'none',
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+    opacity: 1
+  },
+  applyButtonDisabled: {
+    opacity: 0.6,
+    cursor: 'not-allowed'
   }
 };

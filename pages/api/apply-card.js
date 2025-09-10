@@ -1,4 +1,3 @@
-
 import { supabase } from '../../lib/supabaseClient';
 
 export default async function handler(req, res) {
@@ -7,10 +6,26 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    if (!user) {
-      return res.status(401).json({ error: 'Unauthorized' });
+    // Check if user is authenticated
+    let user;
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: 'Missing or invalid authorization header' });
+      }
+
+      const token = authHeader.replace('Bearer ', '');
+      const { data: { user: authUser }, error: authError } = await supabase.auth.getUser(token);
+
+      if (authError || !authUser) {
+        console.error('Auth error:', authError);
+        return res.status(401).json({ error: 'Invalid or expired token' });
+      }
+
+      user = authUser;
+    } catch (error) {
+      console.error('Authentication error:', error);
+      return res.status(401).json({ error: 'Authentication failed' });
     }
 
     const { accountId, cardholderName } = req.body;
