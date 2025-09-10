@@ -30,7 +30,7 @@ export default function EnrollPage() {
       clearTimeout(window.enrollmentTimeout);
       window.enrollmentTimeout = null;
     }
-    
+
     setLoading(true);
     setError('');
     console.log('Verifying magic link user:', user.email, 'for application:', applicationId);
@@ -70,138 +70,58 @@ export default function EnrollPage() {
     }
   };
 
-  // Function to handle traditional token-based enrollment verification
+  // Function to verify traditional enrollment token
   const verifyToken = async (token, applicationId) => {
-    setAuthCreationLoading(true); // Use authCreationLoading for initial setup phase
-    setMessage('');
+    setLoading(true);
     setError('');
 
     try {
-      // 1. Verify enrollment token
-      const { data: enrollmentData, error: enrollmentError } = await supabase
-        .from('enrollments')
-        .select('*')
-        .eq('token', token)
-        .eq('is_used', false)
-        .single();
-
-      if (enrollmentError || !enrollmentData) {
-        setMessage('Invalid or expired enrollment link. Please request a new enrollment email.');
-        setStep('error');
-        setAuthCreationLoading(false);
-        return;
-      }
-
-      // 2. Load application data
-      const { data: appData, error: appError } = await supabase
-        .from('applications')
-        .select('*')
-        .eq('id', applicationId)
-        .single();
-
-      if (appError || !appData) {
-        setMessage('Application not found. Please contact support.');
-        setStep('error');
-        setAuthCreationLoading(false);
-        return;
-      }
-
-      // 3. Verify email matches
-      if (enrollmentData.email !== appData.email) {
-        setMessage('Email verification failed. Invalid enrollment link.');
-        setStep('error');
-        setAuthCreationLoading(false);
-        return;
-      }
-
-      setApplicationInfo(appData); // Set application data for display
-
-      // 4. Load associated accounts for this application only
-      const { data: accountsData, error: accountsError } = await supabase
-        .from('accounts')
-        .select('account_number, account_type')
-        .eq('application_id', applicationId);
-
-      if (!accountsError && accountsData && accountsData.length > 0) {
-        setAccounts(accountsData);
-      } else {
-        setMessage('No accounts found for this application. Please contact support.');
-        setStep('error');
-        setAuthCreationLoading(false);
-        return;
-      }
-
-      // 5. Create auth user immediately (this part might be replaced by magic link flow)
-      const authResponse = await fetch('/api/create-auth-user', {
+      const response = await fetch('/api/debug-enrollment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token, application_id: applicationId })
       });
 
-      const authResult = await authResponse.json();
+      const result = await response.json();
+      console.log('Token verification result:', result);
 
-      if (!authResponse.ok) {
-        setMessage(`Error: ${authResult.error}`);
+      if (response.ok && result.application) {
+        setApplicationInfo(result.application);
+        setAccounts(result.account_numbers || []);
+        setFormData(prev => ({ ...prev, email: result.application.email }));
+        setStep('password');
+      } else {
+        console.error('Token verification failed:', result.error);
+        setError(result.error || 'Invalid or expired enrollment token. Please request a new enrollment link.');
         setStep('error');
-        setAuthCreationLoading(false);
-        return;
       }
-
-      setFormData(prev => ({ ...prev, email: appData.email })); // Pre-fill email
-      setStep('password'); // Proceed to password setup
-
     } catch (error) {
-      console.error('Error validating enrollment:', error);
-      setMessage('Error loading enrollment data. Please try again.');
+      console.error('Token verification error:', error);
+      setError('Error verifying enrollment token. Please check your internet connection and try again.');
       setStep('error');
     } finally {
-      setAuthCreationLoading(false);
+      setLoading(false);
     }
   };
 
   // Effect to handle authentication state changes and initial setup
   useEffect(() => {
-    // Handle magic link authentication
-    const handleAuthStateChange = async (event, session) => {
-      console.log('Auth state change:', event, session?.user?.email || 'No user');
-      
-      if (event === 'SIGNED_IN' && session?.user) {
-        console.log('User signed in via magic link:', session.user.email);
-
-        // Get application_id from URL or user metadata
-        const { application_id } = router.query;
-        const userAppId = session.user.user_metadata?.application_id || application_id;
-
-        console.log('Application ID from query:', application_id);
-        console.log('Application ID from user metadata:', session.user.user_metadata?.application_id);
-        console.log('Using application ID:', userAppId);
-
-        if (userAppId) {
-          setApplicationId(userAppId);
-          await verifyMagicLinkUser(session.user, userAppId);
-        } else {
-          console.error('No application ID found');
-          setError('Application ID not found. Please use the link from your email.');
-          setStep('error');
-        }
-      }
-    };
-
-    // Subscribe to auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(handleAuthStateChange);
-
-    // Check for existing session
-    const checkSession = async () => {
+    const initializeEnrollment = async () => {
       setAuthCreationLoading(true);
-      
+      setLoading(true);
+
       try {
+        // First, check URL parameters
+        const { token, application_id, type } = router.query;
+        console.log('URL params:', { token: !!token, application_id: !!application_id, type });
+
+        // Check if user is already authenticated (magic link flow)
         const { data: { session } } = await supabase.auth.getSession();
-        console.log('Current session:', session?.user?.email || 'No session');
-        console.log('Router query:', router.query);
-        
-        if (session?.user) {
-          console.log('Found existing session for user:', session.user.email);
-          const { application_id } = router.query;
+        console.log('Current session:', !!session, 'User:', session?.user?.email);
+
+        if (session?.user && (type === 'magiclink' || !token)) {
+          // User is authenticated via magic link
+          console.log('User authenticated via magic link');
           const userAppId = session.user.user_metadata?.application_id || application_id;
 
           if (userAppId) {
@@ -213,60 +133,33 @@ export default function EnrollPage() {
             setError('Application ID not found. Please use the link from your email.');
             setStep('error');
           }
+        } else if (token && application_id) {
+          // Traditional token-based enrollment
+          console.log('Using token-based enrollment');
+          setEnrollmentToken(token);
+          setApplicationId(application_id);
+          await verifyToken(token, application_id);
         } else {
-          // If no active session, check for traditional token-based enrollment
-          const { token, application_id } = router.query;
-          console.log('No session - checking for token:', !!token, 'app_id:', !!application_id);
-          
-          if (token && application_id && !router.query.type) {
-            console.log('No session found, trying token-based enrollment');
-            setEnrollmentToken(token);
-            setApplicationId(application_id);
-            await verifyToken(token, application_id);
-          } else if (!token && !application_id) {
-            // If no token and no session, it's likely an invalid entry point
-            console.log('No token or application_id - invalid link');
-            setMessage('Invalid enrollment link or session expired. Please request a new enrollment email.');
-            setStep('error');
-          } else {
-            // Wait for magic link authentication with shorter timeout
-            console.log('Waiting for magic link authentication...');
-            setMessage('Please wait while we process your enrollment link...');
-            setStep('loading');
-            
-            // Add timeout to prevent infinite loading - use a ref to track current step
-            const timeoutId = setTimeout(() => {
-              console.log('Timeout waiting for authentication, current step:', step);
-              setError('Authentication timeout. Please try clicking the enrollment link again.');
-              setStep('error');
-            }, 10000); // 10 second timeout
-            
-            // Store timeout ID to clear it if authentication succeeds
-            window.enrollmentTimeout = timeoutId;
-          }
+          // Invalid or missing parameters
+          console.log('Invalid enrollment link - missing required parameters');
+          setError('Invalid enrollment link. Please check your email for the correct link or request a new one.');
+          setStep('error');
         }
       } catch (error) {
-        console.error('Error checking session:', error);
+        console.error('Error initializing enrollment:', error);
         setError('Error loading enrollment. Please try again.');
         setStep('error');
       } finally {
         setAuthCreationLoading(false);
+        setLoading(false);
       }
     };
 
-    if (router.isReady) {
-      checkSession();
+    // Only initialize if we have router query params
+    if (Object.keys(router.query).length > 0) {
+      initializeEnrollment();
     }
-
-    return () => {
-      subscription?.unsubscribe();
-      // Clear timeout on cleanup
-      if (window.enrollmentTimeout) {
-        clearTimeout(window.enrollmentTimeout);
-        window.enrollmentTimeout = null;
-      }
-    };
-  }, [router.query, router.isReady]);
+  }, [router.query]);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -324,10 +217,10 @@ export default function EnrollPage() {
     try {
       // Get current session to determine flow
       const { data: { session } } = await supabase.auth.getSession();
-      
+
       // Decide which API endpoint to call and prepare data
       let endpoint, bodyData;
-      
+
       if (session?.user && step === 'password') {
         // Magic link flow - user is authenticated
         endpoint = '/api/complete-enrollment-magic-link';

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useRouter } from 'next/router';
+import Link from 'next/link'; // Import Link
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
@@ -49,399 +50,439 @@ export default function Dashboard() {
   const styles = {
     container: {
       minHeight: '100vh',
-      backgroundColor: '#f7f9fc',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+      backgroundColor: '#f8fafc',
     },
-    header: {
-      background: 'linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%)',
+    headerSection: {
+      background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #60a5fa 100%)',
       color: 'white',
-      padding: '1rem 2rem',
-      boxShadow: '0 4px 20px rgba(30, 58, 138, 0.3)',
-      borderBottom: '1px solid rgba(255,255,255,0.1)'
+      padding: '30px 0',
     },
     headerContent: {
-      maxWidth: '1400px',
+      maxWidth: '1200px',
       margin: '0 auto',
+      padding: '0 20px',
       display: 'flex',
       justifyContent: 'space-between',
-      alignItems: 'center'
-    },
-    logo: {
-      fontSize: '1.5rem',
-      fontWeight: '700',
-      display: 'flex',
       alignItems: 'center',
-      gap: '0.5rem'
-    },
-    userInfo: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '1rem'
-    },
-    logoutButton: {
-      background: 'rgba(255,255,255,0.15)',
-      border: '1px solid rgba(255,255,255,0.2)',
-      color: 'white',
-      padding: '0.5rem 1rem',
-      borderRadius: '8px',
-      cursor: 'pointer',
-      transition: 'all 0.2s',
-      fontSize: '0.9rem',
-      fontWeight: '500'
-    },
-    dropdown: {
-      position: 'relative'
-    },
-    dropdownButton: {
-      background: 'rgba(255,255,255,0.15)',
-      border: '1px solid rgba(255,255,255,0.2)',
-      color: 'white',
-      padding: '0.5rem 1rem',
-      borderRadius: '8px',
-      cursor: 'pointer',
-      transition: 'all 0.2s',
-      fontSize: '0.9rem',
-      fontWeight: '500'
-    },
-    dropdownContent: {
-      position: 'absolute',
-      top: '100%',
-      right: 0,
-      backgroundColor: 'white',
-      borderRadius: '12px',
-      boxShadow: '0 10px 40px rgba(0,0,0,0.15)',
-      border: '1px solid #e2e8f0',
-      minWidth: '200px',
-      zIndex: 1000,
-      marginTop: '8px'
-    },
-    dropdownItem: {
-      display: 'block',
-      width: '100%',
-      padding: '12px 16px',
-      background: 'none',
-      border: 'none',
-      textAlign: 'left',
-      cursor: 'pointer',
-      fontSize: '14px',
-      color: '#374151',
-      transition: 'background-color 0.2s'
-    },
-    dropdownDivider: {
-      margin: '8px 0',
-      border: 'none',
-      borderTop: '1px solid #e2e8f0'
-    },
-    main: {
-      maxWidth: '1400px',
-      margin: '0 auto',
-      padding: '2rem'
+      flexWrap: 'wrap',
+      gap: '20px',
     },
     welcomeSection: {
-      marginBottom: '2rem'
+      flex: '1',
+      minWidth: '300px',
     },
     welcomeTitle: {
-      fontSize: '2.2rem',
+      fontSize: '28px',
       fontWeight: '700',
-      color: '#1e293b',
-      marginBottom: '0.5rem'
+      margin: '0 0 8px 0',
+      letterSpacing: '-0.025em',
     },
-    balanceCard: {
-      background: 'linear-gradient(135deg, #064e3b 0%, #047857 50%, #10b981 100%)',
-      color: 'white',
-      padding: '2.5rem',
-      borderRadius: '20px',
-      marginBottom: '2rem',
-      boxShadow: '0 10px 40px rgba(16, 185, 129, 0.25)',
-      position: 'relative',
-      overflow: 'hidden'
-    },
-    balanceCardOverlay: {
-      position: 'absolute',
-      top: 0,
-      right: 0,
-      width: '200px',
-      height: '200px',
-      background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)',
-      borderRadius: '50%',
-      transform: 'translate(50%, -50%)'
-    },
-    totalBalance: {
-      fontSize: '1rem',
+    welcomeSubtitle: {
+      fontSize: '16px',
       opacity: 0.9,
-      marginBottom: '0.5rem',
-      fontWeight: '500'
+      margin: 0,
     },
-    balanceAmount: {
-      fontSize: '3rem',
-      fontWeight: '800',
-      marginBottom: '1.5rem'
-    },
-    balanceActions: {
+    headerStats: {
       display: 'flex',
-      gap: '1rem',
-      flexWrap: 'wrap'
+      gap: '20px',
+      flexWrap: 'wrap',
     },
-    actionButton: {
-      background: 'rgba(255,255,255,0.15)',
-      border: '1px solid rgba(255,255,255,0.2)',
-      color: 'white',
-      padding: '0.75rem 1.5rem',
-      borderRadius: '12px',
-      cursor: 'pointer',
-      fontSize: '0.9rem',
-      fontWeight: '600',
-      transition: 'all 0.2s',
+    statCard: {
       display: 'flex',
       alignItems: 'center',
-      gap: '0.5rem'
+      gap: '12px',
+      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+      backdropFilter: 'blur(10px)',
+      padding: '16px 20px',
+      borderRadius: '12px',
+      border: '1px solid rgba(255, 255, 255, 0.2)',
+      minWidth: '140px',
     },
-    grid: {
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
-      gap: '2rem'
+    statIcon: {
+      fontSize: '24px',
     },
-    section: {
+    statInfo: {
+      display: 'flex',
+      flexDirection: 'column',
+    },
+    statLabel: {
+      fontSize: '12px',
+      opacity: 0.8,
+      marginBottom: '4px',
+    },
+    statValue: {
+      fontSize: '16px',
+      fontWeight: '600',
+    },
+    dashboardContainer: {
+      maxWidth: '1200px',
+      margin: '0 auto',
+      padding: '30px 20px',
+      gap: '30px',
+      display: 'flex',
+      flexDirection: 'column',
+    },
+    quickActionsContainer: {
       backgroundColor: 'white',
       borderRadius: '16px',
-      padding: '2rem',
-      boxShadow: '0 4px 30px rgba(0,0,0,0.08)',
-      border: '1px solid #e2e8f0'
+      padding: '28px',
+      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+      border: '1px solid #e5e7eb',
     },
     sectionTitle: {
-      fontSize: '1.5rem',
+      fontSize: '20px',
       fontWeight: '700',
-      color: '#1e293b',
-      marginBottom: '1.5rem',
+      color: '#111827',
+      marginBottom: '20px',
       display: 'flex',
       alignItems: 'center',
-      gap: '0.75rem'
+      gap: '8px',
     },
-    accountSelector: {
-      marginBottom: '1.5rem'
+    sectionIcon: {
+      fontSize: '20px',
     },
-    select: {
-      width: '100%',
-      padding: '0.75rem 1rem',
-      border: '2px solid #e2e8f0',
+    quickActions: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+      gap: '16px',
+    },
+    quickActionLink: {
+      textDecoration: 'none',
+      color: 'inherit',
+    },
+    quickAction: {
+      display: 'flex',
+      alignItems: 'center',
+      padding: '20px',
+      backgroundColor: '#ffffff',
       borderRadius: '12px',
-      fontSize: '1rem',
+      border: '2px solid #f3f4f6',
+      cursor: 'pointer',
+      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+      gap: '16px',
+      position: 'relative',
+      overflow: 'hidden',
+    },
+    quickActionIconContainer: {
+      width: '48px',
+      height: '48px',
+      borderRadius: '12px',
+      backgroundColor: '#f0f9ff',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      flexShrink: 0,
+    },
+    quickActionIcon: {
+      fontSize: '24px',
+    },
+    quickActionContent: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '4px',
+    },
+    quickActionTitle: {
+      fontSize: '16px',
+      fontWeight: '600',
+      color: '#111827',
+    },
+    quickActionDesc: {
+      fontSize: '14px',
+      color: '#6b7280',
+    },
+    accountsSection: {
       backgroundColor: 'white',
-      color: '#1e293b',
-      fontWeight: '500',
-      cursor: 'pointer',
-      transition: 'all 0.2s'
-    },
-    accountCard: {
-      background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
-      border: '2px solid #e2e8f0',
       borderRadius: '16px',
-      padding: '1.5rem',
-      marginBottom: '1rem',
-      cursor: 'pointer',
-      transition: 'all 0.3s'
+      padding: '28px',
+      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+      border: '1px solid #e5e7eb',
     },
-    accountCardSelected: {
-      borderColor: '#3b82f6',
-      background: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)',
-      transform: 'translateY(-2px)',
-      boxShadow: '0 8px 30px rgba(59, 130, 246, 0.15)'
+    accountsGrid: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+      gap: '20px',
+    },
+    enhancedAccountCard: {
+      backgroundColor: '#ffffff',
+      border: '2px solid #f3f4f6',
+      borderRadius: '16px',
+      padding: '24px',
+      transition: 'all 0.3s ease',
+      cursor: 'pointer',
+      position: 'relative',
+      overflow: 'hidden',
     },
     accountHeader: {
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
-      marginBottom: '0.5rem'
+      marginBottom: '20px',
     },
-    accountName: {
-      fontWeight: '700',
-      color: '#1e293b',
-      fontSize: '1.1rem'
+    accountType: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '8px',
     },
-    accountNumber: {
-      fontSize: '0.85rem',
-      color: '#64748b',
-      fontFamily: 'monospace'
+    accountTypeIcon: {
+      fontSize: '20px',
+    },
+    accountTypeName: {
+      fontSize: '16px',
+      fontWeight: '600',
+      color: '#111827',
+    },
+    accountMenu: {
+      fontSize: '16px',
+      color: '#6b7280',
+      cursor: 'pointer',
+      padding: '4px',
     },
     accountBalance: {
-      fontSize: '1.3rem',
-      fontWeight: '700',
-      color: '#047857'
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '4px',
+      marginBottom: '16px',
     },
-    transactionItem: {
+    balanceLabel: {
+      fontSize: '14px',
+      color: '#6b7280',
+    },
+    balanceAmount: {
+      fontSize: '28px',
+      fontWeight: '700',
+      color: '#111827',
+    },
+    accountNumber: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '4px',
+      marginBottom: '20px',
+    },
+    accountNumberLabel: {
+      fontSize: '12px',
+      color: '#6b7280',
+      textTransform: 'uppercase',
+      letterSpacing: '0.05em',
+    },
+    accountNumberValue: {
+      fontSize: '14px',
+      fontWeight: '500',
+      color: '#374151',
+      fontFamily: 'monospace',
+    },
+    accountActions: {
+      display: 'flex',
+      gap: '12px',
+    },
+    accountActionBtn: {
+      flex: 1,
+      padding: '10px 16px',
+      backgroundColor: '#1e40af',
+      color: 'white',
+      border: 'none',
+      borderRadius: '8px',
+      fontSize: '14px',
+      fontWeight: '500',
+      cursor: 'pointer',
+      transition: 'background-color 0.2s',
+    },
+    accountActionBtnSecondary: {
+      flex: 1,
+      padding: '10px 16px',
+      backgroundColor: 'transparent',
+      color: '#1e40af',
+      border: '1px solid #1e40af',
+      borderRadius: '8px',
+      fontSize: '14px',
+      fontWeight: '500',
+      cursor: 'pointer',
+      transition: 'all 0.2s',
+    },
+    transactionsSection: {
+      backgroundColor: 'white',
+      borderRadius: '16px',
+      padding: '28px',
+      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+      border: '1px solid #e5e7eb',
+    },
+    transactionsHeader: {
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
-      padding: '1rem 0',
-      borderBottom: '1px solid #f1f5f9'
+      marginBottom: '20px',
+    },
+    viewAllLink: {
+      color: '#1e40af',
+      textDecoration: 'none',
+      fontSize: '14px',
+      fontWeight: '500',
+    },
+    transactionsList: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '12px',
+    },
+    enhancedTransactionItem: {
+      display: 'flex',
+      alignItems: 'center',
+      padding: '16px',
+      backgroundColor: '#f9fafb',
+      borderRadius: '12px',
+      border: '1px solid #e5e7eb',
+      gap: '16px',
     },
     transactionIcon: {
-      width: '48px',
-      height: '48px',
-      borderRadius: '12px',
+      width: '40px',
+      height: '40px',
+      borderRadius: '10px',
+      backgroundColor: '#f0f9ff',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      fontSize: '1.2rem',
-      marginRight: '1rem',
-      fontWeight: '600'
+      fontSize: '18px',
+      flexShrink: 0,
     },
     transactionDetails: {
-      flex: 1
+      flex: 1,
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '4px',
     },
     transactionDescription: {
-      fontWeight: '600',
-      color: '#1e293b',
-      marginBottom: '0.25rem'
+      fontSize: '16px',
+      fontWeight: '500',
+      color: '#111827',
     },
     transactionDate: {
-      fontSize: '0.85rem',
-      color: '#64748b'
+      fontSize: '14px',
+      color: '#6b7280',
     },
     transactionAmount: {
-      fontWeight: '700',
-      fontSize: '1.1rem'
-    },
-    modal: {
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: 'rgba(0,0,0,0.6)',
       display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      zIndex: 1000,
-      padding: '1rem'
+      flexDirection: 'column',
+      alignItems: 'flex-end',
+      gap: '4px',
     },
-    modalContent: {
-      backgroundColor: 'white',
-      borderRadius: '20px',
-      padding: '2rem',
-      maxWidth: '500px',
-      width: '100%',
-      maxHeight: '90vh',
-      overflow: 'auto',
-      boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
-    },
-    modalTitle: {
-      fontSize: '1.8rem',
-      fontWeight: '700',
-      marginBottom: '1.5rem',
-      color: '#1e293b'
-    },
-    formGroup: {
-      marginBottom: '1.5rem'
-    },
-    label: {
-      display: 'block',
-      marginBottom: '0.5rem',
+    transactionAmountValue: {
+      fontSize: '16px',
       fontWeight: '600',
-      color: '#374151'
     },
-    input: {
-      width: '100%',
-      padding: '0.875rem 1rem',
-      border: '2px solid #e2e8f0',
+    transactionStatus: {
+      fontSize: '12px',
+      color: '#10b981',
+      backgroundColor: '#d1fae5',
+      padding: '2px 8px',
       borderRadius: '12px',
-      fontSize: '1rem',
-      boxSizing: 'border-box',
-      transition: 'all 0.2s'
     },
-    modalActions: {
-      display: 'flex',
-      gap: '1rem',
-      marginTop: '2rem'
-    },
-    primaryButton: {
-      backgroundColor: '#1e40af',
-      color: 'white',
-      border: 'none',
-      padding: '1rem 2rem',
-      borderRadius: '12px',
-      cursor: 'pointer',
-      fontWeight: '600',
-      flex: 1,
-      fontSize: '1rem',
-      transition: 'all 0.2s'
-    },
-    secondaryButton: {
-      backgroundColor: '#f1f5f9',
-      color: '#64748b',
-      border: '2px solid #e2e8f0',
-      padding: '1rem 2rem',
-      borderRadius: '12px',
-      cursor: 'pointer',
-      fontWeight: '600',
-      flex: 1,
-      fontSize: '1rem',
-      transition: 'all 0.2s'
-    },
-    loadingContainer: {
+    noTransactionsCard: {
+      textAlign: 'center',
+      padding: '60px 40px',
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
-      justifyContent: 'center',
-      minHeight: '100vh',
-      backgroundColor: '#f7f9fc'
+      gap: '12px',
     },
-    spinner: {
-      width: '48px',
-      height: '48px',
-      border: '4px solid #e2e8f0',
-      borderTop: '4px solid #1e40af',
-      borderRadius: '50%',
-      animation: 'spin 1s linear infinite',
-      marginBottom: '1rem'
+    noTransactionsIcon: {
+      fontSize: '48px',
+      opacity: 0.5,
     },
-    errorContainer: {
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      minHeight: '100vh',
-      backgroundColor: '#f7f9fc',
-      textAlign: 'center',
-      padding: '2rem'
+    noTransactions: {
+      color: '#6b7280',
+      fontSize: '18px',
+      fontWeight: '500',
+      margin: 0,
     },
-    retryButton: {
-      backgroundColor: '#1e40af',
-      color: 'white',
-      border: 'none',
-      padding: '1rem 2rem',
-      borderRadius: '12px',
-      cursor: 'pointer',
-      fontSize: '1rem',
-      marginTop: '1rem',
-      fontWeight: '600'
+    noTransactionsSubtext: {
+      color: '#9ca3af',
+      fontSize: '14px',
+      margin: 0,
     },
-    quickActions: {
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
-      gap: '1rem',
-      marginTop: '1.5rem'
-    },
-    quickActionCard: {
-      textAlign: 'center',
-      padding: '1.5rem 1rem',
-      border: '2px solid #e2e8f0',
-      borderRadius: '16px',
-      cursor: 'pointer',
-      transition: 'all 0.3s',
-      backgroundColor: 'white'
-    },
-    quickActionIcon: {
-      fontSize: '2.5rem',
-      marginBottom: '0.75rem',
-      display: 'block'
-    },
-    quickActionText: {
-      fontSize: '0.9rem',
-      fontWeight: '600',
-      color: '#1e293b'
-    }
+    // Original styles that are no longer needed or replaced
+    // container: {
+    //   minHeight: '100vh',
+    //   backgroundColor: '#f8fafc',
+    // },
+    // dashboardContainer: {
+    //   maxWidth: '1200px',
+    //   margin: '0 auto',
+    //   padding: '20px',
+    //   gap: '30px',
+    //   display: 'flex',
+    //   flexDirection: 'column',
+    // },
+    // quickActionsContainer: {
+    //   backgroundColor: 'white',
+    //   borderRadius: '12px',
+    //   padding: '24px',
+    //   boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+    // },
+    // sectionTitle: {
+    //   fontSize: '18px',
+    //   fontWeight: '600',
+    //   color: '#1f2937',
+    //   marginBottom: '16px',
+    // },
+    // quickActions: {
+    //   display: 'grid',
+    //   gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+    //   gap: '16px',
+    // },
+    // quickActionLink: {
+    //   textDecoration: 'none',
+    //   color: 'inherit',
+    // },
+    // quickAction: {
+    //   display: 'flex',
+    //   alignItems: 'center',
+    //   padding: '16px',
+    //   backgroundColor: '#f9fafb',
+    //   borderRadius: '8px',
+    //   border: '1px solid #e5e7eb',
+    //   cursor: 'pointer',
+    //   transition: 'all 0.2s',
+    //   gap: '12px',
+    // },
+    // quickActionIcon: {
+    //   fontSize: '24px',
+    // },
+    // accountsSection: {
+    //   backgroundColor: 'white',
+    //   borderRadius: '12px',
+    //   padding: '24px',
+    //   boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+    // },
+    // accountsGrid: {
+    //   display: 'grid',
+    //   gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+    //   gap: '16px',
+    // },
+    // transactionsSection: {
+    //   backgroundColor: 'white',
+    //   borderRadius: '12px',
+    //   padding: '24px',
+    //   boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+    // },
+    // transactionsList: {
+    //   display: 'flex',
+    //   flexDirection: 'column',
+    //   gap: '12px',
+    // },
+    // noTransactions: {
+    //   textAlign: 'center',
+    //   color: '#6b7280',
+    //   padding: '40px',
+    //   fontSize: '16px',
+    // },
   };
+
+  // Mock data for recentTransactions for demonstration
+  const recentTransactions = [
+    { id: 1, type: 'deposit', amount: 1500.50, description: 'Salary Deposit', created_at: '2023-10-26T10:00:00Z' },
+    { id: 2, type: 'withdrawal', amount: -250.75, description: 'ATM Withdrawal', created_at: '2023-10-25T15:30:00Z' },
+    { id: 3, type: 'transfer', amount: -100.00, description: 'Transfer to John Doe', created_at: '2023-10-24T09:15:00Z' },
+    { id: 4, type: 'payment', amount: -75.20, description: 'Electricity Bill', created_at: '2023-10-23T11:45:00Z' },
+  ];
+
 
   useEffect(() => {
     checkUser();
