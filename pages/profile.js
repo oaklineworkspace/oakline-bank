@@ -42,14 +42,28 @@ export default function Profile() {
 
   const fetchUserProfile = async (userId) => {
     try {
-      const { data, error } = await supabase
+      // Try to get profile from profiles table first
+      const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .single();
 
-      if (error && error.code !== 'PGRST116') throw error;
-      setUserProfile(data);
+      if (profileData) {
+        setUserProfile(profileData);
+      } else {
+        // If no profile found, try to get from auth metadata
+        const { data: { user: authUser } } = await supabase.auth.getUser();
+        if (authUser?.user_metadata) {
+          setUserProfile({
+            id: authUser.id,
+            email: authUser.email,
+            full_name: authUser.user_metadata.full_name,
+            created_at: authUser.created_at,
+            ...authUser.user_metadata
+          });
+        }
+      }
     } catch (error) {
       console.error('Error fetching profile:', error);
     }
@@ -57,40 +71,65 @@ export default function Profile() {
 
   const fetchUserAccounts = async (userId) => {
     try {
-      let { data, error } = await supabase
+      // Try multiple approaches to find user accounts
+      let accountsData = [];
+      
+      // Method 1: Direct user_id match
+      const { data: directAccounts, error: directError } = await supabase
         .from('accounts')
         .select('*')
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
 
-      if (!data || data.length === 0) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('application_id')
-          .eq('id', userId)
-          .single();
-
-        if (profile?.application_id) {
-          const { data: accountsData, error: accountsError } = await supabase
+      if (directAccounts && directAccounts.length > 0) {
+        accountsData = directAccounts;
+      } else {
+        // Method 2: Try by email
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user?.email) {
+          const { data: emailAccounts, error: emailError } = await supabase
             .from('accounts')
             .select('*')
-            .eq('application_id', profile.application_id)
+            .or(`user_email.eq.${user.email},email.eq.${user.email}`)
             .order('created_at', { ascending: false });
 
-          data = accountsData;
-          error = accountsError;
+          if (emailAccounts && emailAccounts.length > 0) {
+            accountsData = emailAccounts;
+          } else {
+            // Method 3: Try through application_id
+            const { data: applications, error: appError } = await supabase
+              .from('applications')
+              .select('id')
+              .eq('email', user.email);
+
+            if (applications && applications.length > 0) {
+              const { data: appAccounts, error: appAccountsError } = await supabase
+                .from('accounts')
+                .select('*')
+                .in('application_id', applications.map(app => app.id))
+                .order('created_at', { ascending: false });
+
+              if (appAccounts) {
+                accountsData = appAccounts;
+              }
+            }
+          }
         }
       }
 
-      if (error) throw error;
-      setAccounts(data || []);
+      setAccounts(accountsData || []);
     } catch (error) {
       console.error('Error fetching accounts:', error);
+      setAccounts([]);
     }
   };
 
   const fetchApplicationData = async (userId) => {
     try {
+      // Try to get application data through multiple methods
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      // Method 1: Through profile table
       const { data: profile } = await supabase
         .from('profiles')
         .select('application_id')
@@ -104,10 +143,44 @@ export default function Profile() {
           .eq('id', profile.application_id)
           .single();
 
-        if (error && error.code !== 'PGRST116') throw error;
-        setApplication(appData);
-        setEditData(appData || {});
+        if (appData) {
+          setApplication(appData);
+          setEditData(appData);
+          return;
+        }
       }
+
+      // Method 2: Direct email match
+      if (user?.email) {
+        const { data: appData, error } = await supabase
+          .from('applications')
+          .select('*')
+          .eq('email', user.email)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single();
+
+        if (appData) {
+          setApplication(appData);
+          setEditData(appData);
+          return;
+        }
+      }
+
+      // Method 3: Try user_id match if available
+      const { data: appDataById, error: errorById } = await supabase
+        .from('applications')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (appDataById) {
+        setApplication(appDataById);
+        setEditData(appDataById);
+      }
+
     } catch (error) {
       console.error('Error fetching application:', error);
     }

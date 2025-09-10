@@ -224,6 +224,12 @@ export default function AdminDashboard() {
         </button>
         <button
           style={styles.actionButton}
+          onClick={() => router.push('/admin/admin-users-management')}
+        >
+          👨‍💼 Admin Users
+        </button>
+        <button
+          style={styles.actionButton}
           onClick={() => router.push('/admin/manual-transactions')}
         >
           💰 Manual Transactions
@@ -313,6 +319,9 @@ export default function AdminDashboard() {
           <div style={styles.buttonGrid}>
             <Link href="/admin/admin-users" style={styles.adminButton}>
               👤 Manage Users
+            </Link>
+            <Link href="/admin/admin-users-management" style={styles.adminButton}>
+              👨‍💼 Admin Users
             </Link>
             <Link href="/admin/create-user" style={styles.adminButton}>
               ➕ Create User
