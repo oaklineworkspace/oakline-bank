@@ -27,20 +27,15 @@
       "static/chunks/main.js",
       "static/chunks/pages/_error.js"
     ],
-    "/account-details": [
+    "/admin/admin-dashboard": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/account-details.js"
+      "static/chunks/pages/admin/admin-dashboard.js"
     ],
-    "/dashboard": [
+    "/crypto": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/dashboard.js"
-    ],
-    "/deposit-real": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/deposit-real.js"
+      "static/chunks/pages/crypto.js"
     ]
   },
   "ampFirstPages": []

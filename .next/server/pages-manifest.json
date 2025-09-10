@@ -3,7 +3,6 @@
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
   "/": "pages/index.js",
-  "/account-details": "pages/account-details.js",
-  "/dashboard": "pages/dashboard.js",
-  "/deposit-real": "pages/deposit-real.js"
+  "/admin/admin-dashboard": "pages/admin/admin-dashboard.js",
+  "/crypto": "pages/crypto.js"
 }
