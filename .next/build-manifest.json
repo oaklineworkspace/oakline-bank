@@ -27,15 +27,10 @@
       "static/chunks/main.js",
       "static/chunks/pages/_error.js"
     ],
-    "/admin/admin-dashboard": [
+    "/dashboard": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/admin/admin-dashboard.js"
-    ],
-    "/admin/resend-enrollment": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/admin/resend-enrollment.js"
+      "static/chunks/pages/dashboard.js"
     ],
     "/main-menu": [
       "static/chunks/webpack.js",
