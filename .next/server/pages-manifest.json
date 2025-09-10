@@ -3,7 +3,5 @@
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
   "/dashboard": "pages/dashboard.js",
-  "/cards": "pages/cards.js",
-  "/main-menu": "pages/main-menu.js",
-  "/": "pages/index.js"
+  "/account-details": "pages/account-details.js"
 }
