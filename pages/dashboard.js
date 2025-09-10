@@ -1,7 +1,8 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useRouter } from 'next/router';
-import Link from 'next/link'; // Import Link
+import Link from 'next/link';
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
@@ -10,842 +11,530 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedAccount, setSelectedAccount] = useState(null);
-  const [userProfile, setUserProfile] = useState(null); // Added to store user profile
-  const [showDropdown, setShowDropdown] = useState(false);
+  const [userProfile, setUserProfile] = useState(null);
+  const [showUserMenu, setShowUserMenu] = useState(false);
   const [showTransferModal, setShowTransferModal] = useState(false);
-  const [showWithdrawalModal, setShowWithdrawalModal] = useState(false);
-  const [showPayModal, setShowPayModal] = useState(false);
-  const [transferData, setTransferData] = useState({
-    fromAccount: '',
-    transferType: 'between_accounts',
-    toAccount: '',
-    recipientName: '',
-    recipientEmail: '',
-    bankName: '',
-    routingNumber: '',
-    swiftCode: '',
-    amount: '',
-    description: '',
-    country: ''
+  const [creditScore, setCreditScore] = useState(742);
+  const [marketData, setMarketData] = useState({
+    sp500: { value: 4456.23, change: +12.45, changePercent: +0.28 },
+    nasdaq: { value: 13845.67, change: -23.12, changePercent: -0.17 },
+    dow: { value: 34567.89, change: +45.67, changePercent: +0.13 }
   });
-  const [withdrawalData, setWithdrawalData] = useState({
-    fromAccount: '',
-    withdrawalMethod: 'atm',
-    amount: '',
-    recipientAccount: '',
-    recipientName: '',
-    routingNumber: '',
-    bankName: '',
-    description: ''
-  });
-  const [paymentData, setPaymentData] = useState({
-    payee: '',
-    amount: '',
-    dueDate: '',
-    description: ''
-  });
+  
   const router = useRouter();
 
-  // Enhanced mature banking color scheme
+  // Professional Banking Color Scheme
+  const colors = {
+    primary: '#1a365d',      // Deep navy blue
+    secondary: '#2c5aa0',    // Royal blue
+    accent: '#0066cc',       // Bright blue
+    success: '#059669',      // Emerald green
+    warning: '#d97706',      // Amber
+    danger: '#dc2626',       // Red
+    light: '#f8fafc',        // Very light blue-gray
+    white: '#ffffff',
+    gray100: '#f7fafc',
+    gray200: '#edf2f7',
+    gray300: '#e2e8f0',
+    gray400: '#cbd5e0',
+    gray500: '#a0aec0',
+    gray600: '#718096',
+    gray700: '#4a5568',
+    gray800: '#2d3748',
+    gray900: '#1a202c',
+  };
+
   const styles = {
     container: {
       minHeight: '100vh',
-      backgroundColor: '#f8fafc',
+      backgroundColor: colors.light,
+      fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
     },
-    headerSection: {
-      background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #60a5fa 100%)',
-      color: 'white',
-      padding: '30px 0',
+    
+    // Header Styles
+    header: {
+      background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%)`,
+      color: colors.white,
+      padding: '0',
+      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+      position: 'sticky',
+      top: 0,
+      zIndex: 1000,
     },
+    
     headerContent: {
-      maxWidth: '1200px',
+      maxWidth: '1400px',
       margin: '0 auto',
-      padding: '0 20px',
+      padding: '16px 24px',
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
-      flexWrap: 'wrap',
-      gap: '20px',
     },
-    welcomeSection: {
-      flex: '1',
-      minWidth: '300px',
-    },
-    welcomeTitle: {
-      fontSize: '28px',
-      fontWeight: '700',
-      margin: '0 0 8px 0',
-      letterSpacing: '-0.025em',
-    },
-    welcomeSubtitle: {
-      fontSize: '16px',
-      opacity: 0.9,
-      margin: 0,
-    },
-    headerStats: {
-      display: 'flex',
-      gap: '20px',
-      flexWrap: 'wrap',
-    },
-    statCard: {
+    
+    logo: {
       display: 'flex',
       alignItems: 'center',
       gap: '12px',
-      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-      backdropFilter: 'blur(10px)',
-      padding: '16px 20px',
-      borderRadius: '12px',
-      border: '1px solid rgba(255, 255, 255, 0.2)',
-      minWidth: '140px',
-    },
-    statIcon: {
-      fontSize: '24px',
-    },
-    statInfo: {
-      display: 'flex',
-      flexDirection: 'column',
-    },
-    statLabel: {
-      fontSize: '12px',
-      opacity: 0.8,
-      marginBottom: '4px',
-    },
-    statValue: {
-      fontSize: '16px',
-      fontWeight: '600',
-    },
-    dashboardContainer: {
-      maxWidth: '1200px',
-      margin: '0 auto',
-      padding: '30px 20px',
-      gap: '30px',
-      display: 'flex',
-      flexDirection: 'column',
-    },
-    quickActionsContainer: {
-      backgroundColor: 'white',
-      borderRadius: '16px',
-      padding: '28px',
-      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-      border: '1px solid #e5e7eb',
-    },
-    sectionTitle: {
-      fontSize: '20px',
+      fontSize: '28px',
       fontWeight: '700',
-      color: '#111827',
-      marginBottom: '20px',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '8px',
+      letterSpacing: '-0.5px',
     },
-    sectionIcon: {
-      fontSize: '20px',
-    },
-    quickActions: {
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-      gap: '16px',
-    },
-    quickActionLink: {
-      textDecoration: 'none',
-      color: 'inherit',
-    },
-    quickAction: {
-      display: 'flex',
-      alignItems: 'center',
-      padding: '20px',
-      backgroundColor: '#ffffff',
-      borderRadius: '12px',
-      border: '2px solid #f3f4f6',
-      cursor: 'pointer',
-      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-      gap: '16px',
-      position: 'relative',
-      overflow: 'hidden',
-    },
-    quickActionIconContainer: {
+    
+    logoIcon: {
+      fontSize: '32px',
+      background: colors.white,
+      color: colors.primary,
+      borderRadius: '8px',
+      padding: '8px',
       width: '48px',
       height: '48px',
-      borderRadius: '12px',
-      backgroundColor: '#f0f9ff',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      flexShrink: 0,
     },
-    quickActionIcon: {
-      fontSize: '24px',
-    },
-    quickActionContent: {
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '4px',
-    },
-    quickActionTitle: {
-      fontSize: '16px',
-      fontWeight: '600',
-      color: '#111827',
-    },
-    quickActionDesc: {
-      fontSize: '14px',
-      color: '#6b7280',
-    },
-    accountsSection: {
-      backgroundColor: 'white',
-      borderRadius: '16px',
-      padding: '28px',
-      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-      border: '1px solid #e5e7eb',
-    },
-    accountsGrid: {
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-      gap: '20px',
-    },
-    enhancedAccountCard: {
-      backgroundColor: '#ffffff',
-      border: '2px solid #f3f4f6',
-      borderRadius: '16px',
-      padding: '24px',
-      transition: 'all 0.3s ease',
-      cursor: 'pointer',
-      position: 'relative',
-      overflow: 'hidden',
-    },
-    accountHeader: {
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: '20px',
-    },
-    accountType: {
+    
+    headerRight: {
       display: 'flex',
       alignItems: 'center',
-      gap: '8px',
+      gap: '24px',
     },
-    accountTypeIcon: {
-      fontSize: '20px',
-    },
-    accountTypeName: {
-      fontSize: '16px',
-      fontWeight: '600',
-      color: '#111827',
-    },
-    accountMenu: {
-      fontSize: '16px',
-      color: '#6b7280',
-      cursor: 'pointer',
-      padding: '4px',
-    },
-    accountBalance: {
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '4px',
-      marginBottom: '16px',
-    },
-    balanceLabel: {
-      fontSize: '14px',
-      color: '#6b7280',
-    },
-    balanceAmount: {
-      fontSize: '28px',
-      fontWeight: '700',
-      color: '#111827',
-    },
-    accountNumber: {
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '4px',
-      marginBottom: '20px',
-    },
-    accountNumberLabel: {
-      fontSize: '12px',
-      color: '#6b7280',
-      textTransform: 'uppercase',
-      letterSpacing: '0.05em',
-    },
-    accountNumberValue: {
-      fontSize: '14px',
-      fontWeight: '500',
-      color: '#374151',
-      fontFamily: 'monospace',
-    },
-    accountActions: {
-      display: 'flex',
-      gap: '12px',
-    },
-    accountActionBtn: {
-      flex: 1,
-      padding: '10px 16px',
-      backgroundColor: '#1e40af',
-      color: 'white',
-      border: 'none',
-      borderRadius: '8px',
-      fontSize: '14px',
-      fontWeight: '500',
-      cursor: 'pointer',
-      transition: 'background-color 0.2s',
-    },
-    accountActionBtnSecondary: {
-      flex: 1,
-      padding: '10px 16px',
-      backgroundColor: 'transparent',
-      color: '#1e40af',
-      border: '1px solid #1e40af',
-      borderRadius: '8px',
-      fontSize: '14px',
-      fontWeight: '500',
-      cursor: 'pointer',
-      transition: 'all 0.2s',
-    },
-    transactionsSection: {
-      backgroundColor: 'white',
-      borderRadius: '16px',
-      padding: '28px',
-      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-      border: '1px solid #e5e7eb',
-    },
-    transactionsHeader: {
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: '20px',
-    },
-    viewAllLink: {
-      color: '#1e40af',
-      textDecoration: 'none',
-      fontSize: '14px',
-      fontWeight: '500',
-    },
-    transactionsList: {
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '12px',
-    },
-    enhancedTransactionItem: {
-      display: 'flex',
-      alignItems: 'center',
-      padding: '16px',
-      backgroundColor: '#f9fafb',
-      borderRadius: '12px',
-      border: '1px solid #e5e7eb',
-      gap: '16px',
-    },
-    transactionIcon: {
-      width: '40px',
-      height: '40px',
-      borderRadius: '10px',
-      backgroundColor: '#f0f9ff',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      fontSize: '18px',
-      flexShrink: 0,
-    },
-    transactionDetails: {
-      flex: 1,
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '4px',
-    },
-    transactionDescription: {
-      fontSize: '16px',
-      fontWeight: '500',
-      color: '#111827',
-    },
-    transactionDate: {
-      fontSize: '14px',
-      color: '#6b7280',
-    },
-    transactionAmount: {
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'flex-end',
-      gap: '4px',
-    },
-    transactionAmountValue: {
-      fontSize: '16px',
-      fontWeight: '600',
-    },
-    transactionStatus: {
-      fontSize: '12px',
-      color: '#10b981',
-      backgroundColor: '#d1fae5',
-      padding: '2px 8px',
-      borderRadius: '12px',
-    },
-    noTransactionsCard: {
-      textAlign: 'center',
-      padding: '60px 40px',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      gap: '12px',
-    },
-    noTransactionsIcon: {
-      fontSize: '48px',
-      opacity: 0.5,
-    },
-    noTransactions: {
-      color: '#6b7280',
-      fontSize: '18px',
-      fontWeight: '500',
-      margin: 0,
-    },
-    noTransactionsSubtext: {
-      color: '#9ca3af',
-      fontSize: '14px',
-      margin: 0,
-    },
-    header: {
-      background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #60a5fa 100%)',
-      color: 'white',
-      padding: '16px 0',
-      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-    },
-    headerContent: {
-      maxWidth: '1200px',
-      margin: '0 auto',
-      padding: '0 20px',
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-    },
-    logo: {
-      fontSize: '24px',
-      fontWeight: 'bold',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '8px',
-    },
+    
     userInfo: {
       display: 'flex',
       alignItems: 'center',
-      gap: '16px',
+      gap: '12px',
       position: 'relative',
     },
-    dropdown: {
-      position: 'relative',
-    },
-    dropdownButton: {
-      background: 'rgba(255, 255, 255, 0.1)',
-      border: '1px solid rgba(255, 255, 255, 0.2)',
-      color: 'white',
-      padding: '8px 16px',
-      borderRadius: '8px',
+    
+    userAvatar: {
+      width: '40px',
+      height: '40px',
+      borderRadius: '50%',
+      background: colors.accent,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      fontWeight: '600',
+      fontSize: '16px',
       cursor: 'pointer',
-      fontSize: '14px',
-      transition: 'all 0.2s',
     },
-    dropdownContent: {
+    
+    userName: {
+      fontWeight: '500',
+      fontSize: '16px',
+    },
+    
+    userMenu: {
       position: 'absolute',
       top: '100%',
       right: '0',
-      background: 'white',
-      borderRadius: '8px',
-      boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
+      background: colors.white,
+      borderRadius: '12px',
+      boxShadow: '0 10px 40px rgba(0, 0, 0, 0.15)',
       padding: '8px 0',
-      minWidth: '180px',
-      zIndex: 1000,
+      minWidth: '200px',
       marginTop: '8px',
+      zIndex: 1001,
     },
-    dropdownItem: {
+    
+    menuItem: {
       width: '100%',
       padding: '12px 20px',
       border: 'none',
       background: 'none',
-      color: '#374151',
+      color: colors.gray700,
       fontSize: '14px',
       cursor: 'pointer',
       textAlign: 'left',
-      transition: 'background-color 0.2s',
       display: 'flex',
       alignItems: 'center',
-      gap: '8px',
+      gap: '12px',
+      transition: 'background-color 0.2s',
     },
-    dropdownDivider: {
-      border: 'none',
-      borderTop: '1px solid #e5e7eb',
-      margin: '8px 0',
-    },
+    
+    // Main Content
     main: {
-      maxWidth: '1200px',
+      maxWidth: '1400px',
       margin: '0 auto',
-      padding: '30px 20px',
+      padding: '32px 24px',
+      display: 'grid',
+      gap: '32px',
     },
+    
     welcomeSection: {
-      marginBottom: '30px',
+      display: 'grid',
+      gridTemplateColumns: '1fr auto',
+      alignItems: 'center',
+      gap: '24px',
+      marginBottom: '8px',
     },
+    
+    welcomeText: {
+      margin: 0,
+    },
+    
     welcomeTitle: {
-      fontSize: '32px',
+      fontSize: '36px',
       fontWeight: '700',
-      color: '#111827',
-      marginBottom: '20px',
+      color: colors.gray900,
+      margin: '0 0 8px 0',
+      letterSpacing: '-0.5px',
     },
-    balanceCard: {
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      borderRadius: '20px',
-      padding: '40px',
-      color: 'white',
+    
+    welcomeSubtitle: {
+      fontSize: '18px',
+      color: colors.gray600,
+      margin: 0,
+    },
+    
+    dateTime: {
+      textAlign: 'right',
+      color: colors.gray600,
+    },
+    
+    // Financial Summary Cards
+    summaryGrid: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+      gap: '24px',
+      marginBottom: '32px',
+    },
+    
+    summaryCard: {
+      background: colors.white,
+      borderRadius: '16px',
+      padding: '32px',
+      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+      border: `1px solid ${colors.gray200}`,
       position: 'relative',
       overflow: 'hidden',
-      marginBottom: '30px',
     },
-    balanceCardOverlay: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      background: 'rgba(255, 255, 255, 0.1)',
-      backdropFilter: 'blur(20px)',
+    
+    balanceCard: {
+      background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%)`,
+      color: colors.white,
     },
-    totalBalance: {
-      fontSize: '16px',
+    
+    cardIcon: {
+      fontSize: '32px',
+      marginBottom: '16px',
       opacity: 0.9,
-      marginBottom: '8px',
-      position: 'relative',
-      zIndex: 1,
     },
-    balanceAmount: {
-      fontSize: '48px',
-      fontWeight: '700',
-      marginBottom: '30px',
-      position: 'relative',
-      zIndex: 1,
-    },
-    balanceActions: {
-      display: 'flex',
-      gap: '12px',
-      flexWrap: 'wrap',
-      position: 'relative',
-      zIndex: 1,
-    },
-    actionButton: {
-      background: 'rgba(255, 255, 255, 0.2)',
-      border: '1px solid rgba(255, 255, 255, 0.3)',
-      color: 'white',
-      padding: '12px 20px',
-      borderRadius: '12px',
-      cursor: 'pointer',
+    
+    cardLabel: {
       fontSize: '14px',
       fontWeight: '500',
-      transition: 'all 0.3s',
+      opacity: 0.8,
+      marginBottom: '8px',
+      textTransform: 'uppercase',
+      letterSpacing: '0.5px',
+    },
+    
+    cardValue: {
+      fontSize: '32px',
+      fontWeight: '700',
+      marginBottom: '12px',
+      letterSpacing: '-0.5px',
+    },
+    
+    cardChange: {
+      fontSize: '14px',
+      fontWeight: '500',
+    },
+    
+    // Market Data
+    marketSection: {
+      background: colors.white,
+      borderRadius: '16px',
+      padding: '24px',
+      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+      border: `1px solid ${colors.gray200}`,
+    },
+    
+    marketGrid: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+      gap: '20px',
+    },
+    
+    marketItem: {
+      padding: '16px',
+      borderRadius: '12px',
+      background: colors.gray50,
+      textAlign: 'center',
+    },
+    
+    // Quick Actions
+    actionsGrid: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+      gap: '16px',
+      marginBottom: '32px',
+    },
+    
+    actionCard: {
+      background: colors.white,
+      borderRadius: '16px',
+      padding: '24px',
+      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+      border: `1px solid ${colors.gray200}`,
+      cursor: 'pointer',
+      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+      textDecoration: 'none',
+      color: 'inherit',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      textAlign: 'center',
+      gap: '12px',
+    },
+    
+    actionIcon: {
+      fontSize: '32px',
+      width: '64px',
+      height: '64px',
+      borderRadius: '16px',
+      background: `linear-gradient(135deg, ${colors.accent}15, ${colors.primary}15)`,
       display: 'flex',
       alignItems: 'center',
-      gap: '8px',
-      backdropFilter: 'blur(10px)',
+      justifyContent: 'center',
+      marginBottom: '8px',
     },
-    grid: {
+    
+    actionTitle: {
+      fontSize: '16px',
+      fontWeight: '600',
+      color: colors.gray900,
+      margin: 0,
+    },
+    
+    actionDesc: {
+      fontSize: '14px',
+      color: colors.gray600,
+      margin: 0,
+    },
+    
+    // Main Grid Layout
+    dashboardGrid: {
       display: 'grid',
-      gridTemplateColumns: '1fr 1fr',
-      gap: '30px',
-      '@media (max-width: 768px)': {
+      gridTemplateColumns: '2fr 1fr',
+      gap: '32px',
+      '@media (max-width: 1024px)': {
         gridTemplateColumns: '1fr',
       },
     },
-    section: {
-      background: 'white',
+    
+    // Accounts Section
+    accountsSection: {
+      background: colors.white,
       borderRadius: '16px',
-      padding: '28px',
-      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+      padding: '32px',
+      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+      border: `1px solid ${colors.gray200}`,
     },
-    accountSelector: {
-      marginBottom: '20px',
+    
+    sectionHeader: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: '24px',
     },
-    select: {
-      width: '100%',
-      padding: '12px',
-      border: '2px solid #e5e7eb',
-      borderRadius: '8px',
-      fontSize: '14px',
-      outline: 'none',
-      transition: 'border-color 0.2s',
+    
+    sectionTitle: {
+      fontSize: '24px',
+      fontWeight: '700',
+      color: colors.gray900,
+      margin: 0,
+      display: 'flex',
+      alignItems: 'center',
+      gap: '12px',
     },
+    
     accountCard: {
-      border: '2px solid #f3f4f6',
+      background: colors.gray50,
       borderRadius: '12px',
-      padding: '20px',
+      padding: '24px',
       marginBottom: '16px',
+      border: `2px solid transparent`,
       cursor: 'pointer',
       transition: 'all 0.2s',
     },
+    
     accountCardSelected: {
-      borderColor: '#3b82f6',
-      background: '#f0f9ff',
+      borderColor: colors.accent,
+      background: colors.white,
+      boxShadow: '0 4px 12px rgba(0, 102, 204, 0.15)',
     },
+    
     accountHeader: {
       display: 'flex',
       justifyContent: 'space-between',
-      alignItems: 'center',
+      alignItems: 'flex-start',
+      marginBottom: '16px',
     },
-    accountName: {
-      fontSize: '16px',
+    
+    accountType: {
+      fontSize: '18px',
       fontWeight: '600',
-      color: '#111827',
+      color: colors.gray900,
+      margin: '0 0 4px 0',
     },
+    
     accountNumber: {
       fontSize: '14px',
-      color: '#6b7280',
-      marginTop: '4px',
+      color: colors.gray600,
+      fontFamily: 'monospace',
     },
+    
     accountBalance: {
-      fontSize: '20px',
+      fontSize: '28px',
       fontWeight: '700',
-      color: '#111827',
+      color: colors.gray900,
+      textAlign: 'right',
     },
-    quickActions: {
-      display: 'grid',
-      gridTemplateColumns: 'repeat(3, 1fr)',
-      gap: '12px',
-      marginTop: '20px',
+    
+    // Transactions Section
+    transactionsSection: {
+      background: colors.white,
+      borderRadius: '16px',
+      padding: '32px',
+      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+      border: `1px solid ${colors.gray200}`,
     },
-    quickActionCard: {
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      padding: '16px',
-      border: '2px solid #f3f4f6',
-      borderRadius: '12px',
-      cursor: 'pointer',
-      transition: 'all 0.2s',
-      gap: '8px',
-    },
-    quickActionIcon: {
-      fontSize: '24px',
-    },
-    quickActionText: {
-      fontSize: '14px',
-      fontWeight: '500',
-      color: '#374151',
-    },
+    
     transactionItem: {
       display: 'flex',
-      justifyContent: 'space-between',
       alignItems: 'center',
-      padding: '16px',
-      backgroundColor: '#f9fafb',
-      borderRadius: '12px',
-      marginBottom: '12px',
+      padding: '16px 0',
+      borderBottom: `1px solid ${colors.gray200}`,
+      gap: '16px',
     },
+    
     transactionIcon: {
-      width: '40px',
-      height: '40px',
-      borderRadius: '10px',
+      width: '48px',
+      height: '48px',
+      borderRadius: '12px',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      fontSize: '18px',
-      fontWeight: 'bold',
-      marginRight: '12px',
+      fontSize: '20px',
+      fontWeight: '600',
     },
+    
     transactionDetails: {
       flex: 1,
     },
-    transactionDescription: {
+    
+    transactionTitle: {
       fontSize: '16px',
-      fontWeight: '500',
-      color: '#111827',
+      fontWeight: '600',
+      color: colors.gray900,
+      margin: '0 0 4px 0',
     },
+    
     transactionDate: {
       fontSize: '14px',
-      color: '#6b7280',
-      marginTop: '2px',
+      color: colors.gray600,
+      margin: 0,
     },
+    
     transactionAmount: {
       fontSize: '16px',
       fontWeight: '600',
+      textAlign: 'right',
     },
-    primaryButton: {
-      background: '#3b82f6',
-      color: 'white',
-      border: 'none',
-      padding: '12px 24px',
-      borderRadius: '8px',
-      cursor: 'pointer',
-      fontSize: '14px',
-      fontWeight: '500',
-      transition: 'background-color 0.2s',
-    },
-    secondaryButton: {
-      background: '#f3f4f6',
-      color: '#374151',
-      border: 'none',
-      padding: '12px 24px',
-      borderRadius: '8px',
-      cursor: 'pointer',
-      fontSize: '14px',
-      fontWeight: '500',
-      transition: 'all 0.2s',
-    },
-    modal: {
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      zIndex: 1000,
-    },
-    modalContent: {
-      backgroundColor: 'white',
+    
+    // Credit Score Widget
+    creditScoreWidget: {
+      background: colors.white,
       borderRadius: '16px',
       padding: '32px',
-      maxWidth: '500px',
-      width: '90%',
-      maxHeight: '90vh',
-      overflow: 'auto',
+      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+      border: `1px solid ${colors.gray200}`,
+      textAlign: 'center',
     },
-    modalTitle: {
-      fontSize: '24px',
+    
+    creditScoreValue: {
+      fontSize: '48px',
       fontWeight: '700',
-      color: '#111827',
-      marginBottom: '24px',
+      color: colors.success,
+      margin: '16px 0 8px 0',
     },
-    formGroup: {
-      marginBottom: '20px',
-    },
-    label: {
-      display: 'block',
+    
+    creditScoreLabel: {
       fontSize: '14px',
-      fontWeight: '500',
-      color: '#374151',
-      marginBottom: '8px',
+      color: colors.gray600,
+      margin: '0 0 16px 0',
     },
-    input: {
+    
+    creditScoreRange: {
       width: '100%',
-      padding: '12px',
-      border: '2px solid #e5e7eb',
-      borderRadius: '8px',
-      fontSize: '14px',
-      outline: 'none',
-      transition: 'border-color 0.2s',
+      height: '8px',
+      background: colors.gray200,
+      borderRadius: '4px',
+      position: 'relative',
+      margin: '16px 0',
     },
-    modalActions: {
-      display: 'flex',
-      gap: '12px',
-      marginTop: '24px',
-    },
-    loadingContainer: {
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      minHeight: '100vh',
-      background: '#f8fafc',
-    },
-    spinner: {
-      width: '40px',
-      height: '40px',
-      border: '4px solid #e5e7eb',
-      borderTop: '4px solid #3b82f6',
+    
+    creditScoreIndicator: {
+      position: 'absolute',
+      left: '74%',
+      top: '-4px',
+      width: '16px',
+      height: '16px',
+      background: colors.success,
       borderRadius: '50%',
-      animation: 'spin 1s linear infinite',
-      marginBottom: '16px',
+      border: `3px solid ${colors.white}`,
+      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
     },
-    errorContainer: {
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      minHeight: '100vh',
-      background: '#f8fafc',
-      padding: '20px',
-    },
-    retryButton: {
-      background: '#3b82f6',
-      color: 'white',
+    
+    // Buttons
+    primaryButton: {
+      background: `linear-gradient(135deg, ${colors.accent} 0%, ${colors.secondary} 100%)`,
+      color: colors.white,
       border: 'none',
+      borderRadius: '12px',
       padding: '12px 24px',
-      borderRadius: '8px',
+      fontSize: '14px',
+      fontWeight: '600',
       cursor: 'pointer',
-      fontSize: '16px',
-      marginTop: '16px',
+      transition: 'all 0.3s',
+      textDecoration: 'none',
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: '8px',
     },
-    // dashboardContainer: {
-    //   maxWidth: '1200px',
-    //   margin: '0 auto',
-    //   padding: '20px',
-    //   gap: '30px',
-    //   display: 'flex',
-    //   flexDirection: 'column',
-    // },
-    // quickActionsContainer: {
-    //   backgroundColor: 'white',
-    //   borderRadius: '12px',
-    //   padding: '24px',
-    //   boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-    // },
-    // sectionTitle: {
-    //   fontSize: '18px',
-    //   fontWeight: '600',
-    //   color: '#1f2937',
-    //   marginBottom: '16px',
-    // },
-    // quickActions: {
-    //   display: 'grid',
-    //   gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-    //   gap: '16px',
-    // },
-    // quickActionLink: {
-    //   textDecoration: 'none',
-    //   color: 'inherit',
-    // },
-    // quickAction: {
-    //   display: 'flex',
-    //   alignItems: 'center',
-    //   padding: '16px',
-    //   backgroundColor: '#f9fafb',
-    //   borderRadius: '8px',
-    //   border: '1px solid #e5e7eb',
-    //   cursor: 'pointer',
-    //   transition: 'all 0.2s',
-    //   gap: '12px',
-    // },
-    // quickActionIcon: {
-    //   fontSize: '24px',
-    // },
-    // accountsSection: {
-    //   backgroundColor: 'white',
-    //   borderRadius: '12px',
-    //   padding: '24px',
-    //   boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-    // },
-    // accountsGrid: {
-    //   display: 'grid',
-    //   gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-    //   gap: '16px',
-    // },
-    // transactionsSection: {
-    //   backgroundColor: 'white',
-    //   borderRadius: '12px',
-    //   padding: '24px',
-    //   boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-    // },
-    // transactionsList: {
-    //   display: 'flex',
-    //   flexDirection: 'column',
-    //   gap: '12px',
-    // },
-    // noTransactions: {
-    //   textAlign: 'center',
-    //   color: '#6b7280',
-    //   padding: '40px',
-    //   fontSize: '16px',
-    // },
+    
+    secondaryButton: {
+      background: colors.white,
+      color: colors.accent,
+      border: `2px solid ${colors.accent}`,
+      borderRadius: '12px',
+      padding: '10px 22px',
+      fontSize: '14px',
+      fontWeight: '600',
+      cursor: 'pointer',
+      transition: 'all 0.3s',
+      textDecoration: 'none',
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: '8px',
+    },
+    
+    // Responsive utilities
+    '@media (max-width: 768px)': {
+      main: {
+        padding: '24px 16px',
+      },
+      welcomeSection: {
+        gridTemplateColumns: '1fr',
+        textAlign: 'center',
+      },
+      dashboardGrid: {
+        gridTemplateColumns: '1fr',
+      },
+    },
   };
-
-  // Mock data for recentTransactions for demonstration
-  const recentTransactions = [
-    { id: 1, type: 'deposit', amount: 1500.50, description: 'Salary Deposit', created_at: '2023-10-26T10:00:00Z' },
-    { id: 2, type: 'withdrawal', amount: -250.75, description: 'ATM Withdrawal', created_at: '2023-10-25T15:30:00Z' },
-    { id: 3, type: 'transfer', amount: -100.00, description: 'Transfer to John Doe', created_at: '2023-10-24T09:15:00Z' },
-    { id: 4, type: 'payment', amount: -75.20, description: 'Electricity Bill', created_at: '2023-10-23T11:45:00Z' },
-  ];
-
 
   useEffect(() => {
     checkUser();
@@ -854,12 +543,10 @@ export default function Dashboard() {
   const checkUser = async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
-
       if (!session) {
         router.push('/login');
         return;
       }
-
       setUser(session.user);
       await fetchUserData(session.user.id);
     } catch (error) {
@@ -869,7 +556,6 @@ export default function Dashboard() {
     }
   };
 
-  // Consolidated function to fetch user data, accounts, and transactions
   const fetchUserData = async (userId) => {
     setLoading(true);
     setError('');
@@ -882,70 +568,34 @@ export default function Dashboard() {
         .eq('id', userId)
         .single();
 
-      if (profileError && profileError.code !== 'PGRST116') {
-        console.error('Error fetching profile:', profileError);
-      }
-      setUserProfile(profile);
+      if (!profileError) setUserProfile(profile);
 
-      // Fetch accounts with better error handling
+      // Fetch accounts
       let accounts = [];
-      try {
-        // Try direct user_id lookup first
-        const { data: directAccounts, error: directAccountsError } = await supabase
-          .from('accounts')
-          .select('*')
-          .eq('user_id', userId);
+      const { data: directAccounts, error: directAccountsError } = await supabase
+        .from('accounts')
+        .select('*')
+        .eq('user_id', userId);
 
-        if (!directAccountsError && directAccounts?.length > 0) {
-          accounts = directAccounts;
-        } else if (profile?.application_id) {
-          // Fallback to application_id lookup
-          const { data: appAccounts, error: appAccountsError } = await supabase
-            .from('accounts')
-            .select('*')
-            .eq('application_id', profile.application_id);
-
-          if (!appAccountsError && appAccounts?.length > 0) {
-            accounts = appAccounts;
-            // Link accounts to user
-            for (const account of accounts) {
-              if (account.user_id !== userId) {
-                await supabase
-                  .from('accounts')
-                  .update({ user_id: userId, updated_at: new Date().toISOString() })
-                  .eq('id', account.id);
-              }
-            }
-          }
-        }
-
-        setAccounts(accounts);
-        if (accounts.length > 0) {
-          setSelectedAccount(accounts[0]);
-        }
-      } catch (accountError) {
-        console.error('Error processing accounts:', accountError);
-        setAccounts([]);
+      if (!directAccountsError) {
+        accounts = directAccounts || [];
       }
 
-      // Fetch transactions with better error handling
-      try {
-        const { data: transactionsData, error: transactionsError } = await supabase
-          .from('transactions')
-          .select('*')
-          .eq('user_id', userId)
-          .order('created_at', { ascending: false })
-          .limit(10);
+      setAccounts(accounts);
+      if (accounts.length > 0) {
+        setSelectedAccount(accounts[0]);
+      }
 
-        if (!transactionsError) {
-          setTransactions(transactionsData || []);
-        } else {
-          console.error('Error fetching transactions:', transactionsError);
-          setTransactions([]);
-        }
-      } catch (transactionError) {
-        console.error('Error fetching transactions:', transactionError);
-        setTransactions([]);
+      // Fetch recent transactions
+      const { data: transactionsData, error: transactionsError } = await supabase
+        .from('transactions')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (!transactionsError) {
+        setTransactions(transactionsData || []);
       }
 
     } catch (error) {
@@ -956,18 +606,14 @@ export default function Dashboard() {
     }
   };
 
-
   const handleLogout = async () => {
     await supabase.auth.signOut();
     router.push('/');
   };
 
   const formatCurrency = (amount) => {
-    // Ensure amount is a number, handle potential null or undefined
     const numericAmount = parseFloat(amount);
-    if (isNaN(numericAmount)) {
-      return '$0.00'; // Return a default value if amount is not a valid number
-    }
+    if (isNaN(numericAmount)) return '$0.00';
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD'
@@ -975,232 +621,95 @@ export default function Dashboard() {
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return ''; // Handle cases where dateString might be null or undefined
+    if (!dateString) return '';
     try {
       return new Date(dateString).toLocaleDateString('en-US', {
-        year: 'numeric',
         month: 'short',
-        day: 'numeric'
+        day: 'numeric',
+        year: 'numeric'
       });
     } catch (e) {
-      console.error("Error formatting date:", dateString, e);
-      return dateString; // Return original string if date parsing fails
+      return dateString;
     }
   };
 
   const getTotalBalance = () => {
     return accounts.reduce((total, account) => {
       const balance = parseFloat(account.balance || 0);
-      return total + (isNaN(balance) ? 0 : balance); // Add 0 if balance is not a valid number
+      return total + (isNaN(balance) ? 0 : balance);
     }, 0);
   };
 
-  const handleTransfer = async (e) => {
-    e.preventDefault();
-
-    try {
-      setLoading(true); // Set loading true for the entire process
-
-      // Basic validation for amount
-      if (parseFloat(transferData.amount) <= 0) {
-        setError("Amount must be greater than zero.");
-        setLoading(false);
-        return;
-      }
-
-      // Find the selected fromAccount to get its current balance
-      const fromAccountDetails = accounts.find(acc => acc.id === transferData.fromAccount);
-      if (!fromAccountDetails) {
-        setError("Selected 'From' account not found.");
-        setLoading(false);
-        return;
-      }
-      const fromAccountBalance = parseFloat(fromAccountDetails.balance);
-
-      // Check if sufficient funds are available
-      if (fromAccountBalance < parseFloat(transferData.amount)) {
-        setError("Insufficient funds in the selected account.");
-        setLoading(false);
-        return;
-      }
-
-      const transferPayload = {
-        ...transferData,
-        user_id: user.id,
-        from_account_id: transferData.fromAccount, // Use explicit names
-        to_account_id: transferData.toAccount, // Use explicit names for internal transfers
-        // For external transfers, toAccount is the account number, need to adjust API accordingly
-        amount: parseFloat(transferData.amount), // Ensure amount is a number
-        // Add metadata for payment processor
-        payment_method: transferData.transferType === 'between_accounts' ? 'internal' : 'external',
-        // For external transfers, you'll need to specify the processor
-        processor: transferData.transferType !== 'between_accounts' ? 'plaid' : null // Placeholder, adjust as needed
-      };
-
-      // If it's an internal transfer, use the internal account IDs
-      if (transferData.transferType === 'between_accounts') {
-        delete transferPayload.recipientName;
-        delete transferPayload.recipientEmail;
-        delete transferPayload.bankName;
-        delete transferPayload.routingNumber;
-        delete transferPayload.swiftCode;
-        delete transferPayload.country;
-        // Ensure toAccount is set correctly for internal transfers
-        transferPayload.to_account_id = transferData.toAccount;
-      } else {
-        // For external transfers, the API will handle routing number, bank name etc.
-        // The 'toAccount' field in transferData might be the account number for external
-        transferPayload.recipient_account_number = transferData.toAccount; // Assuming toAccount is account number for external
-        // Other fields like recipientName, bankName, routingNumber, swiftCode, country are already in transferData
-      }
-
-      // Call your transfer API endpoint
-      const response = await fetch('/api/process-transfer', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(transferPayload)
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-        // Refresh user data and close modal
-        await fetchUserData(user.id); // Refetch data after successful transfer
-        setShowTransferModal(false);
-        // Reset form data
-        setTransferData({
-          fromAccount: '',
-          transferType: 'between_accounts',
-          toAccount: '',
-          recipientName: '',
-          recipientEmail: '',
-          bankName: '',
-          routingNumber: '',
-          swiftCode: '',
-          amount: '',
-          description: '',
-          country: ''
-        });
-        setError(''); // Clear any previous errors
-      } else {
-        setError(result.error || 'Transfer failed. Please check details and try again.');
-      }
-    } catch (error) {
-      console.error('Transfer error:', error);
-      setError('An unexpected error occurred during transfer. Please try again later.');
-    } finally {
-      setLoading(false); // Ensure loading is set to false
-    }
+  const getInitials = (name) => {
+    if (!name) return user?.email?.charAt(0).toUpperCase() || 'U';
+    return name.split(' ').map(n => n.charAt(0)).join('').toUpperCase();
   };
 
-  const handleWithdrawal = async (e) => {
-    e.preventDefault();
-    try {
-      setLoading(true);
-      const withdrawalPayload = {
-        ...withdrawalData,
-        user_id: user.id,
-        amount: parseFloat(withdrawalData.amount), // Ensure amount is a number
-        // Add other relevant fields based on withdrawalMethod
-      };
-
-      // Simulate API call for withdrawal
-      // Replace with your actual withdrawal API call
-      const response = await fetch('/api/process-withdrawal', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(withdrawalPayload)
-      });
-      const result = await response.json();
-
-      if (result.success) {
-        await fetchUserData(user.id); // Refresh data
-        setShowWithdrawalModal(false);
-        setWithdrawalData({ // Reset form
-          fromAccount: '',
-          withdrawalMethod: 'atm',
-          amount: '',
-          recipientAccount: '',
-          recipientName: '',
-          routingNumber: '',
-          bankName: '',
-          description: ''
-        });
-        setError('');
-      } else {
-        setError(result.error || 'Withdrawal failed.');
-      }
-    } catch (error) {
-      console.error('Withdrawal error:', error);
-      setError('Failed to process withdrawal.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handlePayment = async (e) => {
-    e.preventDefault();
-    try {
-      setLoading(true);
-      const paymentPayload = {
-        ...paymentData,
-        user_id: user.id, // Assuming payment is linked to user
-        amount: parseFloat(paymentData.amount), // Ensure amount is a number
-        // Add other relevant fields like account to pay from if needed
-      };
-
-      // Simulate API call for payment
-      // Replace with your actual payment API call
-      const response = await fetch('/api/process-payment', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(paymentPayload)
-      });
-      const result = await response.json();
-
-      if (result.success) {
-        await fetchUserData(user.id); // Refresh data
-        setShowPayModal(false);
-        setPaymentData({ // Reset form
-          payee: '',
-          amount: '',
-          dueDate: '',
-          description: ''
-        });
-        setError('');
-      } else {
-        setError(result.error || 'Payment failed.');
-      }
-    } catch (error) {
-      console.error('Payment error:', error);
-      setError('Failed to process payment.');
-    } finally {
-      setLoading(false);
-    }
+  const getCurrentDateTime = () => {
+    const now = new Date();
+    return {
+      date: now.toLocaleDateString('en-US', { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      }),
+      time: now.toLocaleTimeString('en-US', { 
+        hour: '2-digit', 
+        minute: '2-digit'
+      })
+    };
   };
 
   if (loading) {
     return (
-      <div style={styles.loadingContainer}>
-        <div style={styles.spinner}></div>
-        <p>Loading your dashboard...</p>
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100vh',
+        background: colors.light,
+        gap: '16px'
+      }}>
+        <div style={{
+          width: '48px',
+          height: '48px',
+          border: `4px solid ${colors.gray300}`,
+          borderTop: `4px solid ${colors.accent}`,
+          borderRadius: '50%',
+          animation: 'spin 1s linear infinite'
+        }}></div>
+        <p style={{ color: colors.gray600, fontSize: '16px' }}>Loading your dashboard...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div style={styles.errorContainer}>
-        <h2>Error</h2>
-        <p>{error}</p>
-        <button onClick={() => window.location.reload()} style={styles.retryButton}>
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100vh',
+        background: colors.light,
+        gap: '16px',
+        padding: '20px'
+      }}>
+        <h2 style={{ color: colors.danger }}>Error</h2>
+        <p style={{ color: colors.gray600 }}>{error}</p>
+        <button 
+          onClick={() => window.location.reload()} 
+          style={styles.primaryButton}
+        >
           Try Again
         </button>
       </div>
     );
   }
+
+  const dateTime = getCurrentDateTime();
 
   return (
     <div style={styles.container}>
@@ -1209,41 +718,29 @@ export default function Dashboard() {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
         }
-
-        .action-button:hover {
-          background: rgba(255,255,255,0.25) !important;
-          transform: translateY(-1px);
+        
+        .action-card:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12) !important;
         }
-
-        .account-card:hover {
-          border-color: #94a3b8 !important;
-          transform: translateY(-2px);
-        }
-
-        .quick-action:hover {
-          border-color: #3b82f6 !important;
-          transform: translateY(-3px);
-          box-shadow: 0 8px 25px rgba(59, 130, 246, 0.2) !important;
-        }
-
-        .select:focus {
-          border-color: #3b82f6 !important;
-          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-
-        .input:focus {
-          border-color: #3b82f6 !important;
-          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-
+        
         .primary-button:hover {
-          background-color: #1e3a8a !important;
           transform: translateY(-1px);
+          box-shadow: 0 8px 25px rgba(0, 102, 204, 0.3);
         }
-
+        
         .secondary-button:hover {
-          background-color: #e2e8f0 !important;
-          transform: translateY(-1px);
+          background: ${colors.accent} !important;
+          color: ${colors.white} !important;
+        }
+        
+        .menu-item:hover {
+          background-color: ${colors.gray100} !important;
+        }
+        
+        .account-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
         }
       `}</style>
 
@@ -1251,42 +748,59 @@ export default function Dashboard() {
       <header style={styles.header}>
         <div style={styles.headerContent}>
           <div style={styles.logo}>
-            <span>🏦</span>
-            Oakline Bank
+            <div style={styles.logoIcon}>🏦</div>
+            <span>Oakline Bank</span>
           </div>
-          <div style={styles.userInfo}>
-            <span>Welcome, {user?.user_metadata?.first_name || user?.email}</span>
-            <div style={styles.dropdown}>
-              <button
-                onClick={() => setShowDropdown(!showDropdown)}
-                style={styles.dropdownButton}
-                className="action-button"
+          
+          <div style={styles.headerRight}>
+            <div style={styles.userInfo}>
+              <div style={styles.userName}>
+                {userProfile?.first_name || user?.user_metadata?.first_name || user?.email}
+              </div>
+              <div 
+                style={styles.userAvatar}
+                onClick={() => setShowUserMenu(!showUserMenu)}
               >
-                ☰ Menu
-              </button>
-              {showDropdown && (
-                <div style={styles.dropdownContent}>
-                  <button onClick={() => router.push('/main-menu')} style={styles.dropdownItem}>
-                    🏠 Main Menu
+                {getInitials(userProfile?.first_name || user?.user_metadata?.first_name)}
+              </div>
+              
+              {showUserMenu && (
+                <div style={styles.userMenu}>
+                  <button 
+                    onClick={() => router.push('/profile')} 
+                    style={styles.menuItem}
+                    className="menu-item"
+                  >
+                    👤 My Profile
                   </button>
-                  <button onClick={() => router.push('/profile')} style={styles.dropdownItem}>
-                    👤 Profile
+                  <button 
+                    onClick={() => router.push('/settings')} 
+                    style={styles.menuItem}
+                    className="menu-item"
+                  >
+                    ⚙️ Settings
                   </button>
-                  <button onClick={() => router.push('/transactions')} style={styles.dropdownItem}>
-                    📊 Transactions
+                  <button 
+                    onClick={() => router.push('/security')} 
+                    style={styles.menuItem}
+                    className="menu-item"
+                  >
+                    🔒 Security
                   </button>
-                  <button onClick={() => router.push('/cards')} style={styles.dropdownItem}>
-                    💳 Cards
+                  <button 
+                    onClick={() => router.push('/support')} 
+                    style={styles.menuItem}
+                    className="menu-item"
+                  >
+                    🆘 Help & Support
                   </button>
-                  <button onClick={() => router.push('/loans')} style={styles.dropdownItem}>
-                    🏠 Loans
-                  </button>
-                  <button onClick={() => router.push('/support')} style={styles.dropdownItem}>
-                    🆘 Support
-                  </button>
-                  <hr style={styles.dropdownDivider} />
-                  <button onClick={handleLogout} style={styles.dropdownItem}>
-                    🚪 Logout
+                  <hr style={{ margin: '8px 0', border: 'none', borderTop: `1px solid ${colors.gray200}` }} />
+                  <button 
+                    onClick={handleLogout} 
+                    style={{...styles.menuItem, color: colors.danger}}
+                    className="menu-item"
+                  >
+                    🚪 Sign Out
                   </button>
                 </div>
               )}
@@ -1299,82 +813,174 @@ export default function Dashboard() {
       <main style={styles.main}>
         {/* Welcome Section */}
         <section style={styles.welcomeSection}>
-          <h1 style={styles.welcomeTitle}>
-            Good {new Date().getHours() < 12 ? 'Morning' : new Date().getHours() < 18 ? 'Afternoon' : 'Evening'}!
-          </h1>
-
-          {/* Total Balance Card */}
-          <div style={styles.balanceCard}>
-            <div style={styles.balanceCardOverlay}></div>
-            <div style={styles.totalBalance}>Total Balance</div>
-            <div style={styles.balanceAmount}>{formatCurrency(getTotalBalance())}</div>
-            <div style={styles.balanceActions}>
-              <button
-                onClick={() => setShowTransferModal(true)}
-                style={styles.actionButton}
-                className="action-button"
-              >
-                <span>💸</span> Quick Transfer
-              </button>
-              <button
-                onClick={() => setShowWithdrawalModal(true)}
-                style={styles.actionButton}
-                className="action-button"
-              >
-                <span>💳</span> Withdraw
-              </button>
-              <button
-                onClick={() => setShowPayModal(true)}
-                style={styles.actionButton}
-                className="action-button"
-              >
-                <span>💰</span> Pay Bills
-              </button>
-              <button
-                onClick={() => router.push('/deposit')}
-                style={styles.actionButton}
-                className="action-button"
-              >
-                <span>📥</span> Deposit
-              </button>
+          <div style={styles.welcomeText}>
+            <h1 style={styles.welcomeTitle}>
+              Good {new Date().getHours() < 12 ? 'Morning' : new Date().getHours() < 18 ? 'Afternoon' : 'Evening'}!
+            </h1>
+            <p style={styles.welcomeSubtitle}>
+              Welcome back to your financial dashboard
+            </p>
+          </div>
+          <div style={styles.dateTime}>
+            <div style={{ fontSize: '16px', fontWeight: '600', color: colors.gray700 }}>
+              {dateTime.date}
+            </div>
+            <div style={{ fontSize: '14px', color: colors.gray600 }}>
+              {dateTime.time}
             </div>
           </div>
         </section>
 
-        {/* Main Dashboard Grid */}
-        <div style={styles.grid}>
-          {/* Accounts Section */}
-          <section style={styles.section}>
-            <h2 style={styles.sectionTitle}>
-              <span>💳</span> Your Accounts
-            </h2>
+        {/* Financial Summary Cards */}
+        <section style={styles.summaryGrid}>
+          <div style={{...styles.summaryCard, ...styles.balanceCard}}>
+            <div style={styles.cardIcon}>💰</div>
+            <div style={styles.cardLabel}>Total Balance</div>
+            <div style={styles.cardValue}>{formatCurrency(getTotalBalance())}</div>
+            <div style={styles.cardChange}>+2.5% from last month</div>
+          </div>
+          
+          <div style={styles.summaryCard}>
+            <div style={{...styles.cardIcon, color: colors.success}}>📈</div>
+            <div style={{...styles.cardLabel, color: colors.gray600}}>Available Credit</div>
+            <div style={{...styles.cardValue, color: colors.gray900}}>{formatCurrency(25000)}</div>
+            <div style={{...styles.cardChange, color: colors.success}}>$5,000 increase</div>
+          </div>
+          
+          <div style={styles.summaryCard}>
+            <div style={{...styles.cardIcon, color: colors.accent}}>📊</div>
+            <div style={{...styles.cardLabel, color: colors.gray600}}>Credit Score</div>
+            <div style={{...styles.cardValue, color: colors.gray900}}>{creditScore}</div>
+            <div style={{...styles.cardChange, color: colors.success}}>+15 points</div>
+          </div>
+          
+          <div style={styles.summaryCard}>
+            <div style={{...styles.cardIcon, color: colors.warning}}>💎</div>
+            <div style={{...styles.cardLabel, color: colors.gray600}}>Investments</div>
+            <div style={{...styles.cardValue, color: colors.gray900}}>{formatCurrency(48750)}</div>
+            <div style={{...styles.cardChange, color: colors.success}}>+$1,250 (2.6%)</div>
+          </div>
+        </section>
 
-            {/* Account Selector Dropdown */}
-            {accounts.length > 0 && (
-              <div style={styles.accountSelector}>
-                <select
-                  style={styles.select}
-                  className="select"
-                  value={selectedAccount?.id || ''}
-                  onChange={(e) => {
-                    const account = accounts.find(acc => acc.id === e.target.value);
-                    setSelectedAccount(account);
-                  }}
-                >
-                  <option value="">Select an account</option>
-                  {accounts.map(account => (
-                    <option key={account.id} value={account.id}>
-                      {account.account_name} - {formatCurrency(account.balance)} (****{account.account_number?.slice(-4)})
-                    </option>
-                  ))}
-                </select>
+        {/* Market Data */}
+        <section style={styles.marketSection}>
+          <h3 style={styles.sectionTitle}>
+            📈 Market Overview
+          </h3>
+          <div style={styles.marketGrid}>
+            <div style={styles.marketItem}>
+              <div style={{ fontWeight: '600', color: colors.gray700 }}>S&P 500</div>
+              <div style={{ fontSize: '20px', fontWeight: '700', color: colors.gray900 }}>
+                {marketData.sp500.value.toLocaleString()}
               </div>
-            )}
+              <div style={{ 
+                color: marketData.sp500.change > 0 ? colors.success : colors.danger,
+                fontSize: '14px'
+              }}>
+                {marketData.sp500.change > 0 ? '+' : ''}{marketData.sp500.change} ({marketData.sp500.changePercent}%)
+              </div>
+            </div>
+            <div style={styles.marketItem}>
+              <div style={{ fontWeight: '600', color: colors.gray700 }}>NASDAQ</div>
+              <div style={{ fontSize: '20px', fontWeight: '700', color: colors.gray900 }}>
+                {marketData.nasdaq.value.toLocaleString()}
+              </div>
+              <div style={{ 
+                color: marketData.nasdaq.change > 0 ? colors.success : colors.danger,
+                fontSize: '14px'
+              }}>
+                {marketData.nasdaq.change > 0 ? '+' : ''}{marketData.nasdaq.change} ({marketData.nasdaq.changePercent}%)
+              </div>
+            </div>
+            <div style={styles.marketItem}>
+              <div style={{ fontWeight: '600', color: colors.gray700 }}>Dow Jones</div>
+              <div style={{ fontSize: '20px', fontWeight: '700', color: colors.gray900 }}>
+                {marketData.dow.value.toLocaleString()}
+              </div>
+              <div style={{ 
+                color: marketData.dow.change > 0 ? colors.success : colors.danger,
+                fontSize: '14px'
+              }}>
+                {marketData.dow.change > 0 ? '+' : ''}{marketData.dow.change} ({marketData.dow.changePercent}%)
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Quick Actions */}
+        <section style={styles.actionsGrid}>
+          <Link href="/transfer" style={styles.actionCard} className="action-card">
+            <div style={{...styles.actionIcon, background: `linear-gradient(135deg, #3b82f615, #1e40af15)`}}>
+              💸
+            </div>
+            <h4 style={styles.actionTitle}>Transfer Money</h4>
+            <p style={styles.actionDesc}>Send money instantly</p>
+          </Link>
+          
+          <Link href="/deposit" style={styles.actionCard} className="action-card">
+            <div style={{...styles.actionIcon, background: `linear-gradient(135deg, #10b98115, #047857155)`}}>
+              📥
+            </div>
+            <h4 style={styles.actionTitle}>Deposit Funds</h4>
+            <p style={styles.actionDesc}>Add money to account</p>
+          </Link>
+          
+          <Link href="/bill-pay" style={styles.actionCard} className="action-card">
+            <div style={{...styles.actionIcon, background: `linear-gradient(135deg, #f59e0b15, #d9770015)`}}>
+              🧾
+            </div>
+            <h4 style={styles.actionTitle}>Pay Bills</h4>
+            <p style={styles.actionDesc}>Manage payments</p>
+          </Link>
+          
+          <Link href="/investments" style={styles.actionCard} className="action-card">
+            <div style={{...styles.actionIcon, background: `linear-gradient(135deg, #8b5cf615, #7c3aed15)`}}>
+              📊
+            </div>
+            <h4 style={styles.actionTitle}>Investments</h4>
+            <p style={styles.actionDesc}>Grow your wealth</p>
+          </Link>
+          
+          <Link href="/loans" style={styles.actionCard} className="action-card">
+            <div style={{...styles.actionIcon, background: `linear-gradient(135deg, #06b6d415, #0891b215)`}}>
+              🏠
+            </div>
+            <h4 style={styles.actionTitle}>Loans</h4>
+            <p style={styles.actionDesc}>Apply for credit</p>
+          </Link>
+          
+          <Link href="/support" style={styles.actionCard} className="action-card">
+            <div style={{...styles.actionIcon, background: `linear-gradient(135deg, #ec489915, #dc262615)`}}>
+              🆘
+            </div>
+            <h4 style={styles.actionTitle}>Customer Support</h4>
+            <p style={styles.actionDesc}>Get help 24/7</p>
+          </Link>
+        </section>
+
+        {/* Main Dashboard Grid */}
+        <div style={styles.dashboardGrid}>
+          {/* Accounts Section */}
+          <section style={styles.accountsSection}>
+            <div style={styles.sectionHeader}>
+              <h3 style={styles.sectionTitle}>
+                💳 Your Accounts
+              </h3>
+              <Link href="/account-details" style={styles.secondaryButton} className="secondary-button">
+                View All
+              </Link>
+            </div>
 
             {accounts.length === 0 ? (
-              <p style={{ color: '#64748b', textAlign: 'center', padding: '2rem' }}>
-                No accounts found. Please contact support if this is unexpected.
-              </p>
+              <div style={{ 
+                textAlign: 'center', 
+                padding: '48px 24px',
+                color: colors.gray600 
+              }}>
+                <div style={{ fontSize: '48px', marginBottom: '16px', opacity: 0.5 }}>🏦</div>
+                <p style={{ fontSize: '18px', margin: '0 0 8px 0' }}>No accounts found</p>
+                <p style={{ fontSize: '14px', margin: 0 }}>Contact support if this seems incorrect</p>
+              </div>
             ) : (
               accounts.map(account => (
                 <div
@@ -1388,10 +994,12 @@ export default function Dashboard() {
                 >
                   <div style={styles.accountHeader}>
                     <div>
-                      <div style={styles.accountName}>{account.account_name}</div>
-                      <div style={styles.accountNumber}>
+                      <h4 style={styles.accountType}>
+                        {account.account_name || account.account_type?.replace('_', ' ')?.toUpperCase()}
+                      </h4>
+                      <p style={styles.accountNumber}>
                         ****{account.account_number?.slice(-4)}
-                      </div>
+                      </p>
                     </div>
                     <div style={styles.accountBalance}>
                       {formatCurrency(account.balance)}
@@ -1400,523 +1008,80 @@ export default function Dashboard() {
                 </div>
               ))
             )}
-
-            {/* Quick Actions */}
-            <div style={styles.quickActions}>
-              <div
-                onClick={() => router.push('/transactions')}
-                style={styles.quickActionCard}
-                className="quick-action"
-              >
-                <span style={styles.quickActionIcon}>📊</span>
-                <div style={styles.quickActionText}>Statements</div>
-              </div>
-              <div
-                onClick={() => router.push('/cards')}
-                style={styles.quickActionCard}
-                className="quick-action"
-              >
-                <span style={styles.quickActionIcon}>💳</span>
-                <div style={styles.quickActionText}>Cards</div>
-              </div>
-              <div
-                onClick={() => router.push('/loans')}
-                style={styles.quickActionCard}
-                className="quick-action"
-              >
-                <span style={styles.quickActionIcon}>🏠</span>
-                <div style={styles.quickActionText}>Loans</div>
-              </div>
-            </div>
           </section>
 
-          {/* Recent Transactions */}
-          <section style={styles.section}>
-            <h2 style={styles.sectionTitle}>
-              <span>📈</span> Recent Activity
-            </h2>
+          {/* Sidebar */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            {/* Recent Transactions */}
+            <section style={styles.transactionsSection}>
+              <div style={styles.sectionHeader}>
+                <h3 style={styles.sectionTitle}>
+                  📈 Recent Activity
+                </h3>
+                <Link href="/transactions" style={styles.secondaryButton} className="secondary-button">
+                  View All
+                </Link>
+              </div>
 
-            {transactions.length === 0 ? (
-              <p style={{ color: '#64748b', textAlign: 'center', padding: '2rem' }}>
-                No recent transactions
-              </p>
-            ) : (
-              transactions.slice(0, 5).map(transaction => (
-                <div key={transaction.id} style={styles.transactionItem}>
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
+              {transactions.length === 0 ? (
+                <div style={{ 
+                  textAlign: 'center', 
+                  padding: '32px 16px',
+                  color: colors.gray600 
+                }}>
+                  <div style={{ fontSize: '32px', marginBottom: '12px', opacity: 0.5 }}>📊</div>
+                  <p style={{ margin: 0 }}>No recent transactions</p>
+                </div>
+              ) : (
+                transactions.slice(0, 5).map(transaction => (
+                  <div key={transaction.id} style={styles.transactionItem}>
                     <div style={{
                       ...styles.transactionIcon,
-                      backgroundColor: transaction.type === 'credit' ? '#dcfce7' : '#fee2e2',
-                      color: transaction.type === 'credit' ? '#16a34a' : '#dc2626'
+                      backgroundColor: transaction.type === 'credit' ? `${colors.success}20` : `${colors.danger}20`,
+                      color: transaction.type === 'credit' ? colors.success : colors.danger
                     }}>
                       {transaction.type === 'credit' ? '↓' : '↑'}
                     </div>
                     <div style={styles.transactionDetails}>
-                      <div style={styles.transactionDescription}>
+                      <h4 style={styles.transactionTitle}>
                         {transaction.description || 'Transaction'}
-                      </div>
-                      <div style={styles.transactionDate}>
+                      </h4>
+                      <p style={styles.transactionDate}>
                         {formatDate(transaction.created_at)}
-                      </div>
+                      </p>
+                    </div>
+                    <div style={{
+                      ...styles.transactionAmount,
+                      color: transaction.type === 'credit' ? colors.success : colors.danger
+                    }}>
+                      {transaction.type === 'credit' ? '+' : '-'}{formatCurrency(Math.abs(transaction.amount))}
                     </div>
                   </div>
-                  <div style={{
-                    ...styles.transactionAmount,
-                    color: transaction.type === 'credit' ? '#16a34a' : '#dc2626'
-                  }}>
-                    {transaction.type === 'credit' ? '+' : '-'}{formatCurrency(Math.abs(transaction.amount))}
-                  </div>
-                </div>
-              ))
-            )}
+                ))
+              )}
+            </section>
 
-            <button
-              onClick={() => router.push('/transactions')}
-              style={{
-                ...styles.primaryButton,
-                marginTop: '1rem',
-                width: '100%'
-              }}
-              className="primary-button"
-            >
-              View All Transactions
-            </button>
-          </section>
+            {/* Credit Score Widget */}
+            <section style={styles.creditScoreWidget}>
+              <h3 style={{...styles.sectionTitle, justifyContent: 'center', marginBottom: '16px'}}>
+                🎯 Credit Score
+              </h3>
+              <div style={styles.creditScoreValue}>{creditScore}</div>
+              <div style={styles.creditScoreLabel}>Excellent</div>
+              <div style={styles.creditScoreRange}>
+                <div style={styles.creditScoreIndicator}></div>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: colors.gray500 }}>
+                <span>300</span>
+                <span>850</span>
+              </div>
+              <Link href="/credit-report" style={{...styles.primaryButton, marginTop: '16px'}} className="primary-button">
+                View Report
+              </Link>
+            </section>
+          </div>
         </div>
       </main>
-
-      {/* Enhanced Transfer Modal */}
-      {showTransferModal && (
-        <div style={styles.modal} onClick={() => setShowTransferModal(false)}>
-          <div style={styles.modalContent} onClick={e => e.stopPropagation()}>
-            <h3 style={styles.modalTitle}>Transfer Money</h3>
-            <form onSubmit={handleTransfer}>
-              <div style={styles.formGroup}>
-                <label style={styles.label}>From Account</label>
-                <select
-                  style={styles.select}
-                  className="select"
-                  value={transferData.fromAccount}
-                  onChange={e => {
-                    setTransferData({...transferData, fromAccount: e.target.value, toAccount: ''}); // Reset toAccount when fromAccount changes
-                    setError(''); // Clear error on input change
-                  }}
-                  required
-                >
-                  <option value="">Select account to send from</option>
-                  {accounts.map(account => (
-                    <option key={account.id} value={account.id}>
-                      {account.account_name || account.account_type?.replace('_', ' ')?.toUpperCase()} - ****{account.account_number?.slice(-4)} - {formatCurrency(account.balance || 0)}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div style={styles.formGroup}>
-                <label style={styles.label}>Transfer Type</label>
-                <select
-                  style={styles.select}
-                  className="select"
-                  value={transferData.transferType}
-                  onChange={e => {
-                    setTransferData({...transferData, transferType: e.target.value, toAccount: '', recipientName: '', recipientEmail: '', bankName: '', routingNumber: '', swiftCode: '', country: ''}); // Reset fields based on type
-                    setError(''); // Clear error on input change
-                  }}
-                  required
-                >
-                  <option value="between_accounts">Between My Accounts</option>
-                  <option value="domestic">Domestic Transfer</option>
-                  <option value="international">International Transfer</option>
-                  <option value="wire">Wire Transfer</option>
-                  <option value="ach">ACH Transfer</option>
-                </select>
-              </div>
-
-              {transferData.transferType === 'between_accounts' && (
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>To Account</label>
-                  <select
-                    style={styles.select}
-                    className="select"
-                    value={transferData.toAccount}
-                    onChange={e => {
-                      setTransferData({...transferData, toAccount: e.target.value});
-                      setError(''); // Clear error on input change
-                    }}
-                    required
-                  >
-                    <option value="">Select account to send to</option>
-                    {accounts.filter(acc => acc.id !== transferData.fromAccount).map(account => (
-                      <option key={account.id} value={account.id}>
-                        {account.account_name || account.account_type?.replace('_', ' ')?.toUpperCase()} - ****{account.account_number?.slice(-4)} - {formatCurrency(account.balance || 0)}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
-              {transferData.transferType !== 'between_accounts' && (
-                <>
-                  <div style={styles.formGroup}>
-                    <label style={styles.label}>Recipient Name</label>
-                    <input
-                      type="text"
-                      style={styles.input}
-                      className="input"
-                      placeholder="Full name of recipient"
-                      value={transferData.recipientName}
-                      onChange={e => {setTransferData({...transferData, recipientName: e.target.value}); setError('');}}
-                      required
-                    />
-                  </div>
-
-                  <div style={styles.formGroup}>
-                    <label style={styles.label}>Recipient Account Number</label>
-                    <input
-                      type="text"
-                      style={styles.input}
-                      className="input"
-                      placeholder="Account number"
-                      value={transferData.toAccount} // Use toAccount field for the recipient's account number
-                      onChange={e => {setTransferData({...transferData, toAccount: e.target.value}); setError('');}}
-                      required
-                    />
-                  </div>
-
-                  {(transferData.transferType === 'domestic' || transferData.transferType === 'ach' || transferData.transferType === 'wire') && (
-                    <>
-                      <div style={styles.formGroup}>
-                        <label style={styles.label}>Bank Name</label>
-                        <input
-                          type="text"
-                          style={styles.input}
-                          className="input"
-                          placeholder="Recipient's bank name"
-                          value={transferData.bankName}
-                          onChange={e => {setTransferData({...transferData, bankName: e.target.value}); setError('');}}
-                          required
-                        />
-                      </div>
-
-                      <div style={styles.formGroup}>
-                        <label style={styles.label}>Routing Number</label>
-                        <input
-                          type="text"
-                          style={styles.input}
-                          className="input"
-                          placeholder="9-digit routing number"
-                          value={transferData.routingNumber}
-                          onChange={e => {setTransferData({...transferData, routingNumber: e.target.value}); setError('');}}
-                          required
-                        />
-                      </div>
-                    </>
-                  )}
-
-                  {transferData.transferType === 'international' && (
-                    <>
-                      <div style={styles.formGroup}>
-                        <label style={styles.label}>SWIFT Code</label>
-                        <input
-                          type="text"
-                          style={styles.input}
-                          className="input"
-                          placeholder="SWIFT/BIC code"
-                          value={transferData.swiftCode}
-                          onChange={e => {setTransferData({...transferData, swiftCode: e.target.value}); setError('');}}
-                          required
-                        />
-                      </div>
-
-                      <div style={styles.formGroup}>
-                        <label style={styles.label}>Country</label>
-                        <input
-                          type="text"
-                          style={styles.input}
-                          className="input"
-                          placeholder="Recipient's country"
-                          value={transferData.country}
-                          onChange={e => {setTransferData({...transferData, country: e.target.value}); setError('');}}
-                          required
-                        />
-                      </div>
-                    </>
-                  )}
-                </>
-              )}
-
-              <div style={styles.formGroup}>
-                <label style={styles.label}>Amount</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  style={styles.input}
-                  className="input"
-                  placeholder="0.00"
-                  value={transferData.amount}
-                  onChange={e => {setTransferData({...transferData, amount: e.target.value}); setError('');}}
-                  required
-                />
-              </div>
-
-              <div style={styles.formGroup}>
-                <label style={styles.label}>Description (Optional)</label>
-                <input
-                  type="text"
-                  style={styles.input}
-                  className="input"
-                  placeholder="What's this for?"
-                  value={transferData.description}
-                  onChange={e => setTransferData({...transferData, description: e.target.value})}
-                />
-              </div>
-
-              <div style={styles.modalActions}>
-                <button
-                  type="button"
-                  onClick={() => setShowTransferModal(false)}
-                  style={styles.secondaryButton}
-                  className="secondary-button"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={() => router.push('/transfer')}
-                  style={{...styles.secondaryButton, backgroundColor: '#e0f2fe', color: '#0277bd'}}
-                  className="secondary-button"
-                >
-                  Advanced Transfer
-                </button>
-                <button
-                  type="submit"
-                  style={styles.primaryButton}
-                  className="primary-button"
-                  disabled={loading}
-                >
-                  {loading ? 'Processing...' : 'Transfer'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Withdrawal Modal */}
-      {showWithdrawalModal && (
-        <div style={styles.modal} onClick={() => setShowWithdrawalModal(false)}>
-          <div style={styles.modalContent} onClick={e => e.stopPropagation()}>
-            <h3 style={styles.modalTitle}>Withdraw Money</h3>
-            <form onSubmit={handleWithdrawal}>
-              <div style={styles.formGroup}>
-                <label style={styles.label}>From Account</label>
-                <select
-                  style={styles.select}
-                  className="select"
-                  value={withdrawalData.fromAccount}
-                  onChange={e => {
-                    setWithdrawalData({...withdrawalData, fromAccount: e.target.value});
-                    setError(''); // Clear error on input change
-                  }}
-                  required
-                >
-                  <option value="">Select account to withdraw from</option>
-                  {accounts.map(account => (
-                    <option key={account.id} value={account.id}>
-                      {account.account_name || account.account_type?.replace('_', ' ')?.toUpperCase()} - ****{account.account_number?.slice(-4)} - {formatCurrency(account.balance || 0)}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div style={styles.formGroup}>
-                <label style={styles.label}>Withdrawal Method</label>
-                <select
-                  style={styles.select}
-                  className="select"
-                  value={withdrawalData.withdrawalMethod}
-                  onChange={e => {
-                    setWithdrawalData({...withdrawalData, withdrawalMethod: e.target.value, recipientAccount: '', bankName: '', routingNumber: ''}); // Reset fields
-                    setError(''); // Clear error on input change
-                  }}
-                  required
-                >
-                  <option value="atm">ATM Withdrawal</option>
-                  <option value="bank_transfer">Bank Transfer</option>
-                  <option value="check">Check Request</option>
-                  <option value="wire_transfer">Wire Transfer</option>
-                </select>
-              </div>
-
-              {withdrawalData.withdrawalMethod === 'bank_transfer' && (
-                <>
-                  <div style={styles.formGroup}>
-                    <label style={styles.label}>Recipient Account Number</label>
-                    <input
-                      type="text"
-                      style={styles.input}
-                      className="input"
-                      placeholder="Account number"
-                      value={withdrawalData.recipientAccount}
-                      onChange={e => {setWithdrawalData({...withdrawalData, recipientAccount: e.target.value}); setError('');}}
-                      required
-                    />
-                  </div>
-
-                  <div style={styles.formGroup}>
-                    <label style={styles.label}>Bank Name</label>
-                    <input
-                      type="text"
-                      style={styles.input}
-                      className="input"
-                      placeholder="Bank name"
-                      value={withdrawalData.bankName}
-                      onChange={e => {setWithdrawalData({...withdrawalData, bankName: e.target.value}); setError('');}}
-                      required
-                    />
-                  </div>
-
-                  <div style={styles.formGroup}>
-                    <label style={styles.label}>Routing Number</label>
-                    <input
-                      type="text"
-                      style={styles.input}
-                      className="input"
-                      placeholder="9-digit routing number"
-                      value={withdrawalData.routingNumber}
-                      onChange={e => {setWithdrawalData({...withdrawalData, routingNumber: e.target.value}); setError('');}}
-                      required
-                    />
-                  </div>
-                </>
-              )}
-
-              <div style={styles.formGroup}>
-                <label style={styles.label}>Amount</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  style={styles.input}
-                  className="input"
-                  placeholder="0.00"
-                  value={withdrawalData.amount}
-                  onChange={e => {setWithdrawalData({...withdrawalData, amount: e.target.value}); setError('');}}
-                  required
-                />
-              </div>
-
-              <div style={styles.formGroup}>
-                <label style={styles.label}>Description (Optional)</label>
-                <input
-                  type="text"
-                  style={styles.input}
-                  className="input"
-                  placeholder="Purpose of withdrawal"
-                  value={withdrawalData.description}
-                  onChange={e => setWithdrawalData({...withdrawalData, description: e.target.value})}
-                />
-              </div>
-
-              <div style={styles.modalActions}>
-                <button
-                  type="button"
-                  onClick={() => setShowWithdrawalModal(false)}
-                  style={styles.secondaryButton}
-                  className="secondary-button"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  style={styles.primaryButton}
-                  className="primary-button"
-                >
-                  Withdraw
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Payment Modal */}
-      {showPayModal && (
-        <div style={styles.modal} onClick={() => setShowPayModal(false)}>
-          <div style={styles.modalContent} onClick={e => e.stopPropagation()}>
-            <h3 style={styles.modalTitle}>Pay Bills</h3>
-            <form onSubmit={handlePayment}>
-              <div style={styles.formGroup}>
-                <label style={styles.label}>Payee</label>
-                <input
-                  type="text"
-                  style={styles.input}
-                  className="input"
-                  placeholder="Company or person name"
-                  value={paymentData.payee}
-                  onChange={e => {setPaymentData({...paymentData, payee: e.target.value}); setError('');}}
-                  required
-                />
-              </div>
-
-              <div style={styles.formGroup}>
-                <label style={styles.label}>Amount</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  style={styles.input}
-                  className="input"
-                  placeholder="0.00"
-                  value={paymentData.amount}
-                  onChange={e => {setPaymentData({...paymentData, amount: e.target.value}); setError('');}}
-                  required
-                />
-              </div>
-
-              <div style={styles.formGroup}>
-                <label style={styles.label}>Due Date</label>
-                <input
-                  type="date"
-                  style={styles.input}
-                  className="input"
-                  value={paymentData.dueDate}
-                  onChange={e => {setPaymentData({...paymentData, dueDate: e.target.value}); setError('');}}
-                  required
-                />
-              </div>
-
-              <div style={styles.formGroup}>
-                <label style={styles.label}>Description</label>
-                <input
-                  type="text"
-                  style={styles.input}
-                  className="input"
-                  placeholder="Account number or memo"
-                  value={paymentData.description}
-                  onChange={e => setPaymentData({...paymentData, description: e.target.value})}
-                />
-              </div>
-
-              <div style={styles.modalActions}>
-                <button
-                  type="button"
-                  onClick={() => setShowPayModal(false)}
-                  style={styles.secondaryButton}
-                  className="secondary-button"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  style={styles.primaryButton}
-                  className="primary-button"
-                >
-                  Schedule Payment
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

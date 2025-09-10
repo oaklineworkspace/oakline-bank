@@ -33,7 +33,7 @@ async function sendEnrollmentEmail() {
     const enrollLink = `${siteUrl}/enroll?token=${enrollmentToken}&application_id=${testApplicationId}`;
     
     const mailOptions = {
-      from: process.env.SMTP_FROM,
+      from: 'info@theoaklinebank.com',
       to: userEmail,
       subject: "Complete Your Oakline Bank Enrollment",
       html: `
