@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { supabase } from '../lib/supabaseClient';
+import DebitCard from '../components/DebitCard';
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
@@ -310,6 +311,29 @@ export default function Dashboard() {
           </nav>
 
           <div style={styles.userInfo}>
+            {/* Menu Access Dropdown */}
+            <div style={styles.dropdown}>
+              <button 
+                style={styles.menuAccessBtn}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleDropdown('menuAccess');
+                }}
+              >
+                Menu ▼
+              </button>
+              {dropdownOpen.menuAccess && (
+                <div style={styles.dropdownContent} onClick={(e) => e.stopPropagation()}>
+                  <div style={styles.dropdownSection}>
+                    <h4 style={styles.dropdownHeading}>🏠 Navigation</h4>
+                    <Link href="/main-menu" style={styles.dropdownLink}>Full Main Menu</Link>
+                    <Link href="/dashboard" style={styles.dropdownLink}>Dashboard Home</Link>
+                    <Link href="/" style={styles.dropdownLink}>Bank Homepage</Link>
+                  </div>
+                </div>
+              )}
+            </div>
+            
             <span style={styles.welcomeText}>Welcome, {getUserDisplayName()}</span>
             <button onClick={() => supabase.auth.signOut()} style={styles.logoutBtn}>
               Sign Out
@@ -381,6 +405,21 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
+
+        {/* Debit Card Display */}
+        {accounts.length > 0 && (
+          <div style={styles.debitCardSection}>
+            <h3 style={styles.sectionTitle}>Your Debit Card</h3>
+            <p style={styles.cardSectionSubtitle}>Manage your primary debit card linked to your checking account</p>
+            <DebitCard 
+              user={user}
+              userProfile={userProfile}
+              account={accounts.find(acc => acc.account_type === 'checking') || accounts[0]}
+              cardType="debit"
+              showDetails={true}
+            />
+          </div>
+        )}
 
         {/* Quick Actions */}
         <div style={styles.quickActionsSection}>
@@ -777,6 +816,18 @@ const styles = {
     fontSize: '1rem',
     fontWeight: '500'
   },
+  menuAccessBtn: {
+    padding: '0.75rem 1rem',
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    color: 'white',
+    border: '1px solid rgba(255,255,255,0.25)',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    fontSize: '0.9rem',
+    fontWeight: '500',
+    transition: 'all 0.2s',
+    whiteSpace: 'nowrap'
+  },
   logoutBtn: {
     padding: '0.5rem 1rem',
     backgroundColor: 'rgba(255,255,255,0.2)',
@@ -883,6 +934,21 @@ const styles = {
   summarySubtext: {
     fontSize: '0.8rem',
     color: '#64748b'
+  },
+  debitCardSection: {
+    backgroundColor: 'white',
+    padding: '2rem',
+    borderRadius: '16px',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+    marginBottom: '2rem',
+    border: '1px solid #e2e8f0',
+    textAlign: 'center'
+  },
+  cardSectionSubtitle: {
+    fontSize: '0.9rem',
+    color: '#64748b',
+    marginBottom: '1.5rem',
+    lineHeight: '1.5'
   },
   quickActionsSection: {
     backgroundColor: 'white',

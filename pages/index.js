@@ -292,6 +292,64 @@ export default function Home() {
           </section>
         )}
 
+        {/* Banking Experience Gallery */}
+        <section style={styles.gallerySection}>
+          <div style={styles.container}>
+            <h2 style={styles.galleryTitle}>Experience Modern Banking</h2>
+            <p style={styles.gallerySubtitle}>See how Oakline Bank transforms your financial experience</p>
+            
+            <div style={styles.imageGrid}>
+              <div style={styles.imageCard}>
+                <img src="/images/Modern_bank_lobby_interior_d535acc7.png" alt="Modern Bank Lobby" style={styles.galleryImage} />
+                <div style={styles.imageOverlay}>
+                  <h3 style={styles.imageTitle}>Modern Banking Facilities</h3>
+                  <p style={styles.imageDesc}>State-of-the-art branches designed for your comfort</p>
+                </div>
+              </div>
+              
+              <div style={styles.imageCard}>
+                <img src="/images/Mobile_banking_user_experience_576bb7a3.png" alt="Mobile Banking" style={styles.galleryImage} />
+                <div style={styles.imageOverlay}>
+                  <h3 style={styles.imageTitle}>Mobile Banking Excellence</h3>
+                  <p style={styles.imageDesc}>Banking at your fingertips, anytime, anywhere</p>
+                </div>
+              </div>
+              
+              <div style={styles.imageCard}>
+                <img src="/images/Digital_investment_dashboard_36d35f19.png" alt="Investment Dashboard" style={styles.galleryImage} />
+                <div style={styles.imageOverlay}>
+                  <h3 style={styles.imageTitle}>Smart Investment Tools</h3>
+                  <p style={styles.imageDesc}>Advanced portfolio management and insights</p>
+                </div>
+              </div>
+              
+              <div style={styles.imageCard}>
+                <img src="/images/Bank_hall_business_discussion_72f98bbe.png" alt="Business Banking" style={styles.galleryImage} />
+                <div style={styles.imageOverlay}>
+                  <h3 style={styles.imageTitle}>Professional Banking Services</h3>
+                  <p style={styles.imageDesc}>Expert guidance for your financial decisions</p>
+                </div>
+              </div>
+              
+              <div style={styles.imageCard}>
+                <img src="/images/Banking_executive_team_meeting_c758f3ec.png" alt="Executive Team" style={styles.galleryImage} />
+                <div style={styles.imageOverlay}>
+                  <h3 style={styles.imageTitle}>Expert Financial Team</h3>
+                  <p style={styles.imageDesc}>Dedicated professionals committed to your success</p>
+                </div>
+              </div>
+              
+              <div style={styles.imageCard}>
+                <img src="/images/Loan_approval_celebration_banner_919a886f.png" alt="Loan Approval" style={styles.galleryImage} />
+                <div style={styles.imageOverlay}>
+                  <h3 style={styles.imageTitle}>Quick Loan Approvals</h3>
+                  <p style={styles.imageDesc}>Fast processing and competitive rates</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* CTAs based on user state */}
         {!user ? (
           <>
@@ -609,5 +667,67 @@ const styles = {
     fontWeight: '500',
     marginTop: '12px',
     textAlign: 'center'
+  },
+  gallerySection: {
+    padding: '4rem 0',
+    background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
+    borderTop: '1px solid #e2e8f0'
+  },
+  galleryTitle: {
+    fontSize: 'clamp(28px, 4vw, 36px)',
+    fontWeight: '700',
+    color: '#1e293b',
+    textAlign: 'center',
+    marginBottom: '1rem'
+  },
+  gallerySubtitle: {
+    fontSize: '18px',
+    color: '#64748b',
+    textAlign: 'center',
+    marginBottom: '3rem',
+    lineHeight: '1.6'
+  },
+  imageGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
+    gap: '2rem',
+    maxWidth: '1400px',
+    margin: '0 auto'
+  },
+  imageCard: {
+    position: 'relative',
+    borderRadius: '16px',
+    overflow: 'hidden',
+    boxShadow: '0 8px 25px rgba(0,0,0,0.1)',
+    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+    cursor: 'pointer'
+  },
+  galleryImage: {
+    width: '100%',
+    height: '250px',
+    objectFit: 'cover',
+    display: 'block'
+  },
+  imageOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    background: 'linear-gradient(transparent, rgba(0,0,0,0.8))',
+    color: 'white',
+    padding: '2rem 1.5rem 1.5rem',
+    transform: 'translateY(10px)',
+    opacity: 0,
+    transition: 'all 0.3s ease'
+  },
+  imageTitle: {
+    fontSize: '1.2rem',
+    fontWeight: 'bold',
+    marginBottom: '0.5rem'
+  },
+  imageDesc: {
+    fontSize: '0.9rem',
+    lineHeight: '1.4',
+    opacity: '0.9'
   }
 };

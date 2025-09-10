@@ -326,6 +326,30 @@ export default function MainMenu() {
           </nav>
 
           <div style={styles.userInfo}>
+            {/* Dashboard Access Dropdown */}
+            <div style={styles.dropdown}>
+              <button 
+                style={styles.dashboardAccessBtn}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleDropdown('dashboardAccess');
+                }}
+              >
+                Quick Access ▼
+              </button>
+              {dropdownOpen.dashboardAccess && (
+                <div style={styles.dropdownContent} onClick={(e) => e.stopPropagation()}>
+                  <div style={styles.dropdownSection}>
+                    <h4 style={styles.dropdownHeading}>📊 Quick Navigation</h4>
+                    <Link href="/dashboard" style={styles.dropdownLink}>Dashboard</Link>
+                    <Link href="/main-menu" style={styles.dropdownLink}>Main Menu</Link>
+                    <Link href="/" style={styles.dropdownLink}>Homepage</Link>
+                    <Link href="/account-details" style={styles.dropdownLink}>Account Details</Link>
+                  </div>
+                </div>
+              )}
+            </div>
+            
             <span style={styles.welcomeText}>Welcome, {getUserDisplayName()}</span>
             <button onClick={handleLogout} style={styles.logoutBtn}>
               Sign Out
@@ -609,6 +633,18 @@ const styles = {
   welcomeText: {
     fontSize: '1rem',
     fontWeight: '500'
+  },
+  dashboardAccessBtn: {
+    padding: '0.75rem 1rem',
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    color: 'white',
+    border: '1px solid rgba(255,255,255,0.25)',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    fontSize: '0.9rem',
+    fontWeight: '500',
+    transition: 'all 0.2s',
+    whiteSpace: 'nowrap'
   },
   logoutBtn: {
     padding: '0.5rem 1rem',
