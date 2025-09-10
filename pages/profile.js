@@ -13,6 +13,8 @@ export default function Profile() {
   const [editMode, setEditMode] = useState(false);
   const [editData, setEditData] = useState({});
   const [message, setMessage] = useState('');
+  const [profilePicture, setProfilePicture] = useState(null);
+  const [uploadingPicture, setUploadingPicture] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -191,23 +193,37 @@ export default function Profile() {
     setMessage('');
 
     try {
+      let profilePictureUrl = null;
+      
+      // Upload profile picture if selected
+      if (profilePicture) {
+        profilePictureUrl = await uploadProfilePicture();
+      }
+
       if (application?.id) {
+        const updateData = {
+          phone: editData.phone,
+          address: editData.address,
+          city: editData.city,
+          state: editData.state,
+          zip_code: editData.zip_code,
+          updated_at: new Date().toISOString()
+        };
+
+        if (profilePictureUrl) {
+          updateData.profile_picture = profilePictureUrl;
+        }
+
         const { error } = await supabase
           .from('applications')
-          .update({
-            phone: editData.phone,
-            address: editData.address,
-            city: editData.city,
-            state: editData.state,
-            zip_code: editData.zip_code,
-            updated_at: new Date().toISOString()
-          })
+          .update(updateData)
           .eq('id', application.id);
 
         if (error) throw error;
         
-        setApplication({ ...application, ...editData });
+        setApplication({ ...application, ...editData, ...(profilePictureUrl && { profile_picture: profilePictureUrl }) });
         setEditMode(false);
+        setProfilePicture(null);
         setMessage('Profile updated successfully!');
       }
     } catch (error) {
@@ -234,6 +250,47 @@ export default function Profile() {
 
   const getTotalBalance = () => {
     return accounts.reduce((total, account) => total + parseFloat(account.balance || 0), 0);
+  };
+
+  const handleProfilePictureChange = (e) => {
+    const file = e.target.files[0];
+    if (file && file.type.startsWith('image/')) {
+      setProfilePicture(file);
+    } else {
+      setMessage('Please select a valid image file');
+    }
+  };
+
+  const uploadProfilePicture = async () => {
+    if (!profilePicture) return null;
+
+    setUploadingPicture(true);
+    try {
+      const fileExt = profilePicture.name.split('.').pop();
+      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+      const filePath = `profile-pictures/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('user-files')
+        .upload(filePath, profilePicture, {
+          cacheControl: '3600',
+          upsert: true
+        });
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage
+        .from('user-files')
+        .getPublicUrl(filePath);
+
+      return data.publicUrl;
+    } catch (error) {
+      console.error('Error uploading profile picture:', error);
+      setMessage('Failed to upload profile picture');
+      return null;
+    } finally {
+      setUploadingPicture(false);
+    }
   };
 
   if (loading) {
@@ -296,6 +353,27 @@ export default function Profile() {
           <form onSubmit={handleUpdateProfile} style={styles.form}>
             <div style={styles.formGrid}>
               <div style={styles.formGroup}>
+                <label style={styles.label}>Profile Picture</label>
+                <div style={styles.profilePictureSection}>
+                  {(application?.profile_picture || profilePicture) && (
+                    <div style={styles.currentPicture}>
+                      <img 
+                        src={profilePicture ? URL.createObjectURL(profilePicture) : application.profile_picture} 
+                        alt="Profile" 
+                        style={styles.profileImage}
+                      />
+                    </div>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleProfilePictureChange}
+                    style={styles.fileInput}
+                  />
+                  {uploadingPicture && <p style={styles.uploadingText}>Uploading...</p>}
+                </div>
+              </div>
+              <div style={styles.formGroup}>
                 <label style={styles.label}>Phone</label>
                 <input
                   type="tel"
@@ -357,6 +435,18 @@ export default function Profile() {
           </form>
         ) : (
           <div style={styles.infoGrid}>
+            {application?.profile_picture && (
+              <div style={styles.infoItem}>
+                <span style={styles.infoLabel}>Profile Picture</span>
+                <div style={styles.profilePictureDisplay}>
+                  <img 
+                    src={application.profile_picture} 
+                    alt="Profile" 
+                    style={styles.profileImageDisplay}
+                  />
+                </div>
+              </div>
+            )}
             <div style={styles.infoItem}>
               <span style={styles.infoLabel}>Full Name</span>
               <span style={styles.infoValue}>
@@ -802,5 +892,41 @@ const styles = {
     color: '#374151',
     cursor: 'pointer',
     textAlign: 'left'
+  },
+  profilePictureSection: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '10px'
+  },
+  currentPicture: {
+    alignSelf: 'flex-start'
+  },
+  profileImage: {
+    width: '80px',
+    height: '80px',
+    borderRadius: '50%',
+    objectFit: 'cover',
+    border: '2px solid #e2e8f0'
+  },
+  fileInput: {
+    padding: '8px',
+    border: '1px solid #d1d5db',
+    borderRadius: '6px',
+    fontSize: '14px'
+  },
+  uploadingText: {
+    fontSize: '12px',
+    color: '#6b7280',
+    fontStyle: 'italic'
+  },
+  profilePictureDisplay: {
+    marginTop: '5px'
+  },
+  profileImageDisplay: {
+    width: '60px',
+    height: '60px',
+    borderRadius: '50%',
+    objectFit: 'cover',
+    border: '2px solid #e2e8f0'
   }
 };
