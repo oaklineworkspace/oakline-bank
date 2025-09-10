@@ -269,6 +269,25 @@ CREATE TABLE IF NOT EXISTS card_applications (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Cards/Debit Cards Table (updated)
+CREATE TABLE IF NOT EXISTS cards (
+    id SERIAL PRIMARY KEY,
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+    account_id UUID REFERENCES accounts(id) ON DELETE CASCADE,
+    application_id UUID REFERENCES card_applications(id) ON DELETE SET NULL,
+    card_number VARCHAR(20) UNIQUE NOT NULL,
+    cardholder_name VARCHAR(100) NOT NULL,
+    expiry_date VARCHAR(5) NOT NULL, -- MM/YY format
+    cvv VARCHAR(4) NOT NULL,
+    card_type VARCHAR(20) DEFAULT 'debit',
+    status VARCHAR(20) DEFAULT 'active',
+    daily_limit DECIMAL(10,2) DEFAULT 1000.00,
+    monthly_limit DECIMAL(10,2) DEFAULT 10000.00,
+    is_locked BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- Users Table (for admin dashboard)
 CREATE TABLE IF NOT EXISTS users (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,

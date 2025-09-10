@@ -1,16 +1,18 @@
+
 import { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabaseClient';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
+import { supabase } from '../lib/supabaseClient';
+import DebitCard from '../components/DebitCard';
 
 export default function Cards() {
   const [user, setUser] = useState(null);
-  const [cards, setCards] = useState([]);
+  const [userProfile, setUserProfile] = useState(null);
   const [accounts, setAccounts] = useState([]);
+  const [cards, setCards] = useState([]);
+  const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showApplicationModal, setShowApplicationModal] = useState(false);
-  const [selectedCardType, setSelectedCardType] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [message, setMessage] = useState('');
+  const [activeTab, setActiveTab] = useState('cards');
   const router = useRouter();
 
   useEffect(() => {
@@ -25,114 +27,80 @@ export default function Cards() {
         return;
       }
       setUser(user);
-      await fetchUserData(user.email);
+      await fetchUserData(user);
     } catch (error) {
       console.error('Error checking user:', error);
       router.push('/login');
-    }
-  };
-
-  const fetchUserData = async (email) => {
-    try {
-      // Fetch user accounts
-      const { data: accountsData, error: accountsError } = await supabase
-        .from('accounts')
-        .select('*')
-        .eq('email', email);
-
-      if (accountsError) throw accountsError;
-      setAccounts(accountsData || []);
-
-      // Fetch user cards (you'll need to create a cards table)
-      // For now, we'll simulate some cards
-      const simulatedCards = [
-        {
-          id: 1,
-          type: 'Debit Card',
-          number: '**** **** **** 1234',
-          status: 'Active',
-          expiryDate: '12/26',
-          accountId: accountsData?.[0]?.id,
-          // Fetch user details for cardholder name
-          user: {
-            first_name: accountsData?.[0]?.account_holder || 'John', // Placeholder if not available
-            last_name: accountsData?.[0]?.account_holder ? '' : 'Doe' // Placeholder if not available
-          }
-        }
-      ];
-      setCards(simulatedCards);
-    } catch (error) {
-      console.error('Error fetching user data:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const cardTypes = [
-    { value: 'debit', label: 'Debit Card', description: 'Access your checking account funds' },
-    { value: 'credit', label: 'Credit Card', description: 'Build credit with responsible use' },
-    { value: 'prepaid', label: 'Prepaid Card', description: 'Load funds for controlled spending' },
-    { value: 'business', label: 'Business Card', description: 'For business expenses and rewards' }
-  ];
-
-  const handleCardApplication = async () => {
+  const fetchUserData = async (user) => {
     try {
-      setIsSubmitting(true);
+      // Fetch user profile
+      const { data: profile } = await supabase
+        .from('applications')
+        .select('*')
+        .eq('email', user.email)
+        .single();
 
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        setMessage('Please log in to apply for a card.');
-        return;
-      }
+      if (profile) setUserProfile(profile);
 
-      // Get user's first account and associated user details
-      const { data: accounts } = await supabase
+      // Fetch user accounts
+      const { data: accountsData } = await supabase
         .from('accounts')
-        .select(`*, user:user_id(first_name, last_name)`) // Join with user table
-        .eq('user_id', user.id)
-        .limit(1);
+        .select('*')
+        .eq('user_id', user.id);
 
-      if (!accounts || accounts.length === 0) {
-        setMessage('No accounts found. Please contact support.');
-        return;
-      }
+      setAccounts(accountsData || []);
 
-      const account = accounts[0];
-      const userName = `${account.user?.first_name || ''} ${account.user?.last_name || ''}`.trim();
-
-      // Submit application to database
-      const { error } = await supabase
-        .from('card_applications')
-        .insert([{
-          user_id: user.id,
-          account_id: account.id,
-          card_type: selectedCardType,
-          cardholder_name: userName || 'Card Holder', // Use fetched name
-          status: 'pending',
-          created_at: new Date().toISOString()
-        }]);
-
-      if (error) {
-        console.error('Error submitting application:', error);
-        setMessage('Error submitting application. Please try again.');
-        return;
-      }
-
-      setShowApplicationModal(false);
-      setSelectedCardType('');
-      setMessage(`Your ${selectedCardType} application has been submitted successfully! You'll receive a response within 2-3 business days.`);
-
+      // Fetch cards and applications
+      await fetchCardsData();
     } catch (error) {
-      console.error('Error:', error);
-      setMessage('Error submitting application. Please try again.');
-    } finally {
-      setIsSubmitting(false);
+      console.error('Error fetching user data:', error);
+    }
+  };
+
+  const fetchCardsData = async () => {
+    try {
+      const response = await fetch('/api/get-user-cards');
+      const data = await response.json();
+      
+      if (data.success) {
+        setCards(data.cards || []);
+        setApplications(data.applications || []);
+      }
+    } catch (error) {
+      console.error('Error fetching cards data:', error);
+    }
+  };
+
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'approved':
+      case 'active':
+        return '#10b981';
+      case 'pending':
+        return '#f59e0b';
+      case 'rejected':
+        return '#ef4444';
+      default:
+        return '#6b7280';
     }
   };
 
   if (loading) {
     return (
-      <div style={styles.container}>
+      <div style={styles.loadingContainer}>
         <div style={styles.loading}>Loading your cards...</div>
       </div>
     );
@@ -142,121 +110,205 @@ export default function Cards() {
     <div style={styles.container}>
       {/* Header */}
       <header style={styles.header}>
-        <button onClick={() => router.push('/dashboard')} style={styles.backButton}>
-          ← Back to Dashboard
-        </button>
-        <h1 style={styles.title}>My Cards</h1>
-        <button onClick={() => router.push('/main-menu')} style={styles.menuButton}>
-          ☰ Menu
-        </button>
+        <div style={styles.headerContent}>
+          <Link href="/dashboard" style={styles.backButton}>
+            ← Back to Dashboard
+          </Link>
+          <h1 style={styles.title}>My Cards</h1>
+          <div style={styles.headerActions}>
+            <Link href="/main-menu" style={styles.menuButton}>
+              Menu
+            </Link>
+          </div>
+        </div>
       </header>
 
-      {/* Display submission message if any */}
-      {message && (
-        <div style={{ padding: '20px', color: message.includes('Error') ? 'red' : 'green', textAlign: 'center' }}>
-          {message}
-        </div>
-      )}
+      {/* Navigation Tabs */}
+      <nav style={styles.tabNav}>
+        <button
+          style={activeTab === 'cards' ? {...styles.tab, ...styles.activeTab} : styles.tab}
+          onClick={() => setActiveTab('cards')}
+        >
+          💳 My Cards
+        </button>
+        <button
+          style={activeTab === 'applications' ? {...styles.tab, ...styles.activeTab} : styles.tab}
+          onClick={() => setActiveTab('applications')}
+        >
+          📋 Applications
+        </button>
+        <button
+          style={activeTab === 'apply' ? {...styles.tab, ...styles.activeTab} : styles.tab}
+          onClick={() => setActiveTab('apply')}
+        >
+          ➕ Apply for Card
+        </button>
+      </nav>
 
-      {/* Current Cards */}
-      <section style={styles.section}>
-        <h2 style={styles.sectionTitle}>Your Cards</h2>
-        {cards.length > 0 ? (
-          <div style={styles.cardsGrid}>
-            {cards.map((card) => (
-              <div key={card.id} style={styles.cardItem}>
-                <div style={styles.cardVisual}>
-                  <div style={styles.cardType}>{card.type}</div>
-                  <div style={styles.cardNumber}>{card.number}</div>
-                  <div style={styles.cardDetails}>
-                    <span>Expires: {card.expiryDate}</span>
-                    <span style={card.status === 'Active' ? styles.statusActive : styles.statusInactive}>
-                      {card.status}
-                    </span>
+      <main style={styles.main}>
+        {/* My Cards Tab */}
+        {activeTab === 'cards' && (
+          <div style={styles.content}>
+            <div style={styles.sectionHeader}>
+              <h2 style={styles.sectionTitle}>Active Cards</h2>
+              <p style={styles.sectionDesc}>Manage your active debit cards and their settings</p>
+            </div>
+            
+            {cards.length > 0 ? (
+              <div style={styles.cardsGrid}>
+                {cards.map(card => (
+                  <div key={card.id} style={styles.cardSection}>
+                    <DebitCard
+                      user={user}
+                      userProfile={userProfile}
+                      account={accounts.find(acc => acc.id === card.account_id)}
+                      cardData={card}
+                      showDetails={true}
+                      showControls={true}
+                    />
                   </div>
-                  {/* Added user name display */}
-                  <div style={styles.cardName}>
-                    {card.user ? `${card.user.first_name?.toUpperCase() || ''} ${card.user.last_name?.toUpperCase() || ''}`.trim() || 'CARD HOLDER' : 'CARD HOLDER'}
-                  </div>
-                </div>
-                <div style={styles.cardActions}>
-                  <button style={styles.actionButton}>Freeze Card</button>
-                  <button style={styles.actionButton}>View PIN</button>
-                  <button style={styles.actionButton}>Transaction History</button>
-                </div>
+                ))}
               </div>
-            ))}
-          </div>
-        ) : (
-          <div style={styles.noCards}>
-            <p>You don't have any cards yet.</p>
-            <button 
-              style={styles.applyButton}
-              onClick={() => {
-                setSelectedCardType('Debit Card'); // Default to Debit Card
-                setShowApplicationModal(true);
-              }}
-            >
-              Apply for Your First Card
-            </button>
+            ) : (
+              <div style={styles.emptyState}>
+                <div style={styles.emptyIcon}>💳</div>
+                <h3 style={styles.emptyTitle}>No Cards Yet</h3>
+                <p style={styles.emptyDesc}>
+                  You don't have any active cards. Apply for a debit card to get started.
+                </p>
+                <button 
+                  onClick={() => setActiveTab('apply')}
+                  style={styles.emptyButton}
+                >
+                  Apply for Debit Card
+                </button>
+              </div>
+            )}
           </div>
         )}
-      </section>
 
-      {/* Apply for New Card */}
-      <section style={styles.section}>
-        <h2 style={styles.sectionTitle}>Apply for a New Card</h2>
-        <div style={styles.cardTypesGrid}>
-          {cardTypes.map((cardType) => (
-            <div key={cardType.value} style={styles.cardTypeItem}>
-              <h3 style={styles.cardTypeTitle}>{cardType.label}</h3>
-              <p style={styles.cardTypeDescription}>{cardType.description}</p>
-              <button 
-                style={styles.applyButton}
-                onClick={() => {
-                  setSelectedCardType(cardType.label);
-                  setShowApplicationModal(true);
-                }}
-              >
-                Apply Now
-              </button>
+        {/* Applications Tab */}
+        {activeTab === 'applications' && (
+          <div style={styles.content}>
+            <div style={styles.sectionHeader}>
+              <h2 style={styles.sectionTitle}>Card Applications</h2>
+              <p style={styles.sectionDesc}>Track the status of your card applications</p>
             </div>
-          ))}
-        </div>
-      </section>
+            
+            {applications.length > 0 ? (
+              <div style={styles.applicationsList}>
+                {applications.map(application => (
+                  <div key={application.id} style={styles.applicationCard}>
+                    <div style={styles.applicationHeader}>
+                      <div style={styles.applicationInfo}>
+                        <h3 style={styles.applicationTitle}>Debit Card Application</h3>
+                        <p style={styles.applicationAccount}>
+                          Account: {application.accounts?.account_type} - ****{application.accounts?.account_number?.slice(-4)}
+                        </p>
+                      </div>
+                      <span style={{
+                        ...styles.statusBadge,
+                        backgroundColor: getStatusColor(application.status)
+                      }}>
+                        {application.status.toUpperCase()}
+                      </span>
+                    </div>
+                    
+                    <div style={styles.applicationDetails}>
+                      <div style={styles.detailRow}>
+                        <span style={styles.detailLabel}>Cardholder Name:</span>
+                        <span style={styles.detailValue}>{application.cardholder_name}</span>
+                      </div>
+                      <div style={styles.detailRow}>
+                        <span style={styles.detailLabel}>Applied Date:</span>
+                        <span style={styles.detailValue}>{formatDate(application.applied_at)}</span>
+                      </div>
+                      {application.approved_at && (
+                        <div style={styles.detailRow}>
+                          <span style={styles.detailLabel}>Approved Date:</span>
+                          <span style={styles.detailValue}>{formatDate(application.approved_at)}</span>
+                        </div>
+                      )}
+                      {application.rejected_at && (
+                        <div style={styles.detailRow}>
+                          <span style={styles.detailLabel}>Rejected Date:</span>
+                          <span style={styles.detailValue}>{formatDate(application.rejected_at)}</span>
+                        </div>
+                      )}
+                    </div>
 
-      {/* Application Modal */}
-      {showApplicationModal && (
-        <div style={styles.modal}>
-          <div style={styles.modalContent}>
-            <h3 style={styles.modalTitle}>Apply for {selectedCardType}</h3>
-            <p style={styles.modalText}>
-              Are you sure you want to apply for a {selectedCardType}? 
-              Your application will be reviewed and you'll receive a response within 2-3 business days.
-            </p>
-            <div style={styles.modalActions}>
-              <button 
-                style={styles.confirmButton}
-                onClick={handleCardApplication}
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? 'Submitting...' : 'Confirm Application'}
-              </button>
-              <button 
-                style={styles.cancelButton}
-                onClick={() => {
-                  setShowApplicationModal(false);
-                  setSelectedCardType('');
-                  setMessage(''); // Clear message when closing modal
-                }}
-                disabled={isSubmitting}
-              >
-                Cancel
-              </button>
-            </div>
+                    {application.status === 'approved' && application.card_number && (
+                      <div style={styles.approvedCardInfo}>
+                        <h4 style={styles.approvedTitle}>Your Card Details</h4>
+                        <div style={styles.cardInfo}>
+                          <div style={styles.cardNumber}>
+                            Card Number: ****{application.card_number.slice(-4)}
+                          </div>
+                          <div style={styles.cardExpiry}>
+                            Expires: {application.expiry_date}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div style={styles.emptyState}>
+                <div style={styles.emptyIcon}>📋</div>
+                <h3 style={styles.emptyTitle}>No Applications</h3>
+                <p style={styles.emptyDesc}>
+                  You haven't submitted any card applications yet.
+                </p>
+                <button 
+                  onClick={() => setActiveTab('apply')}
+                  style={styles.emptyButton}
+                >
+                  Apply for Debit Card
+                </button>
+              </div>
+            )}
           </div>
-        </div>
-      )}
+        )}
+
+        {/* Apply for Card Tab */}
+        {activeTab === 'apply' && (
+          <div style={styles.content}>
+            <div style={styles.sectionHeader}>
+              <h2 style={styles.sectionTitle}>Apply for Debit Card</h2>
+              <p style={styles.sectionDesc}>Choose an account to link your new debit card</p>
+            </div>
+            
+            {accounts.length > 0 ? (
+              <div style={styles.accountsGrid}>
+                {accounts.map(account => (
+                  <div key={account.id} style={styles.accountCard}>
+                    <DebitCard
+                      user={user}
+                      userProfile={userProfile}
+                      account={account}
+                      showDetails={true}
+                      showControls={true}
+                      onApplyCard={fetchCardsData}
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div style={styles.emptyState}>
+                <div style={styles.emptyIcon}>🏦</div>
+                <h3 style={styles.emptyTitle}>No Accounts Found</h3>
+                <p style={styles.emptyDesc}>
+                  You need to have an active account to apply for a debit card.
+                </p>
+                <Link href="/apply" style={styles.emptyButton}>
+                  Open New Account
+                </Link>
+              </div>
+            )}
+          </div>
+        )}
+      </main>
     </div>
   );
 }
@@ -264,274 +316,265 @@ export default function Cards() {
 const styles = {
   container: {
     minHeight: '100vh',
-    backgroundColor: '#f8fafc', // Light grey background
-    padding: '0',
-    fontFamily: 'Arial, sans-serif', // Professional sans-serif font
+    backgroundColor: '#f1f5f9',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+  },
+  loadingContainer: {
+    minHeight: '100vh',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#f1f5f9'
+  },
+  loading: {
+    fontSize: '1.2rem',
+    color: '#64748b'
   },
   header: {
+    backgroundColor: '#1e40af',
+    color: 'white',
+    padding: '1rem 0',
+    boxShadow: '0 4px 12px rgba(30, 64, 175, 0.2)'
+  },
+  headerContent: {
+    maxWidth: '1200px',
+    margin: '0 auto',
+    padding: '0 1rem',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: '20px 30px', // Increased padding
-    backgroundColor: '#1e3a8a', // Deep blue
-    color: 'white',
-    boxShadow: '0 2px 5px rgba(0,0,0,0.1)', // Subtle shadow
+    flexWrap: 'wrap',
+    gap: '1rem'
   },
   backButton: {
-    padding: '10px 20px', // More padding
-    backgroundColor: 'transparent',
     color: 'white',
-    border: '1px solid white',
-    borderRadius: '8px', // Slightly more rounded corners
-    cursor: 'pointer',
-    fontSize: '14px',
+    textDecoration: 'none',
+    fontSize: '0.9rem',
     fontWeight: '500',
-    transition: 'all 0.3s ease',
-  },
-  backButtonHover: { // Added hover style for back button
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    padding: '0.5rem 1rem',
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: '8px',
+    transition: 'all 0.2s'
   },
   title: {
-    fontSize: '28px', // Larger title
+    fontSize: '1.8rem',
     fontWeight: 'bold',
-    margin: 0,
-    letterSpacing: '1px', // Letter spacing for elegance
+    margin: 0
+  },
+  headerActions: {
+    display: 'flex',
+    gap: '0.5rem'
   },
   menuButton: {
-    padding: '10px 20px', // More padding
-    backgroundColor: 'transparent',
     color: 'white',
-    border: '1px solid white',
-    borderRadius: '8px', // Slightly more rounded corners
-    cursor: 'pointer',
-    fontSize: '14px',
+    textDecoration: 'none',
+    fontSize: '0.9rem',
     fontWeight: '500',
-    transition: 'all 0.3s ease',
+    padding: '0.5rem 1rem',
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: '8px',
+    transition: 'all 0.2s'
   },
-  menuButtonHover: { // Added hover style for menu button
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  loading: {
+  tabNav: {
+    backgroundColor: 'white',
+    borderBottom: '1px solid #e2e8f0',
+    padding: '0 1rem',
     display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: '50vh',
-    fontSize: '18px',
-    color: '#64748b', // Neutral grey
+    gap: '0.5rem',
+    overflowX: 'auto'
   },
-  section: {
-    padding: '30px', // Increased padding
-    marginBottom: '30px', // Increased margin
+  tab: {
+    padding: '1rem 1.5rem',
+    backgroundColor: 'transparent',
+    border: 'none',
+    borderBottom: '3px solid transparent',
+    cursor: 'pointer',
+    fontSize: '0.9rem',
+    fontWeight: '600',
+    color: '#64748b',
+    transition: 'all 0.2s',
+    whiteSpace: 'nowrap'
+  },
+  activeTab: {
+    color: '#1e40af',
+    borderBottomColor: '#1e40af'
+  },
+  main: {
+    maxWidth: '1200px',
+    margin: '0 auto',
+    padding: '2rem 1rem'
+  },
+  content: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '2rem'
+  },
+  sectionHeader: {
+    textAlign: 'center',
+    marginBottom: '1rem'
   },
   sectionTitle: {
-    fontSize: '24px', // Larger section titles
+    fontSize: '1.8rem',
     fontWeight: 'bold',
-    color: '#1e293b', // Dark blue-grey
-    marginBottom: '20px', // Increased margin below title
-    borderBottom: '2px solid #e0e0e0', // Underline for section titles
-    paddingBottom: '10px',
+    color: '#1e293b',
+    marginBottom: '0.5rem'
+  },
+  sectionDesc: {
+    fontSize: '1rem',
+    color: '#64748b',
+    lineHeight: '1.6'
   },
   cardsGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', // Responsive grid for cards
-    gap: '30px', // Increased gap between cards
+    gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
+    gap: '2rem'
   },
-  cardItem: {
+  cardSection: {
     backgroundColor: 'white',
-    borderRadius: '12px',
-    padding: '20px',
-    boxShadow: '0 4px 20px rgba(0,0,0,0.1)', // Stronger shadow for depth
-    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-    overflow: 'hidden', // Ensure content stays within rounded borders
+    padding: '2rem',
+    borderRadius: '16px',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+    border: '1px solid #e2e8f0'
   },
-  cardItemHover: { // Added hover effect for card items
-    transform: 'translateY(-5px)',
-    boxShadow: '0 8px 30px rgba(0,0,0,0.15)',
+  accountsGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
+    gap: '2rem'
   },
-  cardVisual: {
-    background: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #3b82f6 100%)', // Professional blue gradient
-    borderRadius: '12px',
-    padding: '25px', // Increased padding
-    color: 'white',
-    marginBottom: '20px',
-    position: 'relative', // For positioning elements inside
-    minHeight: '180px', // Ensure consistent height
+  accountCard: {
+    backgroundColor: 'white',
+    padding: '2rem',
+    borderRadius: '16px',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+    border: '1px solid #e2e8f0'
+  },
+  applicationsList: {
     display: 'flex',
     flexDirection: 'column',
-    justifyContent: 'space-between',
+    gap: '1.5rem'
   },
-  cardType: {
-    fontSize: '16px', // Larger font for card type
-    fontWeight: '600', // Semi-bold
-    marginBottom: '15px',
-    opacity: '0.9', // Slight transparency
+  applicationCard: {
+    backgroundColor: 'white',
+    padding: '2rem',
+    borderRadius: '16px',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+    border: '1px solid #e2e8f0'
+  },
+  applicationHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: '1.5rem',
+    flexWrap: 'wrap',
+    gap: '1rem'
+  },
+  applicationInfo: {
+    flex: 1
+  },
+  applicationTitle: {
+    fontSize: '1.2rem',
+    fontWeight: 'bold',
+    color: '#1e293b',
+    marginBottom: '0.5rem'
+  },
+  applicationAccount: {
+    fontSize: '0.9rem',
+    color: '#64748b',
+    margin: 0
+  },
+  statusBadge: {
+    padding: '0.5rem 1rem',
+    borderRadius: '20px',
+    color: 'white',
+    fontSize: '0.8rem',
+    fontWeight: 'bold',
+    textAlign: 'center'
+  },
+  applicationDetails: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.75rem',
+    marginBottom: '1.5rem'
+  },
+  detailRow: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '0.5rem 0',
+    borderBottom: '1px solid #f1f5f9'
+  },
+  detailLabel: {
+    fontSize: '0.9rem',
+    fontWeight: '600',
+    color: '#374151'
+  },
+  detailValue: {
+    fontSize: '0.9rem',
+    color: '#64748b'
+  },
+  approvedCardInfo: {
+    backgroundColor: '#f0f9ff',
+    padding: '1.5rem',
+    borderRadius: '12px',
+    border: '1px solid #bae6fd'
+  },
+  approvedTitle: {
+    fontSize: '1rem',
+    fontWeight: 'bold',
+    color: '#0369a1',
+    marginBottom: '1rem'
+  },
+  cardInfo: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.5rem'
   },
   cardNumber: {
-    fontSize: '22px', // Larger font for card number
-    fontWeight: 'bold',
-    letterSpacing: '3px', // Wider letter spacing
-    marginBottom: '20px',
-    textShadow: '0 2px 4px rgba(0,0,0,0.2)', // Subtle text shadow
+    fontSize: '0.9rem',
+    fontWeight: '600',
+    color: '#374151',
+    fontFamily: 'monospace'
   },
-  cardDetails: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    fontSize: '13px',
-    opacity: '0.85',
-    fontWeight: '500',
+  cardExpiry: {
+    fontSize: '0.9rem',
+    fontWeight: '600',
+    color: '#374151'
   },
-  statusActive: {
-    color: '#10b981', // Green for active
-    fontWeight: 'bold',
-  },
-  statusInactive: {
-    color: '#ef4444', // Red for inactive
-    fontWeight: 'bold',
-  },
-  cardName: { // Style for cardholder name
-    fontSize: '15px',
-    fontWeight: 'bold',
-    marginTop: '10px',
-    letterSpacing: '1px',
-    textTransform: 'uppercase',
-  },
-  cardActions: {
-    display: 'flex',
-    gap: '12px',
-    flexWrap: 'wrap',
-    justifyContent: 'center', // Center actions
-  },
-  actionButton: {
-    padding: '10px 18px', // Adjusted padding
-    backgroundColor: '#e2e8f0', // Light grey
-    color: '#1e293b', // Dark blue-grey
-    border: 'none',
-    borderRadius: '8px', // Rounded corners
-    cursor: 'pointer',
-    fontSize: '13px',
-    fontWeight: '500',
-    transition: 'background-color 0.3s ease',
-  },
-  actionButtonHover: { // Added hover style for action buttons
-    backgroundColor: '#cbd5e0',
-  },
-  noCards: {
+  emptyState: {
     textAlign: 'center',
-    padding: '50px 20px',
+    padding: '4rem 2rem',
     backgroundColor: 'white',
-    borderRadius: '12px',
-    boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+    borderRadius: '16px',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+    border: '1px solid #e2e8f0'
   },
-  cardTypesGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-    gap: '20px',
+  emptyIcon: {
+    fontSize: '4rem',
+    marginBottom: '1rem'
   },
-  cardTypeItem: {
-    backgroundColor: 'white',
-    borderRadius: '12px',
-    padding: '25px', // Increased padding
-    boxShadow: '0 4px 20px rgba(0,0,0,0.1)', // Stronger shadow
-    textAlign: 'center',
-    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-  },
-  cardTypeItemHover: { // Added hover effect for card type items
-    transform: 'translateY(-5px)',
-    boxShadow: '0 8px 30px rgba(0,0,0,0.15)',
-  },
-  cardTypeTitle: {
-    fontSize: '20px', // Larger title
+  emptyTitle: {
+    fontSize: '1.5rem',
     fontWeight: 'bold',
     color: '#1e293b',
-    marginBottom: '10px',
+    marginBottom: '0.5rem'
   },
-  cardTypeDescription: {
-    fontSize: '14px',
+  emptyDesc: {
+    fontSize: '1rem',
     color: '#64748b',
-    marginBottom: '20px',
-    lineHeight: '1.5',
-  },
-  applyButton: {
-    padding: '12px 24px',
-    backgroundColor: '#1e3a8a', // Deep blue
-    color: 'white',
-    border: 'none',
-    borderRadius: '8px', // Rounded corners
-    cursor: 'pointer',
-    fontSize: '14px',
-    fontWeight: '500',
-    transition: 'background-color 0.3s ease, transform 0.3s ease',
-  },
-  applyButtonHover: { // Added hover style for apply buttons
-    backgroundColor: '#1e40af', // Slightly lighter blue on hover
-    transform: 'scale(1.02)',
-  },
-  modal: {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.6)', // Darker overlay
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 1000,
-    backdropFilter: 'blur(5px)', // Blur effect for overlay
-  },
-  modalContent: {
-    backgroundColor: 'white',
-    borderRadius: '16px', // More rounded modal
-    padding: '35px', // Increased padding
-    maxWidth: '450px', // Slightly wider modal
-    width: '90%',
-    textAlign: 'center',
-    boxShadow: '0 10px 30px rgba(0,0,0,0.2)', // Deeper shadow
-  },
-  modalTitle: {
-    fontSize: '22px', // Larger modal title
-    fontWeight: 'bold',
-    marginBottom: '18px',
-    color: '#1e293b',
-  },
-  modalText: {
-    fontSize: '15px', // Larger modal text
-    color: '#4b5563', // Slightly lighter grey
-    marginBottom: '30px',
     lineHeight: '1.6',
+    marginBottom: '2rem'
   },
-  modalActions: {
-    display: 'flex',
-    gap: '15px', // Increased gap between buttons
-    justifyContent: 'center',
-  },
-  confirmButton: {
-    padding: '12px 28px',
-    backgroundColor: '#10b981', // Green for confirmation
+  emptyButton: {
+    display: 'inline-block',
+    padding: '0.75rem 2rem',
+    backgroundColor: '#1e40af',
     color: 'white',
+    textDecoration: 'none',
+    borderRadius: '10px',
+    fontSize: '1rem',
+    fontWeight: '600',
     border: 'none',
-    borderRadius: '8px',
     cursor: 'pointer',
-    fontSize: '14px',
-    fontWeight: '500',
-    transition: 'background-color 0.3s ease, transform 0.3s ease',
-  },
-  confirmButtonHover: { // Added hover style for confirm button
-    backgroundColor: '#059669',
-    transform: 'scale(1.02)',
-  },
-  cancelButton: {
-    padding: '12px 28px',
-    backgroundColor: '#e2e8f0', // Light grey
-    color: '#1e293b',
-    border: 'none',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    fontSize: '14px',
-    fontWeight: '500',
-    transition: 'background-color 0.3s ease',
-  },
-  cancelButtonHover: { // Added hover style for cancel button
-    backgroundColor: '#cbd5e0',
-  },
+    transition: 'all 0.2s'
+  }
 };
