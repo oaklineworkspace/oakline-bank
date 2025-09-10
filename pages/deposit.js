@@ -1,522 +1,414 @@
-// pages/deposit.js
+
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabaseClient';
 
-export default function Deposit() {
+export default function MobileDeposit() {
+  const [user, setUser] = useState(null);
   const [accounts, setAccounts] = useState([]);
   const [selectedAccount, setSelectedAccount] = useState('');
   const [amount, setAmount] = useState('');
-  const [depositMethod, setDepositMethod] = useState('debit_card');
-  const [paymentDetails, setPaymentDetails] = useState({
-    card_number: '',
-    expiry: '',
-    cvv: '',
-    cardholder_name: '',
-    routing_number: '',
-    account_number: '',
-    bank_name: '',
-    zelle_email: '',
-    zelle_phone: '',
-    venmo_username: '',
-    cashapp_cashtag: '',
-    chime_phone: ''
-  });
+  const [checkFront, setCheckFront] = useState(null);
+  const [checkBack, setCheckBack] = useState(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const router = useRouter();
 
   useEffect(() => {
-    fetchAccounts();
+    checkUser();
   }, []);
 
-  const fetchAccounts = async () => {
+  const checkUser = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user) {
+        router.push('/login');
+        return;
+      }
+      setUser(user);
+      await fetchAccounts(user);
+    } catch (error) {
+      console.error('Error checking user:', error);
+      router.push('/login');
+    }
+  };
 
-      const { data, error } = await supabase
+  const fetchAccounts = async (user) => {
+    try {
+      const { data: accountsData, error } = await supabase
         .from('accounts')
         .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: true });
+        .or(`user_id.eq.${user.id},user_email.eq.${user.email},email.eq.${user.email}`)
+        .in('account_type', ['checking', 'savings']);
 
-      if (error) throw error;
-      setAccounts(data || []);
-      if (data?.length > 0) setSelectedAccount(data[0].id);
+      if (accountsData && accountsData.length > 0) {
+        setAccounts(accountsData);
+        setSelectedAccount(accountsData[0].id.toString());
+      }
     } catch (error) {
       console.error('Error fetching accounts:', error);
-      setMessage('Unable to load accounts. Please try again.');
     }
   };
 
-  const handlePaymentDetailsChange = (field, value) => {
-    setPaymentDetails(prev => ({ ...prev, [field]: value }));
+  const handleFileUpload = (e, side) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        setMessage('File size must be less than 5MB');
+        return;
+      }
+      if (!file.type.startsWith('image/')) {
+        setMessage('Please upload an image file');
+        return;
+      }
+      
+      if (side === 'front') {
+        setCheckFront(file);
+      } else {
+        setCheckBack(file);
+      }
+      setMessage('');
+    }
   };
 
-  const validateForm = () => {
-    if (!selectedAccount || !amount || parseFloat(amount) <= 0) {
-      setMessage('Please select an account and enter a valid amount.');
-      return false;
-    }
-
-    if (parseFloat(amount) > 50000) {
-      setMessage('Deposits over $50,000 require additional verification. Please contact support.');
-      return false;
-    }
-
-    // Validate payment method specific fields
-    switch (depositMethod) {
-      case 'debit_card':
-      case 'credit_card':
-        if (!paymentDetails.card_number || !paymentDetails.expiry || !paymentDetails.cvv || !paymentDetails.cardholder_name) {
-          setMessage('Please fill in all card details.');
-          return false;
-        }
-        break;
-      case 'bank_transfer':
-        if (!paymentDetails.routing_number || !paymentDetails.account_number || !paymentDetails.bank_name) {
-          setMessage('Please fill in all bank transfer details.');
-          return false;
-        }
-        break;
-      case 'zelle':
-        if (!paymentDetails.zelle_email && !paymentDetails.zelle_phone) {
-          setMessage('Please provide either Zelle email or phone number.');
-          return false;
-        }
-        break;
-      case 'venmo':
-        if (!paymentDetails.venmo_username) {
-          setMessage('Please provide your Venmo username.');
-          return false;
-        }
-        break;
-      case 'cash_app':
-        if (!paymentDetails.cashapp_cashtag) {
-          setMessage('Please provide your Cash App $Cashtag.');
-          return false;
-        }
-        break;
-      case 'chime':
-        if (!paymentDetails.chime_phone) {
-          setMessage('Please provide your Chime phone number.');
-          return false;
-        }
-        break;
-    }
-    return true;
-  };
-
-  const handleSubmit = async (e) => {
+  const handleDeposit = async (e) => {
     e.preventDefault();
-    if (!validateForm()) return;
+    
+    if (!selectedAccount || !amount || !checkFront || !checkBack) {
+      setMessage('Please fill all fields and upload both check images');
+      return;
+    }
+
+    if (parseFloat(amount) <= 0) {
+      setMessage('Amount must be greater than 0');
+      return;
+    }
 
     setLoading(true);
-    setMessage('');
-
+    
     try {
-      const selectedAccountData = accounts.find(acc => acc.id === selectedAccount);
-      const depositAmount = parseFloat(amount);
-
-      // Create transaction record
-      const { error: transactionError } = await supabase
+      // In a real implementation, you would upload images to storage
+      // and use OCR to read check details
+      
+      const selectedAccountData = accounts.find(acc => acc.id.toString() === selectedAccount);
+      
+      // Create pending transaction
+      const { data: transactionData, error: transactionError } = await supabase
         .from('transactions')
-        .insert([{
-          account_id: selectedAccount,
-          type: 'deposit',
-          amount: depositAmount,
-          status: 'pending',
-          reference: `${depositMethod.toUpperCase()} deposit - ${new Date().toISOString()}`
-        }]);
+        .insert([
+          {
+            user_id: user.id,
+            user_email: user.email,
+            account_id: selectedAccount,
+            account_type: selectedAccountData?.account_type || 'checking',
+            amount: parseFloat(amount),
+            transaction_type: 'deposit',
+            description: 'Mobile Check Deposit',
+            status: 'pending',
+            category: 'deposit',
+            created_at: new Date().toISOString()
+          }
+        ])
+        .select()
+        .single();
 
       if (transactionError) throw transactionError;
 
-      // Update account balance (in real banking, this would happen after payment processing)
-      const newBalance = parseFloat(selectedAccountData.balance) + depositAmount;
-      const { error: updateError } = await supabase
-        .from('accounts')
-        .update({ balance: newBalance, updated_at: new Date().toISOString() })
-        .eq('id', selectedAccount);
-
-      if (updateError) throw updateError;
-
-      // Create notification
-      const { data: { user } } = await supabase.auth.getUser();
-      await supabase.from('notifications').insert([{
-        user_id: user.id,
-        type: 'deposit',
-        title: 'Deposit Processed',
-        message: `$${depositAmount.toFixed(2)} deposited to account ${selectedAccountData.account_number} via ${depositMethod.replace('_', ' ')}`
-      }]);
-
-      setMessage(`✅ Deposit of $${depositAmount.toFixed(2)} has been processed successfully!`);
-      setAmount('');
-      setPaymentDetails({
-        card_number: '', expiry: '', cvv: '', cardholder_name: '',
-        routing_number: '', account_number: '', bank_name: '',
-        zelle_email: '', zelle_phone: '', venmo_username: '',
-        cashapp_cashtag: '', chime_phone: ''
-      });
+      setMessage('✅ Check deposit submitted successfully! Your deposit is being processed and will be available within 1-2 business days.');
       
-      // Refresh accounts to show updated balance
-      fetchAccounts();
+      // Reset form
+      setAmount('');
+      setCheckFront(null);
+      setCheckBack(null);
+      document.getElementById('checkFront').value = '';
+      document.getElementById('checkBack').value = '';
+      
+      // Redirect to dashboard after 3 seconds
+      setTimeout(() => {
+        router.push('/dashboard');
+      }, 3000);
 
     } catch (error) {
-      console.error('Deposit error:', error);
-      setMessage(`Error: ${error.message}`);
+      console.error('Error processing deposit:', error);
+      setMessage('❌ Error processing deposit. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  const inputStyle = {
-    width: '100%',
-    padding: '12px',
-    border: '2px solid #e1e5e9',
-    borderRadius: '8px',
-    fontSize: '14px',
-    marginBottom: '15px',
-    boxSizing: 'border-box'
-  };
-
-  const selectStyle = {
-    ...inputStyle,
-    backgroundColor: 'white'
-  };
-
-  const buttonStyle = {
-    width: '100%',
-    padding: '15px',
-    backgroundColor: '#28a745',
-    color: 'white',
-    border: 'none',
-    borderRadius: '8px',
-    fontSize: '16px',
-    fontWeight: 'bold',
-    cursor: loading ? 'not-allowed' : 'pointer',
-    opacity: loading ? 0.6 : 1
-  };
-
-  const renderPaymentMethodFields = () => {
-    switch (depositMethod) {
-      case 'debit_card':
-      case 'credit_card':
-        return (
-          <>
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
-              Cardholder Name:
-            </label>
-            <input
-              type="text"
-              style={inputStyle}
-              value={paymentDetails.cardholder_name}
-              onChange={(e) => handlePaymentDetailsChange('cardholder_name', e.target.value)}
-              placeholder="Full name on card"
-              required
-            />
-            
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
-              Card Number:
-            </label>
-            <input
-              type="text"
-              style={inputStyle}
-              value={paymentDetails.card_number}
-              onChange={(e) => handlePaymentDetailsChange('card_number', e.target.value)}
-              placeholder="1234 5678 9012 3456"
-              maxLength="19"
-              required
-            />
-            
-            <div style={{ display: 'flex', gap: '15px' }}>
-              <div style={{ flex: '1' }}>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
-                  Expiry (MM/YY):
-                </label>
-                <input
-                  type="text"
-                  style={inputStyle}
-                  value={paymentDetails.expiry}
-                  onChange={(e) => handlePaymentDetailsChange('expiry', e.target.value)}
-                  placeholder="12/26"
-                  maxLength="5"
-                  required
-                />
-              </div>
-              <div style={{ flex: '1' }}>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
-                  CVV:
-                </label>
-                <input
-                  type="text"
-                  style={inputStyle}
-                  value={paymentDetails.cvv}
-                  onChange={(e) => handlePaymentDetailsChange('cvv', e.target.value)}
-                  placeholder="123"
-                  maxLength="4"
-                  required
-                />
-              </div>
-            </div>
-          </>
-        );
-
-      case 'bank_transfer':
-        return (
-          <>
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
-              Bank Name:
-            </label>
-            <input
-              type="text"
-              style={inputStyle}
-              value={paymentDetails.bank_name}
-              onChange={(e) => handlePaymentDetailsChange('bank_name', e.target.value)}
-              placeholder="Bank of America"
-              required
-            />
-            
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
-              Routing Number:
-            </label>
-            <input
-              type="text"
-              style={inputStyle}
-              value={paymentDetails.routing_number}
-              onChange={(e) => handlePaymentDetailsChange('routing_number', e.target.value)}
-              placeholder="123456789"
-              maxLength="9"
-              required
-            />
-            
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
-              Account Number:
-            </label>
-            <input
-              type="text"
-              style={inputStyle}
-              value={paymentDetails.account_number}
-              onChange={(e) => handlePaymentDetailsChange('account_number', e.target.value)}
-              placeholder="Account number"
-              required
-            />
-          </>
-        );
-
-      case 'zelle':
-        return (
-          <>
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
-              Zelle Email:
-            </label>
-            <input
-              type="email"
-              style={inputStyle}
-              value={paymentDetails.zelle_email}
-              onChange={(e) => handlePaymentDetailsChange('zelle_email', e.target.value)}
-              placeholder="your-email@example.com"
-            />
-            
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
-              Or Zelle Phone:
-            </label>
-            <input
-              type="tel"
-              style={inputStyle}
-              value={paymentDetails.zelle_phone}
-              onChange={(e) => handlePaymentDetailsChange('zelle_phone', e.target.value)}
-              placeholder="(555) 123-4567"
-            />
-            <p style={{ fontSize: '12px', color: '#666', margin: '-10px 0 15px 0' }}>
-              Provide either email or phone number registered with Zelle
-            </p>
-          </>
-        );
-
-      case 'venmo':
-        return (
-          <>
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
-              Venmo Username:
-            </label>
-            <input
-              type="text"
-              style={inputStyle}
-              value={paymentDetails.venmo_username}
-              onChange={(e) => handlePaymentDetailsChange('venmo_username', e.target.value)}
-              placeholder="@username"
-              required
-            />
-          </>
-        );
-
-      case 'cash_app':
-        return (
-          <>
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
-              Cash App $Cashtag:
-            </label>
-            <input
-              type="text"
-              style={inputStyle}
-              value={paymentDetails.cashapp_cashtag}
-              onChange={(e) => handlePaymentDetailsChange('cashapp_cashtag', e.target.value)}
-              placeholder="$YourCashTag"
-              required
-            />
-          </>
-        );
-
-      case 'chime':
-        return (
-          <>
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
-              Chime Phone Number:
-            </label>
-            <input
-              type="tel"
-              style={inputStyle}
-              value={paymentDetails.chime_phone}
-              onChange={(e) => handlePaymentDetailsChange('chime_phone', e.target.value)}
-              placeholder="(555) 123-4567"
-              required
-            />
-          </>
-        );
-
-      default:
-        return null;
-    }
-  };
-
-  if (accounts.length === 0) {
-    return (
-      <div style={{
-        maxWidth: '600px',
-        margin: '40px auto',
-        padding: '40px',
-        textAlign: 'center',
-        backgroundColor: '#f8f9fa',
-        borderRadius: '12px'
-      }}>
-        <h1 style={{ color: '#0070f3' }}>No Accounts Found</h1>
-        <p>You need to have at least one account to make deposits. Please contact support or apply for an account first.</p>
-      </div>
-    );
-  }
-
   return (
-    <div style={{
-      maxWidth: '600px',
-      margin: '40px auto',
-      padding: '40px',
-      backgroundColor: '#f8f9fa',
-      borderRadius: '12px',
-      fontFamily: 'Arial, sans-serif'
-    }}>
-      <h1 style={{ color: '#0070f3', textAlign: 'center', marginBottom: '30px' }}>
-        💰 Make a Deposit
-      </h1>
-
-      {message && (
-        <div style={{
-          padding: '15px',
-          marginBottom: '20px',
-          borderRadius: '8px',
-          backgroundColor: message.includes('✅') ? '#e8f5e8' : '#ffeaa7',
-          border: `1px solid ${message.includes('✅') ? '#4caf50' : '#f39c12'}`,
-          color: message.includes('✅') ? '#2e7d32' : '#d68910'
-        }}>
-          {message}
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit}>
-        <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
-          Deposit To Account:
-        </label>
-        <select
-          style={selectStyle}
-          value={selectedAccount}
-          onChange={(e) => setSelectedAccount(e.target.value)}
-          required
-        >
-          {accounts.map(account => (
-            <option key={account.id} value={account.id}>
-              {account.account_number} ({account.account_type}) - ${parseFloat(account.balance).toFixed(2)}
-            </option>
-          ))}
-        </select>
-
-        <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
-          Deposit Amount ($):
-        </label>
-        <input
-          type="number"
-          style={inputStyle}
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          placeholder="Enter amount"
-          step="0.01"
-          min="0.01"
-          max="50000"
-          required
-        />
-
-        <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
-          Deposit Method:
-        </label>
-        <select
-          style={selectStyle}
-          value={depositMethod}
-          onChange={(e) => setDepositMethod(e.target.value)}
-          required
-        >
-          <option value="debit_card">💳 Debit Card</option>
-          <option value="credit_card">💳 Credit Card</option>
-          <option value="bank_transfer">🏦 Bank Transfer (ACH)</option>
-          <option value="zelle">⚡ Zelle</option>
-          <option value="venmo">💙 Venmo</option>
-          <option value="cash_app">💚 Cash App</option>
-          <option value="chime">🟢 Chime</option>
-          <option value="wire_transfer">📡 Wire Transfer</option>
-        </select>
-
-        <div style={{ 
-          backgroundColor: 'white', 
-          padding: '20px', 
-          borderRadius: '8px', 
-          marginBottom: '20px',
-          border: '1px solid #e1e5e9' 
-        }}>
-          <h3 style={{ color: '#0070f3', marginBottom: '15px' }}>
-            Payment Details
-          </h3>
-          {renderPaymentMethodFields()}
-        </div>
-
-        <button type="submit" style={buttonStyle} disabled={loading}>
-          {loading ? 'Processing Deposit...' : `Deposit $${amount || '0.00'}`}
+    <div style={styles.container}>
+      <div style={styles.header}>
+        <button onClick={() => router.back()} style={styles.backButton}>
+          ← Back
         </button>
-      </form>
+        <h1 style={styles.title}>📥 Mobile Check Deposit</h1>
+      </div>
 
-      <div style={{
-        marginTop: '20px',
-        padding: '15px',
-        backgroundColor: 'white',
-        borderRadius: '8px',
-        border: '1px solid #e1e5e9',
-        fontSize: '12px',
-        color: '#666'
-      }}>
-        <strong>Important Notes:</strong>
-        <ul style={{ margin: '10px 0', paddingLeft: '20px' }}>
-          <li>Deposits may take 1-3 business days to process</li>
-          <li>Maximum single deposit: $50,000</li>
-          <li>Card deposits may incur processing fees</li>
-          <li>Bank transfers are typically free</li>
-          <li>All transactions are secured with bank-level encryption</li>
-        </ul>
+      <div style={styles.content}>
+        <div style={styles.instructionsCard}>
+          <h3 style={styles.instructionsTitle}>📋 Deposit Instructions</h3>
+          <ul style={styles.instructionsList}>
+            <li>Endorse the back of your check by signing it</li>
+            <li>Take clear photos of both sides of the check</li>
+            <li>Ensure the entire check is visible in the photos</li>
+            <li>Make sure the photos are well-lit and in focus</li>
+            <li>Deposits are processed within 1-2 business days</li>
+          </ul>
+        </div>
+
+        <form onSubmit={handleDeposit} style={styles.form}>
+          <div style={styles.formGroup}>
+            <label style={styles.label}>Deposit To Account</label>
+            <select
+              value={selectedAccount}
+              onChange={(e) => setSelectedAccount(e.target.value)}
+              style={styles.select}
+              required
+            >
+              <option value="">Select Account</option>
+              {accounts.map(account => (
+                <option key={account.id} value={account.id}>
+                  {account.account_name || account.account_type} - {account.account_number}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div style={styles.formGroup}>
+            <label style={styles.label}>Deposit Amount ($)</label>
+            <input
+              type="number"
+              step="0.01"
+              min="0.01"
+              max="10000"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              style={styles.input}
+              placeholder="0.00"
+              required
+            />
+          </div>
+
+          <div style={styles.uploadSection}>
+            <div style={styles.uploadGroup}>
+              <label style={styles.label}>Check Front</label>
+              <input
+                id="checkFront"
+                type="file"
+                accept="image/*"
+                onChange={(e) => handleFileUpload(e, 'front')}
+                style={styles.fileInput}
+                required
+              />
+              {checkFront && (
+                <div style={styles.filePreview}>
+                  ✅ {checkFront.name}
+                </div>
+              )}
+            </div>
+
+            <div style={styles.uploadGroup}>
+              <label style={styles.label}>Check Back</label>
+              <input
+                id="checkBack"
+                type="file"
+                accept="image/*"
+                onChange={(e) => handleFileUpload(e, 'back')}
+                style={styles.fileInput}
+                required
+              />
+              {checkBack && (
+                <div style={styles.filePreview}>
+                  ✅ {checkBack.name}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            style={{
+              ...styles.submitButton,
+              opacity: loading ? 0.7 : 1,
+              cursor: loading ? 'not-allowed' : 'pointer'
+            }}
+          >
+            {loading ? '🔄 Processing...' : '📥 Submit Deposit'}
+          </button>
+        </form>
+
+        {message && (
+          <div style={{
+            ...styles.message,
+            backgroundColor: message.includes('✅') ? '#d4edda' : '#f8d7da',
+            color: message.includes('✅') ? '#155724' : '#721c24',
+            borderColor: message.includes('✅') ? '#c3e6cb' : '#f5c6cb'
+          }}>
+            {message}
+          </div>
+        )}
+
+        <div style={styles.securityNote}>
+          <h4 style={styles.securityTitle}>🔒 Security & Limits</h4>
+          <ul style={styles.securityList}>
+            <li>Daily deposit limit: $10,000</li>
+            <li>Mobile deposits are encrypted and secure</li>
+            <li>Funds availability subject to verification</li>
+            <li>Keep your original check until deposit clears</li>
+          </ul>
+        </div>
       </div>
     </div>
   );
 }
+
+const styles = {
+  container: {
+    minHeight: '100vh',
+    backgroundColor: '#f1f5f9',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+  },
+  header: {
+    backgroundColor: '#1e40af',
+    color: 'white',
+    padding: '1rem',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '1rem'
+  },
+  backButton: {
+    background: 'rgba(255,255,255,0.2)',
+    color: 'white',
+    border: 'none',
+    padding: '0.5rem 1rem',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    fontSize: '0.9rem'
+  },
+  title: {
+    fontSize: '1.5rem',
+    fontWeight: 'bold',
+    margin: 0
+  },
+  content: {
+    maxWidth: '800px',
+    margin: '0 auto',
+    padding: '2rem 1rem'
+  },
+  instructionsCard: {
+    backgroundColor: 'white',
+    padding: '2rem',
+    borderRadius: '16px',
+    marginBottom: '2rem',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.08)'
+  },
+  instructionsTitle: {
+    color: '#1e40af',
+    marginBottom: '1rem',
+    fontSize: '1.2rem'
+  },
+  instructionsList: {
+    margin: 0,
+    paddingLeft: '1.5rem',
+    color: '#374151',
+    lineHeight: '1.6'
+  },
+  form: {
+    backgroundColor: 'white',
+    padding: '2rem',
+    borderRadius: '16px',
+    marginBottom: '2rem',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.08)'
+  },
+  formGroup: {
+    marginBottom: '1.5rem'
+  },
+  label: {
+    display: 'block',
+    fontSize: '0.9rem',
+    fontWeight: '600',
+    color: '#374151',
+    marginBottom: '0.5rem'
+  },
+  select: {
+    width: '100%',
+    padding: '0.75rem',
+    border: '2px solid #e2e8f0',
+    borderRadius: '8px',
+    fontSize: '1rem',
+    backgroundColor: 'white'
+  },
+  input: {
+    width: '100%',
+    padding: '0.75rem',
+    border: '2px solid #e2e8f0',
+    borderRadius: '8px',
+    fontSize: '1rem',
+    boxSizing: 'border-box'
+  },
+  uploadSection: {
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap: '1rem',
+    marginBottom: '2rem',
+    '@media (max-width: 768px)': {
+      gridTemplateColumns: '1fr'
+    }
+  },
+  uploadGroup: {
+    display: 'flex',
+    flexDirection: 'column'
+  },
+  fileInput: {
+    padding: '0.75rem',
+    border: '2px dashed #e2e8f0',
+    borderRadius: '8px',
+    cursor: 'pointer'
+  },
+  filePreview: {
+    marginTop: '0.5rem',
+    padding: '0.5rem',
+    backgroundColor: '#dcfce7',
+    color: '#16a34a',
+    borderRadius: '4px',
+    fontSize: '0.9rem'
+  },
+  submitButton: {
+    width: '100%',
+    padding: '1rem',
+    backgroundColor: '#1e40af',
+    color: 'white',
+    border: 'none',
+    borderRadius: '12px',
+    fontSize: '1rem',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'all 0.2s'
+  },
+  message: {
+    padding: '1rem',
+    borderRadius: '8px',
+    border: '1px solid',
+    marginBottom: '2rem',
+    fontSize: '0.9rem'
+  },
+  securityNote: {
+    backgroundColor: '#fffbeb',
+    padding: '1.5rem',
+    borderRadius: '12px',
+    border: '1px solid #fbbf24'
+  },
+  securityTitle: {
+    color: '#92400e',
+    marginBottom: '1rem',
+    fontSize: '1rem'
+  },
+  securityList: {
+    margin: 0,
+    paddingLeft: '1.5rem',
+    color: '#92400e',
+    lineHeight: '1.6'
+  }
+};

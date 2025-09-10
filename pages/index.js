@@ -282,9 +282,9 @@ export default function Home() {
                     <span style={styles.quickAccessIcon}>📋</span>
                     <span>Transactions</span>
                   </Link>
-                  <Link href="/admin/admin-dashboard" style={styles.quickAccessCard}>
-                    <span style={styles.quickAccessIcon}>👑</span>
-                    <span>Admin Dashboard</span>
+                  <Link href="/bills" style={styles.quickAccessCard}>
+                    <span style={styles.quickAccessIcon}>🧾</span>
+                    <span>Pay Bills</span>
                   </Link>
                 </div>
               </div>

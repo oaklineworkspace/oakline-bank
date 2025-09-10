@@ -393,7 +393,7 @@ export default function Dashboard() {
                 <span style={styles.actionDesc}>Send or move funds</span>
               </div>
             </Link>
-            <Link href="/deposit-real" style={styles.actionCard}>
+            <Link href="/deposit" style={styles.actionCard}>
               <span style={styles.actionIcon}>📥</span>
               <div style={styles.actionContent}>
                 <span style={styles.actionText}>Mobile Deposit</span>
@@ -672,7 +672,12 @@ const styles = {
     justifyContent: 'space-between',
     alignItems: 'center',
     flexWrap: 'wrap',
-    gap: '1rem'
+    gap: '1rem',
+    '@media (max-width: 768px)': {
+      flexDirection: 'column',
+      alignItems: 'stretch',
+      gap: '0.5rem'
+    }
   },
   logo: {
     display: 'flex',
@@ -693,8 +698,13 @@ const styles = {
     display: 'flex',
     gap: '0.5rem',
     alignItems: 'center',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
     '@media (max-width: 768px)': {
-      display: 'none'
+      width: '100%',
+      overflowX: 'auto',
+      paddingBottom: '0.5rem',
+      gap: '0.25rem'
     }
   },
   dropdown: {

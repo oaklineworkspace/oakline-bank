@@ -489,7 +489,13 @@ const styles = {
     justifyContent: 'space-between',
     alignItems: 'center',
     flexWrap: 'wrap',
-    gap: '1rem'
+    gap: '1rem',
+    '@media (max-width: 768px)': {
+      flexDirection: 'column',
+      alignItems: 'stretch',
+      gap: '0.5rem',
+      padding: '0 0.5rem'
+    }
   },
   logo: {
     display: 'flex',
@@ -509,7 +515,15 @@ const styles = {
   headerNav: {
     display: 'flex',
     gap: '0.5rem',
-    alignItems: 'center'
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    '@media (max-width: 768px)': {
+      width: '100%',
+      overflowX: 'auto',
+      paddingBottom: '0.5rem',
+      gap: '0.25rem'
+    }
   },
   dropdown: {
     position: 'relative'
