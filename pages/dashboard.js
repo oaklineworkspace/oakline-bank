@@ -53,12 +53,23 @@ export default function Dashboard() {
         .select('*')
         .eq('user_id', user.id);
 
-      // If no accounts found by user_id, try by email
+      // If no accounts found by user_id, try by email (check if user_email column exists)
       if (!accountsData || accountsData.length === 0) {
-        const { data: emailAccounts, error: emailError } = await supabase
+        // First try with user_email, if that fails try with email
+        let { data: emailAccounts, error: emailError } = await supabase
           .from('accounts')
           .select('*')
           .eq('user_email', user.email);
+        
+        // If user_email column doesn't exist, try with email
+        if (emailError && emailError.code === '42703') {
+          const { data: emailAccounts2, error: emailError2 } = await supabase
+            .from('accounts')
+            .select('*')
+            .eq('email', user.email);
+          emailAccounts = emailAccounts2;
+          emailError = emailError2;
+        }
         
         accountsData = emailAccounts;
         accountsError = emailError;
@@ -318,12 +329,12 @@ export default function Dashboard() {
                 <div key={account.id} style={styles.accountCard}>
                   <div style={styles.accountHeader}>
                     <div style={styles.accountType}>
-                      {(account.account_type || account.type || 'Account').replace('_', ' ').toUpperCase()}
+                      {(account.account_type || account.type || 'Account').replace(/_/g, ' ').toUpperCase()}
                     </div>
                     <div style={styles.accountStatus}>{account.status || 'Active'}</div>
                   </div>
                   <div style={styles.accountName}>
-                    {account.account_name || account.name || `${(account.account_type || account.type || 'Account').replace('_', ' ')} Account`}
+                    {account.account_name || account.name || `${(account.account_type || account.type || 'Account').replace(/_/g, ' ')} Account`}
                   </div>
                   <div style={styles.accountNumber}>{account.account_number}</div>
                   <div style={{
@@ -336,7 +347,7 @@ export default function Dashboard() {
                     View Details
                   </Link>
                 </div>
-              ))}</div>
+              ))}
             </div>
           </div>
         )}
