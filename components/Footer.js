@@ -78,7 +78,7 @@ export default function Footer() {
                 <span style={styles.contactIcon}>✉️</span>
                 <div>
                   <p style={styles.contactLabel}>Email Support</p>
-                  <p style={styles.contactValue}>support@oaklinebank.com</p>
+                  <p style={styles.contactValue}>support@theoaklinebank.com</p>
                 </div>
               </div>
               <div style={styles.contactItem}>
