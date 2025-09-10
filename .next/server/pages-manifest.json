@@ -3,6 +3,9 @@
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
   "/": "pages/index.js",
+  "/account-details": "pages/account-details.js",
+  "/dashboard": "pages/dashboard.js",
   "/login": "pages/login.js",
-  "/dashboard": "pages/dashboard.js"
+  "/apply": "pages/apply.js",
+  "/transactions": "pages/transactions.js"
 }
