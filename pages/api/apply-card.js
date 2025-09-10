@@ -1,3 +1,4 @@
+
 import { supabase } from '../../lib/supabaseClient';
 
 export default async function handler(req, res) {
@@ -6,26 +7,21 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Check if user is authenticated
-    let user;
-    try {
-      const authHeader = req.headers.authorization;
-      if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(401).json({ error: 'Missing or invalid authorization header' });
-      }
+    // Get the authorization header
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: 'Missing or invalid authorization header' });
+    }
 
-      const token = authHeader.replace('Bearer ', '');
-      const { data: { user: authUser }, error: authError } = await supabase.auth.getUser(token);
-
-      if (authError || !authUser) {
-        console.error('Auth error:', authError);
-        return res.status(401).json({ error: 'Invalid or expired token' });
-      }
-
-      user = authUser;
-    } catch (error) {
-      console.error('Authentication error:', error);
-      return res.status(401).json({ error: 'Authentication failed' });
+    // Extract the token
+    const token = authHeader.replace('Bearer ', '');
+    
+    // Verify the user
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    
+    if (authError || !user) {
+      console.error('Auth error:', authError);
+      return res.status(401).json({ error: 'Invalid or expired token' });
     }
 
     const { accountId, cardholderName } = req.body;
@@ -34,28 +30,32 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Account ID and cardholder name are required' });
     }
 
-    // Check if user already has a pending application for this account
-    const { data: existingApplication, error: checkError } = await supabase
+    // Check if user already has a pending application
+    const { data: existingApplication } = await supabase
       .from('card_applications')
       .select('id')
       .eq('user_id', user.id)
-      .eq('account_id', accountId)
       .eq('status', 'pending')
       .single();
 
     if (existingApplication) {
-      return res.status(400).json({ error: 'You already have a pending card application for this account' });
+      return res.status(400).json({ error: 'You already have a pending card application' });
     }
 
-    // Verify the account belongs to the user
+    // Verify the account exists and belongs to the user
     const { data: account, error: accountError } = await supabase
       .from('accounts')
-      .select('id, user_id')
+      .select('id, user_id, email')
       .eq('id', accountId)
       .single();
 
     if (accountError || !account) {
       return res.status(404).json({ error: 'Account not found' });
+    }
+
+    // Check if account belongs to user (either by user_id or email)
+    if (account.user_id !== user.id && account.email !== user.email) {
+      return res.status(403).json({ error: 'Account does not belong to you' });
     }
 
     // Create the card application
@@ -78,7 +78,7 @@ export default async function handler(req, res) {
 
     res.status(200).json({
       success: true,
-      message: 'Card application submitted successfully',
+      message: 'Card application submitted successfully! You will receive an email confirmation shortly.',
       application
     });
 

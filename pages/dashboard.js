@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
@@ -13,6 +12,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
   const [dropdownOpen, setDropdownOpen] = useState({});
+  const [cardApplicationStatus, setCardApplicationStatus] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -38,8 +38,8 @@ export default function Dashboard() {
 
   const fetchUserData = async (user) => {
     try {
-      // Fetch user profile from applications table
-      const { data: profile, error: profileError } = await supabase
+      // Fetch user profile
+      const { data: profile } = await supabase
         .from('applications')
         .select('*')
         .eq('email', user.email)
@@ -49,82 +49,67 @@ export default function Dashboard() {
         setUserProfile(profile);
       }
 
-      // Fetch real accounts for this user
-      let { data: accountsData, error: accountsError } = await supabase
+      // Fetch accounts
+      let { data: accountsData } = await supabase
         .from('accounts')
         .select('*')
         .eq('user_id', user.id);
 
       if (!accountsData || accountsData.length === 0) {
-        let { data: emailAccounts, error: emailError } = await supabase
+        const { data: emailAccounts } = await supabase
           .from('accounts')
           .select('*')
-          .eq('user_email', user.email);
-        
-        if (emailError && emailError.code === '42703') {
-          const { data: emailAccounts2, error: emailError2 } = await supabase
-            .from('accounts')
-            .select('*')
-            .eq('email', user.email);
-          emailAccounts = emailAccounts2;
-          emailError = emailError2;
-        }
-        
+          .eq('email', user.email);
         accountsData = emailAccounts;
-        accountsError = emailError;
-      }
-
-      if (!accountsData || accountsData.length === 0) {
-        accountsData = [
-          {
-            id: 1,
-            account_type: 'checking',
-            account_name: 'Premier Checking',
-            balance: 0.00,
-            account_number: `****${Math.floor(1000 + Math.random() * 9000)}`,
-            status: 'Active',
-            user_id: user.id,
-            user_email: user.email
-          },
-          {
-            id: 2,
-            account_type: 'savings',
-            account_name: 'High Yield Savings',
-            balance: 0.00,
-            account_number: `****${Math.floor(1000 + Math.random() * 9000)}`,
-            status: 'Active',
-            user_id: user.id,
-            user_email: user.email
-          }
-        ];
       }
 
       setAccounts(accountsData || []);
 
-      const { data: transactionsData, error: transactionsError } = await supabase
+      // Fetch transactions
+      const { data: transactionsData } = await supabase
         .from('transactions')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
-        .limit(10);
+        .limit(5);
 
-      if (!transactionsData || transactionsData.length === 0) {
-        const { data: emailTransactions, error: emailTransError } = await supabase
-          .from('transactions')
-          .select('*')
-          .eq('user_email', user.email)
-          .order('created_at', { ascending: false })
-          .limit(10);
-        
-        setTransactions(emailTransactions || []);
-      } else {
-        setTransactions(transactionsData || []);
-      }
+      setTransactions(transactionsData || []);
 
     } catch (error) {
       console.error('Error fetching user data:', error);
-      setAccounts([]);
-      setTransactions([]);
+    }
+  };
+
+  const applyForCard = async () => {
+    if (!accounts.length) {
+      setCardApplicationStatus('error: No accounts found');
+      return;
+    }
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+
+      const response = await fetch('/api/apply-card', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.access_token}`
+        },
+        body: JSON.stringify({
+          accountId: accounts[0].id,
+          cardholderName: getUserDisplayName()
+        })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setCardApplicationStatus('success');
+      } else {
+        setCardApplicationStatus(`error: ${result.error}`);
+      }
+    } catch (error) {
+      setCardApplicationStatus(`error: ${error.message}`);
     }
   };
 
@@ -144,9 +129,7 @@ export default function Dashboard() {
   };
 
   const getTotalBalance = () => {
-    return accounts
-      .filter(acc => acc.type !== 'Credit')
-      .reduce((total, acc) => total + (parseFloat(acc.balance) || 0), 0);
+    return accounts.reduce((total, acc) => total + (parseFloat(acc.balance) || 0), 0);
   };
 
   const getUserDisplayName = () => {
@@ -167,510 +150,247 @@ export default function Dashboard() {
     setDropdownOpen({});
   };
 
-  const handleSupportContact = () => {
-    window.location.href = 'mailto:support@theoaklinebank.com?subject=Customer Support Request';
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push('/');
   };
 
   if (loading) {
     return (
       <div style={styles.loadingContainer}>
-        <div style={styles.loading}>Loading your dashboard...</div>
+        <div style={styles.loadingSpinner}></div>
+        <div style={styles.loadingText}>Loading your dashboard...</div>
       </div>
     );
   }
 
   return (
     <div style={styles.container} onClick={closeAllDropdowns}>
-      {/* Header */}
+      {/* Professional Banking Header */}
       <header style={styles.header}>
-        <div style={styles.headerContent}>
-          <Link href="/" style={styles.logo}>
-            <img src="/images/logo-primary.png.jpg" alt="Oakline Bank" style={styles.logoImg} />
-            <span style={styles.logoText}>Oakline Bank</span>
-          </Link>
+        <div style={styles.headerContainer}>
+          <div style={styles.headerLeft}>
+            <Link href="/" style={styles.logoContainer}>
+              <img src="/images/logo-primary.png.jpg" alt="Oakline Bank" style={styles.logo} />
+              <div style={styles.brandInfo}>
+                <h1 style={styles.brandName}>Oakline Bank</h1>
+                <span style={styles.brandTagline}>Your Financial Partner</span>
+              </div>
+            </Link>
+          </div>
 
-          {/* Navigation Dropdowns */}
-          <nav style={styles.headerNav}>
-            {/* Banking Services Dropdown */}
-            <div style={styles.dropdown}>
-              <button 
-                style={styles.dropdownBtn}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toggleDropdown('banking');
-                }}
-              >
-                Banking Services ▼
+          <nav style={styles.mainNav}>
+            <div style={styles.navItem}>
+              <button style={styles.navButton} onClick={(e) => { e.stopPropagation(); toggleDropdown('accounts'); }}>
+                <span style={styles.navIcon}>🏦</span>
+                Accounts
+                <span style={styles.navArrow}>▼</span>
               </button>
-              {dropdownOpen.banking && (
-                <div style={styles.dropdownContent} onClick={(e) => e.stopPropagation()}>
-                  <div style={styles.dropdownSection}>
-                    <h4 style={styles.dropdownHeading}>💳 Account Services</h4>
-                    <Link href="/account-details" style={styles.dropdownLink}>Account Details</Link>
-                    <Link href="/transactions" style={styles.dropdownLink}>Transaction History</Link>
-                    <Link href="/apply" style={styles.dropdownLink}>Open New Account</Link>
-                    <Link href="/cards" style={styles.dropdownLink}>Manage Cards</Link>
-                  </div>
-                  <div style={styles.dropdownSection}>
-                    <h4 style={styles.dropdownHeading}>💸 Transfers & Payments</h4>
-                    <Link href="/transfer" style={styles.dropdownLink}>Transfer Money</Link>
-                    <Link href="/bill-pay" style={styles.dropdownLink}>Pay Bills</Link>
-                    <Link href="/deposit-real" style={styles.dropdownLink}>Mobile Deposit</Link>
-                    <Link href="/withdrawal" style={styles.dropdownLink}>Withdraw Funds</Link>
-                  </div>
+              {dropdownOpen.accounts && (
+                <div style={styles.dropdown}>
+                  <Link href="/account-details" style={styles.dropdownLink}>View All Accounts</Link>
+                  <Link href="/apply" style={styles.dropdownLink}>Open New Account</Link>
+                  <Link href="/transactions" style={styles.dropdownLink}>Transaction History</Link>
                 </div>
               )}
             </div>
 
-            {/* Loans & Credit Dropdown */}
-            <div style={styles.dropdown}>
-              <button 
-                style={styles.dropdownBtn}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toggleDropdown('loans');
-                }}
-              >
-                Loans & Credit ▼
+            <div style={styles.navItem}>
+              <button style={styles.navButton} onClick={(e) => { e.stopPropagation(); toggleDropdown('transfer'); }}>
+                <span style={styles.navIcon}>💸</span>
+                Transfer
+                <span style={styles.navArrow}>▼</span>
               </button>
-              {dropdownOpen.loans && (
-                <div style={styles.dropdownContent} onClick={(e) => e.stopPropagation()}>
-                  <div style={styles.dropdownSection}>
-                    <h4 style={styles.dropdownHeading}>🏠 Home Loans</h4>
-                    <Link href="/loans" style={styles.dropdownLink}>Mortgage Application</Link>
-                    <Link href="/loans" style={styles.dropdownLink}>Refinancing</Link>
-                    <Link href="/loans" style={styles.dropdownLink}>Home Equity Loans</Link>
-                  </div>
-                  <div style={styles.dropdownSection}>
-                    <h4 style={styles.dropdownHeading}>🚗 Auto & Personal</h4>
-                    <Link href="/loans" style={styles.dropdownLink}>Auto Loans</Link>
-                    <Link href="/loans" style={styles.dropdownLink}>Personal Loans</Link>
-                    <Link href="/credit-report" style={styles.dropdownLink}>Credit Report</Link>
-                  </div>
+              {dropdownOpen.transfer && (
+                <div style={styles.dropdown}>
+                  <Link href="/transfer" style={styles.dropdownLink}>Transfer Money</Link>
+                  <Link href="/bill-pay" style={styles.dropdownLink}>Pay Bills</Link>
+                  <Link href="/deposit-real" style={styles.dropdownLink}>Mobile Deposit</Link>
                 </div>
               )}
             </div>
 
-            {/* Investments Dropdown */}
-            <div style={styles.dropdown}>
-              <button 
-                style={styles.dropdownBtn}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toggleDropdown('investments');
-                }}
-              >
-                Investments ▼
+            <div style={styles.navItem}>
+              <button style={styles.navButton} onClick={(e) => { e.stopPropagation(); toggleDropdown('services'); }}>
+                <span style={styles.navIcon}>⚙️</span>
+                Services
+                <span style={styles.navArrow}>▼</span>
               </button>
-              {dropdownOpen.investments && (
-                <div style={styles.dropdownContent} onClick={(e) => e.stopPropagation()}>
-                  <div style={styles.dropdownSection}>
-                    <h4 style={styles.dropdownHeading}>📈 Investment Options</h4>
-                    <Link href="/investments" style={styles.dropdownLink}>Portfolio Management</Link>
-                    <Link href="/crypto" style={styles.dropdownLink}>Cryptocurrency</Link>
-                    <Link href="/financial-advisory" style={styles.dropdownLink}>Financial Advisory</Link>
-                  </div>
-                  <div style={styles.dropdownSection}>
-                    <h4 style={styles.dropdownHeading}>📊 Trading</h4>
-                    <Link href="/investments" style={styles.dropdownLink}>Stock Trading</Link>
-                    <Link href="/market-news" style={styles.dropdownLink}>Market News</Link>
-                    <Link href="/rewards" style={styles.dropdownLink}>Rewards Program</Link>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Support Dropdown */}
-            <div style={styles.dropdown}>
-              <button 
-                style={styles.dropdownBtn}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toggleDropdown('support');
-                }}
-              >
-                Support ▼
-              </button>
-              {dropdownOpen.support && (
-                <div style={styles.dropdownContent} onClick={(e) => e.stopPropagation()}>
-                  <div style={styles.dropdownSection}>
-                    <h4 style={styles.dropdownHeading}>🎧 Get Help</h4>
-                    <button onClick={handleSupportContact} style={styles.dropdownButton}>Contact Support</button>
-                    <Link href="/faq" style={styles.dropdownLink}>FAQ</Link>
-                    <Link href="/security" style={styles.dropdownLink}>Security Center</Link>
-                  </div>
-                  <div style={styles.dropdownSection}>
-                    <h4 style={styles.dropdownHeading}>📱 Digital Services</h4>
-                    <Link href="/messages" style={styles.dropdownLink}>Messages</Link>
-                    <Link href="/notifications" style={styles.dropdownLink}>Notifications</Link>
-                    <Link href="/main-menu" style={styles.dropdownLink}>Full Menu</Link>
-                  </div>
+              {dropdownOpen.services && (
+                <div style={styles.dropdown}>
+                  <Link href="/loans" style={styles.dropdownLink}>Loans</Link>
+                  <Link href="/investments" style={styles.dropdownLink}>Investments</Link>
+                  <Link href="/cards" style={styles.dropdownLink}>Manage Cards</Link>
+                  <Link href="/credit-report" style={styles.dropdownLink}>Credit Report</Link>
                 </div>
               )}
             </div>
           </nav>
 
-          <div style={styles.userInfo}>
-            {/* Menu Access Dropdown */}
-            <div style={styles.dropdown}>
-              <button 
-                style={styles.menuAccessBtn}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toggleDropdown('menuAccess');
-                }}
-              >
-                Menu ▼
-              </button>
-              {dropdownOpen.menuAccess && (
-                <div style={styles.dropdownContent} onClick={(e) => e.stopPropagation()}>
-                  <div style={styles.dropdownSection}>
-                    <h4 style={styles.dropdownHeading}>🏠 Navigation</h4>
-                    <Link href="/main-menu" style={styles.dropdownLink}>Full Main Menu</Link>
-                    <Link href="/dashboard" style={styles.dropdownLink}>Dashboard Home</Link>
-                    <Link href="/" style={styles.dropdownLink}>Bank Homepage</Link>
-                  </div>
-                </div>
-              )}
+          <div style={styles.headerRight}>
+            <div style={styles.userSection}>
+              <div style={styles.userInfo}>
+                <span style={styles.welcomeText}>Welcome</span>
+                <span style={styles.userName}>{getUserDisplayName()}</span>
+              </div>
+              <div style={styles.userActions}>
+                <Link href="/main-menu" style={styles.actionButton}>
+                  <span style={styles.actionIcon}>☰</span>
+                  Menu
+                </Link>
+                <button onClick={handleLogout} style={styles.logoutButton}>
+                  <span style={styles.actionIcon}>🚪</span>
+                  Sign Out
+                </button>
+              </div>
             </div>
-            
-            <span style={styles.welcomeText}>Welcome, {getUserDisplayName()}</span>
-            <button onClick={() => supabase.auth.signOut()} style={styles.logoutBtn}>
-              Sign Out
-            </button>
           </div>
         </div>
       </header>
 
-      {/* Main Content */}
+      {/* Main Dashboard Content */}
       <main style={styles.main}>
-        {/* User Profile Section */}
-        {userProfile && (
-          <div style={styles.profileCard}>
-            <div style={styles.profileHeader}>
-              <h2 style={styles.profileTitle}>Account Holder Information</h2>
-              <Link href="/profile" style={styles.editProfileBtn}>Edit Profile</Link>
-            </div>
-            <div style={styles.profileGrid}>
-              <div style={styles.profileItem}>
-                <span style={styles.profileLabel}>Full Name:</span>
-                <span style={styles.profileValue}>
-                  {`${userProfile.first_name || ''} ${userProfile.middle_name || ''} ${userProfile.last_name || ''}`.trim()}
-                </span>
-              </div>
-              <div style={styles.profileItem}>
-                <span style={styles.profileLabel}>Email:</span>
-                <span style={styles.profileValue}>{userProfile.email}</span>
-              </div>
-              <div style={styles.profileItem}>
-                <span style={styles.profileLabel}>Phone:</span>
-                <span style={styles.profileValue}>{userProfile.phone || 'Not provided'}</span>
-              </div>
-              <div style={styles.profileItem}>
-                <span style={styles.profileLabel}>Address:</span>
-                <span style={styles.profileValue}>
-                  {userProfile.address ? `${userProfile.address}, ${userProfile.city || ''}, ${userProfile.state || ''} ${userProfile.zip_code || ''}`.trim() : 'Not provided'}
-                </span>
-              </div>
-            </div>
+        {/* Account Summary Section */}
+        <section style={styles.summarySection}>
+          <div style={styles.summaryHeader}>
+            <h2 style={styles.sectionTitle}>Account Summary</h2>
+            <span style={styles.lastUpdated}>Last updated: {new Date().toLocaleDateString()}</span>
           </div>
-        )}
 
-        {/* Balance Summary Cards */}
-        <div style={styles.summaryGrid}>
-          <div style={styles.summaryCard}>
-            <div style={styles.summaryIcon}>💰</div>
-            <div style={styles.summaryContent}>
-              <h3 style={styles.summaryTitle}>Total Balance</h3>
-              <div style={styles.summaryAmount}>{formatCurrency(getTotalBalance())}</div>
-              <div style={styles.summarySubtext}>Across {accounts.length} account{accounts.length !== 1 ? 's' : ''}</div>
+          <div style={styles.summaryCards}>
+            <div style={styles.summaryCard}>
+              <div style={styles.cardIcon} style={{backgroundColor: '#e3f2fd'}}>💰</div>
+              <div style={styles.cardContent}>
+                <h3 style={styles.cardLabel}>Total Balance</h3>
+                <div style={styles.cardValue}>{formatCurrency(getTotalBalance())}</div>
+                <span style={styles.cardSubtext}>Across {accounts.length} account{accounts.length !== 1 ? 's' : ''}</span>
+              </div>
             </div>
-          </div>
-          
-          <div style={styles.summaryCard}>
-            <div style={styles.summaryIcon}>📊</div>
-            <div style={styles.summaryContent}>
-              <h3 style={styles.summaryTitle}>This Month</h3>
-              <div style={styles.summaryAmount}>+$2,450</div>
-              <div style={styles.summarySubtext}>12% increase from last month</div>
-            </div>
-          </div>
-          
-          <div style={styles.summaryCard}>
-            <div style={styles.summaryIcon}>💳</div>
-            <div style={styles.summaryContent}>
-              <h3 style={styles.summaryTitle}>Available Credit</h3>
-              <div style={styles.summaryAmount}>$15,000</div>
-              <div style={styles.summarySubtext}>Credit limit utilization: 25%</div>
-            </div>
-          </div>
-        </div>
 
-        {/* Debit Card Display */}
-        {accounts.length > 0 && (
-          <div style={styles.debitCardSection}>
-            <h3 style={styles.sectionTitle}>Your Debit Card</h3>
-            <p style={styles.cardSectionSubtitle}>Manage your primary debit card linked to your checking account</p>
-            <DebitCard 
-              user={user}
-              userProfile={userProfile}
-              account={accounts.find(acc => acc.account_type === 'checking') || accounts[0]}
-              cardType="debit"
-              showDetails={true}
-            />
+            <div style={styles.summaryCard}>
+              <div style={styles.cardIcon} style={{backgroundColor: '#f3e5f5'}}>📈</div>
+              <div style={styles.cardContent}>
+                <h3 style={styles.cardLabel}>Monthly Growth</h3>
+                <div style={styles.cardValue}>+2.4%</div>
+                <span style={styles.cardSubtext}>vs last month</span>
+              </div>
+            </div>
+
+            <div style={styles.summaryCard}>
+              <div style={styles.cardIcon} style={{backgroundColor: '#e8f5e8'}}>💳</div>
+              <div style={styles.cardContent}>
+                <h3 style={styles.cardLabel}>Available Credit</h3>
+                <div style={styles.cardValue}>$15,000</div>
+                <span style={styles.cardSubtext}>85% available</span>
+              </div>
+            </div>
           </div>
-        )}
+        </section>
 
         {/* Quick Actions */}
-        <div style={styles.quickActionsSection}>
+        <section style={styles.quickActionsSection}>
           <h3 style={styles.sectionTitle}>Quick Actions</h3>
-          <div style={styles.actionGrid}>
-            <Link href="/transfer" style={styles.actionCard}>
-              <span style={styles.actionIcon}>💸</span>
-              <div style={styles.actionContent}>
-                <span style={styles.actionText}>Transfer Money</span>
-                <span style={styles.actionDesc}>Send or move funds</span>
-              </div>
+          <div style={styles.quickActions}>
+            <Link href="/transfer" style={styles.quickAction}>
+              <span style={styles.quickActionIcon}>💸</span>
+              <span style={styles.quickActionText}>Transfer Money</span>
             </Link>
-            <Link href="/deposit" style={styles.actionCard}>
-              <span style={styles.actionIcon}>📥</span>
-              <div style={styles.actionContent}>
-                <span style={styles.actionText}>Mobile Deposit</span>
-                <span style={styles.actionDesc}>Deposit checks instantly</span>
-              </div>
+            <Link href="/deposit-real" style={styles.quickAction}>
+              <span style={styles.quickActionIcon}>📥</span>
+              <span style={styles.quickActionText}>Mobile Deposit</span>
             </Link>
-            <Link href="/bill-pay" style={styles.actionCard}>
-              <span style={styles.actionIcon}>🧾</span>
-              <div style={styles.actionContent}>
-                <span style={styles.actionText}>Pay Bills</span>
-                <span style={styles.actionDesc}>Schedule payments</span>
-              </div>
+            <Link href="/bill-pay" style={styles.quickAction}>
+              <span style={styles.quickActionIcon}>🧾</span>
+              <span style={styles.quickActionText}>Pay Bills</span>
             </Link>
-            <Link href="/cards" style={styles.actionCard}>
-              <span style={styles.actionIcon}>💳</span>
-              <div style={styles.actionContent}>
-                <span style={styles.actionText}>Manage Cards</span>
-                <span style={styles.actionDesc}>Control card settings</span>
-              </div>
-            </Link>
+            <button onClick={applyForCard} style={styles.quickAction}>
+              <span style={styles.quickActionIcon}>💳</span>
+              <span style={styles.quickActionText}>Apply for Card</span>
+            </button>
           </div>
-        </div>
 
-        {/* Navigation Tabs */}
-        <nav style={styles.tabNav}>
-          <button
-            style={activeTab === 'overview' ? {...styles.tab, ...styles.activeTab} : styles.tab}
-            onClick={() => setActiveTab('overview')}
-          >
-            📊 Overview
-          </button>
-          <button
-            style={activeTab === 'accounts' ? {...styles.tab, ...styles.activeTab} : styles.tab}
-            onClick={() => setActiveTab('accounts')}
-          >
-            🏦 Accounts
-          </button>
-          <button
-            style={activeTab === 'transactions' ? {...styles.tab, ...styles.activeTab} : styles.tab}
-            onClick={() => setActiveTab('transactions')}
-          >
-            📋 Transactions
-          </button>
-          <button
-            style={activeTab === 'services' ? {...styles.tab, ...styles.activeTab} : styles.tab}
-            onClick={() => setActiveTab('services')}
-          >
-            🔧 Services
-          </button>
-        </nav>
-
-        {/* Content based on active tab */}
-        {activeTab === 'overview' && (
-          <div style={styles.content}>
-            {/* Recent Transactions */}
-            <div style={styles.section}>
-              <div style={styles.sectionHeader}>
-                <h3 style={styles.sectionTitle}>Recent Transactions</h3>
-                <Link href="/transactions" style={styles.viewAllLink}>View All</Link>
-              </div>
-              <div style={styles.transactionList}>
-                {transactions.length > 0 ? (
-                  transactions.slice(0, 5).map(transaction => (
-                    <div key={transaction.id} style={styles.transactionItem}>
-                      <div style={styles.transactionIcon}>
-                        {transaction.amount >= 0 ? '📥' : '📤'}
-                      </div>
-                      <div style={styles.transactionInfo}>
-                        <div style={styles.transactionDesc}>
-                          {transaction.description || transaction.transaction_type || 'Transaction'}
-                        </div>
-                        <div style={styles.transactionDate}>
-                          {formatDate(transaction.created_at || transaction.date)}
-                        </div>
-                      </div>
-                      <div style={{
-                        ...styles.transactionAmount,
-                        color: (transaction.amount || 0) >= 0 ? '#10b981' : '#ef4444'
-                      }}>
-                        {(transaction.amount || 0) >= 0 ? '+' : ''}{formatCurrency(transaction.amount || 0)}
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div style={styles.noTransactions}>
-                    <div style={styles.emptyStateIcon}>📭</div>
-                    <h4 style={styles.emptyStateTitle}>No transactions yet</h4>
-                    <p style={styles.emptyStateDesc}>Start banking with us to see your transaction history here!</p>
-                  </div>
-                )}
-              </div>
+          {cardApplicationStatus && (
+            <div style={{
+              ...styles.statusMessage,
+              backgroundColor: cardApplicationStatus.startsWith('error') ? '#ffebee' : '#e8f5e8',
+              color: cardApplicationStatus.startsWith('error') ? '#c62828' : '#2e7d32'
+            }}>
+              {cardApplicationStatus.startsWith('error') 
+                ? cardApplicationStatus.replace('error: ', '❌ ') 
+                : '✅ Card application submitted successfully!'}
             </div>
+          )}
+        </section>
+
+        {/* Accounts Overview */}
+        <section style={styles.accountsSection}>
+          <div style={styles.sectionHeaderWithAction}>
+            <h3 style={styles.sectionTitle}>My Accounts</h3>
+            <Link href="/account-details" style={styles.viewAllLink}>View All Details →</Link>
           </div>
-        )}
 
-        {activeTab === 'accounts' && (
-          <div style={styles.content}>
-            <div style={styles.sectionHeader}>
-              <h2 style={styles.sectionTitle}>Your Accounts</h2>
-              <Link href="/apply" style={styles.addAccountBtn}>+ Add Account</Link>
-            </div>
-            <div style={styles.accountGrid}>
-              {accounts.map(account => (
-                <div key={account.id} style={styles.accountCard}>
-                  <div style={styles.accountHeader}>
-                    <div style={styles.accountType}>
-                      {(account.account_type || account.type || 'Account').replace(/_/g, ' ').toUpperCase()}
-                    </div>
-                    <div style={styles.accountStatus}>{account.status || 'Active'}</div>
+          <div style={styles.accountsList}>
+            {accounts.map(account => (
+              <div key={account.id} style={styles.accountItem}>
+                <div style={styles.accountInfo}>
+                  <div style={styles.accountTypeIcon}>
+                    {account.account_type === 'checking' ? '🏦' : 
+                     account.account_type === 'savings' ? '💰' : '📊'}
                   </div>
-                  <div style={styles.accountName}>
-                    {account.account_name || account.name || `${(account.account_type || account.type || 'Account').replace(/_/g, ' ')} Account`}
+                  <div style={styles.accountDetails}>
+                    <h4 style={styles.accountName}>
+                      {account.account_type ? account.account_type.replace('_', ' ').toUpperCase() : 'Account'}
+                    </h4>
+                    <span style={styles.accountNumber}>****{account.account_number?.slice(-4)}</span>
                   </div>
-                  <div style={styles.accountNumber}>Account: {account.account_number}</div>
+                </div>
+                <div style={styles.accountBalance}>
+                  {formatCurrency(account.balance || 0)}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Recent Transactions */}
+        <section style={styles.transactionsSection}>
+          <div style={styles.sectionHeaderWithAction}>
+            <h3 style={styles.sectionTitle}>Recent Transactions</h3>
+            <Link href="/transactions" style={styles.viewAllLink}>View All →</Link>
+          </div>
+
+          <div style={styles.transactionsList}>
+            {transactions.length > 0 ? (
+              transactions.map(transaction => (
+                <div key={transaction.id} style={styles.transactionItem}>
+                  <div style={styles.transactionIcon}>
+                    {(transaction.amount || 0) >= 0 ? '📥' : '📤'}
+                  </div>
+                  <div style={styles.transactionDetails}>
+                    <span style={styles.transactionDescription}>
+                      {transaction.description || 'Transaction'}
+                    </span>
+                    <span style={styles.transactionDate}>
+                      {formatDate(transaction.created_at)}
+                    </span>
+                  </div>
                   <div style={{
-                    ...styles.accountBalance,
-                    color: (parseFloat(account.balance) || 0) < 0 ? '#ef4444' : '#10b981'
+                    ...styles.transactionAmount,
+                    color: (transaction.amount || 0) >= 0 ? '#2e7d32' : '#d32f2f'
                   }}>
-                    {formatCurrency(account.balance || 0)}
-                  </div>
-                  <div style={styles.accountActions}>
-                    <Link href={`/account-details?id=${account.id}`} style={styles.viewDetailsBtn}>
-                      View Details
-                    </Link>
-                    <Link href={`/transfer?from=${account.id}`} style={styles.transferBtn}>
-                      Transfer
-                    </Link>
+                    {(transaction.amount || 0) >= 0 ? '+' : ''}{formatCurrency(transaction.amount || 0)}
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'transactions' && (
-          <div style={styles.content}>
-            <div style={styles.sectionHeader}>
-              <h2 style={styles.sectionTitle}>Transaction History</h2>
-              <div style={styles.filterButtons}>
-                <button style={styles.filterBtn}>All</button>
-                <button style={styles.filterBtn}>Income</button>
-                <button style={styles.filterBtn}>Expenses</button>
+              ))
+            ) : (
+              <div style={styles.emptyState}>
+                <span style={styles.emptyIcon}>📭</span>
+                <h4 style={styles.emptyTitle}>No recent transactions</h4>
+                <p style={styles.emptyDesc}>Your transaction history will appear here.</p>
               </div>
-            </div>
-            <div style={styles.transactionList}>
-              {transactions.length > 0 ? (
-                transactions.map(transaction => (
-                  <div key={transaction.id} style={styles.transactionItem}>
-                    <div style={styles.transactionIcon}>
-                      {transaction.amount >= 0 ? '📥' : '📤'}
-                    </div>
-                    <div style={styles.transactionInfo}>
-                      <div style={styles.transactionDesc}>
-                        {transaction.description || transaction.transaction_type || 'Transaction'}
-                      </div>
-                      <div style={styles.transactionMeta}>
-                        <span style={styles.transactionDate}>
-                          {formatDate(transaction.created_at || transaction.date)}
-                        </span>
-                        <span style={styles.transactionAccount}>
-                          {transaction.account_type || 'Account'}
-                        </span>
-                      </div>
-                    </div>
-                    <div style={{
-                      ...styles.transactionAmount,
-                      color: (transaction.amount || 0) >= 0 ? '#10b981' : '#ef4444'
-                    }}>
-                      {(transaction.amount || 0) >= 0 ? '+' : ''}{formatCurrency(transaction.amount || 0)}
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div style={styles.noTransactions}>
-                  <div style={styles.emptyStateIcon}>📭</div>
-                  <h4 style={styles.emptyStateTitle}>No transactions found</h4>
-                  <p style={styles.emptyStateDesc}>Your transaction history will appear here once you start banking with us.</p>
-                </div>
-              )}
-            </div>
+            )}
           </div>
-        )}
-
-        {activeTab === 'services' && (
-          <div style={styles.content}>
-            <h2 style={styles.sectionTitle}>Banking Services</h2>
-            <div style={styles.serviceGrid}>
-              <Link href="/loans" style={styles.serviceCard}>
-                <span style={styles.serviceIcon}>🏠</span>
-                <div style={styles.serviceInfo}>
-                  <div style={styles.serviceTitle}>Loans & Credit</div>
-                  <div style={styles.serviceDesc}>Apply for personal, auto, or home loans</div>
-                </div>
-                <span style={styles.serviceArrow}>→</span>
-              </Link>
-              <Link href="/investments" style={styles.serviceCard}>
-                <span style={styles.serviceIcon}>📈</span>
-                <div style={styles.serviceInfo}>
-                  <div style={styles.serviceTitle}>Investment Services</div>
-                  <div style={styles.serviceDesc}>Grow your wealth with our investment options</div>
-                </div>
-                <span style={styles.serviceArrow}>→</span>
-              </Link>
-              <Link href="/crypto" style={styles.serviceCard}>
-                <span style={styles.serviceIcon}>₿</span>
-                <div style={styles.serviceInfo}>
-                  <div style={styles.serviceTitle}>Cryptocurrency</div>
-                  <div style={styles.serviceDesc}>Buy, sell, and trade digital currencies</div>
-                </div>
-                <span style={styles.serviceArrow}>→</span>
-              </Link>
-              <button onClick={handleSupportContact} style={{...styles.serviceCard, cursor: 'pointer', border: 'none', background: 'white'}}>
-                <span style={styles.serviceIcon}>🎧</span>
-                <div style={styles.serviceInfo}>
-                  <div style={styles.serviceTitle}>Customer Support</div>
-                  <div style={styles.serviceDesc}>Get help with your banking needs</div>
-                </div>
-                <span style={styles.serviceArrow}>→</span>
-              </button>
-              <Link href="/credit-report" style={styles.serviceCard}>
-                <span style={styles.serviceIcon}>📊</span>
-                <div style={styles.serviceInfo}>
-                  <div style={styles.serviceTitle}>Credit Report</div>
-                  <div style={styles.serviceDesc}>Check your credit score and history</div>
-                </div>
-                <span style={styles.serviceArrow}>→</span>
-              </Link>
-              <Link href="/security" style={styles.serviceCard}>
-                <span style={styles.serviceIcon}>🔒</span>
-                <div style={styles.serviceInfo}>
-                  <div style={styles.serviceTitle}>Security Center</div>
-                  <div style={styles.serviceDesc}>Manage your account security settings</div>
-                </div>
-                <span style={styles.serviceArrow}>→</span>
-              </Link>
-            </div>
-          </div>
-        )}
+        </section>
       </main>
     </div>
   );
@@ -679,81 +399,99 @@ export default function Dashboard() {
 const styles = {
   container: {
     minHeight: '100vh',
-    backgroundColor: '#f1f5f9',
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-    position: 'relative'
+    backgroundColor: '#f8fafc',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
   },
   loadingContainer: {
     minHeight: '100vh',
     display: 'flex',
+    flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#f1f5f9'
+    backgroundColor: '#f8fafc'
   },
-  loading: {
-    fontSize: '1.2rem',
+  loadingSpinner: {
+    width: '40px',
+    height: '40px',
+    border: '4px solid #e2e8f0',
+    borderTop: '4px solid #1e40af',
+    borderRadius: '50%',
+    animation: 'spin 1s linear infinite',
+    marginBottom: '1rem'
+  },
+  loadingText: {
+    fontSize: '1rem',
     color: '#64748b'
   },
   header: {
     backgroundColor: '#1e40af',
-    color: 'white',
-    padding: '1rem 0',
-    boxShadow: '0 4px 12px rgba(30, 64, 175, 0.2)',
-    position: 'sticky',
-    top: 0,
-    zIndex: 1000
+    borderBottom: '3px solid #1e3a8a',
+    boxShadow: '0 4px 12px rgba(30, 64, 175, 0.15)'
   },
-  headerContent: {
+  headerContainer: {
     maxWidth: '1400px',
     margin: '0 auto',
-    padding: '0 1rem',
+    padding: '0 1.5rem',
     display: 'flex',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    flexWrap: 'wrap',
-    gap: '1rem',
+    justifyContent: 'space-between',
+    minHeight: '80px',
     '@media (max-width: 768px)': {
       flexDirection: 'column',
-      alignItems: 'stretch',
-      gap: '0.5rem'
+      padding: '1rem',
+      minHeight: 'auto'
     }
+  },
+  headerLeft: {
+    display: 'flex',
+    alignItems: 'center'
+  },
+  logoContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    textDecoration: 'none',
+    color: 'white',
+    gap: '1rem'
   },
   logo: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.5rem',
-    textDecoration: 'none',
-    color: 'white'
-  },
-  logoImg: {
-    height: '40px',
+    height: '50px',
     width: 'auto'
   },
-  logoText: {
-    fontSize: '1.5rem',
-    fontWeight: 'bold'
+  brandInfo: {
+    display: 'flex',
+    flexDirection: 'column'
   },
-  headerNav: {
+  brandName: {
+    fontSize: '1.5rem',
+    fontWeight: 'bold',
+    margin: 0,
+    color: 'white'
+  },
+  brandTagline: {
+    fontSize: '0.8rem',
+    color: '#bfdbfe',
+    fontWeight: '500'
+  },
+  mainNav: {
     display: 'flex',
     gap: '0.5rem',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
     '@media (max-width: 768px)': {
       width: '100%',
-      overflowX: 'auto',
-      paddingBottom: '0.5rem',
-      gap: '0.25rem'
+      justifyContent: 'center',
+      marginTop: '1rem'
     }
   },
-  dropdown: {
+  navItem: {
     position: 'relative'
   },
-  dropdownBtn: {
+  navButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
     padding: '0.75rem 1rem',
     backgroundColor: 'rgba(255,255,255,0.1)',
     color: 'white',
-    border: '1px solid rgba(255,255,255,0.2)',
+    border: 'none',
     borderRadius: '8px',
     cursor: 'pointer',
     fontSize: '0.9rem',
@@ -761,286 +499,119 @@ const styles = {
     transition: 'all 0.2s',
     whiteSpace: 'nowrap'
   },
-  dropdownContent: {
+  navIcon: {
+    fontSize: '1rem'
+  },
+  navArrow: {
+    fontSize: '0.7rem',
+    transition: 'transform 0.2s'
+  },
+  dropdown: {
     position: 'absolute',
     top: '100%',
     left: 0,
     backgroundColor: 'white',
-    borderRadius: '12px',
-    boxShadow: '0 10px 25px rgba(0,0,0,0.15)',
-    padding: '1rem',
-    minWidth: '280px',
+    borderRadius: '8px',
+    boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
+    padding: '0.5rem',
+    minWidth: '200px',
     zIndex: 1000,
-    marginTop: '0.5rem',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '1rem'
-  },
-  dropdownSection: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.5rem'
-  },
-  dropdownHeading: {
-    fontSize: '0.9rem',
-    fontWeight: 'bold',
-    color: '#1e40af',
-    margin: '0 0 0.5rem 0'
+    marginTop: '0.5rem'
   },
   dropdownLink: {
-    padding: '0.5rem 0.75rem',
+    display: 'block',
+    padding: '0.75rem 1rem',
     color: '#374151',
     textDecoration: 'none',
     borderRadius: '6px',
     fontSize: '0.9rem',
-    transition: 'all 0.2s'
+    transition: 'background-color 0.2s'
   },
-  dropdownButton: {
-    padding: '0.5rem 0.75rem',
-    color: '#374151',
-    background: 'none',
-    border: 'none',
-    borderRadius: '6px',
-    fontSize: '0.9rem',
-    textAlign: 'left',
-    cursor: 'pointer',
-    transition: 'all 0.2s'
+  headerRight: {
+    display: 'flex',
+    alignItems: 'center'
   },
-  userInfo: {
+  userSection: {
     display: 'flex',
     alignItems: 'center',
     gap: '1rem',
-    flexWrap: 'wrap'
+    '@media (max-width: 768px)': {
+      flexDirection: 'column',
+      gap: '0.5rem',
+      marginTop: '1rem'
+    }
+  },
+  userInfo: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-end',
+    '@media (max-width: 768px)': {
+      alignItems: 'center'
+    }
   },
   welcomeText: {
-    fontSize: '1rem',
-    fontWeight: '500'
+    fontSize: '0.8rem',
+    color: '#bfdbfe'
   },
-  menuAccessBtn: {
-    padding: '0.75rem 1rem',
+  userName: {
+    fontSize: '1rem',
+    fontWeight: '600',
+    color: 'white'
+  },
+  userActions: {
+    display: 'flex',
+    gap: '0.5rem'
+  },
+  actionButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    padding: '0.5rem 0.75rem',
     backgroundColor: 'rgba(255,255,255,0.15)',
     color: 'white',
-    border: '1px solid rgba(255,255,255,0.25)',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    fontSize: '0.9rem',
+    textDecoration: 'none',
+    borderRadius: '6px',
+    fontSize: '0.85rem',
     fontWeight: '500',
-    transition: 'all 0.2s',
-    whiteSpace: 'nowrap'
+    transition: 'all 0.2s'
   },
-  logoutBtn: {
-    padding: '0.5rem 1rem',
+  logoutButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    padding: '0.5rem 0.75rem',
     backgroundColor: 'rgba(255,255,255,0.2)',
     color: 'white',
-    border: '1px solid rgba(255,255,255,0.3)',
-    borderRadius: '8px',
+    border: 'none',
+    borderRadius: '6px',
     cursor: 'pointer',
-    fontSize: '0.9rem',
+    fontSize: '0.85rem',
+    fontWeight: '500',
     transition: 'all 0.2s'
+  },
+  actionIcon: {
+    fontSize: '0.9rem'
   },
   main: {
     maxWidth: '1400px',
     margin: '0 auto',
-    padding: 'clamp(1rem, 3vw, 2rem)'
-  },
-  profileCard: {
-    backgroundColor: 'white',
-    padding: '1.5rem',
-    borderRadius: '16px',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-    marginBottom: '2rem',
-    border: '1px solid #e2e8f0'
-  },
-  profileHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '1.5rem',
-    flexWrap: 'wrap',
-    gap: '1rem'
-  },
-  profileTitle: {
-    fontSize: '1.4rem',
-    fontWeight: 'bold',
-    color: '#1e293b',
-    margin: 0
-  },
-  editProfileBtn: {
-    padding: '0.5rem 1rem',
-    backgroundColor: '#1e40af',
-    color: 'white',
-    textDecoration: 'none',
-    borderRadius: '8px',
-    fontSize: '0.9rem',
-    fontWeight: '500'
-  },
-  profileGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-    gap: '1.5rem'
-  },
-  profileItem: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.5rem'
-  },
-  profileLabel: {
-    fontSize: '0.9rem',
-    color: '#64748b',
-    fontWeight: '600'
-  },
-  profileValue: {
-    fontSize: '1rem',
-    color: '#1e293b',
-    fontWeight: '500'
-  },
-  summaryGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-    gap: '1.5rem',
-    marginBottom: '2rem'
-  },
-  summaryCard: {
-    backgroundColor: 'white',
-    padding: '2rem',
-    borderRadius: '16px',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '1.5rem',
-    border: '1px solid #e2e8f0'
-  },
-  summaryIcon: {
-    fontSize: '2.5rem',
-    padding: '1rem',
-    backgroundColor: '#eff6ff',
-    borderRadius: '12px'
-  },
-  summaryContent: {
-    flex: 1
-  },
-  summaryTitle: {
-    fontSize: '0.9rem',
-    color: '#64748b',
-    margin: '0 0 0.5rem 0',
-    fontWeight: '600'
-  },
-  summaryAmount: {
-    fontSize: 'clamp(1.5rem, 4vw, 2rem)',
-    fontWeight: 'bold',
-    color: '#1e40af',
-    margin: '0 0 0.5rem 0'
-  },
-  summarySubtext: {
-    fontSize: '0.8rem',
-    color: '#64748b'
-  },
-  debitCardSection: {
-    backgroundColor: 'white',
-    padding: '2rem',
-    borderRadius: '16px',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-    marginBottom: '2rem',
-    border: '1px solid #e2e8f0',
-    textAlign: 'center'
-  },
-  cardSectionSubtitle: {
-    fontSize: '0.9rem',
-    color: '#64748b',
-    marginBottom: '1.5rem',
-    lineHeight: '1.5'
-  },
-  quickActionsSection: {
-    backgroundColor: 'white',
-    padding: '2rem',
-    borderRadius: '16px',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-    marginBottom: '2rem',
-    border: '1px solid #e2e8f0'
-  },
-  actionGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-    gap: '1rem'
-  },
-  actionCard: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '1rem',
-    padding: '1.5rem',
-    backgroundColor: '#f8fafc',
-    borderRadius: '12px',
-    textDecoration: 'none',
-    color: '#374151',
-    transition: 'all 0.2s',
-    border: '2px solid transparent'
-  },
-  actionIcon: {
-    fontSize: '1.5rem',
-    minWidth: '40px'
-  },
-  actionContent: {
-    flex: 1
-  },
-  actionText: {
-    display: 'block',
-    fontSize: '1rem',
-    fontWeight: '600',
-    color: '#1e293b',
-    marginBottom: '0.25rem'
-  },
-  actionDesc: {
-    fontSize: '0.8rem',
-    color: '#64748b'
-  },
-  tabNav: {
-    display: 'flex',
-    gap: '0.5rem',
-    marginBottom: '2rem',
-    overflowX: 'auto',
-    padding: '0.5rem 0',
-    backgroundColor: 'white',
-    borderRadius: '12px',
-    padding: '1rem',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
-  },
-  tab: {
-    padding: '0.75rem 1.5rem',
-    backgroundColor: 'transparent',
-    border: '2px solid #e2e8f0',
-    borderRadius: '10px',
-    cursor: 'pointer',
-    fontSize: '0.9rem',
-    fontWeight: '500',
-    color: '#64748b',
-    transition: 'all 0.2s',
-    whiteSpace: 'nowrap',
-    minWidth: 'fit-content'
-  },
-  activeTab: {
-    backgroundColor: '#1e40af',
-    color: 'white',
-    borderColor: '#1e40af'
-  },
-  content: {
+    padding: '2rem 1.5rem',
     display: 'flex',
     flexDirection: 'column',
     gap: '2rem'
   },
-  section: {
+  summarySection: {
     backgroundColor: 'white',
+    borderRadius: '12px',
     padding: '2rem',
-    borderRadius: '16px',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
     border: '1px solid #e2e8f0'
   },
-  sectionHeader: {
+  summaryHeader: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: '1.5rem',
-    flexWrap: 'wrap',
-    gap: '1rem'
+    marginBottom: '1.5rem'
   },
   sectionTitle: {
     fontSize: '1.4rem',
@@ -1048,65 +619,188 @@ const styles = {
     color: '#1e293b',
     margin: 0
   },
-  viewAllLink: {
-    color: '#1e40af',
-    textDecoration: 'none',
-    fontSize: '0.9rem',
-    fontWeight: '600',
-    padding: '0.5rem 1rem',
-    borderRadius: '8px',
-    border: '1px solid #1e40af',
-    transition: 'all 0.2s'
+  lastUpdated: {
+    fontSize: '0.85rem',
+    color: '#64748b'
   },
-  addAccountBtn: {
-    padding: '0.75rem 1.5rem',
-    backgroundColor: '#1e40af',
-    color: 'white',
-    textDecoration: 'none',
-    borderRadius: '10px',
-    fontSize: '0.9rem',
-    fontWeight: '600',
-    boxShadow: '0 2px 8px rgba(30, 64, 175, 0.3)'
+  summaryCards: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+    gap: '1.5rem'
   },
-  filterButtons: {
-    display: 'flex',
-    gap: '0.5rem'
-  },
-  filterBtn: {
-    padding: '0.5rem 1rem',
-    backgroundColor: '#f1f5f9',
-    color: '#64748b',
-    border: '1px solid #e2e8f0',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    fontSize: '0.8rem',
-    fontWeight: '500'
-  },
-  transactionList: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '1rem'
-  },
-  transactionItem: {
+  summaryCard: {
     display: 'flex',
     alignItems: 'center',
     gap: '1rem',
     padding: '1.5rem',
     backgroundColor: '#f8fafc',
+    borderRadius: '10px',
+    border: '1px solid #e2e8f0'
+  },
+  cardIcon: {
+    fontSize: '2rem',
+    padding: '1rem',
+    borderRadius: '10px'
+  },
+  cardContent: {
+    flex: 1
+  },
+  cardLabel: {
+    fontSize: '0.9rem',
+    color: '#64748b',
+    margin: '0 0 0.5rem 0',
+    fontWeight: '600'
+  },
+  cardValue: {
+    fontSize: '1.8rem',
+    fontWeight: 'bold',
+    color: '#1e293b',
+    margin: '0 0 0.25rem 0'
+  },
+  cardSubtext: {
+    fontSize: '0.8rem',
+    color: '#64748b'
+  },
+  quickActionsSection: {
+    backgroundColor: 'white',
     borderRadius: '12px',
+    padding: '1.5rem',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+    border: '1px solid #e2e8f0'
+  },
+  quickActions: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+    gap: '1rem',
+    marginTop: '1rem'
+  },
+  quickAction: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '0.5rem',
+    padding: '1.5rem 1rem',
+    backgroundColor: '#f8fafc',
+    borderRadius: '10px',
+    border: '2px solid #e2e8f0',
+    textDecoration: 'none',
+    color: '#374151',
+    transition: 'all 0.2s',
+    cursor: 'pointer'
+  },
+  quickActionIcon: {
+    fontSize: '1.5rem'
+  },
+  quickActionText: {
+    fontSize: '0.9rem',
+    fontWeight: '600',
+    textAlign: 'center'
+  },
+  statusMessage: {
+    marginTop: '1rem',
+    padding: '0.75rem 1rem',
+    borderRadius: '8px',
+    fontSize: '0.9rem',
+    fontWeight: '500'
+  },
+  accountsSection: {
+    backgroundColor: 'white',
+    borderRadius: '12px',
+    padding: '1.5rem',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+    border: '1px solid #e2e8f0'
+  },
+  sectionHeaderWithAction: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '1rem'
+  },
+  viewAllLink: {
+    color: '#1e40af',
+    textDecoration: 'none',
+    fontSize: '0.9rem',
+    fontWeight: '600'
+  },
+  accountsList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1rem'
+  },
+  accountItem: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '1rem',
+    backgroundColor: '#f8fafc',
+    borderRadius: '8px',
+    border: '1px solid #e2e8f0'
+  },
+  accountInfo: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '1rem'
+  },
+  accountTypeIcon: {
+    fontSize: '1.5rem',
+    padding: '0.5rem',
+    backgroundColor: '#eff6ff',
+    borderRadius: '8px'
+  },
+  accountDetails: {
+    display: 'flex',
+    flexDirection: 'column'
+  },
+  accountName: {
+    fontSize: '1rem',
+    fontWeight: '600',
+    color: '#1e293b',
+    margin: '0 0 0.25rem 0'
+  },
+  accountNumber: {
+    fontSize: '0.8rem',
+    color: '#64748b',
+    fontFamily: 'monospace'
+  },
+  accountBalance: {
+    fontSize: '1.2rem',
+    fontWeight: 'bold',
+    color: '#1e40af'
+  },
+  transactionsSection: {
+    backgroundColor: 'white',
+    borderRadius: '12px',
+    padding: '1.5rem',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+    border: '1px solid #e2e8f0'
+  },
+  transactionsList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.75rem'
+  },
+  transactionItem: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '1rem',
+    padding: '1rem',
+    backgroundColor: '#f8fafc',
+    borderRadius: '8px',
     border: '1px solid #e2e8f0'
   },
   transactionIcon: {
-    fontSize: '1.5rem',
-    minWidth: '40px',
-    textAlign: 'center'
+    fontSize: '1.2rem',
+    padding: '0.5rem',
+    backgroundColor: '#eff6ff',
+    borderRadius: '6px'
   },
-  transactionInfo: {
+  transactionDetails: {
     flex: 1,
-    minWidth: 0
+    display: 'flex',
+    flexDirection: 'column'
   },
-  transactionDesc: {
-    fontSize: '1rem',
+  transactionDescription: {
+    fontSize: '0.95rem',
     fontWeight: '600',
     color: '#1e293b',
     marginBottom: '0.25rem'
@@ -1115,167 +809,29 @@ const styles = {
     fontSize: '0.8rem',
     color: '#64748b'
   },
-  transactionMeta: {
-    display: 'flex',
-    gap: '1rem',
-    flexWrap: 'wrap'
-  },
-  transactionAccount: {
-    fontSize: '0.8rem',
-    color: '#64748b'
-  },
   transactionAmount: {
     fontSize: '1rem',
     fontWeight: 'bold',
-    textAlign: 'right',
-    minWidth: '80px'
+    textAlign: 'right'
   },
-  noTransactions: {
+  emptyState: {
     textAlign: 'center',
-    padding: '3rem 2rem',
+    padding: '2rem',
     color: '#64748b'
   },
-  emptyStateIcon: {
+  emptyIcon: {
     fontSize: '3rem',
-    marginBottom: '1rem'
+    marginBottom: '1rem',
+    display: 'block'
   },
-  emptyStateTitle: {
-    fontSize: '1.2rem',
+  emptyTitle: {
+    fontSize: '1.1rem',
     fontWeight: 'bold',
     color: '#1e293b',
     margin: '0 0 0.5rem 0'
   },
-  emptyStateDesc: {
+  emptyDesc: {
     fontSize: '0.9rem',
-    color: '#64748b',
     margin: 0
-  },
-  accountGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-    gap: '1.5rem'
-  },
-  accountCard: {
-    backgroundColor: 'white',
-    padding: '2rem',
-    borderRadius: '16px',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-    border: '1px solid #e2e8f0',
-    transition: 'all 0.2s'
-  },
-  accountHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '1.5rem'
-  },
-  accountType: {
-    fontSize: '0.9rem',
-    fontWeight: '700',
-    color: '#1e40af',
-    textTransform: 'uppercase',
-    letterSpacing: '0.5px'
-  },
-  accountStatus: {
-    fontSize: '0.8rem',
-    padding: '0.25rem 0.75rem',
-    backgroundColor: '#dcfce7',
-    color: '#16a34a',
-    borderRadius: '20px',
-    fontWeight: '600'
-  },
-  accountName: {
-    fontSize: '1.2rem',
-    fontWeight: 'bold',
-    color: '#1e293b',
-    marginBottom: '0.75rem'
-  },
-  accountNumber: {
-    fontSize: '0.9rem',
-    color: '#64748b',
-    marginBottom: '1.5rem',
-    fontFamily: 'monospace'
-  },
-  accountBalance: {
-    fontSize: '1.8rem',
-    fontWeight: 'bold',
-    marginBottom: '1.5rem'
-  },
-  accountActions: {
-    display: 'flex',
-    gap: '0.75rem',
-    flexWrap: 'wrap'
-  },
-  viewDetailsBtn: {
-    flex: 1,
-    display: 'inline-block',
-    padding: '0.75rem 1rem',
-    backgroundColor: '#f1f5f9',
-    color: '#1e40af',
-    textDecoration: 'none',
-    borderRadius: '8px',
-    fontSize: '0.9rem',
-    fontWeight: '600',
-    border: '1px solid #e2e8f0',
-    transition: 'all 0.2s',
-    textAlign: 'center'
-  },
-  transferBtn: {
-    flex: 1,
-    display: 'inline-block',
-    padding: '0.75rem 1rem',
-    backgroundColor: '#1e40af',
-    color: 'white',
-    textDecoration: 'none',
-    borderRadius: '8px',
-    fontSize: '0.9rem',
-    fontWeight: '600',
-    transition: 'all 0.2s',
-    textAlign: 'center'
-  },
-  serviceGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-    gap: '1.5rem'
-  },
-  serviceCard: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '1.5rem',
-    padding: '2rem',
-    backgroundColor: 'white',
-    borderRadius: '16px',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-    textDecoration: 'none',
-    color: 'inherit',
-    transition: 'all 0.2s',
-    border: '1px solid #e2e8f0'
-  },
-  serviceIcon: {
-    fontSize: '2rem',
-    minWidth: '60px',
-    textAlign: 'center',
-    padding: '1rem',
-    backgroundColor: '#eff6ff',
-    borderRadius: '12px'
-  },
-  serviceInfo: {
-    flex: 1
-  },
-  serviceTitle: {
-    fontSize: '1.1rem',
-    fontWeight: 'bold',
-    color: '#1e293b',
-    marginBottom: '0.5rem'
-  },
-  serviceDesc: {
-    fontSize: '0.9rem',
-    color: '#64748b',
-    lineHeight: '1.5'
-  },
-  serviceArrow: {
-    fontSize: '1.5rem',
-    color: '#94a3b8',
-    fontWeight: 'bold'
   }
 };
