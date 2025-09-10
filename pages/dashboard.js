@@ -11,6 +11,7 @@ export default function Dashboard() {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
+  const [dropdownOpen, setDropdownOpen] = useState({});
   const router = useRouter();
 
   useEffect(() => {
@@ -53,15 +54,12 @@ export default function Dashboard() {
         .select('*')
         .eq('user_id', user.id);
 
-      // If no accounts found by user_id, try by email (check if user_email column exists)
       if (!accountsData || accountsData.length === 0) {
-        // First try with user_email, if that fails try with email
         let { data: emailAccounts, error: emailError } = await supabase
           .from('accounts')
           .select('*')
           .eq('user_email', user.email);
         
-        // If user_email column doesn't exist, try with email
         if (emailError && emailError.code === '42703') {
           const { data: emailAccounts2, error: emailError2 } = await supabase
             .from('accounts')
@@ -75,7 +73,6 @@ export default function Dashboard() {
         accountsError = emailError;
       }
 
-      // If still no accounts, create sample accounts with proper structure
       if (!accountsData || accountsData.length === 0) {
         accountsData = [
           {
@@ -103,7 +100,6 @@ export default function Dashboard() {
 
       setAccounts(accountsData || []);
 
-      // Fetch real transactions for this user
       const { data: transactionsData, error: transactionsError } = await supabase
         .from('transactions')
         .select('*')
@@ -111,7 +107,6 @@ export default function Dashboard() {
         .order('created_at', { ascending: false })
         .limit(10);
 
-      // If no transactions found, try by email
       if (!transactionsData || transactionsData.length === 0) {
         const { data: emailTransactions, error: emailTransError } = await supabase
           .from('transactions')
@@ -160,6 +155,17 @@ export default function Dashboard() {
     return user?.email?.split('@')[0] || 'User';
   };
 
+  const toggleDropdown = (menu) => {
+    setDropdownOpen(prev => ({
+      ...Object.keys(prev).reduce((acc, key) => ({ ...acc, [key]: false }), {}),
+      [menu]: !prev[menu]
+    }));
+  };
+
+  const closeAllDropdowns = () => {
+    setDropdownOpen({});
+  };
+
   const handleSupportContact = () => {
     window.location.href = 'mailto:support@theoaklinebank.com?subject=Customer Support Request';
   };
@@ -173,7 +179,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div style={styles.container}>
+    <div style={styles.container} onClick={closeAllDropdowns}>
       {/* Header */}
       <header style={styles.header}>
         <div style={styles.headerContent}>
@@ -181,6 +187,128 @@ export default function Dashboard() {
             <img src="/images/logo-primary.png.jpg" alt="Oakline Bank" style={styles.logoImg} />
             <span style={styles.logoText}>Oakline Bank</span>
           </Link>
+
+          {/* Navigation Dropdowns */}
+          <nav style={styles.headerNav}>
+            {/* Banking Services Dropdown */}
+            <div style={styles.dropdown}>
+              <button 
+                style={styles.dropdownBtn}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleDropdown('banking');
+                }}
+              >
+                Banking Services ▼
+              </button>
+              {dropdownOpen.banking && (
+                <div style={styles.dropdownContent} onClick={(e) => e.stopPropagation()}>
+                  <div style={styles.dropdownSection}>
+                    <h4 style={styles.dropdownHeading}>💳 Account Services</h4>
+                    <Link href="/account-details" style={styles.dropdownLink}>Account Details</Link>
+                    <Link href="/transactions" style={styles.dropdownLink}>Transaction History</Link>
+                    <Link href="/apply" style={styles.dropdownLink}>Open New Account</Link>
+                    <Link href="/cards" style={styles.dropdownLink}>Manage Cards</Link>
+                  </div>
+                  <div style={styles.dropdownSection}>
+                    <h4 style={styles.dropdownHeading}>💸 Transfers & Payments</h4>
+                    <Link href="/transfer" style={styles.dropdownLink}>Transfer Money</Link>
+                    <Link href="/bill-pay" style={styles.dropdownLink}>Pay Bills</Link>
+                    <Link href="/deposit-real" style={styles.dropdownLink}>Mobile Deposit</Link>
+                    <Link href="/withdrawal" style={styles.dropdownLink}>Withdraw Funds</Link>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Loans & Credit Dropdown */}
+            <div style={styles.dropdown}>
+              <button 
+                style={styles.dropdownBtn}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleDropdown('loans');
+                }}
+              >
+                Loans & Credit ▼
+              </button>
+              {dropdownOpen.loans && (
+                <div style={styles.dropdownContent} onClick={(e) => e.stopPropagation()}>
+                  <div style={styles.dropdownSection}>
+                    <h4 style={styles.dropdownHeading}>🏠 Home Loans</h4>
+                    <Link href="/loans" style={styles.dropdownLink}>Mortgage Application</Link>
+                    <Link href="/loans" style={styles.dropdownLink}>Refinancing</Link>
+                    <Link href="/loans" style={styles.dropdownLink}>Home Equity Loans</Link>
+                  </div>
+                  <div style={styles.dropdownSection}>
+                    <h4 style={styles.dropdownHeading}>🚗 Auto & Personal</h4>
+                    <Link href="/loans" style={styles.dropdownLink}>Auto Loans</Link>
+                    <Link href="/loans" style={styles.dropdownLink}>Personal Loans</Link>
+                    <Link href="/credit-report" style={styles.dropdownLink}>Credit Report</Link>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Investments Dropdown */}
+            <div style={styles.dropdown}>
+              <button 
+                style={styles.dropdownBtn}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleDropdown('investments');
+                }}
+              >
+                Investments ▼
+              </button>
+              {dropdownOpen.investments && (
+                <div style={styles.dropdownContent} onClick={(e) => e.stopPropagation()}>
+                  <div style={styles.dropdownSection}>
+                    <h4 style={styles.dropdownHeading}>📈 Investment Options</h4>
+                    <Link href="/investments" style={styles.dropdownLink}>Portfolio Management</Link>
+                    <Link href="/crypto" style={styles.dropdownLink}>Cryptocurrency</Link>
+                    <Link href="/financial-advisory" style={styles.dropdownLink}>Financial Advisory</Link>
+                  </div>
+                  <div style={styles.dropdownSection}>
+                    <h4 style={styles.dropdownHeading}>📊 Trading</h4>
+                    <Link href="/investments" style={styles.dropdownLink}>Stock Trading</Link>
+                    <Link href="/market-news" style={styles.dropdownLink}>Market News</Link>
+                    <Link href="/rewards" style={styles.dropdownLink}>Rewards Program</Link>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Support Dropdown */}
+            <div style={styles.dropdown}>
+              <button 
+                style={styles.dropdownBtn}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleDropdown('support');
+                }}
+              >
+                Support ▼
+              </button>
+              {dropdownOpen.support && (
+                <div style={styles.dropdownContent} onClick={(e) => e.stopPropagation()}>
+                  <div style={styles.dropdownSection}>
+                    <h4 style={styles.dropdownHeading}>🎧 Get Help</h4>
+                    <button onClick={handleSupportContact} style={styles.dropdownButton}>Contact Support</button>
+                    <Link href="/faq" style={styles.dropdownLink}>FAQ</Link>
+                    <Link href="/security" style={styles.dropdownLink}>Security Center</Link>
+                  </div>
+                  <div style={styles.dropdownSection}>
+                    <h4 style={styles.dropdownHeading}>📱 Digital Services</h4>
+                    <Link href="/messages" style={styles.dropdownLink}>Messages</Link>
+                    <Link href="/notifications" style={styles.dropdownLink}>Notifications</Link>
+                    <Link href="/main-menu" style={styles.dropdownLink}>Full Menu</Link>
+                  </div>
+                </div>
+              )}
+            </div>
+          </nav>
+
           <div style={styles.userInfo}>
             <span style={styles.welcomeText}>Welcome, {getUserDisplayName()}</span>
             <button onClick={() => supabase.auth.signOut()} style={styles.logoutBtn}>
@@ -195,7 +323,10 @@ export default function Dashboard() {
         {/* User Profile Section */}
         {userProfile && (
           <div style={styles.profileCard}>
-            <h2 style={styles.profileTitle}>Account Holder Information</h2>
+            <div style={styles.profileHeader}>
+              <h2 style={styles.profileTitle}>Account Holder Information</h2>
+              <Link href="/profile" style={styles.editProfileBtn}>Edit Profile</Link>
+            </div>
             <div style={styles.profileGrid}>
               <div style={styles.profileItem}>
                 <span style={styles.profileLabel}>Full Name:</span>
@@ -220,6 +351,71 @@ export default function Dashboard() {
             </div>
           </div>
         )}
+
+        {/* Balance Summary Cards */}
+        <div style={styles.summaryGrid}>
+          <div style={styles.summaryCard}>
+            <div style={styles.summaryIcon}>💰</div>
+            <div style={styles.summaryContent}>
+              <h3 style={styles.summaryTitle}>Total Balance</h3>
+              <div style={styles.summaryAmount}>{formatCurrency(getTotalBalance())}</div>
+              <div style={styles.summarySubtext}>Across {accounts.length} account{accounts.length !== 1 ? 's' : ''}</div>
+            </div>
+          </div>
+          
+          <div style={styles.summaryCard}>
+            <div style={styles.summaryIcon}>📊</div>
+            <div style={styles.summaryContent}>
+              <h3 style={styles.summaryTitle}>This Month</h3>
+              <div style={styles.summaryAmount}>+$2,450</div>
+              <div style={styles.summarySubtext}>12% increase from last month</div>
+            </div>
+          </div>
+          
+          <div style={styles.summaryCard}>
+            <div style={styles.summaryIcon}>💳</div>
+            <div style={styles.summaryContent}>
+              <h3 style={styles.summaryTitle}>Available Credit</h3>
+              <div style={styles.summaryAmount}>$15,000</div>
+              <div style={styles.summarySubtext}>Credit limit utilization: 25%</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Actions */}
+        <div style={styles.quickActionsSection}>
+          <h3 style={styles.sectionTitle}>Quick Actions</h3>
+          <div style={styles.actionGrid}>
+            <Link href="/transfer" style={styles.actionCard}>
+              <span style={styles.actionIcon}>💸</span>
+              <div style={styles.actionContent}>
+                <span style={styles.actionText}>Transfer Money</span>
+                <span style={styles.actionDesc}>Send or move funds</span>
+              </div>
+            </Link>
+            <Link href="/deposit-real" style={styles.actionCard}>
+              <span style={styles.actionIcon}>📥</span>
+              <div style={styles.actionContent}>
+                <span style={styles.actionText}>Mobile Deposit</span>
+                <span style={styles.actionDesc}>Deposit checks instantly</span>
+              </div>
+            </Link>
+            <Link href="/bill-pay" style={styles.actionCard}>
+              <span style={styles.actionIcon}>🧾</span>
+              <div style={styles.actionContent}>
+                <span style={styles.actionText}>Pay Bills</span>
+                <span style={styles.actionDesc}>Schedule payments</span>
+              </div>
+            </Link>
+            <Link href="/cards" style={styles.actionCard}>
+              <span style={styles.actionIcon}>💳</span>
+              <div style={styles.actionContent}>
+                <span style={styles.actionText}>Manage Cards</span>
+                <span style={styles.actionDesc}>Control card settings</span>
+              </div>
+            </Link>
+          </div>
+        </div>
 
         {/* Navigation Tabs */}
         <nav style={styles.tabNav}>
@@ -252,36 +448,6 @@ export default function Dashboard() {
         {/* Content based on active tab */}
         {activeTab === 'overview' && (
           <div style={styles.content}>
-            {/* Balance Summary */}
-            <div style={styles.summaryCard}>
-              <h2 style={styles.summaryTitle}>Total Balance</h2>
-              <div style={styles.totalBalance}>{formatCurrency(getTotalBalance())}</div>
-              <div style={styles.balanceSubtext}>Across {accounts.length} account{accounts.length !== 1 ? 's' : ''}</div>
-            </div>
-
-            {/* Quick Actions */}
-            <div style={styles.quickActions}>
-              <h3 style={styles.sectionTitle}>Quick Actions</h3>
-              <div style={styles.actionGrid}>
-                <Link href="/transfer" style={styles.actionCard}>
-                  <span style={styles.actionIcon}>💸</span>
-                  <span style={styles.actionText}>Transfer Money</span>
-                </Link>
-                <Link href="/deposit-real" style={styles.actionCard}>
-                  <span style={styles.actionIcon}>📥</span>
-                  <span style={styles.actionText}>Mobile Deposit</span>
-                </Link>
-                <Link href="/bill-pay" style={styles.actionCard}>
-                  <span style={styles.actionIcon}>💳</span>
-                  <span style={styles.actionText}>Pay Bills</span>
-                </Link>
-                <Link href="/cards" style={styles.actionCard}>
-                  <span style={styles.actionIcon}>🎯</span>
-                  <span style={styles.actionText}>Manage Cards</span>
-                </Link>
-              </div>
-            </div>
-
             {/* Recent Transactions */}
             <div style={styles.section}>
               <div style={styles.sectionHeader}>
@@ -292,6 +458,9 @@ export default function Dashboard() {
                 {transactions.length > 0 ? (
                   transactions.slice(0, 5).map(transaction => (
                     <div key={transaction.id} style={styles.transactionItem}>
+                      <div style={styles.transactionIcon}>
+                        {transaction.amount >= 0 ? '📥' : '📤'}
+                      </div>
                       <div style={styles.transactionInfo}>
                         <div style={styles.transactionDesc}>
                           {transaction.description || transaction.transaction_type || 'Transaction'}
@@ -310,7 +479,9 @@ export default function Dashboard() {
                   ))
                 ) : (
                   <div style={styles.noTransactions}>
-                    <p>No transactions yet. Start banking with us!</p>
+                    <div style={styles.emptyStateIcon}>📭</div>
+                    <h4 style={styles.emptyStateTitle}>No transactions yet</h4>
+                    <p style={styles.emptyStateDesc}>Start banking with us to see your transaction history here!</p>
                   </div>
                 )}
               </div>
@@ -336,16 +507,21 @@ export default function Dashboard() {
                   <div style={styles.accountName}>
                     {account.account_name || account.name || `${(account.account_type || account.type || 'Account').replace(/_/g, ' ')} Account`}
                   </div>
-                  <div style={styles.accountNumber}>{account.account_number}</div>
+                  <div style={styles.accountNumber}>Account: {account.account_number}</div>
                   <div style={{
                     ...styles.accountBalance,
                     color: (parseFloat(account.balance) || 0) < 0 ? '#ef4444' : '#10b981'
                   }}>
                     {formatCurrency(account.balance || 0)}
                   </div>
-                  <Link href={`/account-details?id=${account.id}`} style={styles.viewDetailsBtn}>
-                    View Details
-                  </Link>
+                  <div style={styles.accountActions}>
+                    <Link href={`/account-details?id=${account.id}`} style={styles.viewDetailsBtn}>
+                      View Details
+                    </Link>
+                    <Link href={`/transfer?from=${account.id}`} style={styles.transferBtn}>
+                      Transfer
+                    </Link>
+                  </div>
                 </div>
               ))}
             </div>
@@ -354,11 +530,21 @@ export default function Dashboard() {
 
         {activeTab === 'transactions' && (
           <div style={styles.content}>
-            <h2 style={styles.sectionTitle}>Transaction History</h2>
+            <div style={styles.sectionHeader}>
+              <h2 style={styles.sectionTitle}>Transaction History</h2>
+              <div style={styles.filterButtons}>
+                <button style={styles.filterBtn}>All</button>
+                <button style={styles.filterBtn}>Income</button>
+                <button style={styles.filterBtn}>Expenses</button>
+              </div>
+            </div>
             <div style={styles.transactionList}>
               {transactions.length > 0 ? (
                 transactions.map(transaction => (
                   <div key={transaction.id} style={styles.transactionItem}>
+                    <div style={styles.transactionIcon}>
+                      {transaction.amount >= 0 ? '📥' : '📤'}
+                    </div>
                     <div style={styles.transactionInfo}>
                       <div style={styles.transactionDesc}>
                         {transaction.description || transaction.transaction_type || 'Transaction'}
@@ -382,7 +568,9 @@ export default function Dashboard() {
                 ))
               ) : (
                 <div style={styles.noTransactions}>
-                  <p>No transactions found. Your transaction history will appear here once you start banking with us.</p>
+                  <div style={styles.emptyStateIcon}>📭</div>
+                  <h4 style={styles.emptyStateTitle}>No transactions found</h4>
+                  <p style={styles.emptyStateDesc}>Your transaction history will appear here once you start banking with us.</p>
                 </div>
               )}
             </div>
@@ -399,6 +587,7 @@ export default function Dashboard() {
                   <div style={styles.serviceTitle}>Loans & Credit</div>
                   <div style={styles.serviceDesc}>Apply for personal, auto, or home loans</div>
                 </div>
+                <span style={styles.serviceArrow}>→</span>
               </Link>
               <Link href="/investments" style={styles.serviceCard}>
                 <span style={styles.serviceIcon}>📈</span>
@@ -406,6 +595,7 @@ export default function Dashboard() {
                   <div style={styles.serviceTitle}>Investment Services</div>
                   <div style={styles.serviceDesc}>Grow your wealth with our investment options</div>
                 </div>
+                <span style={styles.serviceArrow}>→</span>
               </Link>
               <Link href="/crypto" style={styles.serviceCard}>
                 <span style={styles.serviceIcon}>₿</span>
@@ -413,6 +603,7 @@ export default function Dashboard() {
                   <div style={styles.serviceTitle}>Cryptocurrency</div>
                   <div style={styles.serviceDesc}>Buy, sell, and trade digital currencies</div>
                 </div>
+                <span style={styles.serviceArrow}>→</span>
               </Link>
               <button onClick={handleSupportContact} style={{...styles.serviceCard, cursor: 'pointer', border: 'none', background: 'white'}}>
                 <span style={styles.serviceIcon}>🎧</span>
@@ -420,6 +611,7 @@ export default function Dashboard() {
                   <div style={styles.serviceTitle}>Customer Support</div>
                   <div style={styles.serviceDesc}>Get help with your banking needs</div>
                 </div>
+                <span style={styles.serviceArrow}>→</span>
               </button>
               <Link href="/credit-report" style={styles.serviceCard}>
                 <span style={styles.serviceIcon}>📊</span>
@@ -427,6 +619,7 @@ export default function Dashboard() {
                   <div style={styles.serviceTitle}>Credit Report</div>
                   <div style={styles.serviceDesc}>Check your credit score and history</div>
                 </div>
+                <span style={styles.serviceArrow}>→</span>
               </Link>
               <Link href="/security" style={styles.serviceCard}>
                 <span style={styles.serviceIcon}>🔒</span>
@@ -434,6 +627,7 @@ export default function Dashboard() {
                   <div style={styles.serviceTitle}>Security Center</div>
                   <div style={styles.serviceDesc}>Manage your account security settings</div>
                 </div>
+                <span style={styles.serviceArrow}>→</span>
               </Link>
             </div>
           </div>
@@ -446,15 +640,16 @@ export default function Dashboard() {
 const styles = {
   container: {
     minHeight: '100vh',
-    backgroundColor: '#f8fafc',
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+    backgroundColor: '#f1f5f9',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    position: 'relative'
   },
   loadingContainer: {
     minHeight: '100vh',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#f8fafc'
+    backgroundColor: '#f1f5f9'
   },
   loading: {
     fontSize: '1.2rem',
@@ -464,10 +659,13 @@ const styles = {
     backgroundColor: '#1e40af',
     color: 'white',
     padding: '1rem 0',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+    boxShadow: '0 4px 12px rgba(30, 64, 175, 0.2)',
+    position: 'sticky',
+    top: 0,
+    zIndex: 1000
   },
   headerContent: {
-    maxWidth: '1200px',
+    maxWidth: '1400px',
     margin: '0 auto',
     padding: '0 1rem',
     display: 'flex',
@@ -491,6 +689,74 @@ const styles = {
     fontSize: '1.5rem',
     fontWeight: 'bold'
   },
+  headerNav: {
+    display: 'flex',
+    gap: '0.5rem',
+    alignItems: 'center',
+    '@media (max-width: 768px)': {
+      display: 'none'
+    }
+  },
+  dropdown: {
+    position: 'relative'
+  },
+  dropdownBtn: {
+    padding: '0.75rem 1rem',
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    color: 'white',
+    border: '1px solid rgba(255,255,255,0.2)',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    fontSize: '0.9rem',
+    fontWeight: '500',
+    transition: 'all 0.2s',
+    whiteSpace: 'nowrap'
+  },
+  dropdownContent: {
+    position: 'absolute',
+    top: '100%',
+    left: 0,
+    backgroundColor: 'white',
+    borderRadius: '12px',
+    boxShadow: '0 10px 25px rgba(0,0,0,0.15)',
+    padding: '1rem',
+    minWidth: '280px',
+    zIndex: 1000,
+    marginTop: '0.5rem',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1rem'
+  },
+  dropdownSection: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.5rem'
+  },
+  dropdownHeading: {
+    fontSize: '0.9rem',
+    fontWeight: 'bold',
+    color: '#1e40af',
+    margin: '0 0 0.5rem 0'
+  },
+  dropdownLink: {
+    padding: '0.5rem 0.75rem',
+    color: '#374151',
+    textDecoration: 'none',
+    borderRadius: '6px',
+    fontSize: '0.9rem',
+    transition: 'all 0.2s'
+  },
+  dropdownButton: {
+    padding: '0.5rem 0.75rem',
+    color: '#374151',
+    background: 'none',
+    border: 'none',
+    borderRadius: '6px',
+    fontSize: '0.9rem',
+    textAlign: 'left',
+    cursor: 'pointer',
+    transition: 'all 0.2s'
+  },
   userInfo: {
     display: 'flex',
     alignItems: 'center',
@@ -506,61 +772,167 @@ const styles = {
     backgroundColor: 'rgba(255,255,255,0.2)',
     color: 'white',
     border: '1px solid rgba(255,255,255,0.3)',
-    borderRadius: '6px',
+    borderRadius: '8px',
     cursor: 'pointer',
     fontSize: '0.9rem',
     transition: 'all 0.2s'
   },
   main: {
-    maxWidth: '1200px',
+    maxWidth: '1400px',
     margin: '0 auto',
-    padding: '2rem 1rem'
+    padding: 'clamp(1rem, 3vw, 2rem)'
   },
   profileCard: {
     backgroundColor: 'white',
     padding: '1.5rem',
-    borderRadius: '12px',
-    boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-    marginBottom: '2rem'
+    borderRadius: '16px',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+    marginBottom: '2rem',
+    border: '1px solid #e2e8f0'
+  },
+  profileHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '1.5rem',
+    flexWrap: 'wrap',
+    gap: '1rem'
   },
   profileTitle: {
-    fontSize: '1.3rem',
+    fontSize: '1.4rem',
     fontWeight: 'bold',
     color: '#1e293b',
-    marginBottom: '1rem'
+    margin: 0
+  },
+  editProfileBtn: {
+    padding: '0.5rem 1rem',
+    backgroundColor: '#1e40af',
+    color: 'white',
+    textDecoration: 'none',
+    borderRadius: '8px',
+    fontSize: '0.9rem',
+    fontWeight: '500'
   },
   profileGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-    gap: '1rem'
+    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+    gap: '1.5rem'
   },
   profileItem: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '0.25rem'
+    gap: '0.5rem'
   },
   profileLabel: {
     fontSize: '0.9rem',
     color: '#64748b',
-    fontWeight: '500'
+    fontWeight: '600'
   },
   profileValue: {
     fontSize: '1rem',
     color: '#1e293b',
     fontWeight: '500'
   },
+  summaryGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+    gap: '1.5rem',
+    marginBottom: '2rem'
+  },
+  summaryCard: {
+    backgroundColor: 'white',
+    padding: '2rem',
+    borderRadius: '16px',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '1.5rem',
+    border: '1px solid #e2e8f0'
+  },
+  summaryIcon: {
+    fontSize: '2.5rem',
+    padding: '1rem',
+    backgroundColor: '#eff6ff',
+    borderRadius: '12px'
+  },
+  summaryContent: {
+    flex: 1
+  },
+  summaryTitle: {
+    fontSize: '0.9rem',
+    color: '#64748b',
+    margin: '0 0 0.5rem 0',
+    fontWeight: '600'
+  },
+  summaryAmount: {
+    fontSize: 'clamp(1.5rem, 4vw, 2rem)',
+    fontWeight: 'bold',
+    color: '#1e40af',
+    margin: '0 0 0.5rem 0'
+  },
+  summarySubtext: {
+    fontSize: '0.8rem',
+    color: '#64748b'
+  },
+  quickActionsSection: {
+    backgroundColor: 'white',
+    padding: '2rem',
+    borderRadius: '16px',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+    marginBottom: '2rem',
+    border: '1px solid #e2e8f0'
+  },
+  actionGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+    gap: '1rem'
+  },
+  actionCard: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '1rem',
+    padding: '1.5rem',
+    backgroundColor: '#f8fafc',
+    borderRadius: '12px',
+    textDecoration: 'none',
+    color: '#374151',
+    transition: 'all 0.2s',
+    border: '2px solid transparent'
+  },
+  actionIcon: {
+    fontSize: '1.5rem',
+    minWidth: '40px'
+  },
+  actionContent: {
+    flex: 1
+  },
+  actionText: {
+    display: 'block',
+    fontSize: '1rem',
+    fontWeight: '600',
+    color: '#1e293b',
+    marginBottom: '0.25rem'
+  },
+  actionDesc: {
+    fontSize: '0.8rem',
+    color: '#64748b'
+  },
   tabNav: {
     display: 'flex',
     gap: '0.5rem',
     marginBottom: '2rem',
     overflowX: 'auto',
-    padding: '0.5rem 0'
+    padding: '0.5rem 0',
+    backgroundColor: 'white',
+    borderRadius: '12px',
+    padding: '1rem',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
   },
   tab: {
-    padding: '0.75rem 1rem',
-    backgroundColor: 'white',
+    padding: '0.75rem 1.5rem',
+    backgroundColor: 'transparent',
     border: '2px solid #e2e8f0',
-    borderRadius: '8px',
+    borderRadius: '10px',
     cursor: 'pointer',
     fontSize: '0.9rem',
     fontWeight: '500',
@@ -579,72 +951,12 @@ const styles = {
     flexDirection: 'column',
     gap: '2rem'
   },
-  summaryCard: {
-    backgroundColor: 'white',
-    padding: '2rem',
-    borderRadius: '12px',
-    boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-    textAlign: 'center'
-  },
-  summaryTitle: {
-    fontSize: '1.1rem',
-    color: '#64748b',
-    margin: '0 0 1rem 0',
-    fontWeight: '500'
-  },
-  totalBalance: {
-    fontSize: 'clamp(2rem, 5vw, 3rem)',
-    fontWeight: 'bold',
-    color: '#1e40af',
-    margin: '0.5rem 0'
-  },
-  balanceSubtext: {
-    fontSize: '0.9rem',
-    color: '#64748b'
-  },
-  quickActions: {
-    backgroundColor: 'white',
-    padding: '1.5rem',
-    borderRadius: '12px',
-    boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-  },
-  sectionTitle: {
-    fontSize: '1.3rem',
-    fontWeight: 'bold',
-    color: '#1e293b',
-    margin: '0 0 1.5rem 0'
-  },
-  actionGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-    gap: '1rem'
-  },
-  actionCard: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: '0.5rem',
-    padding: '1.5rem 1rem',
-    backgroundColor: '#f8fafc',
-    borderRadius: '8px',
-    textDecoration: 'none',
-    color: '#374151',
-    transition: 'all 0.2s',
-    border: '2px solid transparent'
-  },
-  actionIcon: {
-    fontSize: '1.5rem'
-  },
-  actionText: {
-    fontSize: '0.9rem',
-    fontWeight: '500',
-    textAlign: 'center'
-  },
   section: {
     backgroundColor: 'white',
-    padding: '1.5rem',
-    borderRadius: '12px',
-    boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+    padding: '2rem',
+    borderRadius: '16px',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+    border: '1px solid #e2e8f0'
   },
   sectionHeader: {
     display: 'flex',
@@ -654,42 +966,72 @@ const styles = {
     flexWrap: 'wrap',
     gap: '1rem'
   },
+  sectionTitle: {
+    fontSize: '1.4rem',
+    fontWeight: 'bold',
+    color: '#1e293b',
+    margin: 0
+  },
   viewAllLink: {
     color: '#1e40af',
     textDecoration: 'none',
     fontSize: '0.9rem',
-    fontWeight: '500'
+    fontWeight: '600',
+    padding: '0.5rem 1rem',
+    borderRadius: '8px',
+    border: '1px solid #1e40af',
+    transition: 'all 0.2s'
   },
   addAccountBtn: {
-    padding: '0.5rem 1rem',
+    padding: '0.75rem 1.5rem',
     backgroundColor: '#1e40af',
     color: 'white',
     textDecoration: 'none',
-    borderRadius: '6px',
+    borderRadius: '10px',
     fontSize: '0.9rem',
+    fontWeight: '600',
+    boxShadow: '0 2px 8px rgba(30, 64, 175, 0.3)'
+  },
+  filterButtons: {
+    display: 'flex',
+    gap: '0.5rem'
+  },
+  filterBtn: {
+    padding: '0.5rem 1rem',
+    backgroundColor: '#f1f5f9',
+    color: '#64748b',
+    border: '1px solid #e2e8f0',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    fontSize: '0.8rem',
     fontWeight: '500'
   },
   transactionList: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '0.75rem'
+    gap: '1rem'
   },
   transactionItem: {
     display: 'flex',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    padding: '1rem',
+    gap: '1rem',
+    padding: '1.5rem',
     backgroundColor: '#f8fafc',
-    borderRadius: '8px',
-    gap: '1rem'
+    borderRadius: '12px',
+    border: '1px solid #e2e8f0'
+  },
+  transactionIcon: {
+    fontSize: '1.5rem',
+    minWidth: '40px',
+    textAlign: 'center'
   },
   transactionInfo: {
     flex: 1,
     minWidth: 0
   },
   transactionDesc: {
-    fontSize: '0.95rem',
-    fontWeight: '500',
+    fontSize: '1rem',
+    fontWeight: '600',
     color: '#1e293b',
     marginBottom: '0.25rem'
   },
@@ -707,88 +1049,127 @@ const styles = {
     color: '#64748b'
   },
   transactionAmount: {
-    fontSize: '0.95rem',
+    fontSize: '1rem',
     fontWeight: 'bold',
-    textAlign: 'right'
+    textAlign: 'right',
+    minWidth: '80px'
   },
   noTransactions: {
     textAlign: 'center',
-    padding: '2rem',
+    padding: '3rem 2rem',
     color: '#64748b'
+  },
+  emptyStateIcon: {
+    fontSize: '3rem',
+    marginBottom: '1rem'
+  },
+  emptyStateTitle: {
+    fontSize: '1.2rem',
+    fontWeight: 'bold',
+    color: '#1e293b',
+    margin: '0 0 0.5rem 0'
+  },
+  emptyStateDesc: {
+    fontSize: '0.9rem',
+    color: '#64748b',
+    margin: 0
   },
   accountGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
     gap: '1.5rem'
   },
   accountCard: {
     backgroundColor: 'white',
-    padding: '1.5rem',
-    borderRadius: '12px',
-    boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-    border: '1px solid #e2e8f0'
+    padding: '2rem',
+    borderRadius: '16px',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+    border: '1px solid #e2e8f0',
+    transition: 'all 0.2s'
   },
   accountHeader: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: '1rem'
+    marginBottom: '1.5rem'
   },
   accountType: {
     fontSize: '0.9rem',
-    fontWeight: '600',
+    fontWeight: '700',
     color: '#1e40af',
-    textTransform: 'uppercase'
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px'
   },
   accountStatus: {
     fontSize: '0.8rem',
-    padding: '0.25rem 0.5rem',
+    padding: '0.25rem 0.75rem',
     backgroundColor: '#dcfce7',
     color: '#16a34a',
-    borderRadius: '4px',
-    fontWeight: '500'
+    borderRadius: '20px',
+    fontWeight: '600'
   },
   accountName: {
-    fontSize: '1.1rem',
+    fontSize: '1.2rem',
     fontWeight: 'bold',
     color: '#1e293b',
-    marginBottom: '0.5rem'
+    marginBottom: '0.75rem'
   },
   accountNumber: {
     fontSize: '0.9rem',
     color: '#64748b',
-    marginBottom: '1rem'
+    marginBottom: '1.5rem',
+    fontFamily: 'monospace'
   },
   accountBalance: {
-    fontSize: '1.5rem',
+    fontSize: '1.8rem',
     fontWeight: 'bold',
-    marginBottom: '1rem'
+    marginBottom: '1.5rem'
+  },
+  accountActions: {
+    display: 'flex',
+    gap: '0.75rem',
+    flexWrap: 'wrap'
   },
   viewDetailsBtn: {
+    flex: 1,
     display: 'inline-block',
-    padding: '0.5rem 1rem',
+    padding: '0.75rem 1rem',
     backgroundColor: '#f1f5f9',
     color: '#1e40af',
     textDecoration: 'none',
-    borderRadius: '6px',
+    borderRadius: '8px',
     fontSize: '0.9rem',
-    fontWeight: '500',
+    fontWeight: '600',
     border: '1px solid #e2e8f0',
-    transition: 'all 0.2s'
+    transition: 'all 0.2s',
+    textAlign: 'center'
+  },
+  transferBtn: {
+    flex: 1,
+    display: 'inline-block',
+    padding: '0.75rem 1rem',
+    backgroundColor: '#1e40af',
+    color: 'white',
+    textDecoration: 'none',
+    borderRadius: '8px',
+    fontSize: '0.9rem',
+    fontWeight: '600',
+    transition: 'all 0.2s',
+    textAlign: 'center'
   },
   serviceGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
     gap: '1.5rem'
   },
   serviceCard: {
     display: 'flex',
     alignItems: 'center',
-    gap: '1rem',
-    padding: '1.5rem',
+    gap: '1.5rem',
+    padding: '2rem',
     backgroundColor: 'white',
-    borderRadius: '12px',
-    boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+    borderRadius: '16px',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
     textDecoration: 'none',
     color: 'inherit',
     transition: 'all 0.2s',
@@ -797,7 +1178,10 @@ const styles = {
   serviceIcon: {
     fontSize: '2rem',
     minWidth: '60px',
-    textAlign: 'center'
+    textAlign: 'center',
+    padding: '1rem',
+    backgroundColor: '#eff6ff',
+    borderRadius: '12px'
   },
   serviceInfo: {
     flex: 1
@@ -811,6 +1195,11 @@ const styles = {
   serviceDesc: {
     fontSize: '0.9rem',
     color: '#64748b',
-    lineHeight: '1.4'
+    lineHeight: '1.5'
+  },
+  serviceArrow: {
+    fontSize: '1.5rem',
+    color: '#94a3b8',
+    fontWeight: 'bold'
   }
 };

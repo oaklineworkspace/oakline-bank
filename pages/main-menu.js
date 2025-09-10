@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useRouter } from 'next/router';
@@ -8,12 +9,13 @@ export default function MainMenu() {
   const [userProfile, setUserProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [authLoading, setAuthLoading] = useState(true);
+  const [dropdownOpen, setDropdownOpen] = useState({});
+  const [searchTerm, setSearchTerm] = useState('');
   const router = useRouter();
 
   useEffect(() => {
     checkUser();
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN') {
         setUser(session?.user || null);
@@ -48,7 +50,6 @@ export default function MainMenu() {
 
   const fetchUserData = async (user) => {
     try {
-      // Fetch user profile from applications table
       const { data: profile, error: profileError } = await supabase
         .from('applications')
         .select('*')
@@ -81,71 +82,66 @@ export default function MainMenu() {
     return user?.email?.split('@')[0] || 'User';
   };
 
+  const toggleDropdown = (menu) => {
+    setDropdownOpen(prev => ({
+      ...Object.keys(prev).reduce((acc, key) => ({ ...acc, [key]: false }), {}),
+      [menu]: !prev[menu]
+    }));
+  };
+
+  const closeAllDropdowns = () => {
+    setDropdownOpen({});
+  };
+
   const handleSupportContact = () => {
     window.location.href = 'mailto:support@theoaklinebank.com?subject=Customer Support Request';
   };
 
-  const menuItems = [
-    {
-      category: 'My Banking',
-      icon: '🏦',
-      items: [
-        { name: 'Dashboard', path: '/dashboard', icon: '📊', description: 'View account overview and balances' },
-        { name: 'Account Details', path: '/account-details', icon: '📋', description: 'Detailed account information' },
-        { name: 'Transaction History', path: '/transactions', icon: '📜', description: 'View all transactions' },
-        { name: 'My Profile', path: '/profile', icon: '👤', description: 'Manage personal information' }
-      ]
-    },
-    {
-      category: 'Money Management',
-      icon: '💰',
-      items: [
-        { name: 'Transfer Money', path: '/transfer', icon: '💸', description: 'Transfer between accounts or to others' },
-        { name: 'Make Deposit', path: '/deposit-real', icon: '📥', description: 'Deposit money to your account' },
-        { name: 'Withdraw Funds', path: '/withdrawal', icon: '📤', description: 'Withdraw money from your account' },
-        { name: 'Bill Pay', path: '/bill-pay', icon: '🧾', description: 'Pay your bills online' }
-      ]
-    },
-    {
-      category: 'Cards & Payments',
-      icon: '💳',
-      items: [
-        { name: 'My Cards', path: '/cards', icon: '💳', description: 'Manage debit and credit cards' },
-        { name: 'Digital Wallet', path: '/digital-wallet', icon: '📱', description: 'Mobile payment options' },
-        { name: 'Card Controls', path: '/card-controls', icon: '🔧', description: 'Set spending limits and controls' }
-      ]
-    },
-    {
-      category: 'Financial Services',
-      icon: '📈',
-      items: [
-        { name: 'Loans', path: '/loans', icon: '🏠', description: 'Apply for personal, auto, or home loans' },
-        { name: 'Investments', path: '/investments', icon: '📊', description: 'Manage your investment portfolio' },
-        { name: 'Cryptocurrency', path: '/crypto', icon: '₿', description: 'Buy, sell, and trade digital currencies' },
-        { name: 'Credit Report', path: '/credit-report', icon: '📋', description: 'Check your credit score and history' }
-      ]
-    },
-    {
-      category: 'Support & Security',
-      icon: '🛡️',
-      items: [
-        { name: 'Customer Support', path: '/support', icon: '🎧', description: 'Get help with your banking needs' },
-        { name: 'Security Center', path: '/security', icon: '🔒', description: 'Manage account security settings' },
-        { name: 'Messages', path: '/messages', icon: '💬', description: 'View bank communications' },
-        { name: 'Notifications', path: '/notifications', icon: '🔔', description: 'Manage notification preferences' }
-      ]
-    },
-    {
-      category: 'Account Services',
-      icon: '⚙️',
-      items: [
-        { name: 'Open New Account', path: '/apply', icon: '➕', description: 'Apply for additional accounts' },
-        { name: 'Account Statements', path: '/statements', icon: '📄', description: 'Download account statements' },
-        { name: 'Tax Documents', path: '/tax-documents', icon: '📋', description: 'Access tax-related documents' },
-        { name: 'Rewards Program', path: '/rewards', icon: '🎁', description: 'View and redeem rewards' }
-      ]
-    }
+  const allServices = [
+    // Account Management
+    { name: 'Dashboard', path: '/dashboard', icon: '📊', category: 'Account Management', description: 'View account overview and balances' },
+    { name: 'Account Details', path: '/account-details', icon: '📋', category: 'Account Management', description: 'Detailed account information' },
+    { name: 'Transaction History', path: '/transactions', icon: '📜', category: 'Account Management', description: 'View all transactions' },
+    { name: 'My Profile', path: '/profile', icon: '👤', category: 'Account Management', description: 'Manage personal information' },
+    
+    // Money Management
+    { name: 'Transfer Money', path: '/transfer', icon: '💸', category: 'Money Management', description: 'Transfer between accounts or to others' },
+    { name: 'Make Deposit', path: '/deposit-real', icon: '📥', category: 'Money Management', description: 'Deposit money to your account' },
+    { name: 'Withdraw Funds', path: '/withdrawal', icon: '📤', category: 'Money Management', description: 'Withdraw money from your account' },
+    { name: 'Bill Pay', path: '/bill-pay', icon: '🧾', category: 'Money Management', description: 'Pay your bills online' },
+    
+    // Cards & Digital
+    { name: 'My Cards', path: '/cards', icon: '💳', category: 'Cards & Digital', description: 'Manage debit and credit cards' },
+    { name: 'Digital Wallet', path: '/digital-wallet', icon: '📱', category: 'Cards & Digital', description: 'Mobile payment options' },
+    { name: 'Card Controls', path: '/card-controls', icon: '🔧', category: 'Cards & Digital', description: 'Set spending limits and controls' },
+    
+    // Loans & Credit
+    { name: 'Loans', path: '/loans', icon: '🏠', category: 'Loans & Credit', description: 'Apply for personal, auto, or home loans' },
+    { name: 'Credit Report', path: '/credit-report', icon: '📋', category: 'Loans & Credit', description: 'Check your credit score and history' },
+    
+    // Investments
+    { name: 'Investments', path: '/investments', icon: '📊', category: 'Investments', description: 'Manage your investment portfolio' },
+    { name: 'Cryptocurrency', path: '/crypto', icon: '₿', category: 'Investments', description: 'Buy, sell, and trade digital currencies' },
+    
+    // Support & Security
+    { name: 'Customer Support', path: '/support', icon: '🎧', category: 'Support & Security', description: 'Get help with your banking needs', isButton: true },
+    { name: 'Security Center', path: '/security', icon: '🔒', category: 'Support & Security', description: 'Manage account security settings' },
+    { name: 'Messages', path: '/messages', icon: '💬', category: 'Support & Security', description: 'View bank communications' },
+    { name: 'Notifications', path: '/notifications', icon: '🔔', category: 'Support & Security', description: 'Manage notification preferences' }
   ];
+
+  const filteredServices = allServices.filter(service =>
+    service.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    service.description.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const groupedServices = filteredServices.reduce((acc, service) => {
+    if (!acc[service.category]) {
+      acc[service.category] = [];
+    }
+    acc[service.category].push(service);
+    return acc;
+  }, {});
 
   if (loading || authLoading) {
     return (
@@ -159,7 +155,6 @@ export default function MainMenu() {
   if (!user) {
     return (
       <div style={styles.container}>
-        {/* Header */}
         <header style={styles.header}>
           <div style={styles.headerContent}>
             <Link href="/" style={styles.logo}>
@@ -198,7 +193,7 @@ export default function MainMenu() {
 
   // Logged-in user view - Main Menu
   return (
-    <div style={styles.container}>
+    <div style={styles.container} onClick={closeAllDropdowns}>
       {/* Header */}
       <header style={styles.header}>
         <div style={styles.headerContent}>
@@ -206,6 +201,130 @@ export default function MainMenu() {
             <img src="/images/logo-primary.png.jpg" alt="Oakline Bank" style={styles.logoImg} />
             <span style={styles.logoText}>Oakline Bank</span>
           </Link>
+
+          {/* Navigation Dropdowns */}
+          <nav style={styles.headerNav}>
+            {/* Banking Dropdown */}
+            <div style={styles.dropdown}>
+              <button 
+                style={styles.dropdownBtn}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleDropdown('banking');
+                }}
+              >
+                Banking ▼
+              </button>
+              {dropdownOpen.banking && (
+                <div style={styles.dropdownContent} onClick={(e) => e.stopPropagation()}>
+                  <div style={styles.dropdownSection}>
+                    <h4 style={styles.dropdownHeading}>💳 Account Services</h4>
+                    <Link href="/dashboard" style={styles.dropdownLink}>Dashboard</Link>
+                    <Link href="/account-details" style={styles.dropdownLink}>Account Details</Link>
+                    <Link href="/apply" style={styles.dropdownLink}>Open New Account</Link>
+                    <Link href="/profile" style={styles.dropdownLink}>My Profile</Link>
+                  </div>
+                  <div style={styles.dropdownSection}>
+                    <h4 style={styles.dropdownHeading}>💸 Transactions</h4>
+                    <Link href="/transfer" style={styles.dropdownLink}>Transfer Money</Link>
+                    <Link href="/deposit-real" style={styles.dropdownLink}>Mobile Deposit</Link>
+                    <Link href="/withdrawal" style={styles.dropdownLink}>Withdraw Funds</Link>
+                    <Link href="/transactions" style={styles.dropdownLink}>Transaction History</Link>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Financial Services Dropdown */}
+            <div style={styles.dropdown}>
+              <button 
+                style={styles.dropdownBtn}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleDropdown('financial');
+                }}
+              >
+                Financial Services ▼
+              </button>
+              {dropdownOpen.financial && (
+                <div style={styles.dropdownContent} onClick={(e) => e.stopPropagation()}>
+                  <div style={styles.dropdownSection}>
+                    <h4 style={styles.dropdownHeading}>🏠 Loans & Credit</h4>
+                    <Link href="/loans" style={styles.dropdownLink}>Apply for Loans</Link>
+                    <Link href="/credit-report" style={styles.dropdownLink}>Credit Report</Link>
+                    <Link href="/cards" style={styles.dropdownLink}>Credit Cards</Link>
+                  </div>
+                  <div style={styles.dropdownSection}>
+                    <h4 style={styles.dropdownHeading}>📈 Investments</h4>
+                    <Link href="/investments" style={styles.dropdownLink}>Investment Portfolio</Link>
+                    <Link href="/crypto" style={styles.dropdownLink}>Cryptocurrency</Link>
+                    <Link href="/financial-advisory" style={styles.dropdownLink}>Financial Advisory</Link>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Digital Services Dropdown */}
+            <div style={styles.dropdown}>
+              <button 
+                style={styles.dropdownBtn}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleDropdown('digital');
+                }}
+              >
+                Digital Services ▼
+              </button>
+              {dropdownOpen.digital && (
+                <div style={styles.dropdownContent} onClick={(e) => e.stopPropagation()}>
+                  <div style={styles.dropdownSection}>
+                    <h4 style={styles.dropdownHeading}>📱 Mobile Banking</h4>
+                    <Link href="/cards" style={styles.dropdownLink}>Manage Cards</Link>
+                    <Link href="/bill-pay" style={styles.dropdownLink}>Bill Pay</Link>
+                    <Link href="/notifications" style={styles.dropdownLink}>Notifications</Link>
+                  </div>
+                  <div style={styles.dropdownSection}>
+                    <h4 style={styles.dropdownHeading}>🔒 Security</h4>
+                    <Link href="/security" style={styles.dropdownLink}>Security Settings</Link>
+                    <Link href="/mfa-setup" style={styles.dropdownLink}>Two-Factor Auth</Link>
+                    <Link href="/messages" style={styles.dropdownLink}>Secure Messages</Link>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Support Dropdown */}
+            <div style={styles.dropdown}>
+              <button 
+                style={styles.dropdownBtn}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleDropdown('support');
+                }}
+              >
+                Support ▼
+              </button>
+              {dropdownOpen.support && (
+                <div style={styles.dropdownContent} onClick={(e) => e.stopPropagation()}>
+                  <div style={styles.dropdownSection}>
+                    <h4 style={styles.dropdownHeading}>🎧 Get Help</h4>
+                    <button onClick={handleSupportContact} style={styles.dropdownButton}>Contact Support</button>
+                    <Link href="/faq" style={styles.dropdownLink}>FAQ</Link>
+                    <Link href="/support" style={styles.dropdownLink}>Help Center</Link>
+                  </div>
+                  <div style={styles.dropdownSection}>
+                    <h4 style={styles.dropdownHeading}>📞 Contact Info</h4>
+                    <div style={styles.contactInfo}>
+                      <div style={styles.contactItem}>📞 1-800-OAKLINE</div>
+                      <div style={styles.contactItem}>✉️ support@theoaklinebank.com</div>
+                      <div style={styles.contactItem}>🕒 24/7 Available</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </nav>
+
           <div style={styles.userInfo}>
             <span style={styles.welcomeText}>Welcome, {getUserDisplayName()}</span>
             <button onClick={handleLogout} style={styles.logoutBtn}>
@@ -221,40 +340,66 @@ export default function MainMenu() {
         <div style={styles.welcomeCard}>
           <h1 style={styles.welcomeTitle}>Banking Services Menu</h1>
           <p style={styles.welcomeSubtitle}>
-            Choose from the banking services below to manage your finances
+            Access all your banking services and manage your finances in one place
           </p>
+          
+          {/* Search Bar */}
+          <div style={styles.searchContainer}>
+            <input
+              type="text"
+              placeholder="Search banking services..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={styles.searchInput}
+            />
+            <span style={styles.searchIcon}>🔍</span>
+          </div>
+
+          {/* Quick Access Buttons */}
           <div style={styles.quickNavButtons}>
             <Link href="/dashboard" style={styles.quickNavButton}>
               <span style={styles.quickNavIcon}>📊</span>
-              <span>Go to Dashboard</span>
+              <span>Dashboard</span>
             </Link>
             <Link href="/transfer" style={styles.quickNavButton}>
               <span style={styles.quickNavIcon}>💸</span>
               <span>Quick Transfer</span>
             </Link>
+            <Link href="/bill-pay" style={styles.quickNavButton}>
+              <span style={styles.quickNavIcon}>🧾</span>
+              <span>Pay Bills</span>
+            </Link>
             <button onClick={handleSupportContact} style={{...styles.quickNavButton, border: 'none', cursor: 'pointer'}}>
               <span style={styles.quickNavIcon}>📞</span>
-              <span>Contact Support</span>
+              <span>Support</span>
             </button>
           </div>
         </div>
 
         {/* Menu Categories */}
         <div style={styles.menuContainer}>
-          {menuItems.map((category, categoryIndex) => (
-            <div key={categoryIndex} style={styles.categorySection}>
+          {Object.entries(groupedServices).map(([category, services]) => (
+            <div key={category} style={styles.categorySection}>
               <div style={styles.categoryHeader}>
-                <span style={styles.categoryIcon}>{category.icon}</span>
-                <h2 style={styles.categoryTitle}>{category.category}</h2>
+                <span style={styles.categoryIcon}>
+                  {category === 'Account Management' ? '🏦' :
+                   category === 'Money Management' ? '💰' :
+                   category === 'Cards & Digital' ? '💳' :
+                   category === 'Loans & Credit' ? '🏠' :
+                   category === 'Investments' ? '📈' :
+                   category === 'Support & Security' ? '🛡️' : '⚙️'}
+                </span>
+                <h2 style={styles.categoryTitle}>{category}</h2>
+                <span style={styles.categoryCount}>{services.length} services</span>
               </div>
 
               <div style={styles.menuGrid}>
-                {category.items.map((item, itemIndex) => (
+                {services.map((item, itemIndex) => (
                   <div
                     key={itemIndex}
                     style={styles.menuItem}
                     onClick={() => {
-                      if (item.name === 'Customer Support') {
+                      if (item.isButton || item.name === 'Customer Support') {
                         handleSupportContact();
                       } else {
                         router.push(item.path);
@@ -273,6 +418,37 @@ export default function MainMenu() {
             </div>
           ))}
         </div>
+
+        {/* Featured Services */}
+        <div style={styles.featuredSection}>
+          <h2 style={styles.featuredTitle}>Featured Services</h2>
+          <div style={styles.featuredGrid}>
+            <div style={styles.featuredCard}>
+              <div style={styles.featuredIcon}>🎯</div>
+              <div style={styles.featuredContent}>
+                <h3 style={styles.featuredName}>Smart Savings</h3>
+                <p style={styles.featuredDesc}>Automatically save money with our AI-powered savings recommendations</p>
+                <Link href="/investments" style={styles.featuredBtn}>Learn More</Link>
+              </div>
+            </div>
+            <div style={styles.featuredCard}>
+              <div style={styles.featuredIcon}>⚡</div>
+              <div style={styles.featuredContent}>
+                <h3 style={styles.featuredName}>Instant Transfers</h3>
+                <p style={styles.featuredDesc}>Send money instantly to family and friends with zero fees</p>
+                <Link href="/transfer" style={styles.featuredBtn}>Try Now</Link>
+              </div>
+            </div>
+            <div style={styles.featuredCard}>
+              <div style={styles.featuredIcon}>🏆</div>
+              <div style={styles.featuredContent}>
+                <h3 style={styles.featuredName}>Rewards Program</h3>
+                <p style={styles.featuredDesc}>Earn cashback on every purchase with our premium rewards program</p>
+                <Link href="/rewards" style={styles.featuredBtn}>Join Now</Link>
+              </div>
+            </div>
+          </div>
+        </div>
       </main>
     </div>
   );
@@ -281,15 +457,16 @@ export default function MainMenu() {
 const styles = {
   container: {
     minHeight: '100vh',
-    backgroundColor: '#f8fafc',
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+    backgroundColor: '#f1f5f9',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    position: 'relative'
   },
   loadingContainer: {
     minHeight: '100vh',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#f8fafc'
+    backgroundColor: '#f1f5f9'
   },
   loading: {
     fontSize: '1.2rem',
@@ -299,10 +476,13 @@ const styles = {
     backgroundColor: '#1e40af',
     color: 'white',
     padding: '1rem 0',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+    boxShadow: '0 4px 12px rgba(30, 64, 175, 0.2)',
+    position: 'sticky',
+    top: 0,
+    zIndex: 1000
   },
   headerContent: {
-    maxWidth: '1200px',
+    maxWidth: '1400px',
     margin: '0 auto',
     padding: '0 1rem',
     display: 'flex',
@@ -326,6 +506,81 @@ const styles = {
     fontSize: '1.5rem',
     fontWeight: 'bold'
   },
+  headerNav: {
+    display: 'flex',
+    gap: '0.5rem',
+    alignItems: 'center'
+  },
+  dropdown: {
+    position: 'relative'
+  },
+  dropdownBtn: {
+    padding: '0.75rem 1rem',
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    color: 'white',
+    border: '1px solid rgba(255,255,255,0.2)',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    fontSize: '0.9rem',
+    fontWeight: '500',
+    transition: 'all 0.2s',
+    whiteSpace: 'nowrap'
+  },
+  dropdownContent: {
+    position: 'absolute',
+    top: '100%',
+    left: 0,
+    backgroundColor: 'white',
+    borderRadius: '12px',
+    boxShadow: '0 10px 25px rgba(0,0,0,0.15)',
+    padding: '1rem',
+    minWidth: '280px',
+    zIndex: 1000,
+    marginTop: '0.5rem',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1rem'
+  },
+  dropdownSection: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.5rem'
+  },
+  dropdownHeading: {
+    fontSize: '0.9rem',
+    fontWeight: 'bold',
+    color: '#1e40af',
+    margin: '0 0 0.5rem 0'
+  },
+  dropdownLink: {
+    padding: '0.5rem 0.75rem',
+    color: '#374151',
+    textDecoration: 'none',
+    borderRadius: '6px',
+    fontSize: '0.9rem',
+    transition: 'all 0.2s'
+  },
+  dropdownButton: {
+    padding: '0.5rem 0.75rem',
+    color: '#374151',
+    background: 'none',
+    border: 'none',
+    borderRadius: '6px',
+    fontSize: '0.9rem',
+    textAlign: 'left',
+    cursor: 'pointer',
+    transition: 'all 0.2s'
+  },
+  contactInfo: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.5rem'
+  },
+  contactItem: {
+    fontSize: '0.8rem',
+    color: '#64748b',
+    padding: '0.25rem 0'
+  },
   guestActions: {
     display: 'flex',
     gap: '1rem',
@@ -346,7 +601,7 @@ const styles = {
     backgroundColor: 'rgba(255,255,255,0.2)',
     color: 'white',
     border: '1px solid rgba(255,255,255,0.3)',
-    borderRadius: '6px',
+    borderRadius: '8px',
     cursor: 'pointer',
     fontSize: '0.9rem',
     transition: 'all 0.2s'
@@ -417,20 +672,21 @@ const styles = {
     fontSize: '1.1rem'
   },
   main: {
-    maxWidth: '1200px',
+    maxWidth: '1400px',
     margin: '0 auto',
-    padding: '2rem 1rem'
+    padding: 'clamp(1rem, 3vw, 2rem)'
   },
   welcomeCard: {
     backgroundColor: 'white',
-    padding: '2rem',
-    borderRadius: '16px',
-    boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+    padding: 'clamp(2rem, 4vw, 3rem)',
+    borderRadius: '20px',
+    boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
     marginBottom: '3rem',
-    textAlign: 'center'
+    textAlign: 'center',
+    border: '1px solid #e2e8f0'
   },
   welcomeTitle: {
-    fontSize: '2.5rem',
+    fontSize: 'clamp(2rem, 4vw, 2.5rem)',
     fontWeight: 'bold',
     color: '#1e293b',
     marginBottom: '1rem'
@@ -440,6 +696,28 @@ const styles = {
     color: '#64748b',
     marginBottom: '2rem',
     lineHeight: '1.6'
+  },
+  searchContainer: {
+    position: 'relative',
+    maxWidth: '400px',
+    margin: '0 auto 2rem auto'
+  },
+  searchInput: {
+    width: '100%',
+    padding: '1rem 3rem 1rem 1rem',
+    fontSize: '1rem',
+    border: '2px solid #e2e8f0',
+    borderRadius: '12px',
+    outline: 'none',
+    transition: 'all 0.2s'
+  },
+  searchIcon: {
+    position: 'absolute',
+    right: '1rem',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    fontSize: '1.2rem',
+    color: '#64748b'
   },
   quickNavButtons: {
     display: 'flex',
@@ -455,10 +733,11 @@ const styles = {
     backgroundColor: '#1e40af',
     color: 'white',
     textDecoration: 'none',
-    borderRadius: '8px',
+    borderRadius: '10px',
     fontSize: '0.9rem',
-    fontWeight: '500',
-    transition: 'all 0.2s'
+    fontWeight: '600',
+    transition: 'all 0.2s',
+    boxShadow: '0 2px 8px rgba(30, 64, 175, 0.2)'
   },
   quickNavIcon: {
     fontSize: '1.1rem'
@@ -466,13 +745,14 @@ const styles = {
   menuContainer: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '3rem'
+    gap: '2rem'
   },
   categorySection: {
     backgroundColor: 'white',
     padding: '2rem',
-    borderRadius: '16px',
-    boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
+    borderRadius: '20px',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+    border: '1px solid #e2e8f0'
   },
   categoryHeader: {
     display: 'flex',
@@ -480,7 +760,8 @@ const styles = {
     gap: '1rem',
     marginBottom: '2rem',
     paddingBottom: '1rem',
-    borderBottom: '2px solid #f1f5f9'
+    borderBottom: '2px solid #f1f5f9',
+    flexWrap: 'wrap'
   },
   categoryIcon: {
     fontSize: '2rem'
@@ -489,17 +770,26 @@ const styles = {
     fontSize: '1.5rem',
     fontWeight: 'bold',
     color: '#1e293b',
-    margin: 0
+    margin: 0,
+    flex: 1
+  },
+  categoryCount: {
+    fontSize: '0.8rem',
+    color: '#64748b',
+    backgroundColor: '#f1f5f9',
+    padding: '0.25rem 0.75rem',
+    borderRadius: '20px',
+    fontWeight: '500'
   },
   menuGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
     gap: '1.5rem'
   },
   menuItem: {
-    padding: '1.5rem',
+    padding: '2rem',
     backgroundColor: '#f8fafc',
-    borderRadius: '12px',
+    borderRadius: '16px',
     border: '2px solid transparent',
     cursor: 'pointer',
     transition: 'all 0.3s ease',
@@ -509,15 +799,15 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     gap: '1rem',
-    marginBottom: '0.75rem'
+    marginBottom: '1rem'
   },
   menuItemIcon: {
-    fontSize: '1.5rem',
-    minWidth: '40px',
+    fontSize: '1.8rem',
+    minWidth: '50px',
     textAlign: 'center'
   },
   menuItemTitle: {
-    fontSize: '1.1rem',
+    fontSize: '1.2rem',
     fontWeight: '600',
     color: '#1e293b',
     margin: 0
@@ -525,15 +815,75 @@ const styles = {
   menuItemDescription: {
     fontSize: '0.9rem',
     color: '#64748b',
-    lineHeight: '1.5',
-    margin: '0 0 0 56px'
+    lineHeight: '1.6',
+    margin: '0 0 0 66px'
   },
   menuItemArrow: {
     position: 'absolute',
-    top: '1.5rem',
-    right: '1.5rem',
-    fontSize: '1.2rem',
+    top: '2rem',
+    right: '2rem',
+    fontSize: '1.5rem',
     color: '#94a3b8',
-    fontWeight: 'bold'
+    fontWeight: 'bold',
+    transition: 'all 0.2s'
+  },
+  featuredSection: {
+    marginTop: '3rem'
+  },
+  featuredTitle: {
+    fontSize: '1.8rem',
+    fontWeight: 'bold',
+    color: '#1e293b',
+    marginBottom: '2rem',
+    textAlign: 'center'
+  },
+  featuredGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+    gap: '2rem'
+  },
+  featuredCard: {
+    backgroundColor: 'white',
+    padding: '2rem',
+    borderRadius: '20px',
+    boxShadow: '0 8px 25px rgba(0,0,0,0.1)',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    textAlign: 'center',
+    border: '1px solid #e2e8f0'
+  },
+  featuredIcon: {
+    fontSize: '3rem',
+    marginBottom: '1rem',
+    padding: '1rem',
+    backgroundColor: '#eff6ff',
+    borderRadius: '50%'
+  },
+  featuredContent: {
+    flex: 1
+  },
+  featuredName: {
+    fontSize: '1.3rem',
+    fontWeight: 'bold',
+    color: '#1e293b',
+    marginBottom: '1rem'
+  },
+  featuredDesc: {
+    fontSize: '0.9rem',
+    color: '#64748b',
+    lineHeight: '1.6',
+    marginBottom: '1.5rem'
+  },
+  featuredBtn: {
+    display: 'inline-block',
+    padding: '0.75rem 1.5rem',
+    backgroundColor: '#1e40af',
+    color: 'white',
+    textDecoration: 'none',
+    borderRadius: '10px',
+    fontSize: '0.9rem',
+    fontWeight: '600',
+    transition: 'all 0.2s'
   }
 };
