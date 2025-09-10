@@ -13,19 +13,19 @@ export default function EnrollPage() {
     accountNumber: '',
     agreeToTerms: false
   });
-  const [applicationInfo, setApplicationInfo] = useState(null);
+  const [applicationInfo, setApplicationInfo] = useState(null); // Renamed from applicationData for clarity
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [authCreationLoading, setAuthCreationLoading] = useState(false); // Start as false
-  const [accounts, setAccounts] = useState([]);
-  const [enrollmentToken, setEnrollmentToken] = useState(''); // For traditional token flow
-  const [applicationId, setApplicationId] = useState(''); // For both flows
-  const [step, setStep] = useState('loading'); // 'loading', 'token_verification', 'password', 'success'
+  const [loading, setLoading] = useState(true); // Start as true to show loading initially
+  const [authCreationLoading, setAuthCreationLoading] = useState(false);
+  const [accounts, setAccounts] = useState([]); // Renamed from availableAccounts
+  const [enrollmentToken, setEnrollmentToken] = useState('');
+  const [applicationId, setApplicationId] = useState('');
+  const [step, setStep] = useState('loading'); // 'loading', 'password', 'success', 'error'
+  const [validToken, setValidToken] = useState(false); // To track if the token validation was successful
 
   // Function to handle magic link authentication and user verification
   const verifyMagicLinkUser = async (user, applicationId) => {
-    // Clear any existing timeout
     if (window.enrollmentTimeout) {
       clearTimeout(window.enrollmentTimeout);
       window.enrollmentTimeout = null;
@@ -36,7 +36,6 @@ export default function EnrollPage() {
     console.log('Verifying magic link user:', user.email, 'for application:', applicationId);
 
     try {
-      // Verify the user and get application data
       const response = await fetch('/api/verify-magic-link-enrollment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -52,13 +51,14 @@ export default function EnrollPage() {
 
       if (response.ok) {
         console.log('Magic link verification successful');
-        setApplicationInfo(result.application); // Use applicationInfo for display
+        setApplicationInfo(result.application);
         setAccounts(result.accounts || result.account_numbers || []);
-        setFormData(prev => ({ ...prev, email: user.email })); // Pre-fill email
-        setStep('password'); // Skip token verification, go straight to password setup
+        setFormData(prev => ({ ...prev, email: user.email }));
+        setStep('password'); // Go straight to password setup
+        setValidToken(true); // Token (magic link) is implicitly valid
       } else {
         console.error('Magic link verification failed:', result.error);
-        setError(result.error || 'Invalid enrollment link');
+        setError(result.error || 'Invalid enrollment link or session expired.');
         setStep('error');
       }
     } catch (error) {
@@ -70,35 +70,88 @@ export default function EnrollPage() {
     }
   };
 
-  // Function to verify traditional enrollment token
-  const verifyToken = async (token, applicationId) => {
-    setLoading(true);
-    setError('');
-
+  // Function to validate traditional enrollment token
+  const validateToken = async (token, applicationId) => {
     try {
-      const response = await fetch('/api/debug-enrollment', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, application_id: applicationId })
-      });
+      setLoading(true);
+      setError('');
 
-      const result = await response.json();
-      console.log('Token verification result:', result);
+      console.log('Validating token:', token, 'for application:', applicationId);
 
-      if (response.ok && result.application) {
-        setApplicationInfo(result.application);
-        setAccounts(result.account_numbers || []);
-        setFormData(prev => ({ ...prev, email: result.application.email }));
-        setStep('password');
-      } else {
-        console.error('Token verification failed:', result.error);
-        setError(result.error || 'Invalid or expired enrollment token. Please request a new enrollment link.');
-        setStep('error');
+      // First check if enrollment exists
+      const { data: enrollment, error: enrollmentError } = await supabase
+        .from('enrollments')
+        .select('*')
+        .eq('token', token)
+        .single();
+
+      if (enrollmentError) {
+        console.error('Enrollment error:', enrollmentError);
+        setError('Enrollment token not found. Please contact support.');
+        setLoading(false);
+        return;
       }
+
+      if (!enrollment) {
+        setError('Invalid enrollment token.');
+        setLoading(false);
+        return;
+      }
+
+      if (enrollment.is_used) {
+        setError('This enrollment link has already been used.');
+        setLoading(false);
+        return;
+      }
+
+      // Check if application_id matches (if provided in enrollment)
+      if (enrollment.application_id && enrollment.application_id !== applicationId) {
+        setError('Enrollment token does not match the application.');
+        setLoading(false);
+        return;
+      }
+
+      // Get application data
+      const { data: application, error: appError } = await supabase
+        .from('applications')
+        .select('*')
+        .eq('id', applicationId)
+        .single();
+
+      if (appError) {
+        console.error('Application error:', appError);
+        setError('Application not found. Please contact support.');
+        setLoading(false);
+        return;
+      }
+
+      // Verify email matches
+      if (enrollment.email !== application.email) {
+        setError('Email mismatch. Please use the correct enrollment link.');
+        setLoading(false);
+        return;
+      }
+
+      // Get accounts for this application
+      const { data: accounts, error: accountsError } = await supabase
+        .from('accounts')
+        .select('*')
+        .eq('application_id', applicationId);
+
+      if (accountsError) {
+        console.error('Accounts error:', accountsError);
+        // Don't fail if no accounts yet, but log it
+        console.log('No accounts found for application:', applicationId);
+      }
+
+      setApplicationInfo(application);
+      setAccounts(accounts || []);
+      setValidToken(true); // Mark token as valid
+
+      console.log('Token validation successful');
     } catch (error) {
-      console.error('Token verification error:', error);
-      setError('Error verifying enrollment token. Please check your internet connection and try again.');
-      setStep('error');
+      console.error('Token validation error:', error);
+      setError('An error occurred while validating your enrollment link. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -111,16 +164,13 @@ export default function EnrollPage() {
       setLoading(true);
 
       try {
-        // First, check URL parameters
         const { token, application_id, type } = router.query;
         console.log('URL params:', { token: !!token, application_id: !!application_id, type });
 
-        // Check if user is already authenticated (magic link flow)
         const { data: { session } } = await supabase.auth.getSession();
         console.log('Current session:', !!session, 'User:', session?.user?.email);
 
         if (session?.user && (type === 'magiclink' || !token)) {
-          // User is authenticated via magic link
           console.log('User authenticated via magic link');
           const userAppId = session.user.user_metadata?.application_id || application_id;
 
@@ -134,13 +184,11 @@ export default function EnrollPage() {
             setStep('error');
           }
         } else if (token && application_id) {
-          // Traditional token-based enrollment
           console.log('Using token-based enrollment');
           setEnrollmentToken(token);
           setApplicationId(application_id);
-          await verifyToken(token, application_id);
+          await validateToken(token, application_id);
         } else {
-          // Invalid or missing parameters
           console.log('Invalid enrollment link - missing required parameters');
           setError('Invalid enrollment link. Please check your email for the correct link or request a new one.');
           setStep('error');
@@ -155,11 +203,10 @@ export default function EnrollPage() {
       }
     };
 
-    // Only initialize if we have router query params
-    if (Object.keys(router.query).length > 0) {
+    if (router.isReady) {
       initializeEnrollment();
     }
-  }, [router.query]);
+  }, [router.isReady, router.query]);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -215,14 +262,11 @@ export default function EnrollPage() {
     }
 
     try {
-      // Get current session to determine flow
       const { data: { session } } = await supabase.auth.getSession();
 
-      // Decide which API endpoint to call and prepare data
       let endpoint, bodyData;
 
       if (session?.user && step === 'password') {
-        // Magic link flow - user is authenticated
         endpoint = '/api/complete-enrollment-magic-link';
         bodyData = {
           userId: session.user.id,
@@ -234,7 +278,6 @@ export default function EnrollPage() {
           accountNumber: formData.accountNumber
         };
       } else {
-        // Traditional token flow
         endpoint = '/api/complete-enrollment';
         bodyData = {
           token: enrollmentToken,
@@ -300,11 +343,11 @@ export default function EnrollPage() {
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
             <button
               onClick={() => window.location.reload()}
-              style={{ 
-                padding: '12px 24px', 
-                backgroundColor: '#059669', 
-                color: 'white', 
-                border: 'none', 
+              style={{
+                padding: '12px 24px',
+                backgroundColor: '#059669',
+                color: 'white',
+                border: 'none',
                 borderRadius: '6px',
                 cursor: 'pointer'
               }}
@@ -313,11 +356,11 @@ export default function EnrollPage() {
             </button>
             <button
               onClick={() => router.push('/')}
-              style={{ 
-                padding: '12px 24px', 
-                backgroundColor: '#1e40af', 
-                color: 'white', 
-                border: 'none', 
+              style={{
+                padding: '12px 24px',
+                backgroundColor: '#1e40af',
+                color: 'white',
+                border: 'none',
                 borderRadius: '6px',
                 cursor: 'pointer'
               }}
@@ -330,179 +373,187 @@ export default function EnrollPage() {
     );
   }
 
-  // Render based on the current step
+  // Render based on the current step and token validity
   return (
     <div style={{ maxWidth: '500px', margin: '2rem auto', padding: '2rem', backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
       <h1 style={{ textAlign: 'center', marginBottom: '2rem', color: '#1e40af' }}>Complete Your Enrollment</h1>
 
-      {applicationInfo && step === 'password' && (
-        <div style={{ backgroundColor: '#f0f9ff', padding: '1rem', borderRadius: '6px', marginBottom: '2rem' }}>
-          <h3>Welcome, {applicationInfo.first_name} {applicationInfo.middle_name ? applicationInfo.middle_name + ' ' : ''}{applicationInfo.last_name}!</h3>
-          <p>Email: {applicationInfo.email}</p>
-          {accounts.length > 0 && (
-            <div>
-              <p><strong>Your Accounts:</strong></p>
-              {accounts.map((account, index) => (
-                <p key={index}>{account.account_type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}: {account.account_number}</p>
-              ))}
-            </div>
-          )}
+      {!validToken && step !== 'password' && (
+        <div style={{ textAlign: 'center', padding: '2rem', color: '#6b7280' }}>
+          Invalid or expired enrollment link. Please check your email or request a new link.
         </div>
       )}
 
-      {step === 'password' && (
-        <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: '1rem' }}>
-            <label>Email:</label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              required
-              disabled
-              style={{ width: '100%', padding: '8px', marginTop: '4px', backgroundColor: '#f3f4f6' }}
-            />
-          </div>
-
-          <div style={{ marginBottom: '1rem' }}>
-            <label>Password:</label>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleInputChange}
-              required
-              minLength="8"
-              style={{ width: '100%', padding: '8px', marginTop: '4px' }}
-              placeholder="Enter your password (min 8 characters)"
-            />
-          </div>
-
-          <div style={{ marginBottom: '1rem' }}>
-            <label>Confirm Password:</label>
-            <input
-              type="password"
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleInputChange}
-              required
-              style={{ width: '100%', padding: '8px', marginTop: '4px' }}
-              placeholder="Confirm your password"
-            />
-          </div>
-
-          {applicationInfo?.country === 'US' ? (
-            <div style={{ marginBottom: '1rem' }}>
-              <label>Social Security Number (SSN) <span style={{color: '#ef4444'}}>*</span>:</label>
-              <input
-                type="text"
-                name="ssn"
-                value={formData.ssn}
-                onChange={handleInputChange}
-                required
-                style={{ width: '100%', padding: '8px', marginTop: '4px', border: '1px solid #d1d5db', borderRadius: '4px' }}
-                placeholder="XXX-XX-XXXX"
-                maxLength="11"
-              />
-            </div>
-          ) : (
-            <div style={{ marginBottom: '1rem' }}>
-              <label>Government ID Number <span style={{color: '#ef4444'}}>*</span>:</label>
-              <input
-                type="text"
-                name="id_number"
-                value={formData.id_number}
-                onChange={handleInputChange}
-                required
-                style={{ width: '100%', padding: '8px', marginTop: '4px', border: '1px solid #d1d5db', borderRadius: '4px' }}
-                placeholder="Enter your government ID number"
-              />
+      {validToken && step === 'password' && (
+        <>
+          {applicationInfo && (
+            <div style={{ backgroundColor: '#f0f9ff', padding: '1rem', borderRadius: '6px', marginBottom: '2rem' }}>
+              <h3>Welcome, {applicationInfo.first_name} {applicationInfo.middle_name ? applicationInfo.middle_name + ' ' : ''}{applicationInfo.last_name}!</h3>
+              <p>Email: {applicationInfo.email}</p>
+              {accounts.length > 0 && (
+                <div>
+                  <p><strong>Your Accounts:</strong></p>
+                  {accounts.map((account, index) => (
+                    <p key={index}>{account.account_type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}: {account.account_number}</p>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
-          <div style={{ marginBottom: '1rem' }}>
-            <label>Select One of Your Account Numbers:</label>
-            <select
-              name="accountNumber"
-              value={formData.accountNumber}
-              onChange={handleInputChange}
-              required
-              style={{ width: '100%', padding: '8px', marginTop: '4px', border: '1px solid #d1d5db', borderRadius: '4px' }}
-            >
-              <option value="">Select an account number</option>
-              {accounts.map((account, index) => (
-                <option key={index} value={account.account_number}>
-                  {account.account_type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}: {account.account_number}
-                </option>
-              ))}
-            </select>
-          </div>
+          <form onSubmit={handleSubmit}>
+            <div style={{ marginBottom: '1rem' }}>
+              <label>Email:</label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                required
+                disabled
+                style={{ width: '100%', padding: '8px', marginTop: '4px', backgroundColor: '#f3f4f6' }}
+              />
+            </div>
 
-          <div style={{
-            marginBottom: '1rem',
-            display: 'flex',
-            alignItems: 'flex-start',
-            gap: '12px',
-            padding: '20px',
-            backgroundColor: formData.agreeToTerms ? '#f0fdf4' : '#ffffff',
-            borderRadius: '12px',
-            border: `3px solid ${formData.agreeToTerms ? '#22c55e' : '#e2e8f0'}`,
-            position: 'relative',
-            zIndex: 10,
-            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-            transition: 'all 0.3s ease'
-          }}>
-            <input
-              type="checkbox"
-              name="agreeToTerms"
-              checked={formData.agreeToTerms}
-              onChange={handleInputChange}
-              required
-              style={{
-                width: '24px',
-                height: '24px',
-                accentColor: '#22c55e',
-                cursor: 'pointer',
-                marginTop: '2px',
-                flexShrink: 0,
-                transform: 'scale(1.2)',
-                border: '2px solid #d1d5db',
-                borderRadius: '4px'
-              }}
-            />
-            <label
-              style={{
-                fontSize: '14px',
-                color: '#374151',
-                cursor: 'pointer',
-                lineHeight: '1.5',
-                userSelect: 'none'
-              }}
-              onClick={() => handleInputChange({target: {name: 'agreeToTerms', type: 'checkbox', checked: !formData.agreeToTerms}})}
-            >
-              I agree to the Terms of Service and Privacy Policy <span style={{color: '#ef4444'}}>*</span>
-              {formData.agreeToTerms && <span style={{ color: '#22c55e', marginLeft: '8px', fontSize: '16px', fontWeight: 'bold' }}>✓ Agreed</span>}
-            </label>
-          </div>
+            <div style={{ marginBottom: '1rem' }}>
+              <label>Password:</label>
+              <input
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleInputChange}
+                required
+                minLength="8"
+                style={{ width: '100%', padding: '8px', marginTop: '4px' }}
+                placeholder="Enter your password (min 8 characters)"
+              />
+            </div>
 
-          <button
-            type="submit"
-            disabled={loading || !applicationInfo} // Ensure applicationInfo is loaded
-            style={{
-              width: '100%',
-              padding: '12px',
-              backgroundColor: loading ? '#9ca3af' : '#1e40af',
-              color: 'white',
-              border: 'none',
-              borderRadius: '6px',
-              fontSize: '16px',
-              cursor: loading ? 'not-allowed' : 'pointer'
-            }}
-          >
-            {loading ? 'Completing Enrollment...' : 'Complete Enrollment'}
-          </button>
-        </form>
+            <div style={{ marginBottom: '1rem' }}>
+              <label>Confirm Password:</label>
+              <input
+                type="password"
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleInputChange}
+                required
+                style={{ width: '100%', padding: '8px', marginTop: '4px' }}
+                placeholder="Confirm your password"
+              />
+            </div>
+
+            {applicationInfo?.country === 'US' ? (
+              <div style={{ marginBottom: '1rem' }}>
+                <label>Social Security Number (SSN) <span style={{color: '#ef4444'}}>*</span>:</label>
+                <input
+                  type="text"
+                  name="ssn"
+                  value={formData.ssn}
+                  onChange={handleInputChange}
+                  required
+                  style={{ width: '100%', padding: '8px', marginTop: '4px', border: '1px solid #d1d5db', borderRadius: '4px' }}
+                  placeholder="XXX-XX-XXXX"
+                  maxLength="11"
+                />
+              </div>
+            ) : (
+              <div style={{ marginBottom: '1rem' }}>
+                <label>Government ID Number <span style={{color: '#ef4444'}}>*</span>:</label>
+                <input
+                  type="text"
+                  name="id_number"
+                  value={formData.id_number}
+                  onChange={handleInputChange}
+                  required
+                  style={{ width: '100%', padding: '8px', marginTop: '4px', border: '1px solid #d1d5db', borderRadius: '4px' }}
+                  placeholder="Enter your government ID number"
+                />
+              </div>
+            )}
+
+            <div style={{ marginBottom: '1rem' }}>
+              <label>Select One of Your Account Numbers:</label>
+              <select
+                name="accountNumber"
+                value={formData.accountNumber}
+                onChange={handleInputChange}
+                required
+                style={{ width: '100%', padding: '8px', marginTop: '4px', border: '1px solid #d1d5db', borderRadius: '4px' }}
+              >
+                <option value="">Select an account number</option>
+                {accounts.map((account, index) => (
+                  <option key={index} value={account.account_number}>
+                    {account.account_type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}: {account.account_number}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div style={{
+              marginBottom: '1rem',
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: '12px',
+              padding: '20px',
+              backgroundColor: formData.agreeToTerms ? '#f0fdf4' : '#ffffff',
+              borderRadius: '12px',
+              border: `3px solid ${formData.agreeToTerms ? '#22c55e' : '#e2e8f0'}`,
+              position: 'relative',
+              zIndex: 10,
+              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+              transition: 'all 0.3s ease'
+            }}>
+              <input
+                type="checkbox"
+                name="agreeToTerms"
+                checked={formData.agreeToTerms}
+                onChange={handleInputChange}
+                required
+                style={{
+                  width: '24px',
+                  height: '24px',
+                  accentColor: '#22c55e',
+                  cursor: 'pointer',
+                  marginTop: '2px',
+                  flexShrink: 0,
+                  transform: 'scale(1.2)',
+                  border: '2px solid #d1d5db',
+                  borderRadius: '4px'
+                }}
+              />
+              <label
+                style={{
+                  fontSize: '14px',
+                  color: '#374151',
+                  cursor: 'pointer',
+                  lineHeight: '1.5',
+                  userSelect: 'none'
+                }}
+                onClick={() => handleInputChange({target: {name: 'agreeToTerms', type: 'checkbox', checked: !formData.agreeToTerms}})}
+              >
+                I agree to the Terms of Service and Privacy Policy <span style={{color: '#ef4444'}}>*</span>
+                {formData.agreeToTerms && <span style={{ color: '#22c55e', marginLeft: '8px', fontSize: '16px', fontWeight: 'bold' }}>✓ Agreed</span>}
+              </label>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading || !applicationInfo}
+              style={{
+                width: '100%',
+                padding: '12px',
+                backgroundColor: loading ? '#9ca3af' : '#1e40af',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                fontSize: '16px',
+                cursor: loading ? 'not-allowed' : 'pointer'
+              }}
+            >
+              {loading ? 'Completing Enrollment...' : 'Complete Enrollment'}
+            </button>
+          </form>
+        </>
       )}
 
       {message && (

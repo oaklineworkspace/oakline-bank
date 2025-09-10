@@ -397,11 +397,374 @@ export default function Dashboard() {
       fontSize: '14px',
       margin: 0,
     },
-    // Original styles that are no longer needed or replaced
-    // container: {
-    //   minHeight: '100vh',
-    //   backgroundColor: '#f8fafc',
-    // },
+    header: {
+      background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #60a5fa 100%)',
+      color: 'white',
+      padding: '16px 0',
+      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+    },
+    headerContent: {
+      maxWidth: '1200px',
+      margin: '0 auto',
+      padding: '0 20px',
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    logo: {
+      fontSize: '24px',
+      fontWeight: 'bold',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '8px',
+    },
+    userInfo: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '16px',
+      position: 'relative',
+    },
+    dropdown: {
+      position: 'relative',
+    },
+    dropdownButton: {
+      background: 'rgba(255, 255, 255, 0.1)',
+      border: '1px solid rgba(255, 255, 255, 0.2)',
+      color: 'white',
+      padding: '8px 16px',
+      borderRadius: '8px',
+      cursor: 'pointer',
+      fontSize: '14px',
+      transition: 'all 0.2s',
+    },
+    dropdownContent: {
+      position: 'absolute',
+      top: '100%',
+      right: '0',
+      background: 'white',
+      borderRadius: '8px',
+      boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
+      padding: '8px 0',
+      minWidth: '180px',
+      zIndex: 1000,
+      marginTop: '8px',
+    },
+    dropdownItem: {
+      width: '100%',
+      padding: '12px 20px',
+      border: 'none',
+      background: 'none',
+      color: '#374151',
+      fontSize: '14px',
+      cursor: 'pointer',
+      textAlign: 'left',
+      transition: 'background-color 0.2s',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '8px',
+    },
+    dropdownDivider: {
+      border: 'none',
+      borderTop: '1px solid #e5e7eb',
+      margin: '8px 0',
+    },
+    main: {
+      maxWidth: '1200px',
+      margin: '0 auto',
+      padding: '30px 20px',
+    },
+    welcomeSection: {
+      marginBottom: '30px',
+    },
+    welcomeTitle: {
+      fontSize: '32px',
+      fontWeight: '700',
+      color: '#111827',
+      marginBottom: '20px',
+    },
+    balanceCard: {
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      borderRadius: '20px',
+      padding: '40px',
+      color: 'white',
+      position: 'relative',
+      overflow: 'hidden',
+      marginBottom: '30px',
+    },
+    balanceCardOverlay: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      background: 'rgba(255, 255, 255, 0.1)',
+      backdropFilter: 'blur(20px)',
+    },
+    totalBalance: {
+      fontSize: '16px',
+      opacity: 0.9,
+      marginBottom: '8px',
+      position: 'relative',
+      zIndex: 1,
+    },
+    balanceAmount: {
+      fontSize: '48px',
+      fontWeight: '700',
+      marginBottom: '30px',
+      position: 'relative',
+      zIndex: 1,
+    },
+    balanceActions: {
+      display: 'flex',
+      gap: '12px',
+      flexWrap: 'wrap',
+      position: 'relative',
+      zIndex: 1,
+    },
+    actionButton: {
+      background: 'rgba(255, 255, 255, 0.2)',
+      border: '1px solid rgba(255, 255, 255, 0.3)',
+      color: 'white',
+      padding: '12px 20px',
+      borderRadius: '12px',
+      cursor: 'pointer',
+      fontSize: '14px',
+      fontWeight: '500',
+      transition: 'all 0.3s',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '8px',
+      backdropFilter: 'blur(10px)',
+    },
+    grid: {
+      display: 'grid',
+      gridTemplateColumns: '1fr 1fr',
+      gap: '30px',
+      '@media (max-width: 768px)': {
+        gridTemplateColumns: '1fr',
+      },
+    },
+    section: {
+      background: 'white',
+      borderRadius: '16px',
+      padding: '28px',
+      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+    },
+    accountSelector: {
+      marginBottom: '20px',
+    },
+    select: {
+      width: '100%',
+      padding: '12px',
+      border: '2px solid #e5e7eb',
+      borderRadius: '8px',
+      fontSize: '14px',
+      outline: 'none',
+      transition: 'border-color 0.2s',
+    },
+    accountCard: {
+      border: '2px solid #f3f4f6',
+      borderRadius: '12px',
+      padding: '20px',
+      marginBottom: '16px',
+      cursor: 'pointer',
+      transition: 'all 0.2s',
+    },
+    accountCardSelected: {
+      borderColor: '#3b82f6',
+      background: '#f0f9ff',
+    },
+    accountHeader: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    accountName: {
+      fontSize: '16px',
+      fontWeight: '600',
+      color: '#111827',
+    },
+    accountNumber: {
+      fontSize: '14px',
+      color: '#6b7280',
+      marginTop: '4px',
+    },
+    accountBalance: {
+      fontSize: '20px',
+      fontWeight: '700',
+      color: '#111827',
+    },
+    quickActions: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(3, 1fr)',
+      gap: '12px',
+      marginTop: '20px',
+    },
+    quickActionCard: {
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      padding: '16px',
+      border: '2px solid #f3f4f6',
+      borderRadius: '12px',
+      cursor: 'pointer',
+      transition: 'all 0.2s',
+      gap: '8px',
+    },
+    quickActionIcon: {
+      fontSize: '24px',
+    },
+    quickActionText: {
+      fontSize: '14px',
+      fontWeight: '500',
+      color: '#374151',
+    },
+    transactionItem: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      padding: '16px',
+      backgroundColor: '#f9fafb',
+      borderRadius: '12px',
+      marginBottom: '12px',
+    },
+    transactionIcon: {
+      width: '40px',
+      height: '40px',
+      borderRadius: '10px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      fontSize: '18px',
+      fontWeight: 'bold',
+      marginRight: '12px',
+    },
+    transactionDetails: {
+      flex: 1,
+    },
+    transactionDescription: {
+      fontSize: '16px',
+      fontWeight: '500',
+      color: '#111827',
+    },
+    transactionDate: {
+      fontSize: '14px',
+      color: '#6b7280',
+      marginTop: '2px',
+    },
+    transactionAmount: {
+      fontSize: '16px',
+      fontWeight: '600',
+    },
+    primaryButton: {
+      background: '#3b82f6',
+      color: 'white',
+      border: 'none',
+      padding: '12px 24px',
+      borderRadius: '8px',
+      cursor: 'pointer',
+      fontSize: '14px',
+      fontWeight: '500',
+      transition: 'background-color 0.2s',
+    },
+    secondaryButton: {
+      background: '#f3f4f6',
+      color: '#374151',
+      border: 'none',
+      padding: '12px 24px',
+      borderRadius: '8px',
+      cursor: 'pointer',
+      fontSize: '14px',
+      fontWeight: '500',
+      transition: 'all 0.2s',
+    },
+    modal: {
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 1000,
+    },
+    modalContent: {
+      backgroundColor: 'white',
+      borderRadius: '16px',
+      padding: '32px',
+      maxWidth: '500px',
+      width: '90%',
+      maxHeight: '90vh',
+      overflow: 'auto',
+    },
+    modalTitle: {
+      fontSize: '24px',
+      fontWeight: '700',
+      color: '#111827',
+      marginBottom: '24px',
+    },
+    formGroup: {
+      marginBottom: '20px',
+    },
+    label: {
+      display: 'block',
+      fontSize: '14px',
+      fontWeight: '500',
+      color: '#374151',
+      marginBottom: '8px',
+    },
+    input: {
+      width: '100%',
+      padding: '12px',
+      border: '2px solid #e5e7eb',
+      borderRadius: '8px',
+      fontSize: '14px',
+      outline: 'none',
+      transition: 'border-color 0.2s',
+    },
+    modalActions: {
+      display: 'flex',
+      gap: '12px',
+      marginTop: '24px',
+    },
+    loadingContainer: {
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      minHeight: '100vh',
+      background: '#f8fafc',
+    },
+    spinner: {
+      width: '40px',
+      height: '40px',
+      border: '4px solid #e5e7eb',
+      borderTop: '4px solid #3b82f6',
+      borderRadius: '50%',
+      animation: 'spin 1s linear infinite',
+      marginBottom: '16px',
+    },
+    errorContainer: {
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      minHeight: '100vh',
+      background: '#f8fafc',
+      padding: '20px',
+    },
+    retryButton: {
+      background: '#3b82f6',
+      color: 'white',
+      border: 'none',
+      padding: '12px 24px',
+      borderRadius: '8px',
+      cursor: 'pointer',
+      fontSize: '16px',
+      marginTop: '16px',
+    },
     // dashboardContainer: {
     //   maxWidth: '1200px',
     //   margin: '0 auto',
@@ -498,108 +861,98 @@ export default function Dashboard() {
       }
 
       setUser(session.user);
-      await fetchUserData(session.user.id); // Call the consolidated fetch function
+      await fetchUserData(session.user.id);
     } catch (error) {
       console.error('Error checking user:', error);
       setError('Failed to load user data');
-    } finally {
       setLoading(false);
     }
   };
 
   // Consolidated function to fetch user data, accounts, and transactions
   const fetchUserData = async (userId) => {
-    setLoading(true); // Start loading
-    setError(''); // Clear previous errors
+    setLoading(true);
+    setError('');
 
     try {
-      // Fetch user profile first to potentially get application_id
+      // Fetch user profile
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .single();
 
-      if (profileError) {
+      if (profileError && profileError.code !== 'PGRST116') {
         console.error('Error fetching profile:', profileError);
-        // Decide if this should be a critical error or if we can proceed without profile
-        // For now, we'll log it but continue to fetch accounts
       }
-      setUserProfile(profile); // Set the profile data
+      setUserProfile(profile);
 
-      // Fetch accounts
+      // Fetch accounts with better error handling
       let accounts = [];
       try {
-        // Method 1: Direct user_id lookup
+        // Try direct user_id lookup first
         const { data: directAccounts, error: directAccountsError } = await supabase
           .from('accounts')
           .select('*')
           .eq('user_id', userId);
 
-        if (directAccountsError) {
-          console.error('Error fetching direct accounts:', directAccountsError);
-        }
-
-        if (directAccounts && directAccounts.length > 0) {
+        if (!directAccountsError && directAccounts?.length > 0) {
           accounts = directAccounts;
         } else if (profile?.application_id) {
-          // Method 2: Via application_id if direct lookup yields no results
+          // Fallback to application_id lookup
           const { data: appAccounts, error: appAccountsError } = await supabase
             .from('accounts')
             .select('*')
             .eq('application_id', profile.application_id);
 
-          if (appAccountsError) {
-            console.error('Error fetching accounts by application_id:', appAccountsError);
-          } else if (appAccounts && appAccounts.length > 0) {
+          if (!appAccountsError && appAccounts?.length > 0) {
             accounts = appAccounts;
-            // Update accounts to link them to the user for future queries
-            // This assumes a one-time sync or that accounts might not have user_id set initially
+            // Link accounts to user
             for (const account of accounts) {
-              // Only update if user_id is not already set or different
               if (account.user_id !== userId) {
                 await supabase
                   .from('accounts')
-                  .update({ user_id: userId, updated_at: new Date().toISOString() }) // Add updated_at
+                  .update({ user_id: userId, updated_at: new Date().toISOString() })
                   .eq('id', account.id);
               }
             }
           }
         }
+
         setAccounts(accounts);
         if (accounts.length > 0) {
           setSelectedAccount(accounts[0]);
         }
       } catch (accountError) {
         console.error('Error processing accounts:', accountError);
-        setError('Failed to load account information');
+        setAccounts([]);
       }
 
-      // Fetch transactions
+      // Fetch transactions with better error handling
       try {
         const { data: transactionsData, error: transactionsError } = await supabase
           .from('transactions')
           .select('*')
-          .eq('user_id', userId) // Ensure we fetch transactions for the logged-in user
+          .eq('user_id', userId)
           .order('created_at', { ascending: false })
           .limit(10);
 
-        if (transactionsError) {
-          console.error('Error fetching transactions:', transactionsError);
-          setTransactions([]); // Clear transactions if there's an error
-        } else {
+        if (!transactionsError) {
           setTransactions(transactionsData || []);
+        } else {
+          console.error('Error fetching transactions:', transactionsError);
+          setTransactions([]);
         }
       } catch (transactionError) {
         console.error('Error fetching transactions:', transactionError);
-        setTransactions([]); // Clear transactions on error
+        setTransactions([]);
       }
 
     } catch (error) {
       console.error('Error in fetchUserData:', error);
       setError('Failed to load dashboard data');
     } finally {
-      setLoading(false); // End loading
+      setLoading(false);
     }
   };
 
