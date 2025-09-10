@@ -6,6 +6,7 @@ import { supabase } from '../lib/supabaseClient';
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
+  const [userProfile, setUserProfile] = useState(null);
   const [accounts, setAccounts] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -35,82 +36,88 @@ export default function Dashboard() {
 
   const fetchUserData = async (user) => {
     try {
-      // Mock account data
-      const mockAccounts = [
-        {
-          id: 1,
-          type: 'Checking',
-          name: 'Premier Checking',
-          balance: 5247.83,
-          account_number: '**** 8234',
-          status: 'Active'
-        },
-        {
-          id: 2,
-          type: 'Savings',
-          name: 'High Yield Savings',
-          balance: 12850.00,
-          account_number: '**** 9876',
-          status: 'Active'
-        },
-        {
-          id: 3,
-          type: 'Credit',
-          name: 'Oakline Rewards Card',
-          balance: -1250.45,
-          account_number: '**** 5432',
-          status: 'Active'
-        }
-      ];
+      // Fetch user profile from applications table
+      const { data: profile, error: profileError } = await supabase
+        .from('applications')
+        .select('*')
+        .eq('email', user.email)
+        .single();
 
-      // Mock transaction data
-      const mockTransactions = [
-        {
-          id: 1,
-          date: '2024-01-15',
-          description: 'Direct Deposit - Salary',
-          amount: 3500.00,
-          type: 'credit',
-          account: 'Checking'
-        },
-        {
-          id: 2,
-          date: '2024-01-14',
-          description: 'Amazon Purchase',
-          amount: -89.99,
-          type: 'debit',
-          account: 'Credit Card'
-        },
-        {
-          id: 3,
-          date: '2024-01-14',
-          description: 'Transfer to Savings',
-          amount: -500.00,
-          type: 'transfer',
-          account: 'Checking'
-        },
-        {
-          id: 4,
-          date: '2024-01-13',
-          description: 'Gas Station',
-          amount: -45.20,
-          type: 'debit',
-          account: 'Checking'
-        },
-        {
-          id: 5,
-          date: '2024-01-12',
-          description: 'Interest Payment',
-          amount: 25.50,
-          type: 'credit',
-          account: 'Savings'
-        }
-      ];
+      if (profile) {
+        setUserProfile(profile);
+      }
 
-      setAccounts(mockAccounts);
-      setTransactions(mockTransactions);
+      // Fetch real accounts for this user
+      let { data: accountsData, error: accountsError } = await supabase
+        .from('accounts')
+        .select('*')
+        .eq('user_id', user.id);
+
+      // If no accounts found by user_id, try by email
+      if (!accountsData || accountsData.length === 0) {
+        const { data: emailAccounts, error: emailError } = await supabase
+          .from('accounts')
+          .select('*')
+          .eq('email', user.email);
+        
+        accountsData = emailAccounts;
+        accountsError = emailError;
+      }
+
+      // If still no accounts, create sample accounts
+      if (!accountsData || accountsData.length === 0) {
+        accountsData = [
+          {
+            id: 1,
+            type: 'Checking',
+            name: 'Premier Checking',
+            balance: 0.00,
+            account_number: `****${Math.floor(1000 + Math.random() * 9000)}`,
+            status: 'Active',
+            user_id: user.id,
+            email: user.email
+          },
+          {
+            id: 2,
+            type: 'Savings',
+            name: 'High Yield Savings',
+            balance: 0.00,
+            account_number: `****${Math.floor(1000 + Math.random() * 9000)}`,
+            status: 'Active',
+            user_id: user.id,
+            email: user.email
+          }
+        ];
+      }
+
+      setAccounts(accountsData || []);
+
+      // Fetch real transactions for this user
+      const { data: transactionsData, error: transactionsError } = await supabase
+        .from('transactions')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      // If no transactions found, try by email
+      if (!transactionsData || transactionsData.length === 0) {
+        const { data: emailTransactions, error: emailTransError } = await supabase
+          .from('transactions')
+          .select('*')
+          .eq('user_email', user.email)
+          .order('created_at', { ascending: false })
+          .limit(10);
+        
+        setTransactions(emailTransactions || []);
+      } else {
+        setTransactions(transactionsData || []);
+      }
+
     } catch (error) {
       console.error('Error fetching user data:', error);
+      setAccounts([]);
+      setTransactions([]);
     }
   };
 
@@ -118,7 +125,7 @@ export default function Dashboard() {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD'
-    }).format(Math.abs(amount));
+    }).format(Math.abs(amount || 0));
   };
 
   const formatDate = (dateString) => {
@@ -132,7 +139,18 @@ export default function Dashboard() {
   const getTotalBalance = () => {
     return accounts
       .filter(acc => acc.type !== 'Credit')
-      .reduce((total, acc) => total + acc.balance, 0);
+      .reduce((total, acc) => total + (parseFloat(acc.balance) || 0), 0);
+  };
+
+  const getUserDisplayName = () => {
+    if (userProfile) {
+      return `${userProfile.first_name || ''} ${userProfile.last_name || ''}`.trim();
+    }
+    return user?.email?.split('@')[0] || 'User';
+  };
+
+  const handleSupportContact = () => {
+    window.location.href = 'mailto:support@theoaklinebank.com?subject=Customer Support Request';
   };
 
   if (loading) {
@@ -153,7 +171,7 @@ export default function Dashboard() {
             <span style={styles.logoText}>Oakline Bank</span>
           </Link>
           <div style={styles.userInfo}>
-            <span style={styles.welcomeText}>Welcome, {user?.email?.split('@')[0]}</span>
+            <span style={styles.welcomeText}>Welcome, {getUserDisplayName()}</span>
             <button onClick={() => supabase.auth.signOut()} style={styles.logoutBtn}>
               Sign Out
             </button>
@@ -163,6 +181,35 @@ export default function Dashboard() {
 
       {/* Main Content */}
       <main style={styles.main}>
+        {/* User Profile Section */}
+        {userProfile && (
+          <div style={styles.profileCard}>
+            <h2 style={styles.profileTitle}>Account Holder Information</h2>
+            <div style={styles.profileGrid}>
+              <div style={styles.profileItem}>
+                <span style={styles.profileLabel}>Full Name:</span>
+                <span style={styles.profileValue}>
+                  {`${userProfile.first_name || ''} ${userProfile.middle_name || ''} ${userProfile.last_name || ''}`.trim()}
+                </span>
+              </div>
+              <div style={styles.profileItem}>
+                <span style={styles.profileLabel}>Email:</span>
+                <span style={styles.profileValue}>{userProfile.email}</span>
+              </div>
+              <div style={styles.profileItem}>
+                <span style={styles.profileLabel}>Phone:</span>
+                <span style={styles.profileValue}>{userProfile.phone || 'Not provided'}</span>
+              </div>
+              <div style={styles.profileItem}>
+                <span style={styles.profileLabel}>Address:</span>
+                <span style={styles.profileValue}>
+                  {userProfile.address ? `${userProfile.address}, ${userProfile.city || ''}, ${userProfile.state || ''} ${userProfile.zip_code || ''}`.trim() : 'Not provided'}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Navigation Tabs */}
         <nav style={styles.tabNav}>
           <button
@@ -198,7 +245,7 @@ export default function Dashboard() {
             <div style={styles.summaryCard}>
               <h2 style={styles.summaryTitle}>Total Balance</h2>
               <div style={styles.totalBalance}>{formatCurrency(getTotalBalance())}</div>
-              <div style={styles.balanceSubtext}>Across all accounts</div>
+              <div style={styles.balanceSubtext}>Across {accounts.length} account{accounts.length !== 1 ? 's' : ''}</div>
             </div>
 
             {/* Quick Actions */}
@@ -231,20 +278,30 @@ export default function Dashboard() {
                 <Link href="/transactions" style={styles.viewAllLink}>View All</Link>
               </div>
               <div style={styles.transactionList}>
-                {transactions.slice(0, 3).map(transaction => (
-                  <div key={transaction.id} style={styles.transactionItem}>
-                    <div style={styles.transactionInfo}>
-                      <div style={styles.transactionDesc}>{transaction.description}</div>
-                      <div style={styles.transactionDate}>{formatDate(transaction.date)}</div>
+                {transactions.length > 0 ? (
+                  transactions.slice(0, 5).map(transaction => (
+                    <div key={transaction.id} style={styles.transactionItem}>
+                      <div style={styles.transactionInfo}>
+                        <div style={styles.transactionDesc}>
+                          {transaction.description || transaction.transaction_type || 'Transaction'}
+                        </div>
+                        <div style={styles.transactionDate}>
+                          {formatDate(transaction.created_at || transaction.date)}
+                        </div>
+                      </div>
+                      <div style={{
+                        ...styles.transactionAmount,
+                        color: (transaction.amount || 0) >= 0 ? '#10b981' : '#ef4444'
+                      }}>
+                        {(transaction.amount || 0) >= 0 ? '+' : ''}{formatCurrency(transaction.amount || 0)}
+                      </div>
                     </div>
-                    <div style={{
-                      ...styles.transactionAmount,
-                      color: transaction.type === 'credit' ? '#10b981' : '#ef4444'
-                    }}>
-                      {transaction.type === 'credit' ? '+' : '-'}{formatCurrency(transaction.amount)}
-                    </div>
+                  ))
+                ) : (
+                  <div style={styles.noTransactions}>
+                    <p>No transactions yet. Start banking with us!</p>
                   </div>
-                ))}
+                )}
               </div>
             </div>
           </div>
@@ -261,15 +318,15 @@ export default function Dashboard() {
                 <div key={account.id} style={styles.accountCard}>
                   <div style={styles.accountHeader}>
                     <div style={styles.accountType}>{account.type}</div>
-                    <div style={styles.accountStatus}>{account.status}</div>
+                    <div style={styles.accountStatus}>{account.status || 'Active'}</div>
                   </div>
-                  <div style={styles.accountName}>{account.name}</div>
+                  <div style={styles.accountName}>{account.name || `${account.type} Account`}</div>
                   <div style={styles.accountNumber}>{account.account_number}</div>
                   <div style={{
                     ...styles.accountBalance,
-                    color: account.balance < 0 ? '#ef4444' : '#10b981'
+                    color: (parseFloat(account.balance) || 0) < 0 ? '#ef4444' : '#10b981'
                   }}>
-                    {formatCurrency(account.balance)}
+                    {formatCurrency(account.balance || 0)}
                   </div>
                   <Link href={`/account-details?id=${account.id}`} style={styles.viewDetailsBtn}>
                     View Details
@@ -284,23 +341,35 @@ export default function Dashboard() {
           <div style={styles.content}>
             <h2 style={styles.sectionTitle}>Transaction History</h2>
             <div style={styles.transactionList}>
-              {transactions.map(transaction => (
-                <div key={transaction.id} style={styles.transactionItem}>
-                  <div style={styles.transactionInfo}>
-                    <div style={styles.transactionDesc}>{transaction.description}</div>
-                    <div style={styles.transactionMeta}>
-                      <span style={styles.transactionDate}>{formatDate(transaction.date)}</span>
-                      <span style={styles.transactionAccount}>{transaction.account}</span>
+              {transactions.length > 0 ? (
+                transactions.map(transaction => (
+                  <div key={transaction.id} style={styles.transactionItem}>
+                    <div style={styles.transactionInfo}>
+                      <div style={styles.transactionDesc}>
+                        {transaction.description || transaction.transaction_type || 'Transaction'}
+                      </div>
+                      <div style={styles.transactionMeta}>
+                        <span style={styles.transactionDate}>
+                          {formatDate(transaction.created_at || transaction.date)}
+                        </span>
+                        <span style={styles.transactionAccount}>
+                          {transaction.account_type || 'Account'}
+                        </span>
+                      </div>
+                    </div>
+                    <div style={{
+                      ...styles.transactionAmount,
+                      color: (transaction.amount || 0) >= 0 ? '#10b981' : '#ef4444'
+                    }}>
+                      {(transaction.amount || 0) >= 0 ? '+' : ''}{formatCurrency(transaction.amount || 0)}
                     </div>
                   </div>
-                  <div style={{
-                    ...styles.transactionAmount,
-                    color: transaction.type === 'credit' ? '#10b981' : '#ef4444'
-                  }}>
-                    {transaction.type === 'credit' ? '+' : '-'}{formatCurrency(transaction.amount)}
-                  </div>
+                ))
+              ) : (
+                <div style={styles.noTransactions}>
+                  <p>No transactions found. Your transaction history will appear here once you start banking with us.</p>
                 </div>
-              ))}
+              )}
             </div>
           </div>
         )}
@@ -330,13 +399,13 @@ export default function Dashboard() {
                   <div style={styles.serviceDesc}>Buy, sell, and trade digital currencies</div>
                 </div>
               </Link>
-              <Link href="/support" style={styles.serviceCard}>
+              <button onClick={handleSupportContact} style={{...styles.serviceCard, cursor: 'pointer', border: 'none', background: 'white'}}>
                 <span style={styles.serviceIcon}>🎧</span>
                 <div style={styles.serviceInfo}>
                   <div style={styles.serviceTitle}>Customer Support</div>
                   <div style={styles.serviceDesc}>Get help with your banking needs</div>
                 </div>
-              </Link>
+              </button>
               <Link href="/credit-report" style={styles.serviceCard}>
                 <span style={styles.serviceIcon}>📊</span>
                 <div style={styles.serviceInfo}>
@@ -431,6 +500,39 @@ const styles = {
     maxWidth: '1200px',
     margin: '0 auto',
     padding: '2rem 1rem'
+  },
+  profileCard: {
+    backgroundColor: 'white',
+    padding: '1.5rem',
+    borderRadius: '12px',
+    boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+    marginBottom: '2rem'
+  },
+  profileTitle: {
+    fontSize: '1.3rem',
+    fontWeight: 'bold',
+    color: '#1e293b',
+    marginBottom: '1rem'
+  },
+  profileGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+    gap: '1rem'
+  },
+  profileItem: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.25rem'
+  },
+  profileLabel: {
+    fontSize: '0.9rem',
+    color: '#64748b',
+    fontWeight: '500'
+  },
+  profileValue: {
+    fontSize: '1rem',
+    color: '#1e293b',
+    fontWeight: '500'
   },
   tabNav: {
     display: 'flex',
@@ -594,6 +696,11 @@ const styles = {
     fontWeight: 'bold',
     textAlign: 'right'
   },
+  noTransactions: {
+    textAlign: 'center',
+    padding: '2rem',
+    color: '#64748b'
+  },
   accountGrid: {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
@@ -690,41 +797,5 @@ const styles = {
     fontSize: '0.9rem',
     color: '#64748b',
     lineHeight: '1.4'
-  },
-  '@media (max-width: 768px)': {
-    headerContent: {
-      flexDirection: 'column',
-      alignItems: 'flex-start'
-    },
-    main: {
-      padding: '1rem 0.5rem'
-    },
-    tabNav: {
-      gap: '0.25rem'
-    },
-    tab: {
-      padding: '0.5rem 0.75rem',
-      fontSize: '0.8rem'
-    },
-    summaryCard: {
-      padding: '1.5rem 1rem'
-    },
-    actionGrid: {
-      gridTemplateColumns: 'repeat(2, 1fr)'
-    },
-    accountGrid: {
-      gridTemplateColumns: '1fr'
-    },
-    serviceGrid: {
-      gridTemplateColumns: '1fr'
-    },
-    transactionItem: {
-      flexDirection: 'column',
-      alignItems: 'flex-start',
-      gap: '0.5rem'
-    },
-    transactionAmount: {
-      alignSelf: 'flex-end'
-    }
   }
 };
