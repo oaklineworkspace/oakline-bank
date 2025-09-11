@@ -224,7 +224,8 @@ export default function Home() {
     return (
       <div style={styles.loadingContainer}>
         <div style={styles.loadingSpinner}>
-          <div style={styles.spinner}></div>
+          <div style={styles.spinner}>
+            </div>
           <div style={styles.loadingContent}>
             <h2 style={styles.loadingTitle}>Welcome to Oakline Bank</h2>
             <p style={styles.loadingText}>Loading your premium banking experience...</p>
@@ -316,7 +317,7 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Enhanced Mobile-First Hero Section with Parallax Effect */}
+      {/* Professional Banking Hero Section */}
       <section style={styles.heroSection} id="hero" data-animate>
         <div style={styles.heroParallax}>
           <div style={styles.heroSlide}>
@@ -981,12 +982,13 @@ const styles = {
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
   },
 
-  // Enhanced Hero Section
+  // Professional Banking Hero Section
   heroSection: {
     position: 'relative',
     height: 'clamp(500px, 70vh, 700px)',
     overflow: 'hidden',
-    width: '100%'
+    width: '100%',
+    background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)'
   },
   heroParallax: {
     position: 'relative',
@@ -1015,7 +1017,8 @@ const styles = {
     objectPosition: 'center',
     transition: 'all 1.2s ease-in-out',
     transform: 'scale(1.05)',
-    animation: 'heroImageFloat 20s ease-in-out infinite'
+    animation: 'heroImageFloat 20s ease-in-out infinite',
+    filter: 'grayscale(20%) opacity(0.3)'
   },
   heroOverlay: {
     position: 'absolute',
@@ -1023,7 +1026,8 @@ const styles = {
     left: 0,
     right: 0,
     bottom: 0,
-    opacity: 0.85
+    background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(51, 65, 85, 0.9) 100%)',
+    opacity: 1
   },
   heroContent: {
     position: 'absolute',
@@ -1141,9 +1145,6 @@ const styles = {
     alignItems: 'center',
     gap: '0.5rem',
     backdropFilter: 'blur(10px)'
-  },
-  buttonIcon: {
-    fontSize: '1.2em'
   },
 
   // Slide Indicators
@@ -1381,10 +1382,10 @@ const styles = {
     transform: 'scale(1.4)'
   },
 
-  // Enhanced Account Types Section
+  // Enhanced Account Types Section with User-Specific Content
   accountTypesSection: {
     padding: 'clamp(4rem, 8vw, 6rem) 0',
-    background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
+    backgroundColor: '#f8fafc',
     width: '100%',
     position: 'relative'
   },

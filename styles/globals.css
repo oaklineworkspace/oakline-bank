@@ -62,15 +62,15 @@ body {
     'Fira Code', 'Droid Sans Mono', 'Courier New', monospace;
 
   /* Professional Banking Color Palette */
-  --primary-blue: #1e3a8a;
-  --secondary-blue: #1e40af;
-  --accent-blue: #3730a3;
-  --light-blue: #bee3f8;
-  --success-green: #38a169;
-  --warning-orange: #ed8936;
-  --error-red: #e53e3e;
-  --neutral-gray: #718096;
-  --light-gray: #f7fafc;
+  --primary-navy: #1e293b;
+  --secondary-navy: #334155;
+  --accent-gold: #d97706;
+  --light-gold: #f59e0b;
+  --success-green: #059669;
+  --warning-orange: #ea580c;
+  --error-red: #dc2626;
+  --neutral-gray: #64748b;
+  --light-gray: #f8fafc;
   --white: #ffffff;
 
   --foreground-rgb: 45, 55, 72;
