@@ -347,7 +347,20 @@ export default function Home() {
               </button>
               
               {activeDropdown === 'features' && (
-                <div style={styles.featuresDropdownMenu}>
+                <>
+                  <div 
+                    style={{
+                      position: 'fixed',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                      zIndex: 999
+                    }}
+                    onClick={() => setActiveDropdown(null)}
+                  ></div>
+                  <div style={styles.featuresDropdownMenu}>
                   <div style={styles.featuresGrid}>
                     <div style={styles.featureDropdownItem}>
                       <span style={styles.featureDropdownIcon}>🔒</span>
@@ -398,7 +411,7 @@ export default function Home() {
                       Open Account Today
                     </Link>
                   </div>
-                </div>
+                </>
               )}
             </div>
             <div style={styles.authButtons}>
@@ -892,7 +905,7 @@ export default function Home() {
           <div style={styles.professionalsGrid}>
             <div style={styles.professionalCard}>
               <img
-                src="/images/professional-mobile-banking-1.png"
+                src="/images/Mobile_banking_user_experience_576bb7a3.png"
                 alt="Professional using Oakline Bank mobile app"
                 style={styles.professionalImage}
               />
@@ -906,8 +919,8 @@ export default function Home() {
 
             <div style={styles.professionalCard}>
               <img
-                src="/images/professional-mobile-banking-2.png"
-                alt="Business woman using mobile banking"
+                src="/images/Bank_hall_business_discussion_72f98bbe.png"
+                alt="Business professionals discussing banking solutions"
                 style={styles.professionalImage}
               />
               <div style={styles.professionalContent}>
@@ -920,8 +933,8 @@ export default function Home() {
 
             <div style={styles.professionalCard}>
               <img
-                src="/images/professional-mobile-banking-3.png"
-                alt="Businessman using tablet for banking"
+                src="/images/Digital_investment_dashboard_36d35f19.png"
+                alt="Digital investment dashboard interface"
                 style={styles.professionalImage}
               />
               <div style={styles.professionalContent}>
@@ -2198,9 +2211,10 @@ const styles = {
     overflow: 'hidden'
   },
   featuresDropdownMenu: {
-    position: 'absolute',
-    top: 'calc(100% + 0.8rem)',
-    right: '0',
+    position: 'fixed',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
     backgroundColor: 'white',
     borderRadius: '20px',
     boxShadow: '0 25px 50px rgba(26, 54, 93, 0.25)',
@@ -2382,9 +2396,9 @@ const styles = {
       minWidth: '300px',
       maxWidth: '95vw',
       left: '50%',
-      transform: 'translateX(-50%)',
-      position: 'fixed',
-      top: '80px'
+      top: '50%',
+      transform: 'translate(-50%, -50%)',
+      position: 'fixed'
     },
     featuresGrid: {
       gridTemplateColumns: '1fr',
