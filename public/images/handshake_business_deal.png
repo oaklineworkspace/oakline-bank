@@ -1,3 +1,57 @@
 
-<!-- This is a placeholder for the handshake business image -->
-<!-- You'll need to replace this with an actual image file -->
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F8FAFC;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#E2E8F0;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="800" height="600" fill="url(#bgGrad)"/>
+  
+  <!-- Office Background -->
+  <rect x="0" y="450" width="800" height="150" fill="#1F2937"/>
+  <rect x="100" y="100" width="600" height="350" fill="#F3F4F6" rx="10"/>
+  
+  <!-- Desk -->
+  <rect x="200" y="350" width="400" height="100" fill="#8B4513" rx="5"/>
+  
+  <!-- Person 1 (Left) -->
+  <circle cx="300" cy="250" r="40" fill="#D4A574"/>
+  <rect x="260" y="290" width="80" height="100" fill="#1E40AF" rx="10"/>
+  <rect x="240" y="340" width="30" height="50" fill="#D4A574"/>
+  
+  <!-- Person 2 (Right) -->
+  <circle cx="500" cy="250" r="40" fill="#F4A460"/>
+  <rect x="460" y="290" width="80" height="100" fill="#374151" rx="10"/>
+  <rect x="530" y="340" width="30" height="50" fill="#F4A460"/>
+  
+  <!-- Handshake -->
+  <ellipse cx="400" cy="320" rx="60" ry="20" fill="#D4A574" opacity="0.8"/>
+  <ellipse cx="400" cy="320" rx="50" ry="15" fill="#F4A460" opacity="0.8"/>
+  
+  <!-- Documents on desk -->
+  <rect x="220" y="370" width="80" height="60" fill="white" rx="3"/>
+  <rect x="500" y="370" width="80" height="60" fill="white" rx="3"/>
+  
+  <!-- Contract lines -->
+  <line x1="230" y1="380" x2="290" y2="380" stroke="#6B7280" stroke-width="2"/>
+  <line x1="230" y1="390" x2="290" y2="390" stroke="#6B7280" stroke-width="2"/>
+  <line x1="230" y1="400" x2="280" y2="400" stroke="#6B7280" stroke-width="2"/>
+  
+  <line x1="510" y1="380" x2="570" y2="380" stroke="#6B7280" stroke-width="2"/>
+  <line x1="510" y1="390" x2="570" y2="390" stroke="#6B7280" stroke-width="2"/>
+  <line x1="510" y1="400" x2="560" y2="400" stroke="#6B7280" stroke-width="2"/>
+  
+  <!-- Bank Logo on wall -->
+  <rect x="350" y="120" width="100" height="40" fill="#1E40AF" rx="5"/>
+  <text x="400" y="145" text-anchor="middle" fill="white" font-family="Arial" font-size="14" font-weight="bold">OAKLINE BANK</text>
+  
+  <!-- Success indicators -->
+  <circle cx="350" cy="200" r="15" fill="#059669"/>
+  <text x="350" y="205" text-anchor="middle" fill="white" font-size="12">✓</text>
+  
+  <circle cx="450" cy="200" r="15" fill="#059669"/>
+  <text x="450" y="205" text-anchor="middle" fill="white" font-size="12">✓</text>
+</svg>

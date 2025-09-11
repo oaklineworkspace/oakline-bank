@@ -328,6 +328,7 @@ export default function Home() {
             </Link>
           </div>
 
+          {/* Enrolled button */}
           <div style={styles.headerCenter}>
             <Link href="/enroll" style={styles.enrollButton}>
               <span style={styles.buttonIcon}>🌐</span>
@@ -336,7 +337,8 @@ export default function Home() {
           </div>
 
           <div style={styles.headerActions}>
-            <div style={styles.featuresDropdown}>
+            {/* Features Dropdown */}
+            <div style={styles.navigationDropdown}>
               <button 
                 style={styles.featuresDropdownButton}
                 onClick={() => setActiveDropdown(activeDropdown === 'features' ? null : 'features')}
@@ -415,20 +417,22 @@ export default function Home() {
                 </>
               )}
             </div>
+
+            {/* Auth Buttons */}
             <div style={styles.authButtons}>
               {user ? (
                 <>
-                  <Link href="/dashboard" style={styles.dashboardButton}>
+                  <Link href="/dashboard" style={styles.dashboardButtonWhite}>
                     <span style={styles.buttonIcon}>📊</span>
                     Dashboard
                   </Link>
-                  <Link href="/main-menu" style={styles.menuButton}>
+                  <Link href="/main-menu" style={styles.menuButtonWhite}>
                     <span style={styles.buttonIcon}>☰</span>
                     Menu
                   </Link>
                   {/* Logout Button */}
                   <button 
-                    style={styles.loginButton}
+                    style={styles.logoutButtonWhite}
                     onClick={async () => {
                       try {
                         await supabase.auth.signOut();
@@ -444,8 +448,8 @@ export default function Home() {
                 </>
               ) : (
                 <>
-                  <Link href="/login" style={styles.loginButton}>Sign In</Link>
-                  <Link href="/apply" style={styles.applyButton}>Open Account</Link>
+                  <Link href="/login" style={styles.loginButtonWhite}>Sign In</Link>
+                  <Link href="/apply" style={styles.applyButtonWhite}>Open Account</Link>
                 </>
               )}
             </div>
@@ -1101,7 +1105,7 @@ const styles = {
     alignItems: 'center',
     gap: '1rem'
   },
-  dropdownMenu: {
+  featuresDropdownMenu: {
     position: 'absolute',
     top: 'calc(100% + 0.5rem)',
     right: 0,
@@ -1115,7 +1119,7 @@ const styles = {
     zIndex: 1000,
     animation: 'dropdownSlideIn 0.3s ease-out'
   },
-  dropdownGrid: {
+  featuresGrid: {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
     gap: '1.5rem'
@@ -2288,6 +2292,105 @@ const styles = {
   dropdownArrow: {
     fontSize: '0.8rem',
     transition: 'transform 0.3s ease'
+  },
+
+  // White Button Styles for Header
+  enrollButtonWhite: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    padding: '0.7rem 1.2rem',
+    backgroundColor: 'white',
+    color: '#1a365d',
+    textDecoration: 'none',
+    borderRadius: '8px',
+    fontSize: '0.9rem',
+    fontWeight: '600',
+    boxShadow: '0 4px 12px rgba(255, 255, 255, 0.2)',
+    border: '1px solid rgba(255, 255, 255, 0.3)',
+    transition: 'all 0.3s ease',
+    backdropFilter: 'blur(10px)'
+  },
+  loginButtonWhite: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    padding: '0.7rem 1.2rem',
+    backgroundColor: 'white',
+    color: '#1a365d',
+    textDecoration: 'none',
+    borderRadius: '8px',
+    fontSize: '0.9rem',
+    fontWeight: '600',
+    boxShadow: '0 4px 12px rgba(255, 255, 255, 0.2)',
+    border: '1px solid rgba(255, 255, 255, 0.3)',
+    transition: 'all 0.3s ease',
+    backdropFilter: 'blur(10px)',
+    cursor: 'pointer'
+  },
+  applyButtonWhite: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    padding: '0.7rem 1.2rem',
+    backgroundColor: 'white',
+    color: '#1a365d',
+    textDecoration: 'none',
+    borderRadius: '8px',
+    fontSize: '0.9rem',
+    fontWeight: '600',
+    boxShadow: '0 4px 12px rgba(255, 255, 255, 0.2)',
+    border: '1px solid rgba(255, 255, 255, 0.3)',
+    transition: 'all 0.3s ease',
+    backdropFilter: 'blur(10px)'
+  },
+  dashboardButtonWhite: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    padding: '0.7rem 1.2rem',
+    backgroundColor: 'white',
+    color: '#1a365d',
+    textDecoration: 'none',
+    borderRadius: '8px',
+    fontSize: '0.9rem',
+    fontWeight: '600',
+    boxShadow: '0 4px 12px rgba(255, 255, 255, 0.2)',
+    border: '1px solid rgba(255, 255, 255, 0.3)',
+    transition: 'all 0.3s ease',
+    backdropFilter: 'blur(10px)'
+  },
+  menuButtonWhite: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    padding: '0.7rem 1.2rem',
+    backgroundColor: 'white',
+    color: '#1a365d',
+    textDecoration: 'none',
+    borderRadius: '8px',
+    fontSize: '0.9rem',
+    fontWeight: '600',
+    boxShadow: '0 4px 12px rgba(255, 255, 255, 0.2)',
+    border: '1px solid rgba(255, 255, 255, 0.3)',
+    transition: 'all 0.3s ease',
+    backdropFilter: 'blur(10px)'
+  },
+  logoutButtonWhite: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    padding: '0.7rem 1.2rem',
+    backgroundColor: 'white',
+    color: '#1a365d',
+    border: '1px solid rgba(255, 255, 255, 0.3)',
+    borderRadius: '8px',
+    fontSize: '0.9rem',
+    fontWeight: '600',
+    boxShadow: '0 4px 12px rgba(255, 255, 255, 0.2)',
+    transition: 'all 0.3s ease',
+    backdropFilter: 'blur(10px)',
+    cursor: 'pointer'
   },
 
   // Mobile Responsive Styles - moved to responsive.css

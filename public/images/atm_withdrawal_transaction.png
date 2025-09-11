@@ -1,3 +1,51 @@
 
-<!-- This is a placeholder for the ATM withdrawal image -->
-<!-- You'll need to replace this with an actual image file -->
+<svg width="600" height="400" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="600" height="400" fill="#E8F4FD"/>
+  
+  <!-- ATM Machine -->
+  <rect x="50" y="50" width="200" height="300" fill="#2C3E50" rx="10"/>
+  
+  <!-- ATM Screen -->
+  <rect x="70" y="80" width="160" height="100" fill="#000" rx="5"/>
+  <rect x="80" y="90" width="140" height="80" fill="#1E40AF" rx="3"/>
+  <text x="150" y="115" text-anchor="middle" fill="white" font-family="Arial" font-size="12">TRANSACTION</text>
+  <text x="150" y="135" text-anchor="middle" fill="white" font-family="Arial" font-size="12">COMPLETE</text>
+  <text x="150" y="155" text-anchor="middle" fill="#00FF00" font-family="Arial" font-size="10">$200.00 WITHDRAWN</text>
+  
+  <!-- Card Slot -->
+  <rect x="100" y="200" width="100" height="8" fill="#000" rx="2"/>
+  <rect x="110" y="195" width="80" height="5" fill="#FFD700" rx="2"/>
+  
+  <!-- Cash Dispenser -->
+  <rect x="80" y="230" width="140" height="30" fill="#333" rx="3"/>
+  <rect x="90" y="240" width="120" height="10" fill="#00C851"/>
+  <text x="150" y="248" text-anchor="middle" fill="white" font-family="Arial" font-size="8">CASH</text>
+  
+  <!-- Keypad -->
+  <rect x="70" y="280" width="160" height="60" fill="#E5E7EB" rx="5"/>
+  
+  <!-- Money Bills -->
+  <rect x="300" y="150" width="80" height="40" fill="#00C851" rx="3"/>
+  <rect x="310" y="160" width="60" height="20" fill="#fff" rx="2"/>
+  <text x="340" y="175" text-anchor="middle" fill="#000" font-family="Arial" font-size="10">$200</text>
+  
+  <rect x="320" y="200" width="80" height="40" fill="#00C851" rx="3"/>
+  <rect x="330" y="210" width="60" height="20" fill="#fff" rx="2"/>
+  <text x="360" y="225" text-anchor="middle" fill="#000" font-family="Arial" font-size="10">$100</text>
+  
+  <!-- Person -->
+  <circle cx="450" cy="120" r="25" fill="#D4A574"/>
+  <rect x="430" y="145" width="40" height="60" fill="#1E40AF" rx="5"/>
+  <rect x="420" y="205" width="20" height="40" fill="#1F2937"/>
+  <rect x="460" y="205" width="20" height="40" fill="#1F2937"/>
+  <rect x="410" y="160" width="25" height="35" fill="#D4A574"/>
+  
+  <!-- Receipt -->
+  <rect x="500" y="180" width="60" height="80" fill="white" rx="2" stroke="#ccc"/>
+  <text x="530" y="200" text-anchor="middle" fill="#000" font-family="Arial" font-size="8">OAKLINE BANK</text>
+  <text x="530" y="215" text-anchor="middle" fill="#000" font-family="Arial" font-size="6">ATM RECEIPT</text>
+  <text x="510" y="230" fill="#000" font-family="Arial" font-size="5">Withdrawal: $200.00</text>
+  <text x="510" y="240" fill="#000" font-family="Arial" font-size="5">Balance: $1,847.50</text>
+  <text x="510" y="250" fill="#000" font-family="Arial" font-size="5">Thank you!</text>
+</svg>
