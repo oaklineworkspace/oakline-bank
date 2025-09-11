@@ -128,8 +128,20 @@ export default function MainMenu({ user }) {
       setMobileMenuOpen(false);
     };
 
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') {
+        closeDropdowns();
+        setMobileMenuOpen(false);
+      }
+    };
+
     document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
+    document.addEventListener('keydown', handleEscape);
+    
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+    };
   }, []);
 
   return (
@@ -140,7 +152,7 @@ export default function MainMenu({ user }) {
           <div style={styles.announcement}>
             <span style={styles.announcementIcon}>🎉</span>
             <span style={styles.announcementText}>
-              New! Explore all 23 account types with detailed comparisons
+              New! Explore all 23 account types • Routing Number: 075915826
             </span>
             <Link href="/account-types" style={styles.announcementLink}>
               View All Accounts
@@ -176,6 +188,7 @@ export default function MainMenu({ user }) {
                     ...(activeDropdown === item.name ? styles.menuButtonActive : {})
                   }}
                   onMouseEnter={() => handleDropdownToggle(item.name)}
+                  onFocus={() => handleDropdownToggle(item.name)}
                   onClick={(e) => {
                     e.stopPropagation();
                     handleDropdownToggle(item.name);
@@ -183,7 +196,10 @@ export default function MainMenu({ user }) {
                 >
                   <span style={styles.menuIcon}>{item.icon}</span>
                   <span>{item.name}</span>
-                  <span style={styles.dropdownArrow}>▼</span>
+                  <span style={{
+                    ...styles.dropdownArrow,
+                    transform: activeDropdown === item.name ? 'rotate(180deg)' : 'rotate(0deg)'
+                  }}>▼</span>
                 </button>
 
                 {activeDropdown === item.name && (
@@ -250,27 +266,47 @@ export default function MainMenu({ user }) {
             onClick={(e) => {
               e.stopPropagation();
               setMobileMenuOpen(!mobileMenuOpen);
+              closeDropdowns();
             }}
+            aria-label="Toggle mobile menu"
           >
-            <span style={styles.hamburgerIcon}>☰</span>
+            <span style={{
+              ...styles.hamburgerIcon,
+              transform: mobileMenuOpen ? 'rotate(90deg)' : 'rotate(0deg)'
+            }}>
+              {mobileMenuOpen ? '✕' : '☰'}
+            </span>
           </button>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Enhanced Mobile Menu */}
         {mobileMenuOpen && (
           <div style={styles.mobileMenu}>
             <div style={styles.mobileMenuContent}>
               {user ? (
                 <div style={styles.mobileUserInfo}>
                   <span style={styles.welcomeText}>Welcome back!</span>
-                  <Link href="/dashboard" style={styles.mobileUserButton}>
-                    Go to Dashboard
-                  </Link>
+                  <div style={styles.mobileUserActions}>
+                    <Link href="/dashboard" style={styles.mobileUserButton}>
+                      <span style={styles.actionIcon}>📊</span>
+                      Go to Dashboard
+                    </Link>
+                    <Link href="/main-menu" style={styles.mobileUserButton}>
+                      <span style={styles.actionIcon}>☰</span>
+                      Main Menu
+                    </Link>
+                  </div>
                 </div>
               ) : (
                 <div style={styles.mobileActions}>
-                  <Link href="/apply" style={styles.mobileApplyButton}>Apply Now</Link>
-                  <Link href="/login" style={styles.mobileLoginButton}>Sign In</Link>
+                  <Link href="/apply" style={styles.mobileApplyButton}>
+                    <span style={styles.actionIcon}>🚀</span>
+                    Apply Now
+                  </Link>
+                  <Link href="/login" style={styles.mobileLoginButton}>
+                    <span style={styles.actionIcon}>👤</span>
+                    Sign In
+                  </Link>
                 </div>
               )}
               
@@ -282,8 +318,11 @@ export default function MainMenu({ user }) {
                   >
                     <span style={styles.menuIcon}>{item.icon}</span>
                     <span>{item.name}</span>
-                    <span style={styles.dropdownArrow}>
-                      {activeDropdown === item.name ? '▲' : '▼'}
+                    <span style={{
+                      ...styles.dropdownArrow,
+                      transform: activeDropdown === item.name ? 'rotate(180deg)' : 'rotate(0deg)'
+                    }}>
+                      ▼
                     </span>
                   </button>
                   
@@ -337,15 +376,19 @@ const styles = {
   topBarContent: {
     maxWidth: '1400px',
     margin: '0 auto',
-    padding: '0.5rem 1rem',
+    padding: '0.6rem 1rem',
     display: 'flex',
     justifyContent: 'space-between',
-    alignItems: 'center'
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: '0.5rem'
   },
   announcement: {
     display: 'flex',
     alignItems: 'center',
-    gap: '0.5rem'
+    gap: '0.5rem',
+    flex: 1,
+    minWidth: '200px'
   },
   announcementIcon: {
     fontSize: '1rem'
@@ -362,7 +405,8 @@ const styles = {
   topBarLinks: {
     display: 'flex',
     alignItems: 'center',
-    gap: '1rem'
+    gap: '1rem',
+    flexWrap: 'wrap'
   },
   topBarLink: {
     color: 'white',
@@ -466,11 +510,12 @@ const styles = {
     padding: '1.5rem',
     minWidth: '600px',
     zIndex: 1000,
-    marginTop: '0.5rem'
+    marginTop: '0.5rem',
+    animation: 'dropdownSlideIn 0.2s ease-out'
   },
   dropdownContent: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(2, 1fr)',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
     gap: '2rem'
   },
   dropdownCategory: {},
@@ -571,70 +616,92 @@ const styles = {
   },
   hamburgerIcon: {
     fontSize: '1.5rem',
-    color: '#374151'
+    color: '#374151',
+    transition: 'transform 0.2s'
   },
 
-  // Mobile Menu
+  // Enhanced Mobile Menu
   mobileMenu: {
     backgroundColor: 'white',
     borderTop: '1px solid #e5e7eb',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.08)'
+    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+    maxHeight: '80vh',
+    overflowY: 'auto'
   },
   mobileMenuContent: {
     padding: '1rem'
   },
   mobileUserInfo: {
     textAlign: 'center',
-    padding: '1rem',
+    padding: '1.5rem',
     backgroundColor: '#f8fafc',
-    borderRadius: '8px',
-    marginBottom: '1rem'
+    borderRadius: '12px',
+    marginBottom: '1.5rem'
   },
   welcomeText: {
     display: 'block',
-    fontSize: '0.9rem',
+    fontSize: '1rem',
     color: '#64748b',
-    marginBottom: '0.5rem'
+    marginBottom: '1rem',
+    fontWeight: '500'
+  },
+  mobileUserActions: {
+    display: 'flex',
+    gap: '0.5rem',
+    justifyContent: 'center'
   },
   mobileUserButton: {
-    display: 'inline-block',
-    padding: '0.5rem 1rem',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    padding: '0.75rem 1rem',
     backgroundColor: '#1e40af',
     color: 'white',
     textDecoration: 'none',
-    borderRadius: '6px',
+    borderRadius: '8px',
     fontSize: '0.85rem',
-    fontWeight: '600'
+    fontWeight: '600',
+    flex: 1,
+    justifyContent: 'center'
   },
   mobileActions: {
     display: 'flex',
-    gap: '0.5rem',
-    marginBottom: '1rem'
+    gap: '0.75rem',
+    marginBottom: '1.5rem'
   },
   mobileApplyButton: {
     flex: 1,
     textAlign: 'center',
-    padding: '0.75rem',
+    padding: '1rem',
     backgroundColor: '#059669',
     color: 'white',
     textDecoration: 'none',
-    borderRadius: '8px',
-    fontSize: '0.9rem',
-    fontWeight: '600'
+    borderRadius: '10px',
+    fontSize: '0.95rem',
+    fontWeight: '600',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '0.5rem'
   },
   mobileLoginButton: {
     flex: 1,
     textAlign: 'center',
-    padding: '0.75rem',
+    padding: '1rem',
     backgroundColor: '#1e40af',
     color: 'white',
     textDecoration: 'none',
-    borderRadius: '8px',
-    fontSize: '0.9rem',
-    fontWeight: '600'
+    borderRadius: '10px',
+    fontSize: '0.95rem',
+    fontWeight: '600',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '0.5rem'
   },
   mobileMenuItem: {
-    borderBottom: '1px solid #e5e7eb'
+    borderBottom: '1px solid #e5e7eb',
+    marginBottom: '0.5rem'
   },
   mobileMenuHeader: {
     width: '100%',
@@ -646,20 +713,21 @@ const styles = {
     border: 'none',
     cursor: 'pointer',
     fontSize: '1rem',
-    fontWeight: '500',
+    fontWeight: '600',
     color: '#374151'
   },
   mobileDropdown: {
-    paddingBottom: '1rem'
+    paddingBottom: '1rem',
+    animation: 'mobileDropdownSlideIn 0.2s ease-out'
   },
   mobileCategorySection: {
-    marginBottom: '1rem'
+    marginBottom: '1.5rem'
   },
   mobileCategoryTitle: {
-    fontSize: '0.8rem',
+    fontSize: '0.85rem',
     fontWeight: 'bold',
     color: '#1e40af',
-    marginBottom: '0.5rem',
+    marginBottom: '0.75rem',
     textTransform: 'uppercase',
     letterSpacing: '0.5px'
   },
@@ -667,24 +735,110 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     gap: '0.75rem',
-    padding: '0.75rem 1rem',
+    padding: '0.875rem 1rem',
     textDecoration: 'none',
     color: '#374151',
     backgroundColor: '#f8fafc',
-    borderRadius: '6px',
-    marginBottom: '0.25rem',
-    transition: 'all 0.2s'
+    borderRadius: '8px',
+    marginBottom: '0.5rem',
+    transition: 'all 0.2s',
+    border: '1px solid #e2e8f0'
   }
 };
 
-// Media Queries
-if (typeof window !== 'undefined') {
-  const mediaQuery = window.matchMedia('(max-width: 1024px)');
-  
-  if (mediaQuery.matches) {
-    styles.desktopMenu.display = 'none';
-    styles.mobileMenuButton.display = 'flex';
-    styles.topBarContent.flexDirection = 'column';
-    styles.topBarContent.gap = '0.5rem';
-  }
+// Add CSS animations and responsive styles
+if (typeof document !== 'undefined') {
+  const styleSheet = document.createElement('style');
+  styleSheet.textContent = `
+    @keyframes dropdownSlideIn {
+      0% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+      100% { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+    
+    @keyframes mobileDropdownSlideIn {
+      0% { opacity: 0; max-height: 0; }
+      100% { opacity: 1; max-height: 500px; }
+    }
+    
+    /* Hover Effects */
+    .menuButton:hover {
+      background-color: #eff6ff;
+      color: #1e40af;
+      transform: translateY(-1px);
+    }
+    
+    .dropdownItem:hover {
+      background-color: #f8fafc;
+      color: #1e40af;
+      transform: translateX(5px);
+    }
+    
+    .actionButton:hover, .applyButton:hover, .loginButton:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .mobileDropdownItem:hover {
+      background-color: #eff6ff;
+      border-color: #3b82f6;
+      transform: translateX(5px);
+    }
+    
+    .topBarLink:hover {
+      color: #fbbf24;
+    }
+    
+    .announcementLink:hover {
+      color: #ffffff;
+    }
+    
+    /* Mobile Responsive */
+    @media (max-width: 1024px) {
+      .desktopMenu {
+        display: none;
+      }
+      
+      .mobileMenuButton {
+        display: flex;
+      }
+      
+      .userActions {
+        display: none;
+      }
+      
+      .topBarContent {
+        flex-direction: column;
+        text-align: center;
+      }
+      
+      .megaDropdown {
+        min-width: 300px;
+        left: 0;
+        transform: none;
+      }
+      
+      .dropdownContent {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .announcement {
+        font-size: 0.8rem;
+      }
+      
+      .brandName {
+        font-size: 1.2rem;
+      }
+      
+      .brandTagline {
+        font-size: 0.7rem;
+      }
+      
+      .logo {
+        height: 35px;
+      }
+    }
+  `;
+  document.head.appendChild(styleSheet);
 }

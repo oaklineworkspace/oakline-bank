@@ -10,7 +10,7 @@ import FeaturesSection from '../components/FeaturesSection';
 import LoanApprovalSection from '../components/LoanApprovalSection';
 import TestimonialsSection from '../components/TestimonialsSection';
 import CTA from '../components/CTA';
-
+import Footer from '../components/Footer';
 
 export default function Home() {
   const [user, setUser] = useState(null);
@@ -45,19 +45,19 @@ export default function Home() {
     // Auto-slide for hero images
     const heroInterval = setInterval(() => {
       setCurrentSlide(prev => (prev + 1) % bankingImages.length);
-    }, 4000);
+    }, 5000);
 
     // Auto-slide for account types
     const accountInterval = setInterval(() => {
-      setCurrentAccountSlide(prev => (prev + 1) % Math.ceil(accountTypes.length / 6));
-    }, 6000);
+      setCurrentAccountSlide(prev => (prev + 1) % Math.ceil(visibleAccountTypes.length / 6));
+    }, 7000);
 
     // Auto-slide for feature showcase
     const featureInterval = setInterval(() => {
       setCurrentFeatureSlide(prev => (prev + 1) % bankingFeatures.length);
-    }, 5000);
+    }, 6000);
 
-    // Intersection Observer for scroll animations
+    // Enhanced Intersection Observer for scroll animations
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -66,11 +66,14 @@ export default function Home() {
           }
         });
       },
-      { threshold: 0.1 }
+      { threshold: 0.1, rootMargin: '50px' }
     );
 
-    const elements = document.querySelectorAll('[data-animate]');
-    elements.forEach((el) => observer.observe(el));
+    // Observe all animated elements
+    setTimeout(() => {
+      const elements = document.querySelectorAll('[data-animate]');
+      elements.forEach((el) => observer.observe(el));
+    }, 100);
 
     return () => {
       subscription?.unsubscribe();
@@ -83,106 +86,122 @@ export default function Home() {
 
   const bankingImages = [
     {
+      src: '/images/atm_machine_people.png',
+      title: 'Convenient ATM Network Access',
+      subtitle: 'Access your money 24/7 at thousands of locations nationwide with zero fees',
+      icon: '🏧',
+      gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+    },
+    {
+      src: '/images/mobile_banking_app.png',
+      title: 'Oakline Mobile Banking',
+      subtitle: 'Complete banking control right in your pocket with our award-winning app',
+      icon: '📱',
+      gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'
+    },
+    {
       src: '/images/handshake_business_deal.png',
       title: 'Professional Banking Partnership',
-      subtitle: 'Building trust through personalized financial solutions',
-      icon: '🤝'
+      subtitle: 'Building trust through personalized financial solutions and expert guidance',
+      icon: '🤝',
+      gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)'
     },
     {
       src: '/images/atm_withdrawal_transaction.png',
-      title: 'Convenient ATM Access',
-      subtitle: 'Withdraw cash securely from our nationwide network',
-      icon: '🏧'
+      title: 'Secure Transaction Processing',
+      subtitle: 'Bank with confidence using our advanced security and fraud protection',
+      icon: '🔒',
+      gradient: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)'
     },
     {
       src: '/images/Bank_hall_business_discussion_72f98bbe.png',
       title: 'Expert Financial Consultation',
-      subtitle: 'Professional advice from certified banking specialists',
-      icon: '💼'
+      subtitle: 'Professional advice from certified banking specialists in our modern branches',
+      icon: '💼',
+      gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)'
     },
     {
       src: '/images/Modern_bank_lobby_interior_d535acc7.png',
       title: 'Modern Banking Facilities',
-      subtitle: 'Experience banking in our state-of-the-art branches',
-      icon: '🏦'
+      subtitle: 'Experience premium banking in our state-of-the-art branch locations',
+      icon: '🏦',
+      gradient: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)'
     },
     {
       src: '/images/Digital_investment_dashboard_36d35f19.png',
-      title: 'Digital Investment Platform',
-      subtitle: 'Manage your investments with cutting-edge technology',
-      icon: '📊'
+      title: 'Advanced Investment Platform',
+      subtitle: 'Grow your wealth with cutting-edge investment tools and real-time analytics',
+      icon: '📊',
+      gradient: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)'
     },
     {
       src: '/images/Mobile_banking_user_experience_576bb7a3.png',
-      title: 'Mobile Banking Excellence',
-      subtitle: 'Bank anywhere with our award-winning mobile app',
-      icon: '📱'
-    },
-    {
-      src: '/images/atm_machine_people.png',
-      title: 'ATM Network Access',
-      subtitle: 'Access your money 24/7 at thousands of locations nationwide',
-      icon: '🏧'
-    },
-    {
-      src: '/images/mobile_banking_app.png',
-      title: 'Oakline Mobile App',
-      subtitle: 'Complete banking control right in your pocket',
-      icon: '📲'
+      title: 'Seamless Digital Experience',
+      subtitle: 'Enjoy intuitive banking with our user-friendly mobile and web platforms',
+      icon: '⚡',
+      gradient: 'linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)'
     }
   ];
 
   const bankingFeatures = [
     {
+      image: '/images/atm_machine_people.png',
+      title: 'Nationwide ATM Access',
+      description: 'Access your money at over 55,000 ATMs across the country with no fees. Our extensive network ensures you\'re never far from your money.',
+      features: ['55,000+ Fee-Free ATMs', 'International ATM Access', 'Mobile ATM Locator', '24/7 Cash Availability'],
+      icon: '🏧',
+      color: '#3b82f6'
+    },
+    {
+      image: '/images/mobile_banking_app.png',
+      title: 'Award-Winning Mobile App',
+      description: 'Experience banking reimagined with our state-of-the-art mobile application. Manage all your finances with ease.',
+      features: ['Mobile Check Deposit', 'Instant Transfers', 'Bill Pay & Scheduling', 'Real-time Notifications'],
+      icon: '📱',
+      color: '#10b981'
+    },
+    {
       image: '/images/handshake_business_deal.png',
-      title: 'Trusted Partnerships',
-      description: 'Building lasting relationships with our valued customers through transparent and reliable banking services.',
-      features: ['Personalized Service', 'Dedicated Relationship Manager', 'Priority Customer Support', '24/7 Banking Assistance']
-    },
-    {
-      image: '/images/atm_withdrawal_transaction.png',
-      title: 'Convenient Banking',
-      description: 'Access your money anytime, anywhere with our extensive ATM network and mobile banking solutions.',
-      features: ['5,000+ ATMs Nationwide', 'Mobile Check Deposit', 'Contactless Payments', 'Real-time Notifications']
-    },
-    {
-      image: '/images/Modern_bank_lobby_interior_d535acc7.png',
-      title: 'Premium Banking Experience',
-      description: 'Visit our modern branches for a comfortable and efficient banking experience with expert staff.',
-      features: ['Private Banking Suites', 'Express Service Counters', 'Digital Self-Service Kiosks', 'Comfortable Waiting Areas']
+      title: 'Personal Banking Relationships',
+      description: 'Build lasting financial partnerships with dedicated relationship managers who understand your unique needs.',
+      features: ['Dedicated Relationship Manager', 'Personalized Financial Planning', 'Priority Customer Support', 'Exclusive Banking Benefits'],
+      icon: '🤝',
+      color: '#f59e0b'
     },
     {
       image: '/images/Digital_investment_dashboard_36d35f19.png',
-      title: 'Smart Investments',
-      description: 'Grow your wealth with our comprehensive investment platform and professional financial advisors.',
-      features: ['Portfolio Management', 'Market Research Tools', 'Risk Assessment', 'Retirement Planning']
+      title: 'Investment & Wealth Management',
+      description: 'Grow your wealth with professional investment management and comprehensive financial planning services.',
+      features: ['Professional Portfolio Management', 'Market Research & Analytics', 'Retirement Planning', 'Tax-Advantaged Accounts'],
+      icon: '📈',
+      color: '#8b5cf6'
     }
   ];
 
   const accountTypes = [
-    { name: 'Premium Checking', icon: '💎', rate: '0.25% APY', desc: 'Luxury banking with exclusive perks', featured: true },
-    { name: 'High-Yield Savings', icon: '⭐', rate: '5.00% APY', desc: 'Maximum earning potential', featured: true },
-    { name: 'Business Checking', icon: '🏢', rate: '0.15% APY', desc: 'Professional banking for businesses', featured: true },
-    { name: 'Investment Account', icon: '📈', rate: 'Variable', desc: 'Trade stocks, bonds, and ETFs', featured: true },
-    { name: 'Money Market', icon: '💰', rate: '4.75% APY', desc: 'Premium savings with higher yields', featured: true },
-    { name: 'Certificate of Deposit', icon: '🔒', rate: '5.25% APY', desc: 'Secure fixed-rate investments', featured: true },
-    { name: 'Student Account', icon: '🎓', rate: '2.50% APY', desc: 'No-fee banking for students', featured: false },
-    { name: 'Retirement IRA', icon: '🏖️', rate: '4.80% APY', desc: 'Plan for your golden years', featured: false },
-    { name: 'Joint Account', icon: '👫', rate: '0.50% APY', desc: 'Shared banking for couples', featured: false },
-    { name: 'Trust Account', icon: '🛡️', rate: '3.50% APY', desc: 'Manage assets for beneficiaries', featured: false },
-    { name: 'Teen Account', icon: '👦', rate: '2.00% APY', desc: 'Financial education for teens', featured: false },
-    { name: 'Senior Account', icon: '👴', rate: '4.00% APY', desc: 'Special benefits for seniors', featured: false },
-    { name: 'Health Savings', icon: '🏥', rate: '3.75% APY', desc: 'Tax-advantaged health savings', featured: false },
-    { name: 'International Account', icon: '🌍', rate: '3.25% APY', desc: 'Global banking solutions', featured: false },
-    { name: 'Cryptocurrency Account', icon: '₿', rate: 'Variable', desc: 'Digital asset management', featured: user ? true : false },
-    { name: 'Green Investment', icon: '🌱', rate: '6.00% APY', desc: 'Sustainable investing options', featured: user ? true : false },
-    { name: 'Real Estate Investment', icon: '🏠', rate: '7.50% APY', desc: 'Property investment trusts', featured: user ? true : false },
-    { name: 'Education Savings', icon: '📚', rate: '4.25% APY', desc: 'Tax-free education savings', featured: false },
-    { name: 'Emergency Fund', icon: '🚨', rate: '4.10% APY', desc: 'Quick access emergency savings', featured: false },
-    { name: 'Small Business', icon: '🏪', rate: '3.80% APY', desc: 'Banking solutions for small business', featured: false },
-    { name: 'Corporate Banking', icon: '🏭', rate: '4.20% APY', desc: 'Enterprise banking solutions', featured: false },
-    { name: 'Private Banking', icon: '💎', rate: '5.50% APY', desc: 'Exclusive high-net-worth services', featured: user ? true : false },
-    { name: 'Wealth Management', icon: '👑', rate: '6.75% APY', desc: 'Comprehensive wealth solutions', featured: user ? true : false }
+    { name: 'Premium Checking', icon: '💎', rate: '0.25% APY', desc: 'Luxury banking with exclusive perks and premium benefits', featured: true, benefits: 'Free checks, premium debit card, concierge service' },
+    { name: 'High-Yield Savings', icon: '⭐', rate: '5.00% APY', desc: 'Maximum earning potential with competitive rates', featured: true, benefits: 'No minimum balance, compound interest, mobile banking' },
+    { name: 'Business Checking', icon: '🏢', rate: '0.15% APY', desc: 'Professional banking solutions for growing businesses', featured: true, benefits: 'Free business banking, merchant services, payroll integration' },
+    { name: 'Investment Account', icon: '📈', rate: 'Variable', desc: 'Trade stocks, bonds, ETFs, and mutual funds', featured: true, benefits: 'Commission-free trades, research tools, advisory services' },
+    { name: 'Money Market', icon: '💰', rate: '4.75% APY', desc: 'Premium savings with higher yields and flexibility', featured: true, benefits: 'Tiered interest rates, check writing, debit card access' },
+    { name: 'Certificate of Deposit', icon: '🔒', rate: '5.25% APY', desc: 'Secure fixed-rate investments with guaranteed returns', featured: true, benefits: 'FDIC insured, fixed rates, flexible terms' },
+    { name: 'Student Account', icon: '🎓', rate: '2.50% APY', desc: 'No-fee banking designed for students', featured: false, benefits: 'No monthly fees, overdraft protection, financial education' },
+    { name: 'Retirement IRA', icon: '🏖️', rate: '4.80% APY', desc: 'Plan for your golden years with tax advantages', featured: false, benefits: 'Traditional & Roth options, tax benefits, retirement planning' },
+    { name: 'Joint Account', icon: '👫', rate: '0.50% APY', desc: 'Shared banking solutions for couples and families', featured: false, benefits: 'Dual access, shared goals, family financial planning' },
+    { name: 'Trust Account', icon: '🛡️', rate: '3.50% APY', desc: 'Manage assets for beneficiaries with professional oversight', featured: false, benefits: 'Estate planning, fiduciary services, beneficiary management' },
+    { name: 'Teen Account', icon: '👦', rate: '2.00% APY', desc: 'Financial education and independence for teens', featured: false, benefits: 'Parental controls, spending alerts, financial literacy tools' },
+    { name: 'Senior Account', icon: '👴', rate: '4.00% APY', desc: 'Special benefits and services for seniors 65+', featured: false, benefits: 'Senior discounts, health savings options, estate planning' },
+    { name: 'Health Savings', icon: '🏥', rate: '3.75% APY', desc: 'Tax-advantaged savings for medical expenses', featured: false, benefits: 'Triple tax advantage, investment options, no expiration' },
+    { name: 'International Account', icon: '🌍', rate: '3.25% APY', desc: 'Global banking solutions for international needs', featured: false, benefits: 'Multi-currency support, international transfers, global ATM access' },
+    { name: 'Cryptocurrency Account', icon: '₿', rate: 'Variable', desc: 'Secure digital asset management and trading', featured: user ? true : false, benefits: 'Multiple cryptocurrencies, secure storage, trading platform' },
+    { name: 'Green Investment', icon: '🌱', rate: '6.00% APY', desc: 'Sustainable investing for environmental impact', featured: user ? true : false, benefits: 'ESG investments, impact reporting, sustainable returns' },
+    { name: 'Real Estate Investment', icon: '🏠', rate: '7.50% APY', desc: 'Property investment trusts and real estate funds', featured: user ? true : false, benefits: 'REIT investments, property exposure, professional management' },
+    { name: 'Education Savings', icon: '📚', rate: '4.25% APY', desc: 'Tax-free education savings for future learning', featured: false, benefits: '529 plan benefits, tax-free growth, educational flexibility' },
+    { name: 'Emergency Fund', icon: '🚨', rate: '4.10% APY', desc: 'Quick access emergency savings with high yields', featured: false, benefits: 'Instant access, high yield, automatic savings tools' },
+    { name: 'Small Business', icon: '🏪', rate: '3.80% APY', desc: 'Comprehensive banking solutions for small businesses', featured: false, benefits: 'Business loans, merchant services, accounting integration' },
+    { name: 'Corporate Banking', icon: '🏭', rate: '4.20% APY', desc: 'Enterprise banking solutions for large organizations', featured: false, benefits: 'Treasury management, commercial lending, cash management' },
+    { name: 'Private Banking', icon: '💎', rate: '5.50% APY', desc: 'Exclusive high-net-worth banking services', featured: user ? true : false, benefits: 'Private banker, exclusive rates, luxury services' },
+    { name: 'Wealth Management', icon: '👑', rate: '6.75% APY', desc: 'Comprehensive wealth solutions for affluent clients', featured: user ? true : false, benefits: 'Investment advisory, estate planning, tax optimization' }
   ];
 
   // Show different account types based on authentication
@@ -191,8 +210,16 @@ export default function Home() {
   if (isLoading) {
     return (
       <div style={styles.loadingContainer}>
-        <div style={styles.spinner}></div>
-        <p style={styles.loadingText}>Loading your banking experience...</p>
+        <div style={styles.loadingSpinner}>
+          <div style={styles.spinner}></div>
+          <div style={styles.loadingContent}>
+            <h2 style={styles.loadingTitle}>Welcome to Oakline Bank</h2>
+            <p style={styles.loadingText}>Loading your premium banking experience...</p>
+            <div style={styles.loadingProgress}>
+              <div style={styles.progressBar}></div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -202,60 +229,93 @@ export default function Home() {
       <MainMenu user={user} />
       <WelcomeBanner />
       
-      {/* Enhanced Mobile-First Hero Section */}
+      {/* Enhanced Mobile-First Hero Section with Parallax Effect */}
       <section style={styles.heroSection} id="hero" data-animate>
-        <div style={styles.heroSlide}>
-          <div style={styles.heroImageContainer}>
-            <img 
-              src={bankingImages[currentSlide].src} 
-              alt="Banking Hero" 
-              style={styles.heroImage}
-            />
-            <div style={styles.heroOverlay}></div>
-          </div>
-          <div style={{
-            ...styles.heroContent,
-            ...(isVisible.hero ? styles.slideInFromBottom : {})
-          }}>
-            <div style={styles.heroIcon}>{bankingImages[currentSlide].icon}</div>
-            <h1 style={styles.heroTitle}>{bankingImages[currentSlide].title}</h1>
-            <p style={styles.heroSubtitle}>{bankingImages[currentSlide].subtitle}</p>
-            <div style={styles.heroButtons}>
-              <Link href="/apply" style={styles.heroButton}>
-                <span style={styles.buttonIcon}>🚀</span>
-                Start Banking Today
-              </Link>
-              <Link href="/login" style={styles.secondaryButton}>
-                <span style={styles.buttonIcon}>👤</span>
-                Sign In
-              </Link>
+        <div style={styles.heroParallax}>
+          <div style={styles.heroSlide}>
+            <div style={styles.heroImageContainer}>
+              <img 
+                src={bankingImages[currentSlide].src} 
+                alt={bankingImages[currentSlide].title}
+                style={styles.heroImage}
+              />
+              <div style={{
+                ...styles.heroOverlay,
+                background: bankingImages[currentSlide].gradient
+              }}></div>
+            </div>
+            <div style={{
+              ...styles.heroContent,
+              ...(isVisible.hero ? styles.heroAnimated : {})
+            }}>
+              <div style={styles.heroIconContainer}>
+                <div style={styles.heroIcon}>{bankingImages[currentSlide].icon}</div>
+              </div>
+              <h1 style={styles.heroTitle}>{bankingImages[currentSlide].title}</h1>
+              <p style={styles.heroSubtitle}>{bankingImages[currentSlide].subtitle}</p>
+              
+              {/* Bank Routing Number Display */}
+              <div style={styles.routingNumberCard}>
+                <div style={styles.routingLabel}>Oakline Bank Routing Number</div>
+                <div style={styles.routingNumber}>075915826</div>
+                <div style={styles.routingNote}>Use this for wire transfers, direct deposits, and ACH transactions</div>
+              </div>
+              
+              <div style={styles.heroButtons}>
+                {user ? (
+                  <>
+                    <Link href="/dashboard" style={styles.heroButton}>
+                      <span style={styles.buttonIcon}>📊</span>
+                      Go to Dashboard
+                    </Link>
+                    <Link href="/account-types" style={styles.secondaryButton}>
+                      <span style={styles.buttonIcon}>🔍</span>
+                      Explore All Accounts
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    <Link href="/apply" style={styles.heroButton}>
+                      <span style={styles.buttonIcon}>🚀</span>
+                      Start Banking Today
+                    </Link>
+                    <Link href="/login" style={styles.secondaryButton}>
+                      <span style={styles.buttonIcon}>👤</span>
+                      Sign In
+                    </Link>
+                  </>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-        
-        <div style={styles.slideIndicators}>
-          {bankingImages.map((_, index) => (
-            <button
-              key={index}
-              style={{
-                ...styles.indicator,
-                ...(currentSlide === index ? styles.indicatorActive : {})
-              }}
-              onClick={() => setCurrentSlide(index)}
-            />
-          ))}
+          
+          <div style={styles.slideIndicators}>
+            {bankingImages.map((_, index) => (
+              <button
+                key={index}
+                style={{
+                  ...styles.indicator,
+                  ...(currentSlide === index ? styles.indicatorActive : {})
+                }}
+                onClick={() => setCurrentSlide(index)}
+              />
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* Banking Features Showcase */}
+      {/* Enhanced Banking Features Showcase with Advanced Animations */}
       <section style={styles.featuresShowcase} id="features-showcase" data-animate>
         <div style={styles.container}>
           <div style={{
             ...styles.sectionHeader,
-            ...(isVisible['features-showcase'] ? styles.fadeInUp : {})
+            ...(isVisible['features-showcase'] ? styles.staggeredFadeIn : {})
           }}>
             <h2 style={styles.sectionTitle}>Why Choose Oakline Bank</h2>
-            <p style={styles.sectionSubtitle}>Discover the features that make us your trusted financial partner</p>
+            <p style={styles.sectionSubtitle}>
+              Discover the premium features that make us your trusted financial partner
+            </p>
+            <div style={styles.titleUnderline}></div>
           </div>
           
           <div style={styles.featureShowcaseContainer}>
@@ -270,8 +330,12 @@ export default function Home() {
                   style={styles.featureImage}
                 />
                 <div style={styles.featureImageOverlay}>
-                  <div style={styles.featureBadge}>
-                    <span>✨ Featured Service</span>
+                  <div style={{
+                    ...styles.featureBadge,
+                    backgroundColor: bankingFeatures[currentFeatureSlide].color
+                  }}>
+                    <span style={styles.badgeIcon}>{bankingFeatures[currentFeatureSlide].icon}</span>
+                    <span>Premium Service</span>
                   </div>
                 </div>
               </div>
@@ -285,16 +349,42 @@ export default function Home() {
                 
                 <div style={styles.featuresList}>
                   {bankingFeatures[currentFeatureSlide].features.map((feature, index) => (
-                    <div key={index} style={styles.featureItem}>
-                      <span style={styles.featureIcon}>✓</span>
+                    <div key={index} style={{
+                      ...styles.featureItem,
+                      ...(isVisible['features-showcase'] ? {
+                        ...styles.bounceInLeft,
+                        animationDelay: `${index * 0.1}s`
+                      } : {})
+                    }}>
+                      <span style={{
+                        ...styles.featureIcon,
+                        backgroundColor: bankingFeatures[currentFeatureSlide].color
+                      }}>✓</span>
                       <span style={styles.featureText}>{feature}</span>
                     </div>
                   ))}
                 </div>
                 
-                <Link href="/apply" style={styles.featureButton}>
-                  Learn More
-                </Link>
+                <div style={styles.featureActions}>
+                  {user ? (
+                    <Link href="/dashboard" style={{
+                      ...styles.featureButton,
+                      backgroundColor: bankingFeatures[currentFeatureSlide].color
+                    }}>
+                      Access Now
+                    </Link>
+                  ) : (
+                    <Link href="/apply" style={{
+                      ...styles.featureButton,
+                      backgroundColor: bankingFeatures[currentFeatureSlide].color
+                    }}>
+                      Get Started
+                    </Link>
+                  )}
+                  <Link href="/account-types" style={styles.featureButtonSecondary}>
+                    Learn More
+                  </Link>
+                </div>
               </div>
             </div>
           </div>
@@ -305,7 +395,10 @@ export default function Home() {
                 key={index}
                 style={{
                   ...styles.featureIndicator,
-                  ...(currentFeatureSlide === index ? styles.featureIndicatorActive : {})
+                  ...(currentFeatureSlide === index ? {
+                    ...styles.featureIndicatorActive,
+                    backgroundColor: bankingFeatures[currentFeatureSlide].color
+                  } : {})
                 }}
                 onClick={() => setCurrentFeatureSlide(index)}
               />
@@ -314,27 +407,28 @@ export default function Home() {
         </div>
       </section>
 
-      {/* All Account Types Showcase */}
+      {/* Enhanced Account Types Section with User-Specific Content */}
       <section style={styles.accountTypesSection} id="account-types" data-animate>
         <div style={styles.container}>
           <div style={{
             ...styles.sectionHeader,
-            ...(isVisible['account-types'] ? styles.fadeInUp : {})
+            ...(isVisible['account-types'] ? styles.zoomIn : {})
           }}>
             <h2 style={styles.sectionTitle}>
-              {user ? 'All 23 Account Types We Offer' : 'Featured Banking Accounts'}
+              {user ? 'All 23 Account Types Available to You' : 'Featured Banking Accounts'}
             </h2>
             <p style={styles.sectionSubtitle}>
-              Find the perfect account for your financial needs
+              Find the perfect account for your financial needs and goals
               {!user && (
                 <span style={styles.loginPrompt}>
                   <br />
                   <Link href="/login" style={styles.loginLink}>
-                    Sign in to view all 23 account types
+                    🔓 Sign in to unlock all 23 premium account types
                   </Link>
                 </span>
               )}
             </p>
+            <div style={styles.titleUnderline}></div>
           </div>
           
           <div style={styles.accountCarousel}>
@@ -353,20 +447,31 @@ export default function Home() {
                         style={{
                           ...styles.accountCard,
                           ...(isVisible['account-types'] ? {
-                            ...styles.bounceIn,
+                            ...styles.flipInY,
                             animationDelay: `${index * 0.1}s`
                           } : {})
                         }}
                       >
-                        <div style={styles.accountIcon}>{account.icon}</div>
-                        <h3 style={styles.accountName}>{account.name}</h3>
-                        <p style={styles.accountRate}>{account.rate}</p>
-                        <p style={styles.accountDesc}>{account.desc}</p>
-                        {user ? (
-                          <Link href="/apply" style={styles.accountButton}>Apply Now</Link>
-                        ) : (
-                          <Link href="/login" style={styles.accountButtonSecondary}>Sign In to Apply</Link>
-                        )}
+                        <div style={styles.accountCardInner}>
+                          <div style={styles.accountIcon}>{account.icon}</div>
+                          <h3 style={styles.accountName}>{account.name}</h3>
+                          <p style={styles.accountRate}>{account.rate}</p>
+                          <p style={styles.accountDesc}>{account.desc}</p>
+                          <div style={styles.accountBenefits}>
+                            <small style={styles.benefitsText}>{account.benefits}</small>
+                          </div>
+                          {user ? (
+                            <Link href="/apply" style={styles.accountButton}>
+                              <span style={styles.buttonIcon}>⚡</span>
+                              Apply Now
+                            </Link>
+                          ) : (
+                            <Link href="/login" style={styles.accountButtonSecondary}>
+                              <span style={styles.buttonIcon}>🔒</span>
+                              Sign In to Apply
+                            </Link>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -390,90 +495,17 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Enhanced Loan Section */}
-      <section style={styles.loanSection} id="loan-section" data-animate>
-        <div style={styles.container}>
-          <div style={{
-            ...styles.loanContent,
-            ...(isVisible['loan-section'] ? styles.fadeInLeft : {})
-          }}>
-            <div style={styles.loanImageContainer}>
-              <img 
-                src="/images/Loan_approval_celebration_banner_919a886f.png" 
-                alt="Loan Approval Success" 
-                style={styles.loanImage}
-              />
-              <div style={styles.loanImageOverlay}>
-                <div style={styles.approvalBadge}>
-                  <span style={styles.badgeIcon}>✅</span>
-                  <span style={styles.badgeText}>Approved in 24hrs!</span>
-                </div>
-              </div>
-            </div>
-            
-            <div style={styles.loanInfo}>
-              <h2 style={styles.loanTitle}>
-                Get Your Loan 
-                <span style={styles.highlight}> Approved Fast</span>
-              </h2>
-              <p style={styles.loanSubtitle}>
-                Join thousands of satisfied customers who've achieved their dreams with Oakline Bank's comprehensive loan programs.
-              </p>
-              
-              <div style={styles.loanStats}>
-                <div style={styles.statItem}>
-                  <span style={styles.statNumber}>$2.5B+</span>
-                  <span style={styles.statLabel}>Loans Approved</span>
-                </div>
-                <div style={styles.statItem}>
-                  <span style={styles.statNumber}>24hrs</span>
-                  <span style={styles.statLabel}>Average Approval</span>
-                </div>
-                <div style={styles.statItem}>
-                  <span style={styles.statNumber}>3.2%</span>
-                  <span style={styles.statLabel}>Starting APR</span>
-                </div>
-              </div>
-              
-              <div style={styles.loanTypes}>
-                <div style={styles.loanType}>
-                  <span style={styles.loanTypeIcon}>🏠</span>
-                  <span>Home Loans</span>
-                </div>
-                <div style={styles.loanType}>
-                  <span style={styles.loanTypeIcon}>🚗</span>
-                  <span>Auto Loans</span>
-                </div>
-                <div style={styles.loanType}>
-                  <span style={styles.loanTypeIcon}>👤</span>
-                  <span>Personal Loans</span>
-                </div>
-                <div style={styles.loanType}>
-                  <span style={styles.loanTypeIcon}>🏢</span>
-                  <span>Business Loans</span>
-                </div>
-              </div>
-              
-              {user ? (
-                <Link href="/loans" style={styles.loanButton}>
-                  Apply for Loan Now
-                </Link>
-              ) : (
-                <Link href="/login" style={styles.loanButtonSecondary}>
-                  Sign In to Apply for Loan
-                </Link>
-              )}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <main>
-        <ServicesSection />
-        <FeaturesSection />
-        <TestimonialsSection />
-        
-        {/* Account Types Discovery Section */}
+      {/* Enhanced Services Section */}
+      <ServicesSection />
+      <FeaturesSection />
+      
+      {/* Enhanced Loan Section with Better Imagery */}
+      <LoanApprovalSection />
+      
+      {/* Testimonials Section */}
+      <TestimonialsSection />
+      
+      {/* Account Types Discovery Section */}
       <section style={styles.accountTypesDiscovery} id="account-types-discovery" data-animate>
         <div style={styles.container}>
           <div style={{
@@ -483,31 +515,36 @@ export default function Home() {
             <h2 style={styles.sectionTitle}>Explore All Our Account Types</h2>
             <p style={styles.sectionSubtitle}>
               Discover detailed information about all 23 account types we offer. 
-              Find comprehensive features, benefits, and eligibility requirements for each account.
+              Find comprehensive features, benefits, and eligibility requirements.
             </p>
+            <div style={styles.titleUnderline}></div>
           </div>
           
           <div style={styles.accountTypesPreview}>
-            <div style={styles.previewCard}>
-              <span style={styles.previewIcon}>💳</span>
-              <h3 style={styles.previewTitle}>Personal Banking</h3>
-              <p style={styles.previewDesc}>Checking, Savings, Student, Senior accounts and more</p>
-            </div>
-            <div style={styles.previewCard}>
-              <span style={styles.previewIcon}>🏢</span>
-              <h3 style={styles.previewTitle}>Business Banking</h3>
-              <p style={styles.previewDesc}>Small Business, Corporate, and Professional accounts</p>
-            </div>
-            <div style={styles.previewCard}>
-              <span style={styles.previewIcon}>📈</span>
-              <h3 style={styles.previewTitle}>Investment Accounts</h3>
-              <p style={styles.previewDesc}>Retirement, Investment, and Wealth Management options</p>
-            </div>
-            <div style={styles.previewCard}>
-              <span style={styles.previewIcon}>🎯</span>
-              <h3 style={styles.previewTitle}>Specialized Accounts</h3>
-              <p style={styles.previewDesc}>HSA, Education, Trust, and International accounts</p>
-            </div>
+            {[
+              { icon: '💳', title: 'Personal Banking', desc: 'Checking, Savings, Student, Senior accounts and more', color: '#3b82f6' },
+              { icon: '🏢', title: 'Business Banking', desc: 'Small Business, Corporate, and Professional accounts', color: '#10b981' },
+              { icon: '📈', title: 'Investment Accounts', desc: 'Retirement, Investment, and Wealth Management options', color: '#f59e0b' },
+              { icon: '🎯', title: 'Specialized Accounts', desc: 'HSA, Education, Trust, and International accounts', color: '#8b5cf6' }
+            ].map((item, index) => (
+              <div 
+                key={index}
+                style={{
+                  ...styles.previewCard,
+                  ...(isVisible['account-types-discovery'] ? {
+                    ...styles.slideInFromBottom,
+                    animationDelay: `${index * 0.2}s`
+                  } : {})
+                }}
+              >
+                <div style={{...styles.previewIconContainer, backgroundColor: item.color}}>
+                  <span style={styles.previewIcon}>{item.icon}</span>
+                </div>
+                <h3 style={styles.previewTitle}>{item.title}</h3>
+                <p style={styles.previewDesc}>{item.desc}</p>
+                <div style={{...styles.previewAccent, backgroundColor: item.color}}></div>
+              </div>
+            ))}
           </div>
           
           <div style={styles.accountTypesAction}>
@@ -522,69 +559,111 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Enhanced CTA with Animation */}
-        <div id="final-cta" data-animate style={{
-          ...(isVisible['final-cta'] ? styles.pulse : {})
-        }}>
-          <CTA
-            title="Ready to Start Your Financial Journey?"
-            subtitle="Join over 500,000 customers who trust Oakline Bank for their financial needs. Open your account today and experience the difference."
-            buttonText="Open Account Now"
-            buttonLink="/apply"
-            variant="primary"
-          />
-        </div>
-      </main>
+      {/* Enhanced Final CTA */}
+      <div id="final-cta" data-animate style={{
+        ...(isVisible['final-cta'] ? styles.pulseGlow : {})
+      }}>
+        <CTA
+          title={user ? "Ready to Expand Your Banking?" : "Ready to Start Your Financial Journey?"}
+          subtitle={user ? 
+            "Explore additional account types and premium services available to you as a valued customer." :
+            "Join over 500,000 customers who trust Oakline Bank for their financial needs. Open your account today and experience the difference."
+          }
+          buttonText={user ? "Explore More Services" : "Open Account Now"}
+          buttonLink={user ? "/account-types" : "/apply"}
+          variant="primary"
+        />
+      </div>
       
-      
+      <Footer />
     </div>
   );
 }
 
 const styles = {
+  // Loading Screen Styles
   loadingContainer: {
     display: 'flex',
-    flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
     height: '100vh',
     background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    color: 'white'
+    color: 'white',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+  },
+  loadingSpinner: {
+    textAlign: 'center',
+    maxWidth: '400px',
+    padding: '2rem'
   },
   spinner: {
-    width: '60px',
-    height: '60px',
-    border: '6px solid rgba(255,255,255,0.2)',
-    borderTop: '6px solid #ffffff',
+    width: '80px',
+    height: '80px',
+    border: '8px solid rgba(255,255,255,0.2)',
+    borderTop: '8px solid #ffffff',
     borderRadius: '50%',
-    animation: 'spin 1s linear infinite',
-    marginBottom: '20px'
+    animation: 'spin 1.2s linear infinite',
+    marginBottom: '2rem',
+    margin: '0 auto 2rem'
+  },
+  loadingContent: {
+    textAlign: 'center'
+  },
+  loadingTitle: {
+    fontSize: '2rem',
+    fontWeight: '700',
+    marginBottom: '1rem',
+    animation: 'fadeInUp 1s ease-out'
   },
   loadingText: {
-    fontSize: '1.2rem',
-    fontWeight: '500',
-    opacity: 0.9
+    fontSize: '1.1rem',
+    opacity: 0.9,
+    marginBottom: '2rem',
+    animation: 'fadeInUp 1s ease-out 0.3s both'
   },
+  loadingProgress: {
+    width: '100%',
+    height: '4px',
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    borderRadius: '2px',
+    overflow: 'hidden',
+    animation: 'fadeInUp 1s ease-out 0.6s both'
+  },
+  progressBar: {
+    width: '100%',
+    height: '100%',
+    background: 'linear-gradient(90deg, #4facfe 0%, #00f2fe 100%)',
+    borderRadius: '2px',
+    animation: 'progressSlide 2s ease-in-out infinite'
+  },
+
+  // Main Container
   pageContainer: {
     minHeight: '100vh',
     background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
     width: '100%',
-    overflow: 'hidden'
+    overflow: 'hidden',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
   },
 
-  // Mobile-First Hero Section
+  // Enhanced Hero Section
   heroSection: {
     position: 'relative',
-    height: '60vh',
-    minHeight: '400px',
-    maxHeight: '500px',
+    height: 'clamp(500px, 70vh, 700px)',
     overflow: 'hidden',
     width: '100%'
+  },
+  heroParallax: {
+    position: 'relative',
+    width: '100%',
+    height: '100%',
+    perspective: '1000px'
   },
   heroSlide: {
     position: 'relative',
     width: '100%',
-    height: '100%'
+    height: '100%',
+    transform: 'translateZ(0)'
   },
   heroImageContainer: {
     position: 'absolute',
@@ -599,7 +678,9 @@ const styles = {
     height: '100%',
     objectFit: 'cover',
     objectPosition: 'center',
-    transition: 'all 0.8s ease-in-out'
+    transition: 'all 1.2s ease-in-out',
+    transform: 'scale(1.05)',
+    animation: 'heroImageFloat 20s ease-in-out infinite'
   },
   heroOverlay: {
     position: 'absolute',
@@ -607,7 +688,7 @@ const styles = {
     left: 0,
     right: 0,
     bottom: 0,
-    background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.8) 0%, rgba(99, 102, 241, 0.7) 100%)'
+    opacity: 0.85
   },
   heroContent: {
     position: 'absolute',
@@ -616,204 +697,344 @@ const styles = {
     transform: 'translate(-50%, -50%)',
     textAlign: 'center',
     color: 'white',
-    maxWidth: '90%',
+    maxWidth: '95%',
     width: '100%',
     padding: '0 1rem',
-    zIndex: 2,
-    transition: 'all 0.8s ease-out'
+    zIndex: 10,
+    transition: 'all 1s ease-out'
+  },
+  heroAnimated: {
+    animation: 'heroContentSlideUp 1.2s ease-out'
+  },
+  heroIconContainer: {
+    marginBottom: '1.5rem'
   },
   heroIcon: {
-    fontSize: 'clamp(2rem, 4vw, 3rem)',
-    marginBottom: '0.8rem',
-    display: 'block',
-    filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))'
+    fontSize: 'clamp(3rem, 6vw, 4.5rem)',
+    display: 'inline-block',
+    filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.4))',
+    animation: 'heroIconBounce 2s ease-in-out infinite'
   },
   heroTitle: {
-    fontSize: 'clamp(1.5rem, 4vw, 2.5rem)',
-    fontWeight: '800',
-    marginBottom: '0.8rem',
-    textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
-    lineHeight: '1.1'
+    fontSize: 'clamp(2rem, 5vw, 3.5rem)',
+    fontWeight: '900',
+    marginBottom: '1rem',
+    textShadow: '2px 4px 8px rgba(0,0,0,0.5)',
+    lineHeight: '1.1',
+    letterSpacing: '-0.02em'
   },
   heroSubtitle: {
-    fontSize: 'clamp(0.9rem, 2vw, 1.1rem)',
-    marginBottom: '1.5rem',
+    fontSize: 'clamp(1rem, 2.5vw, 1.3rem)',
+    marginBottom: '2rem',
     opacity: 0.95,
-    maxWidth: '500px',
-    margin: '0 auto 1.5rem',
-    fontWeight: '300'
+    maxWidth: '600px',
+    margin: '0 auto 2rem',
+    fontWeight: '400',
+    lineHeight: '1.5',
+    textShadow: '1px 2px 4px rgba(0,0,0,0.3)'
   },
+  
+  // Routing Number Card
+  routingNumberCard: {
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    backdropFilter: 'blur(10px)',
+    border: '1px solid rgba(255,255,255,0.2)',
+    borderRadius: '16px',
+    padding: '1.5rem',
+    marginBottom: '2rem',
+    maxWidth: '400px',
+    margin: '0 auto 2rem',
+    animation: 'routingCardGlow 3s ease-in-out infinite'
+  },
+  routingLabel: {
+    fontSize: '0.9rem',
+    fontWeight: '600',
+    opacity: 0.9,
+    marginBottom: '0.5rem',
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px'
+  },
+  routingNumber: {
+    fontSize: 'clamp(1.5rem, 4vw, 2rem)',
+    fontWeight: '900',
+    fontFamily: 'monospace',
+    letterSpacing: '2px',
+    marginBottom: '0.5rem',
+    textShadow: '2px 2px 4px rgba(0,0,0,0.3)'
+  },
+  routingNote: {
+    fontSize: '0.8rem',
+    opacity: 0.8,
+    lineHeight: '1.4'
+  },
+
   heroButtons: {
     display: 'flex',
-    gap: '0.8rem',
+    gap: '1rem',
     justifyContent: 'center',
-    flexWrap: 'wrap'
+    flexWrap: 'wrap',
+    marginTop: '1rem'
   },
   heroButton: {
     background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
     color: 'white',
     textDecoration: 'none',
-    padding: 'clamp(0.7rem, 1.5vw, 1rem) clamp(1.2rem, 3vw, 2rem)',
-    borderRadius: '10px',
-    fontSize: 'clamp(0.85rem, 1.8vw, 1rem)',
+    padding: 'clamp(1rem, 2vw, 1.3rem) clamp(1.5rem, 4vw, 2.5rem)',
+    borderRadius: '12px',
+    fontSize: 'clamp(0.9rem, 2vw, 1.1rem)',
     fontWeight: '700',
-    boxShadow: '0 6px 16px rgba(16, 185, 129, 0.4)',
+    boxShadow: '0 8px 24px rgba(16, 185, 129, 0.4)',
     transition: 'all 0.3s ease',
     display: 'inline-flex',
     alignItems: 'center',
-    gap: '0.4rem',
-    border: '2px solid transparent'
+    gap: '0.5rem',
+    border: 'none',
+    transform: 'translateY(0)',
+    animation: 'buttonPulse 2s ease-in-out infinite'
   },
   secondaryButton: {
     backgroundColor: 'transparent',
     color: 'white',
     textDecoration: 'none',
-    padding: 'clamp(0.7rem, 1.5vw, 1rem) clamp(1.2rem, 3vw, 2rem)',
-    borderRadius: '10px',
-    fontSize: 'clamp(0.85rem, 1.8vw, 1rem)',
+    padding: 'clamp(1rem, 2vw, 1.3rem) clamp(1.5rem, 4vw, 2.5rem)',
+    borderRadius: '12px',
+    fontSize: 'clamp(0.9rem, 2vw, 1.1rem)',
     fontWeight: '700',
     border: '2px solid white',
     transition: 'all 0.3s ease',
     display: 'inline-flex',
     alignItems: 'center',
-    gap: '0.4rem'
+    gap: '0.5rem',
+    backdropFilter: 'blur(10px)'
   },
   buttonIcon: {
-    fontSize: '1.1em'
+    fontSize: '1.2em'
   },
+
+  // Slide Indicators
   slideIndicators: {
     position: 'absolute',
-    bottom: '20px',
+    bottom: '30px',
     left: '50%',
     transform: 'translateX(-50%)',
     display: 'flex',
-    gap: '10px',
-    zIndex: 3
+    gap: '12px',
+    zIndex: 15
   },
   indicator: {
-    width: '10px',
-    height: '10px',
+    width: '12px',
+    height: '12px',
     borderRadius: '50%',
     border: '2px solid white',
     background: 'transparent',
     cursor: 'pointer',
-    transition: 'all 0.3s ease'
+    transition: 'all 0.4s ease',
+    backdropFilter: 'blur(5px)'
   },
   indicatorActive: {
     backgroundColor: 'white',
-    transform: 'scale(1.2)',
-    boxShadow: '0 0 12px rgba(255,255,255,0.6)'
+    transform: 'scale(1.4)',
+    boxShadow: '0 0 20px rgba(255,255,255,0.8)'
   },
 
-  // Features Showcase Section
+  // Enhanced Features Showcase
   featuresShowcase: {
-    padding: 'clamp(2.5rem, 5vw, 4rem) 0',
+    padding: 'clamp(4rem, 8vw, 6rem) 0',
     backgroundColor: 'white',
+    width: '100%',
+    position: 'relative'
+  },
+  container: {
+    maxWidth: '1400px',
+    margin: '0 auto',
+    padding: '0 1rem',
     width: '100%'
   },
-  featureShowcaseContainer: {
-    marginBottom: '2rem'
-  },
-  featureContent: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 350px), 1fr))',
-    gap: 'clamp(1.5rem, 3vw, 3rem)',
-    alignItems: 'center'
-  },
-  featureImageContainer: {
-    position: 'relative',
-    borderRadius: '16px',
-    overflow: 'hidden',
-    boxShadow: '0 15px 35px rgba(0,0,0,0.1)',
+  sectionHeader: {
+    textAlign: 'center',
+    marginBottom: 'clamp(2rem, 5vw, 4rem)',
     transition: 'all 0.8s ease-out'
   },
-  featureImage: {
-    width: '100%',
-    height: '250px',
-    objectFit: 'cover',
-    transition: 'transform 0.3s ease'
+  staggeredFadeIn: {
+    animation: 'staggeredFadeIn 1s ease-out'
   },
-  featureImageOverlay: {
-    position: 'absolute',
-    top: '15px',
-    right: '15px'
-  },
-  featureBadge: {
-    background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
-    color: 'white',
-    padding: '8px 16px',
-    borderRadius: '8px',
-    fontSize: '0.8rem',
-    fontWeight: '600',
-    boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)'
-  },
-  featureInfo: {
-    padding: '1rem',
-    transition: 'all 0.8s ease-out'
-  },
-  featureTitle: {
-    fontSize: 'clamp(1.5rem, 3vw, 2.2rem)',
-    fontWeight: '800',
+  sectionTitle: {
+    fontSize: 'clamp(2rem, 4vw, 3rem)',
+    fontWeight: '900',
     color: '#1e293b',
     marginBottom: '1rem',
     background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
     WebkitBackgroundClip: 'text',
     WebkitTextFillColor: 'transparent',
-    backgroundClip: 'text'
+    backgroundClip: 'text',
+    letterSpacing: '-0.02em'
+  },
+  sectionSubtitle: {
+    fontSize: 'clamp(1rem, 2.5vw, 1.2rem)',
+    color: '#64748b',
+    maxWidth: '600px',
+    margin: '0 auto',
+    lineHeight: '1.6',
+    fontWeight: '400'
+  },
+  titleUnderline: {
+    width: '80px',
+    height: '4px',
+    background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+    margin: '1.5rem auto 0',
+    borderRadius: '2px',
+    animation: 'underlineExpand 1s ease-out 0.5s both'
+  },
+
+  // Feature Showcase Content
+  featureShowcaseContainer: {
+    marginBottom: '3rem'
+  },
+  featureContent: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 400px), 1fr))',
+    gap: 'clamp(2rem, 4vw, 4rem)',
+    alignItems: 'center'
+  },
+  featureImageContainer: {
+    position: 'relative',
+    borderRadius: '20px',
+    overflow: 'hidden',
+    boxShadow: '0 20px 40px rgba(0,0,0,0.15)',
+    transition: 'all 0.8s ease-out',
+    transform: 'translateX(-100px)',
+    opacity: 0
+  },
+  slideInFromLeft: {
+    animation: 'slideInFromLeft 1s ease-out forwards'
+  },
+  featureImage: {
+    width: '100%',
+    height: '300px',
+    objectFit: 'cover',
+    transition: 'transform 0.5s ease'
+  },
+  featureImageOverlay: {
+    position: 'absolute',
+    top: '20px',
+    right: '20px'
+  },
+  featureBadge: {
+    background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+    color: 'white',
+    padding: '10px 16px',
+    borderRadius: '12px',
+    fontSize: '0.85rem',
+    fontWeight: '700',
+    boxShadow: '0 6px 16px rgba(59, 130, 246, 0.4)',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+    backdropFilter: 'blur(10px)'
+  },
+  badgeIcon: {
+    fontSize: '1rem'
+  },
+  featureInfo: {
+    padding: '1rem',
+    transition: 'all 0.8s ease-out',
+    transform: 'translateX(100px)',
+    opacity: 0
+  },
+  slideInFromRight: {
+    animation: 'slideInFromRight 1s ease-out forwards'
+  },
+  featureTitle: {
+    fontSize: 'clamp(1.8rem, 3.5vw, 2.5rem)',
+    fontWeight: '900',
+    color: '#1e293b',
+    marginBottom: '1.5rem',
+    background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
+    backgroundClip: 'text',
+    letterSpacing: '-0.01em'
   },
   featureDescription: {
-    fontSize: 'clamp(0.95rem, 2vw, 1.1rem)',
+    fontSize: 'clamp(1rem, 2.2vw, 1.15rem)',
     color: '#64748b',
-    marginBottom: '1.5rem',
-    lineHeight: '1.6'
+    marginBottom: '2rem',
+    lineHeight: '1.7',
+    fontWeight: '400'
   },
   featuresList: {
-    marginBottom: '2rem'
+    marginBottom: '2.5rem'
   },
   featureItem: {
     display: 'flex',
     alignItems: 'center',
-    gap: '0.8rem',
-    marginBottom: '0.8rem',
-    fontSize: '0.95rem',
-    color: '#374151'
+    gap: '1rem',
+    marginBottom: '1rem',
+    fontSize: '1rem',
+    color: '#374151',
+    opacity: 0,
+    transform: 'translateX(-20px)'
+  },
+  bounceInLeft: {
+    animation: 'bounceInLeft 0.6s ease-out forwards'
   },
   featureIcon: {
     backgroundColor: '#10b981',
     color: 'white',
     borderRadius: '50%',
-    width: '20px',
-    height: '20px',
+    width: '24px',
+    height: '24px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     fontSize: '12px',
-    fontWeight: 'bold'
+    fontWeight: 'bold',
+    boxShadow: '0 4px 8px rgba(16, 185, 129, 0.3)'
   },
   featureText: {
-    fontWeight: '500'
+    fontWeight: '600'
+  },
+  featureActions: {
+    display: 'flex',
+    gap: '1rem',
+    flexWrap: 'wrap'
   },
   featureButton: {
     background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
     color: 'white',
     textDecoration: 'none',
-    padding: '0.8rem 1.5rem',
-    borderRadius: '8px',
-    fontSize: '0.95rem',
-    fontWeight: '600',
+    padding: '1rem 1.8rem',
+    borderRadius: '10px',
+    fontSize: '1rem',
+    fontWeight: '700',
     transition: 'all 0.3s ease',
     display: 'inline-block',
-    boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)'
+    boxShadow: '0 6px 16px rgba(59, 130, 246, 0.4)',
+    transform: 'translateY(0)'
   },
+  featureButtonSecondary: {
+    backgroundColor: 'transparent',
+    color: '#3b82f6',
+    textDecoration: 'none',
+    padding: '1rem 1.8rem',
+    borderRadius: '10px',
+    fontSize: '1rem',
+    fontWeight: '700',
+    border: '2px solid #3b82f6',
+    transition: 'all 0.3s ease',
+    display: 'inline-block'
+  },
+
+  // Feature Indicators
   featureIndicators: {
     display: 'flex',
     justifyContent: 'center',
-    gap: '8px',
-    marginTop: '2rem'
+    gap: '10px',
+    marginTop: '2.5rem'
   },
   featureIndicator: {
-    width: '8px',
-    height: '8px',
+    width: '10px',
+    height: '10px',
     borderRadius: '50%',
     border: '2px solid #3b82f6',
     background: 'transparent',
@@ -822,138 +1043,151 @@ const styles = {
   },
   featureIndicatorActive: {
     backgroundColor: '#3b82f6',
-    transform: 'scale(1.3)'
+    transform: 'scale(1.4)'
   },
 
-  // Container and Common Styles
-  container: {
-    maxWidth: '1200px',
-    margin: '0 auto',
-    padding: '0 1rem',
-    width: '100%'
-  },
-  sectionHeader: {
-    textAlign: 'center',
-    marginBottom: 'clamp(1.5rem, 4vw, 3rem)',
-    transition: 'all 0.6s ease-out'
-  },
-  sectionTitle: {
-    fontSize: 'clamp(1.6rem, 3.5vw, 2.5rem)',
-    fontWeight: '800',
-    color: '#1e293b',
-    marginBottom: '0.8rem',
-    background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
-    backgroundClip: 'text'
-  },
-  sectionSubtitle: {
-    fontSize: 'clamp(0.95rem, 2vw, 1.1rem)',
-    color: '#64748b',
-    maxWidth: '500px',
-    margin: '0 auto',
-    lineHeight: '1.6'
+  // Enhanced Account Types Section
+  accountTypesSection: {
+    padding: 'clamp(4rem, 8vw, 6rem) 0',
+    background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
+    width: '100%',
+    position: 'relative'
   },
   loginPrompt: {
-    marginTop: '0.5rem'
+    marginTop: '1rem',
+    display: 'block'
   },
   loginLink: {
     color: '#3b82f6',
-    textDecoration: 'underline',
-    fontWeight: '600'
+    textDecoration: 'none',
+    fontWeight: '700',
+    padding: '0.5rem 1rem',
+    borderRadius: '8px',
+    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+    transition: 'all 0.3s ease',
+    display: 'inline-block',
+    marginTop: '0.5rem'
   },
 
-  // Account Types Section
-  accountTypesSection: {
-    padding: 'clamp(2.5rem, 5vw, 4rem) 0',
-    background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
-    width: '100%'
-  },
+  // Account Carousel
   accountCarousel: {
     position: 'relative',
     overflow: 'hidden',
-    borderRadius: '12px'
+    borderRadius: '16px'
   },
   accountSlideContainer: {
     display: 'flex',
-    transition: 'transform 0.8s ease-in-out',
+    transition: 'transform 1s ease-in-out',
     width: '100%'
   },
   accountSlide: {
     minWidth: '100%',
-    padding: '1rem 0'
+    padding: '1.5rem 0'
   },
   accountGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))',
-    gap: '1.2rem'
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))',
+    gap: '1.5rem'
   },
   accountCard: {
     backgroundColor: 'white',
-    padding: '1.2rem',
-    borderRadius: '12px',
-    textAlign: 'center',
-    boxShadow: '0 8px 20px rgba(0,0,0,0.06)',
+    borderRadius: '16px',
+    overflow: 'hidden',
+    boxShadow: '0 10px 25px rgba(0,0,0,0.08)',
     border: '2px solid #e2e8f0',
-    transition: 'all 0.3s ease',
+    transition: 'all 0.4s ease',
     cursor: 'pointer',
     position: 'relative',
-    overflow: 'hidden'
+    transform: 'scale(0.8) rotateY(90deg)',
+    opacity: 0
+  },
+  flipInY: {
+    animation: 'flipInY 0.8s ease-out forwards'
+  },
+  accountCardInner: {
+    padding: '1.8rem',
+    textAlign: 'center',
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'column'
   },
   accountIcon: {
-    fontSize: '2rem',
-    marginBottom: '0.8rem',
-    display: 'block'
+    fontSize: '2.5rem',
+    marginBottom: '1rem',
+    display: 'block',
+    filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))'
   },
   accountName: {
-    fontSize: '1rem',
-    fontWeight: '700',
+    fontSize: '1.1rem',
+    fontWeight: '800',
     color: '#1e293b',
-    marginBottom: '0.4rem'
+    marginBottom: '0.5rem',
+    letterSpacing: '-0.01em'
   },
   accountRate: {
-    fontSize: '0.9rem',
-    fontWeight: '600',
+    fontSize: '1rem',
+    fontWeight: '700',
     color: '#10b981',
-    marginBottom: '0.4rem'
+    marginBottom: '0.5rem'
   },
   accountDesc: {
     color: '#64748b',
-    fontSize: '0.8rem',
+    fontSize: '0.9rem',
     marginBottom: '1rem',
+    lineHeight: '1.5',
+    flex: 1
+  },
+  accountBenefits: {
+    backgroundColor: '#f8fafc',
+    padding: '0.8rem',
+    borderRadius: '8px',
+    marginBottom: '1.5rem'
+  },
+  benefitsText: {
+    fontSize: '0.8rem',
+    color: '#64748b',
     lineHeight: '1.4'
   },
   accountButton: {
     backgroundColor: '#3b82f6',
     color: 'white',
     textDecoration: 'none',
-    padding: '0.6rem 1.1rem',
-    borderRadius: '6px',
-    fontSize: '0.8rem',
-    fontWeight: '600',
+    padding: '0.8rem 1.3rem',
+    borderRadius: '8px',
+    fontSize: '0.9rem',
+    fontWeight: '700',
     transition: 'all 0.3s ease',
-    display: 'inline-block'
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '0.5rem',
+    transform: 'translateY(0)'
   },
   accountButtonSecondary: {
     backgroundColor: '#e2e8f0',
     color: '#64748b',
     textDecoration: 'none',
-    padding: '0.6rem 1.1rem',
-    borderRadius: '6px',
-    fontSize: '0.8rem',
-    fontWeight: '600',
+    padding: '0.8rem 1.3rem',
+    borderRadius: '8px',
+    fontSize: '0.9rem',
+    fontWeight: '700',
     transition: 'all 0.3s ease',
-    display: 'inline-block'
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '0.5rem'
   },
+
+  // Account Indicators
   accountIndicators: {
     display: 'flex',
     justifyContent: 'center',
-    gap: '8px',
-    marginTop: '1.5rem'
+    gap: '10px',
+    marginTop: '2rem'
   },
   accountIndicator: {
-    width: '8px',
-    height: '8px',
+    width: '10px',
+    height: '10px',
     borderRadius: '50%',
     border: '2px solid #3b82f6',
     background: 'transparent',
@@ -962,205 +1196,69 @@ const styles = {
   },
   accountIndicatorActive: {
     backgroundColor: '#3b82f6',
-    transform: 'scale(1.2)'
+    transform: 'scale(1.3)'
   },
 
-  // Loan Section
-  loanSection: {
-    padding: 'clamp(2.5rem, 5vw, 4rem) 0',
-    backgroundColor: 'white',
-    width: '100%'
-  },
-  loanContent: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 350px), 1fr))',
-    gap: 'clamp(1.5rem, 3vw, 3rem)',
-    alignItems: 'center',
-    transition: 'all 0.8s ease-out'
-  },
-  loanImageContainer: {
-    position: 'relative',
-    borderRadius: '16px',
-    overflow: 'hidden',
-    boxShadow: '0 15px 35px rgba(0,0,0,0.1)'
-  },
-  loanImage: {
-    width: '100%',
-    height: '250px',
-    objectFit: 'cover',
-    objectPosition: 'center'
-  },
-  loanImageOverlay: {
-    position: 'absolute',
-    top: '15px',
-    right: '15px'
-  },
-  approvalBadge: {
-    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-    color: 'white',
-    padding: '10px 16px',
-    borderRadius: '10px',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '6px',
-    boxShadow: '0 6px 12px rgba(16, 185, 129, 0.3)',
-    fontWeight: '700',
-    fontSize: '0.85rem'
-  },
-  badgeIcon: {
-    fontSize: '0.9rem'
-  },
-  badgeText: {
-    fontSize: '0.85rem'
-  },
-  loanInfo: {
-    padding: '1rem'
-  },
-  loanTitle: {
-    fontSize: 'clamp(1.6rem, 3.5vw, 2.5rem)',
-    fontWeight: '800',
-    color: '#1e293b',
-    marginBottom: '1rem',
-    lineHeight: '1.2'
-  },
-  highlight: {
-    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
-    backgroundClip: 'text'
-  },
-  loanSubtitle: {
-    fontSize: 'clamp(0.95rem, 2vw, 1.1rem)',
-    color: '#64748b',
-    marginBottom: '1.5rem',
-    lineHeight: '1.6'
-  },
-  loanStats: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))',
-    gap: '1rem',
-    marginBottom: '1.5rem'
-  },
-  statItem: {
-    textAlign: 'center'
-  },
-  statNumber: {
-    fontSize: 'clamp(1.2rem, 2.5vw, 1.6rem)',
-    fontWeight: '800',
-    color: '#3b82f6',
-    display: 'block',
-    lineHeight: '1'
-  },
-  statLabel: {
-    fontSize: '0.8rem',
-    color: '#64748b',
-    fontWeight: '500',
-    marginTop: '0.3rem'
-  },
-  loanTypes: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
-    gap: '0.8rem',
-    marginBottom: '1.5rem'
-  },
-  loanType: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.6rem',
-    padding: '0.6rem',
-    backgroundColor: '#f8fafc',
-    borderRadius: '8px',
-    boxShadow: '0 3px 8px rgba(0,0,0,0.04)',
-    fontSize: '0.85rem',
-    fontWeight: '600',
-    color: '#1e293b'
-  },
-  loanTypeIcon: {
-    fontSize: '1.1rem'
-  },
-  loanButton: {
-    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-    color: 'white',
-    textDecoration: 'none',
-    padding: 'clamp(0.7rem, 1.8vw, 1rem) clamp(1.2rem, 2.5vw, 1.8rem)',
-    borderRadius: '8px',
-    fontSize: 'clamp(0.85rem, 1.6vw, 1rem)',
-    fontWeight: '700',
-    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
-    transition: 'all 0.3s ease',
-    display: 'inline-block'
-  },
-  loanButtonSecondary: {
-    backgroundColor: '#e2e8f0',
-    color: '#64748b',
-    textDecoration: 'none',
-    padding: 'clamp(0.7rem, 1.8vw, 1rem) clamp(1.2rem, 2.5vw, 1.8rem)',
-    borderRadius: '8px',
-    fontSize: 'clamp(0.85rem, 1.6vw, 1rem)',
-    fontWeight: '700',
-    transition: 'all 0.3s ease',
-    display: 'inline-block'
-  },
-
-  // Animation Classes
-  fadeInUp: {
-    animation: 'fadeInUp 0.8s ease-out forwards'
-  },
-  fadeInLeft: {
-    animation: 'fadeInLeft 0.8s ease-out forwards'
-  },
-  slideInFromLeft: {
-    animation: 'slideInFromLeft 1s ease-out forwards'
-  },
-  slideInFromRight: {
-    animation: 'slideInFromRight 1s ease-out forwards'
-  },
-  slideInFromBottom: {
-    animation: 'slideInFromBottom 1s ease-out forwards'
-  },
-  bounceIn: {
-    animation: 'bounceIn 0.8s ease-out forwards'
-  },
-  pulse: {
-    animation: 'pulse 2s infinite'
-  },
-
-  // Account Types Discovery Section
+  // Account Types Discovery
   accountTypesDiscovery: {
-    padding: 'clamp(2.5rem, 5vw, 4rem) 0',
+    padding: 'clamp(4rem, 8vw, 6rem) 0',
     background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
     width: '100%'
   },
   accountTypesPreview: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 250px), 1fr))',
-    gap: '1.5rem',
-    marginBottom: '2rem'
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))',
+    gap: '2rem',
+    marginBottom: '3rem'
   },
   previewCard: {
     backgroundColor: 'white',
-    padding: '2rem',
-    borderRadius: '16px',
+    padding: '2.5rem',
+    borderRadius: '20px',
     textAlign: 'center',
-    boxShadow: '0 8px 20px rgba(0,0,0,0.06)',
+    boxShadow: '0 15px 35px rgba(0,0,0,0.08)',
     border: '2px solid #e2e8f0',
-    transition: 'all 0.3s ease'
+    transition: 'all 0.4s ease',
+    position: 'relative',
+    overflow: 'hidden',
+    transform: 'translateY(50px)',
+    opacity: 0
+  },
+  slideInFromBottom: {
+    animation: 'slideInFromBottom 0.8s ease-out forwards'
+  },
+  previewIconContainer: {
+    width: '80px',
+    height: '80px',
+    borderRadius: '50%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    margin: '0 auto 1.5rem',
+    position: 'relative'
   },
   previewIcon: {
-    fontSize: '2.5rem',
-    display: 'block',
-    marginBottom: '1rem'
+    fontSize: '2rem',
+    color: 'white'
   },
   previewTitle: {
-    fontSize: '1.2rem',
-    fontWeight: '700',
+    fontSize: '1.3rem',
+    fontWeight: '800',
     color: '#1e293b',
-    marginBottom: '0.75rem'
+    marginBottom: '1rem',
+    letterSpacing: '-0.01em'
   },
   previewDesc: {
-    fontSize: '0.9rem',
+    fontSize: '0.95rem',
     color: '#64748b',
-    lineHeight: '1.5'
+    lineHeight: '1.6'
+  },
+  previewAccent: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: '4px'
   },
   accountTypesAction: {
     textAlign: 'center'
@@ -1168,21 +1266,158 @@ const styles = {
   exploreButton: {
     display: 'inline-flex',
     alignItems: 'center',
-    gap: '0.75rem',
-    padding: 'clamp(0.8rem, 2vw, 1.2rem) clamp(1.5rem, 3vw, 2.5rem)',
+    gap: '0.8rem',
+    padding: 'clamp(1rem, 2.5vw, 1.5rem) clamp(2rem, 4vw, 3rem)',
     background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
     color: 'white',
     textDecoration: 'none',
-    borderRadius: '12px',
-    fontSize: 'clamp(0.9rem, 2vw, 1.1rem)',
-    fontWeight: '700',
-    boxShadow: '0 8px 20px rgba(59, 130, 246, 0.3)',
+    borderRadius: '16px',
+    fontSize: 'clamp(1rem, 2.2vw, 1.2rem)',
+    fontWeight: '800',
+    boxShadow: '0 10px 30px rgba(59, 130, 246, 0.4)',
     transition: 'all 0.3s ease',
-    marginBottom: '1rem'
+    marginBottom: '1rem',
+    transform: 'translateY(0)'
   },
   actionNote: {
-    fontSize: '0.9rem',
+    fontSize: '0.95rem',
     color: '#64748b',
     fontStyle: 'italic'
+  },
+
+  // Animation Classes
+  fadeInUp: {
+    animation: 'fadeInUp 1s ease-out forwards'
+  },
+  zoomIn: {
+    animation: 'zoomIn 0.8s ease-out forwards'
+  },
+  pulseGlow: {
+    animation: 'pulseGlow 2s ease-in-out infinite'
   }
 };
+
+// Add CSS animations to the document
+if (typeof document !== 'undefined') {
+  const styleSheet = document.createElement('style');
+  styleSheet.textContent = `
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    @keyframes progressSlide {
+      0% { transform: translateX(-100%); }
+      50% { transform: translateX(0%); }
+      100% { transform: translateX(100%); }
+    }
+    
+    @keyframes heroImageFloat {
+      0%, 100% { transform: scale(1.05) translateY(0px); }
+      50% { transform: scale(1.08) translateY(-10px); }
+    }
+    
+    @keyframes heroContentSlideUp {
+      0% { transform: translate(-50%, -30%) scale(0.9); opacity: 0; }
+      100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    }
+    
+    @keyframes heroIconBounce {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-10px) rotate(5deg); }
+    }
+    
+    @keyframes routingCardGlow {
+      0%, 100% { box-shadow: 0 0 20px rgba(255,255,255,0.3); }
+      50% { box-shadow: 0 0 30px rgba(255,255,255,0.5); }
+    }
+    
+    @keyframes buttonPulse {
+      0%, 100% { transform: translateY(0px) scale(1); }
+      50% { transform: translateY(-2px) scale(1.02); }
+    }
+    
+    @keyframes staggeredFadeIn {
+      0% { opacity: 0; transform: translateY(30px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes underlineExpand {
+      0% { width: 0; }
+      100% { width: 80px; }
+    }
+    
+    @keyframes slideInFromLeft {
+      0% { transform: translateX(-100px); opacity: 0; }
+      100% { transform: translateX(0); opacity: 1; }
+    }
+    
+    @keyframes slideInFromRight {
+      0% { transform: translateX(100px); opacity: 0; }
+      100% { transform: translateX(0); opacity: 1; }
+    }
+    
+    @keyframes slideInFromBottom {
+      0% { transform: translateY(50px); opacity: 0; }
+      100% { transform: translateY(0); opacity: 1; }
+    }
+    
+    @keyframes bounceInLeft {
+      0% { transform: translateX(-20px); opacity: 0; }
+      60% { transform: translateX(5px); opacity: 0.8; }
+      100% { transform: translateX(0); opacity: 1; }
+    }
+    
+    @keyframes flipInY {
+      0% { transform: scale(0.8) rotateY(90deg); opacity: 0; }
+      50% { transform: scale(0.9) rotateY(0deg); opacity: 0.5; }
+      100% { transform: scale(1) rotateY(0deg); opacity: 1; }
+    }
+    
+    @keyframes fadeInUp {
+      0% { transform: translateY(30px); opacity: 0; }
+      100% { transform: translateY(0); opacity: 1; }
+    }
+    
+    @keyframes zoomIn {
+      0% { transform: scale(0.8); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    
+    @keyframes pulseGlow {
+      0%, 100% { transform: scale(1); filter: brightness(1); }
+      50% { transform: scale(1.02); filter: brightness(1.1); }
+    }
+    
+    /* Hover Effects */
+    .accountCard:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    }
+    
+    .previewCard:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+    }
+    
+    .heroButton:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 35px rgba(16, 185, 129, 0.6);
+    }
+    
+    .secondaryButton:hover {
+      background-color: rgba(255,255,255,0.2);
+      transform: translateY(-3px);
+    }
+    
+    .featureImage:hover {
+      transform: scale(1.05);
+    }
+    
+    .exploreButton:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 40px rgba(59, 130, 246, 0.6);
+    }
+  `;
+  document.head.appendChild(styleSheet);
+}
