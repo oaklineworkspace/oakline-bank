@@ -3,5 +3,6 @@
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
   "/": "pages/index.js",
-  "/account-types": "pages/account-types.js"
+  "/account-types": "pages/account-types.js",
+  "/transfer": "pages/transfer.js"
 }
