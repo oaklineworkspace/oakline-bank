@@ -239,11 +239,8 @@ export default function Home() {
 
   return (
     <div style={styles.pageContainer}>
-      <MainMenu user={user} />
-      <WelcomeBanner />
-
-      {/* Simplified Header */}
-      <div style={styles.simplifiedHeader}>
+      {/* Single Clean Header */}
+      <header style={styles.mainHeader}>
         <div style={styles.headerContainer}>
           <Link href="/" style={styles.logoSection}>
             <img src="/images/logo-primary.png.jpg" alt="Oakline Bank" style={styles.headerLogo} />
@@ -253,12 +250,12 @@ export default function Home() {
             </div>
           </Link>
 
-          <div style={styles.headerActions}>
-            <div style={styles.bankInfo}>
-              <span style={styles.routingInfo}>Routing: 075915826</span>
-              <span style={styles.phoneInfo}>📞 1-800-OAKLINE</span>
-            </div>
+          <div style={styles.headerCenter}>
+            <span style={styles.routingInfo}>Routing: 075915826</span>
+            <span style={styles.phoneInfo}>📞 1-800-OAKLINE</span>
+          </div>
 
+          <div style={styles.headerActions}>
             <div style={styles.navigationDropdown} className="navigationDropdown">
               <button 
                 style={styles.dropdownButton}
@@ -298,10 +295,16 @@ export default function Home() {
 
             <div style={styles.authButtons}>
               {user ? (
-                <Link href="/dashboard" style={styles.dashboardButton}>
-                  <span style={styles.buttonIcon}>📊</span>
-                  Dashboard
-                </Link>
+                <>
+                  <Link href="/dashboard" style={styles.dashboardButton}>
+                    <span style={styles.buttonIcon}>📊</span>
+                    Dashboard
+                  </Link>
+                  <Link href="/main-menu" style={styles.menuButton}>
+                    <span style={styles.buttonIcon}>☰</span>
+                    Menu
+                  </Link>
+                </>
               ) : (
                 <>
                   <Link href="/login" style={styles.loginButton}>Sign In</Link>
@@ -311,7 +314,7 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </div>
+      </header>
 
       {/* Enhanced Mobile-First Hero Section with Parallax Effect */}
       <section style={styles.heroSection} id="hero" data-animate>
@@ -665,8 +668,8 @@ export default function Home() {
 }
 
 const styles = {
-  // Simplified Header Styles
-  simplifiedHeader: {
+  // Main Header Styles
+  mainHeader: {
     backgroundColor: 'white',
     boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
     borderBottom: '3px solid #3b82f6',
@@ -678,10 +681,18 @@ const styles = {
   headerContainer: {
     maxWidth: '1400px',
     margin: '0 auto',
-    padding: '1rem 1.5rem',
+    padding: '1rem 1rem',
     display: 'flex',
     justifyContent: 'space-between',
-    alignItems: 'center'
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: '0.5rem'
+  },
+  headerCenter: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '0.25rem'
   },
   logoSection: {
     display: 'flex',
@@ -829,6 +840,20 @@ const styles = {
     fontSize: '0.9rem',
     fontWeight: '600',
     boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+    transition: 'all 0.3s ease'
+  },
+  menuButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    padding: '0.6rem 1.2rem',
+    background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+    color: 'white',
+    borderRadius: '8px',
+    textDecoration: 'none',
+    fontSize: '0.9rem',
+    fontWeight: '600',
+    boxShadow: '0 4px 12px rgba(139, 92, 246, 0.3)',
     transition: 'all 0.3s ease'
   },
   buttonIcon: {
@@ -1604,6 +1629,79 @@ const styles = {
   },
   pulseGlow: {
     animation: 'pulseGlow 2s ease-in-out infinite'
+  },
+
+  // Mobile Responsive Styles
+  '@media (max-width: 768px)': {
+    headerContainer: {
+      flexDirection: 'column',
+      padding: '0.75rem',
+      gap: '1rem'
+    },
+    headerCenter: {
+      order: 1,
+      width: '100%',
+      textAlign: 'center'
+    },
+    logoSection: {
+      order: 0
+    },
+    headerActions: {
+      order: 2,
+      width: '100%',
+      justifyContent: 'center'
+    },
+    authButtons: {
+      flexDirection: 'column',
+      gap: '0.5rem',
+      width: '100%'
+    },
+    dashboardButton: {
+      width: '100%',
+      justifyContent: 'center'
+    },
+    menuButton: {
+      width: '100%',
+      justifyContent: 'center'
+    },
+    loginButton: {
+      width: '100%',
+      textAlign: 'center',
+      justifyContent: 'center'
+    },
+    applyButton: {
+      width: '100%',
+      textAlign: 'center',
+      justifyContent: 'center'
+    },
+    dropdownMenu: {
+      position: 'fixed',
+      top: '100%',
+      left: '1rem',
+      right: '1rem',
+      width: 'auto'
+    },
+    heroSection: {
+      height: 'auto',
+      minHeight: '60vh',
+      padding: '2rem 1rem'
+    },
+    heroContent: {
+      padding: '0 0.5rem'
+    },
+    heroButtons: {
+      flexDirection: 'column',
+      width: '100%',
+      gap: '0.75rem'
+    },
+    heroButton: {
+      width: '100%',
+      justifyContent: 'center'
+    },
+    secondaryButton: {
+      width: '100%',
+      justifyContent: 'center'
+    }
   }
 };
 

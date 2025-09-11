@@ -177,6 +177,10 @@ export default function MainMenu() {
             <div style={styles.userSection}>
               <span style={styles.welcomeText}>Welcome, {getUserDisplayName()}</span>
               <div style={styles.headerActions}>
+                <Link href="/" style={styles.headerButton}>
+                  <span style={styles.buttonIcon}>🏠</span>
+                  Home
+                </Link>
                 <Link href="/dashboard" style={styles.headerButton}>
                   <span style={styles.buttonIcon}>📊</span>
                   Dashboard

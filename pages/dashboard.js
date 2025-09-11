@@ -234,6 +234,10 @@ export default function Dashboard() {
                 <span style={styles.userName}>{getUserDisplayName()}</span>
               </div>
               <div style={styles.userActions}>
+                <Link href="/" style={styles.actionButton}>
+                  <span style={styles.actionIcon}>🏠</span>
+                  Home
+                </Link>
                 <Link href="/main-menu" style={styles.actionButton}>
                   <span style={styles.actionIcon}>☰</span>
                   Menu

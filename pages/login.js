@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useRouter } from 'next/router';
@@ -42,33 +43,54 @@ export default function LoginPage() {
 
   return (
     <div style={styles.container}>
-      {/* Mobile-optimized header */}
-      <div style={styles.header}>
+      {/* Oakline Bank Header */}
+      <header style={styles.header}>
         <div style={styles.headerContent}>
           <Link href="/" style={styles.logoContainer}>
-            <div style={styles.logo}>
-              <span style={styles.logoIcon}>🏦</span>
-              <span style={styles.logoText}>Oakline Bank</span>
+            <img src="/images/logo-primary.png.jpg" alt="Oakline Bank" style={styles.logo} />
+            <div style={styles.brandInfo}>
+              <span style={styles.bankName}>Oakline Bank</span>
+              <span style={styles.tagline}>Your Financial Partner</span>
             </div>
           </Link>
+          
           <div style={styles.headerActions}>
-            <Link href="/apply" style={styles.headerLink}>Open Account</Link>
-            <Link href="/support" style={styles.headerLink}>Support</Link>
+            <Link href="/apply" style={styles.headerButton}>Open Account</Link>
+            <Link href="/support" style={styles.headerButton}>Support</Link>
           </div>
         </div>
-      </div>
+      </header>
 
-      {/* Main content - mobile first approach */}
-      <div style={styles.mainContent}>
-        <div style={styles.loginContainer}>
-          {/* Hero section for larger screens */}
+      {/* Main Content */}
+      <main style={styles.main}>
+        <div style={styles.contentWrapper}>
+          {/* Hero Section for Desktop */}
           <div style={styles.heroSection}>
             <div style={styles.heroContent}>
-              <h1 style={styles.heroTitle}>Secure Online Banking</h1>
+              <h1 style={styles.heroTitle}>Secure Banking Access</h1>
               <p style={styles.heroSubtitle}>
-                Access your accounts securely from anywhere, anytime with Oakline Bank's 
-                state-of-the-art online banking platform.
+                Access your accounts securely with our state-of-the-art banking platform. 
+                Your financial security is our priority.
               </p>
+              
+              <div style={styles.bankingInfo}>
+                <div style={styles.infoCard}>
+                  <span style={styles.infoIcon}>🏦</span>
+                  <div>
+                    <h3 style={styles.infoTitle}>Routing Number</h3>
+                    <p style={styles.infoText}>075915826</p>
+                  </div>
+                </div>
+                
+                <div style={styles.infoCard}>
+                  <span style={styles.infoIcon}>📞</span>
+                  <div>
+                    <h3 style={styles.infoTitle}>24/7 Support</h3>
+                    <p style={styles.infoText}>1-800-OAKLINE</p>
+                  </div>
+                </div>
+              </div>
+
               <div style={styles.securityFeatures}>
                 <div style={styles.feature}>
                   <span style={styles.featureIcon}>🔒</span>
@@ -86,12 +108,15 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* Login form */}
+          {/* Login Form Section */}
           <div style={styles.loginSection}>
             <div style={styles.loginCard}>
               <div style={styles.loginHeader}>
-                <h2 style={styles.loginTitle}>Sign In</h2>
-                <p style={styles.loginSubtitle}>Welcome back! Enter your credentials</p>
+                <div style={styles.cardLogo}>
+                  <img src="/images/logo-primary.png.jpg" alt="Oakline Bank" style={styles.cardLogoImg} />
+                </div>
+                <h2 style={styles.loginTitle}>Welcome Back</h2>
+                <p style={styles.loginSubtitle}>Sign in to your Oakline Bank account</p>
               </div>
 
               <form onSubmit={handleSubmit} style={styles.form}>
@@ -129,7 +154,7 @@ export default function LoginPage() {
                   disabled={loading}
                   style={{
                     ...styles.loginButton,
-                    backgroundColor: loading ? '#9ca3af' : '#1e3a8a',
+                    backgroundColor: loading ? '#9ca3af' : '#1e40af',
                     cursor: loading ? 'not-allowed' : 'pointer'
                   }}
                 >
@@ -139,7 +164,10 @@ export default function LoginPage() {
                       Signing In...
                     </span>
                   ) : (
-                    'Sign In Securely'
+                    <>
+                      <span style={styles.buttonIcon}>🔐</span>
+                      Sign In Securely
+                    </>
                   )}
                 </button>
               </form>
@@ -155,17 +183,26 @@ export default function LoginPage() {
                 </div>
               )}
 
-              {/* Sign up section */}
-              <div style={styles.signupSection}>
-                <p style={styles.signupText}>
-                  New to Oakline Bank?
-                </p>
-                <Link href="/apply" style={styles.signupButton}>
-                  🚀 Open Your Account Today
-                </Link>
+              {/* Quick Actions */}
+              <div style={styles.quickActions}>
+                <h3 style={styles.quickActionsTitle}>Quick Actions</h3>
+                <div style={styles.actionButtons}>
+                  <Link href="/apply" style={styles.actionButton}>
+                    <span style={styles.actionIcon}>🚀</span>
+                    Open New Account
+                  </Link>
+                  <Link href="/dashboard" style={styles.actionButton}>
+                    <span style={styles.actionIcon}>📊</span>
+                    Go to Dashboard
+                  </Link>
+                  <Link href="/main-menu" style={styles.actionButton}>
+                    <span style={styles.actionIcon}>☰</span>
+                    Banking Menu
+                  </Link>
+                </div>
               </div>
 
-              {/* Help section */}
+              {/* Help Section */}
               <div style={styles.helpSection}>
                 <div style={styles.helpOptions}>
                   <Link href="/support" style={styles.helpLink}>
@@ -182,10 +219,10 @@ export default function LoginPage() {
             </div>
           </div>
         </div>
-      </div>
+      </main>
 
       {/* Footer */}
-      <div style={styles.footer}>
+      <footer style={styles.footer}>
         <div style={styles.footerContent}>
           <div style={styles.footerSection}>
             <h4 style={styles.footerTitle}>Security Notice</h4>
@@ -196,10 +233,10 @@ export default function LoginPage() {
         </div>
         <div style={styles.footerBottom}>
           <p style={styles.copyright}>
-            © 2024 Oakline Bank. All rights reserved. Member FDIC.
+            © 2024 Oakline Bank. All rights reserved. Member FDIC. Routing: 075915826
           </p>
         </div>
-      </div>
+      </footer>
 
       <style jsx>{`
         @keyframes spin {
@@ -215,306 +252,385 @@ const styles = {
   container: {
     minHeight: '100vh',
     backgroundColor: '#f8fafc',
-    fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
     width: '100%',
     overflowX: 'hidden'
   },
   header: {
-    backgroundColor: 'white',
-    borderBottom: '1px solid #e5e7eb',
-    padding: '12px 16px',
-    position: 'sticky',
-    top: 0,
-    zIndex: 100,
-    boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+    backgroundColor: '#1e40af',
+    color: 'white',
+    padding: '1rem 1.5rem',
+    boxShadow: '0 4px 12px rgba(30, 64, 175, 0.2)'
   },
   headerContent: {
+    maxWidth: '1400px',
+    margin: '0 auto',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    maxWidth: '100%'
+    flexWrap: 'wrap',
+    gap: '1rem'
   },
   logoContainer: {
-    textDecoration: 'none'
-  },
-  logo: {
     display: 'flex',
     alignItems: 'center',
-    gap: '8px'
+    gap: '1rem',
+    textDecoration: 'none',
+    color: 'white'
   },
-  logoIcon: {
-    fontSize: '24px'
+  logo: {
+    height: '50px',
+    width: 'auto'
   },
-  logoText: {
-    fontSize: '18px',
+  brandInfo: {
+    display: 'flex',
+    flexDirection: 'column'
+  },
+  bankName: {
+    fontSize: '1.5rem',
     fontWeight: 'bold',
-    color: '#1e3a8a',
-    letterSpacing: '-0.5px'
+    margin: 0,
+    color: 'white'
+  },
+  tagline: {
+    fontSize: '0.9rem',
+    color: '#bfdbfe'
   },
   headerActions: {
-    display: 'none'
+    display: 'flex',
+    gap: '1rem'
   },
-  headerLink: {
-    color: '#4b5563',
+  headerButton: {
+    padding: '0.5rem 1rem',
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    color: 'white',
     textDecoration: 'none',
-    fontWeight: '500',
-    padding: '8px 12px',
     borderRadius: '6px',
-    fontSize: '14px'
+    fontSize: '0.9rem',
+    fontWeight: '500',
+    transition: 'all 0.3s ease'
   },
-  mainContent: {
-    width: '100%',
-    minHeight: 'calc(100vh - 60px)'
+  main: {
+    flex: 1,
+    minHeight: 'calc(100vh - 120px)'
   },
-  loginContainer: {
-    width: '100%',
-    minHeight: '100%'
+  contentWrapper: {
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    minHeight: 'calc(100vh - 120px)'
   },
   heroSection: {
-    display: 'none'
+    background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
+    color: 'white',
+    padding: '3rem',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   heroContent: {
     maxWidth: '500px',
     textAlign: 'center'
   },
   heroTitle: {
-    fontSize: '36px',
+    fontSize: '2.5rem',
     fontWeight: 'bold',
-    marginBottom: '20px',
-    lineHeight: '1.2',
-    color: 'white'
+    marginBottom: '1.5rem',
+    lineHeight: '1.2'
   },
   heroSubtitle: {
-    fontSize: '16px',
-    marginBottom: '30px',
+    fontSize: '1.1rem',
+    marginBottom: '2rem',
     lineHeight: '1.6',
-    opacity: '0.9',
+    opacity: 0.9
+  },
+  bankingInfo: {
+    display: 'flex',
+    gap: '1.5rem',
+    marginBottom: '2rem',
+    flexWrap: 'wrap'
+  },
+  infoCard: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.75rem',
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    padding: '1rem',
+    borderRadius: '12px',
+    backdropFilter: 'blur(10px)'
+  },
+  infoIcon: {
+    fontSize: '1.5rem'
+  },
+  infoTitle: {
+    fontSize: '0.9rem',
+    fontWeight: 'bold',
+    margin: 0,
     color: 'white'
+  },
+  infoText: {
+    fontSize: '0.8rem',
+    margin: 0,
+    color: '#bfdbfe',
+    fontFamily: 'monospace'
   },
   securityFeatures: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '12px'
+    gap: '0.75rem'
   },
   feature: {
     display: 'flex',
     alignItems: 'center',
-    gap: '10px',
-    fontSize: '14px',
-    fontWeight: '500',
-    color: 'white'
+    gap: '0.75rem',
+    fontSize: '0.9rem',
+    fontWeight: '500'
   },
   featureIcon: {
-    fontSize: '16px'
+    fontSize: '1.2rem'
   },
   loginSection: {
-    width: '100%',
-    padding: '20px 16px',
-    backgroundColor: '#ffffff',
-    minHeight: 'calc(100vh - 60px)',
+    backgroundColor: 'white',
+    padding: '2rem',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center'
   },
   loginCard: {
     width: '100%',
-    maxWidth: '400px',
+    maxWidth: '450px',
     backgroundColor: 'white',
-    borderRadius: '16px',
-    boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
-    padding: '24px',
-    border: '1px solid #e5e7eb'
+    borderRadius: '20px',
+    boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
+    padding: '2rem',
+    border: '2px solid #e2e8f0'
   },
   loginHeader: {
     textAlign: 'center',
-    marginBottom: '24px'
+    marginBottom: '2rem'
+  },
+  cardLogo: {
+    marginBottom: '1rem'
+  },
+  cardLogoImg: {
+    height: '40px',
+    width: 'auto'
   },
   loginTitle: {
-    fontSize: '24px',
+    fontSize: '1.8rem',
     fontWeight: 'bold',
-    color: '#111827',
-    marginBottom: '8px'
+    color: '#1e40af',
+    marginBottom: '0.5rem'
   },
   loginSubtitle: {
-    fontSize: '14px',
-    color: '#6b7280',
+    fontSize: '1rem',
+    color: '#64748b',
     margin: 0
   },
   form: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '20px'
+    gap: '1.5rem'
   },
   inputGroup: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '6px'
+    gap: '0.5rem'
   },
   label: {
-    fontSize: '14px',
+    fontSize: '0.9rem',
     fontWeight: '600',
     color: '#374151'
   },
   input: {
     width: '100%',
-    padding: '12px 14px',
-    border: '2px solid #d1d5db',
-    borderRadius: '8px',
-    fontSize: '16px',
-    transition: 'all 0.3s',
+    padding: '0.75rem 1rem',
+    border: '2px solid #e2e8f0',
+    borderRadius: '10px',
+    fontSize: '1rem',
+    transition: 'all 0.3s ease',
     boxSizing: 'border-box',
     outline: 'none'
   },
   forgotPassword: {
-    color: '#1e3a8a',
+    color: '#1e40af',
     textDecoration: 'none',
-    fontSize: '12px',
+    fontSize: '0.85rem',
     fontWeight: '500',
     alignSelf: 'flex-end'
   },
   loginButton: {
     width: '100%',
-    padding: '14px',
-    backgroundColor: '#1e3a8a',
+    padding: '1rem',
+    backgroundColor: '#1e40af',
     color: 'white',
     border: 'none',
-    borderRadius: '8px',
-    fontSize: '16px',
-    fontWeight: '600',
-    transition: 'all 0.3s',
-    marginTop: '8px'
+    borderRadius: '10px',
+    fontSize: '1rem',
+    fontWeight: '700',
+    transition: 'all 0.3s ease',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '0.5rem',
+    marginTop: '0.5rem'
   },
   loadingContent: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: '8px'
+    gap: '0.5rem'
   },
   spinner: {
-    width: '14px',
-    height: '14px',
+    width: '16px',
+    height: '16px',
     border: '2px solid transparent',
     borderTop: '2px solid white',
     borderRadius: '50%',
     animation: 'spin 1s linear infinite'
   },
+  buttonIcon: {
+    fontSize: '1rem'
+  },
   message: {
-    marginTop: '16px',
-    padding: '12px',
+    marginTop: '1rem',
+    padding: '0.75rem 1rem',
     borderRadius: '8px',
     textAlign: 'center',
-    fontSize: '14px',
+    fontSize: '0.9rem',
     fontWeight: '500',
     border: '1px solid'
   },
-  signupSection: {
-    textAlign: 'center',
-    padding: '16px',
+  quickActions: {
+    marginTop: '2rem',
+    padding: '1.5rem',
     backgroundColor: '#f8fafc',
     borderRadius: '12px',
-    marginTop: '20px'
+    border: '1px solid #e2e8f0'
   },
-  signupText: {
-    fontSize: '14px',
-    color: '#6b7280',
-    marginBottom: '12px'
+  quickActionsTitle: {
+    fontSize: '1.1rem',
+    fontWeight: 'bold',
+    color: '#1e40af',
+    marginBottom: '1rem',
+    textAlign: 'center'
   },
-  signupButton: {
-    display: 'inline-block',
-    padding: '10px 20px',
-    backgroundColor: '#10b981',
-    color: 'white',
+  actionButtons: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.75rem'
+  },
+  actionButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.75rem',
+    padding: '0.75rem 1rem',
+    backgroundColor: 'white',
+    color: '#374151',
     textDecoration: 'none',
-    borderRadius: '6px',
-    fontSize: '14px',
-    fontWeight: '600'
+    borderRadius: '8px',
+    border: '2px solid #e2e8f0',
+    fontSize: '0.9rem',
+    fontWeight: '500',
+    transition: 'all 0.3s ease'
+  },
+  actionIcon: {
+    fontSize: '1rem'
   },
   helpSection: {
-    marginTop: '16px'
+    marginTop: '1.5rem',
+    padding: '1rem',
+    borderTop: '1px solid #e2e8f0'
   },
   helpOptions: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '8px'
+    gap: '0.5rem'
   },
   helpLink: {
-    color: '#6b7280',
+    color: '#64748b',
     textDecoration: 'none',
-    fontSize: '12px',
+    fontSize: '0.85rem',
     fontWeight: '500',
-    textAlign: 'center'
+    textAlign: 'center',
+    padding: '0.5rem'
   },
   footer: {
     backgroundColor: '#1f2937',
     color: 'white',
-    padding: '20px 16px'
+    padding: '2rem 1.5rem 1rem'
   },
   footerContent: {
+    maxWidth: '1400px',
+    margin: '0 auto',
     textAlign: 'center'
   },
   footerSection: {
-    marginBottom: '16px'
+    marginBottom: '1rem'
   },
   footerTitle: {
-    fontSize: '16px',
+    fontSize: '1.1rem',
     fontWeight: '600',
     color: '#f9fafb',
-    marginBottom: '8px'
+    marginBottom: '0.5rem'
   },
   footerText: {
-    fontSize: '12px',
+    fontSize: '0.9rem',
     lineHeight: '1.5',
     color: '#d1d5db'
   },
   footerBottom: {
     borderTop: '1px solid #374151',
-    paddingTop: '16px',
+    paddingTop: '1rem',
     textAlign: 'center'
   },
   copyright: {
-    fontSize: '10px',
+    fontSize: '0.8rem',
     color: '#9ca3af',
     margin: 0
+  },
+
+  // Mobile Responsive Styles
+  '@media (max-width: 768px)': {
+    contentWrapper: {
+      gridTemplateColumns: '1fr',
+      gridTemplateRows: 'auto 1fr'
+    },
+    heroSection: {
+      padding: '2rem 1rem',
+      order: 2
+    },
+    heroTitle: {
+      fontSize: '1.8rem'
+    },
+    heroSubtitle: {
+      fontSize: '1rem'
+    },
+    bankingInfo: {
+      flexDirection: 'column',
+      gap: '1rem'
+    },
+    infoCard: {
+      width: '100%',
+      justifyContent: 'center'
+    },
+    loginSection: {
+      order: 1,
+      padding: '1rem'
+    },
+    loginCard: {
+      padding: '1.5rem'
+    },
+    headerContent: {
+      flexDirection: 'column',
+      gap: '1rem'
+    },
+    headerActions: {
+      width: '100%',
+      justifyContent: 'center'
+    },
+    actionButtons: {
+      gap: '0.5rem'
+    }
   }
 };
-
-// Media queries for responsive design
-if (typeof window !== 'undefined') {
-  const mediaQuery = window.matchMedia('(min-width: 768px)');
-
-  if (mediaQuery.matches) {
-    // Desktop styles
-    styles.mainContent = {
-      ...styles.mainContent,
-      display: 'grid',
-      gridTemplateColumns: '1fr 1fr'
-    };
-
-    styles.heroSection = {
-      ...styles.heroSection,
-      display: 'flex',
-      background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '40px'
-    };
-
-    styles.headerActions = {
-      ...styles.headerActions,
-      display: 'flex',
-      gap: '16px',
-      alignItems: 'center'
-    };
-
-    styles.loginCard = {
-      ...styles.loginCard,
-      padding: '32px'
-    };
-
-    styles.helpOptions = {
-      ...styles.helpOptions,
-      flexDirection: 'row',
-      justifyContent: 'space-around'
-    };
-  }
-}

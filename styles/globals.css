@@ -132,6 +132,93 @@ section {
   * {
     max-width: 100vw;
   }
+
+  /* Mobile Navigation Fixes */
+  .navigationDropdown {
+    position: relative !important;
+  }
+
+  .navigationDropdown .dropdownMenu {
+    position: fixed !important;
+    top: auto !important;
+    left: 1rem !important;
+    right: 1rem !important;
+    width: auto !important;
+    z-index: 9999 !important;
+  }
+
+  /* Mobile Button Styles */
+  .authButtons {
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+    width: 100% !important;
+  }
+
+  .authButtons > * {
+    width: 100% !important;
+    text-align: center !important;
+    justify-content: center !important;
+  }
+
+  /* Mobile Header Fixes */
+  .headerContainer {
+    flex-direction: column !important;
+    gap: 1rem !important;
+  }
+
+  .headerActions {
+    width: 100% !important;
+  }
+
+  /* Mobile Form Styles */
+  .form {
+    width: 100% !important;
+  }
+
+  .input {
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Mobile Card Styles */
+  .card {
+    margin: 0 !important;
+    border-radius: 12px !important;
+  }
+
+  /* Mobile Typography */
+  h1 {
+    font-size: clamp(1.5rem, 5vw, 2.5rem) !important;
+  }
+
+  h2 {
+    font-size: clamp(1.3rem, 4vw, 2rem) !important;
+  }
+
+  p {
+    font-size: clamp(0.9rem, 2.5vw, 1rem) !important;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Extra small mobile styles */
+  .headerContainer {
+    padding: 0.5rem !important;
+  }
+
+  .logoSection {
+    flex-direction: column !important;
+    text-align: center !important;
+  }
+
+  .brandSection {
+    text-align: center !important;
+  }
+
+  .dropdownMenu {
+    left: 0.5rem !important;
+    right: 0.5rem !important;
+  }
 }
 
 /* Typography */
