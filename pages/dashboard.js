@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { supabase } from '../lib/supabaseClient';
 import DebitCard from '../components/DebitCard';
+import LiveChat from '../components/LiveChat';
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
@@ -396,6 +397,7 @@ export default function Dashboard() {
           </div>
         </section>
       </main>
+      <LiveChat />
     </div>
   );
 }

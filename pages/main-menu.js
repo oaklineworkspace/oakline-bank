@@ -1,8 +1,8 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import LiveChat from '../components/LiveChat';
 
 export default function MainMenu() {
   const [user, setUser] = useState(null);
@@ -402,6 +402,7 @@ export default function MainMenu() {
           </div>
         </section>
       </main>
+      <LiveChat />
     </div>
   );
 }

@@ -10,6 +10,7 @@ import LoanApprovalSection from '../components/LoanApprovalSection';
 import TestimonialsSection from '../components/TestimonialsSection';
 import CTA from '../components/CTA';
 import Footer from '../components/Footer';
+import LiveChat from '../components/LiveChat';
 
 export default function Home() {
   const [user, setUser] = useState(null);
@@ -356,60 +357,71 @@ export default function Home() {
       {/* Professional Banking Hero Section */}
       <section style={styles.heroSection} id="hero" data-animate>
         <div style={styles.heroParallax}>
-          <div style={styles.heroSlide}>
-            <div style={styles.heroImageContainer}>
-              <img 
-                src={bankingImages[currentSlide].src} 
-                alt={bankingImages[currentSlide].title}
-                style={styles.heroImage}
-              />
-              <div style={{
-                ...styles.heroOverlay,
-                background: bankingImages[currentSlide].gradient
-              }}></div>
+          {/* Hero Slider - Updated for better slide transition */}
+          <div style={styles.heroSlider}>
+            {bankingImages.map((image, index) => (
+              <div
+                key={index}
+                style={{
+                  ...styles.heroSlide,
+                  opacity: currentSlide === index ? 1 : 0,
+                  transform: `translateX(${(index - currentSlide) * 100}%)`,
+                  zIndex: currentSlide === index ? 2 : 1,
+                }}
+              >
+                <img
+                  src={image.src}
+                  alt={image.title}
+                  style={styles.heroImage}
+                />
+                <div style={{
+                  ...styles.heroOverlay,
+                  background: image.gradient
+                }}></div>
+              </div>
+            ))}
+          </div>
+          <div style={{
+            ...styles.heroContent,
+            ...(isVisible.hero ? styles.heroAnimated : {})
+          }}>
+            <div style={styles.heroIconContainer}>
+              <div style={styles.heroIcon}>{bankingImages[currentSlide].icon}</div>
             </div>
-            <div style={{
-              ...styles.heroContent,
-              ...(isVisible.hero ? styles.heroAnimated : {})
-            }}>
-              <div style={styles.heroIconContainer}>
-                <div style={styles.heroIcon}>{bankingImages[currentSlide].icon}</div>
-              </div>
-              <h1 style={styles.heroTitle}>{bankingImages[currentSlide].title}</h1>
-              <p style={styles.heroSubtitle}>{bankingImages[currentSlide].subtitle}</p>
+            <h1 style={styles.heroTitle}>{bankingImages[currentSlide].title}</h1>
+            <p style={styles.heroSubtitle}>{bankingImages[currentSlide].subtitle}</p>
 
-              {/* Bank Routing Number Display */}
-              <div style={styles.routingNumberCard}>
-                <div style={styles.routingLabel}>Oakline Bank Routing Number</div>
-                <div style={styles.routingNumber}>075915826</div>
-                <div style={styles.routingNote}>Use this for wire transfers, direct deposits, and ACH transactions</div>
-              </div>
+            {/* Bank Routing Number Display */}
+            <div style={styles.routingNumberCard}>
+              <div style={styles.routingLabel}>Oakline Bank Routing Number</div>
+              <div style={styles.routingNumber}>075915826</div>
+              <div style={styles.routingNote}>Use this for wire transfers, direct deposits, and ACH transactions</div>
+            </div>
 
-              <div style={styles.heroButtons}>
-                {user ? (
-                  <>
-                    <Link href="/dashboard" style={styles.heroButton}>
-                      <span style={styles.buttonIcon}>📊</span>
-                      Go to Dashboard
-                    </Link>
-                    <Link href="/account-types" style={styles.secondaryButton}>
-                      <span style={styles.buttonIcon}>🔍</span>
-                      Explore All Accounts
-                    </Link>
-                  </>
-                ) : (
-                  <>
-                    <Link href="/apply" style={styles.heroButton}>
-                      <span style={styles.buttonIcon}>🚀</span>
-                      Start Banking Today
-                    </Link>
-                    <Link href="/login" style={styles.secondaryButton}>
-                      <span style={styles.buttonIcon}>👤</span>
-                      Sign In
-                    </Link>
-                  </>
-                )}
-              </div>
+            <div style={styles.heroButtons}>
+              {user ? (
+                <>
+                  <Link href="/dashboard" style={styles.heroButton}>
+                    <span style={styles.buttonIcon}>📊</span>
+                    Go to Dashboard
+                  </Link>
+                  <Link href="/account-types" style={styles.secondaryButton}>
+                    <span style={styles.buttonIcon}>🔍</span>
+                    Explore All Accounts
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link href="/apply" style={styles.heroButton}>
+                    <span style={styles.buttonIcon}>🚀</span>
+                    Start Banking Today
+                  </Link>
+                  <Link href="/login" style={styles.secondaryButton}>
+                    <span style={styles.buttonIcon}>👤</span>
+                    Sign In
+                  </Link>
+                </>
+              )}
             </div>
           </div>
 
@@ -698,6 +710,9 @@ export default function Home() {
           variant="primary"
         />
       </div>
+
+      {/* Live Chat Component */}
+      <LiveChat />
 
       <Footer />
     </div>
@@ -1045,10 +1060,13 @@ const styles = {
     perspective: '1000px'
   },
   heroSlide: {
-    position: 'relative',
+    position: 'absolute',
+    top: 0,
+    left: 0,
     width: '100%',
     height: '100%',
-    transform: 'translateZ(0)'
+    transition: 'opacity 0.8s ease-in-out, transform 0.8s ease-in-out',
+    overflow: 'hidden',
   },
   heroImageContainer: {
     position: 'absolute',
