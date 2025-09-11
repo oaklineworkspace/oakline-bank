@@ -676,6 +676,7 @@ export default function Home() {
                         key={index}
                         style={{
                           ...styles.accountCard,
+                          background: user ? 'linear-gradient(135deg, #1e293b 0%, #334155 100%)' : 'linear-gradient(135deg, #059669 0%, #047857 100%)',
                           ...(isVisible['account-types'] ? {
                             ...styles.flipInY,
                             animationDelay: `${index * 0.1}s`
@@ -1748,7 +1749,6 @@ const styles = {
     gap: '1.5rem'
   },
   accountCard: {
-    background: user ? 'linear-gradient(135deg, #1e293b 0%, #334155 100%)' : 'linear-gradient(135deg, #059669 0%, #047857 100%)',
     borderRadius: '20px',
     padding: '2rem',
     textAlign: 'center',
