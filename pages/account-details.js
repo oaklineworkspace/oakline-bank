@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabaseClient';
@@ -52,7 +51,7 @@ export default function AccountDetails() {
           .eq('id', accountId)
           .eq('user_id', user.id)
           .single(),
-        
+
         // Query by account ID and user email
         () => supabase
           .from('accounts')
@@ -60,7 +59,7 @@ export default function AccountDetails() {
           .eq('id', accountId)
           .eq('user_email', user.email)
           .single(),
-          
+
         // Query by account ID with OR condition
         () => supabase
           .from('accounts')

@@ -259,7 +259,7 @@ export default function Home() {
 
           <div style={styles.headerActions}>
             <div style={styles.navigationDropdown} className="navigationDropdown">
-              <button 
+              <button
                 style={styles.dropdownButton}
                 onClick={() => setActiveDropdown(activeDropdown === 'nav' ? null : 'nav')}
               >
@@ -344,6 +344,8 @@ export default function Home() {
                     <span style={styles.buttonIcon}>☰</span>
                     Menu
                   </Link>
+                  {/* Logout Button for Main Menu Page */}
+                  <Link href="/index" style={styles.loginButton}>Logout</Link>
                 </>
               ) : (
                 <>
@@ -462,8 +464,8 @@ export default function Home() {
                 ...styles.featureImageContainer,
                 ...(isVisible['features-showcase'] ? styles.slideInFromLeft : {})
               }}>
-                <img 
-                  src={bankingFeatures[currentFeatureSlide].image} 
+                <img
+                  src={bankingFeatures[currentFeatureSlide].image}
                   alt={bankingFeatures[currentFeatureSlide].title}
                   style={styles.featureImage}
                 />
@@ -570,7 +572,7 @@ export default function Home() {
           </div>
 
           <div style={styles.accountCarousel}>
-            <div 
+            <div
               style={{
                 ...styles.accountSlideContainer,
                 transform: `translateX(-${currentAccountSlide * 100}%)`
@@ -580,8 +582,8 @@ export default function Home() {
                 <div key={slideIndex} style={styles.accountSlide}>
                   <div style={styles.accountGrid}>
                     {visibleAccountTypes.slice(slideIndex * 6, (slideIndex + 1) * 6).map((account, index) => (
-                      <div 
-                        key={index} 
+                      <div
+                        key={index}
                         style={{
                           ...styles.accountCard,
                           ...(isVisible['account-types'] ? {
@@ -692,7 +694,7 @@ export default function Home() {
                 color: '#d97706'
               }
             ].map((feature, index) => (
-              <div 
+              <div
                 key={index}
                 style={{
                   ...styles.professionalFeatureCard,
@@ -753,7 +755,7 @@ export default function Home() {
           }}>
             <h2 style={styles.sectionTitle}>Explore All Our Account Types</h2>
             <p style={styles.sectionSubtitle}>
-              Discover detailed information about all 23 account types we offer. 
+              Discover detailed information about all 23 account types we offer.
               Find comprehensive features, benefits, and eligibility requirements.
             </p>
             <div style={styles.titleUnderline}></div>
@@ -766,7 +768,7 @@ export default function Home() {
               { icon: '📈', title: 'Investment Accounts', desc: 'Retirement, Investment, and Wealth Management options', color: '#f59e0b' },
               { icon: '🎯', title: 'Specialized Accounts', desc: 'HSA, Education, Trust, and International accounts', color: '#8b5cf6' }
             ].map((item, index) => (
-              <div 
+              <div
                 key={index}
                 style={{
                   ...styles.previewCard,
@@ -807,8 +809,8 @@ export default function Home() {
           </p>
           <div style={styles.professionalsGrid}>
             <div style={styles.professionalCard}>
-              <img 
-                src="/images/mobile_banking_professionals_1.png" 
+              <img
+                src="/images/mobile_banking_professionals_1.png"
                 alt="Professional using Oakline Bank mobile app"
                 style={styles.professionalImage}
               />
@@ -821,8 +823,8 @@ export default function Home() {
             </div>
 
             <div style={styles.professionalCard}>
-              <img 
-                src="/images/mobile_banking_professionals_2.png" 
+              <img
+                src="/images/mobile_banking_professionals_2.png"
                 alt="Business woman using mobile banking"
                 style={styles.professionalImage}
               />
@@ -835,8 +837,8 @@ export default function Home() {
             </div>
 
             <div style={styles.professionalCard}>
-              <img 
-                src="/images/mobile_banking_professionals_3.png" 
+              <img
+                src="/images/mobile_banking_professionals_3.png"
                 alt="Businessman using tablet for banking"
                 style={styles.professionalImage}
               />
@@ -857,7 +859,7 @@ export default function Home() {
       }}>
         <CTA
           title={user ? "Ready to Expand Your Banking?" : "Ready to Start Your Financial Journey?"}
-          subtitle={user ? 
+          subtitle={user ?
             "Explore additional account types and premium services available to you as a valued customer." :
             "Join over 500,000 customers who trust Oakline Bank for their financial needs. Open your account today and experience the difference."
           }
@@ -1007,13 +1009,14 @@ const styles = {
     alignItems: 'center',
     gap: '1rem',
     padding: '1rem',
-    color: '#64748b',
+    color: '#374151',
     textDecoration: 'none',
     fontSize: '0.95rem',
     fontWeight: '600',
     borderRadius: '10px',
     transition: 'all 0.3s ease',
-    margin: '0.25rem 0'
+    margin: '0.25rem 0',
+    backgroundColor: 'transparent'
   },
   dropdownItemIcon: {
     fontSize: '1.2rem',
@@ -2105,13 +2108,14 @@ const styles = {
     alignItems: 'center',
     gap: '1rem',
     padding: '1rem',
-    color: '#64748b',
+    color: '#374151',
     textDecoration: 'none',
     fontSize: '0.95rem',
     fontWeight: '600',
     borderRadius: '10px',
     transition: 'all 0.3s ease',
-    margin: '0.25rem 0'
+    margin: '0.25rem 0',
+    backgroundColor: 'transparent'
   },
   dropdownItemIcon: {
     fontSize: '1.2rem',
@@ -2164,11 +2168,12 @@ const styles = {
     },
     dropdownMenu: {
       position: 'fixed',
-      top: '100%',
+      top: 'auto',
       left: '1rem',
       right: '1rem',
       width: 'auto',
-      minWidth: 'auto'
+      minWidth: 'auto',
+      maxWidth: 'none'
     },
     dropdownGrid: {
       gridTemplateColumns: '1fr'
@@ -2322,6 +2327,16 @@ if (typeof document !== 'undefined') {
     }
 
     /* Hover Effects */
+    .dropdownItem:hover {
+      background-color: #f8fafc;
+      color: #1a365d;
+      transform: translateY(-2px);
+    }
+
+    .dropdownMenu {
+      box-shadow: 0 25px 50px rgba(0,0,0,0.15) !important;
+    }
+
     .accountCard:hover {
       transform: translateY(-8px) scale(1.02);
       box-shadow: 0 20px 40px rgba(0,0,0,0.15);

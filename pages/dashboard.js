@@ -152,8 +152,14 @@ export default function Dashboard() {
   };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.push('/');
+    try {
+      await supabase.auth.signOut();
+      router.push('/');
+    } catch (error) {
+      console.error('Error signing out:', error);
+      // Force redirect even if signOut fails
+      router.push('/');
+    }
   };
 
   if (loading) {
@@ -245,7 +251,7 @@ export default function Dashboard() {
                 </Link>
                 <button onClick={handleLogout} style={styles.logoutButton}>
                   <span style={styles.actionIcon}>🚪</span>
-                  Sign Out
+                  Logout
                 </button>
               </div>
             </div>
