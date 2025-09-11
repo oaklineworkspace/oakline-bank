@@ -1,409 +1,676 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import MainMenu from '../components/MainMenu';
-import Footer from '../components/Footer';
+import { supabase } from '../lib/supabaseClient';
 
 export default function BranchLocator() {
   const [user, setUser] = useState(null);
-  const [searchZip, setSearchZip] = useState('');
   const [selectedState, setSelectedState] = useState('');
-  const [searchResults, setSearchResults] = useState([]);
+  const [searchZip, setSearchZip] = useState('');
+  const [filteredBranches, setFilteredBranches] = useState([]);
 
-  const branchData = [
+  useEffect(() => {
+    checkUser();
+    setFilteredBranches(branches);
+  }, []);
+
+  const checkUser = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    } catch (error) {
+      console.error('Error checking user:', error);
+    }
+  };
+
+  const branches = [
     {
       id: 1,
-      name: 'Downtown Main Branch',
-      address: '123 Main Street',
-      city: 'New York',
-      state: 'NY',
-      zip: '10001',
-      phone: '(555) 123-4567',
-      hours: {
-        weekday: '9:00 AM - 5:00 PM',
-        saturday: '9:00 AM - 2:00 PM',
-        sunday: 'Closed'
-      },
-      services: ['Full Service', 'ATM', 'Drive-Through', 'Safe Deposit Boxes', 'Notary'],
-      manager: 'Jennifer Smith'
+      name: 'Manhattan Financial Center',
+      address: '123 Financial District, New York, NY 10005',
+      phone: '(212) 555-0123',
+      hours: 'Mon-Fri: 9AM-5PM, Sat: 9AM-2PM',
+      services: ['Full Service', 'Investment Services', 'Safe Deposit Boxes', 'Notary'],
+      type: 'Full Service Branch'
     },
     {
       id: 2,
-      name: 'Westside Community Branch',
-      address: '456 Oak Avenue',
-      city: 'Los Angeles',
-      state: 'CA',
-      zip: '90210',
-      phone: '(555) 234-5678',
-      hours: {
-        weekday: '9:00 AM - 6:00 PM',
-        saturday: '9:00 AM - 3:00 PM',
-        sunday: 'Closed'
-      },
-      services: ['Full Service', 'ATM', 'Business Banking', 'Investment Services'],
-      manager: 'Michael Rodriguez'
+      name: 'Brooklyn Heights Branch',
+      address: '456 Montague Street, Brooklyn, NY 11201',
+      phone: '(718) 555-0456',
+      hours: 'Mon-Fri: 9AM-5PM, Sat: 9AM-1PM',
+      services: ['Full Service', 'ATM', 'Safe Deposit Boxes'],
+      type: 'Community Branch'
     },
     {
       id: 3,
-      name: 'Suburban Plaza Branch',
-      address: '789 Pine Road',
-      city: 'Chicago',
-      state: 'IL',
-      zip: '60601',
-      phone: '(555) 345-6789',
-      hours: {
-        weekday: '8:30 AM - 5:30 PM',
-        saturday: '9:00 AM - 1:00 PM',
-        sunday: 'Closed'
-      },
-      services: ['Full Service', 'ATM', 'Drive-Through', 'Mortgage Services'],
-      manager: 'Sarah Johnson'
+      name: 'Los Angeles Downtown',
+      address: '789 Wilshire Blvd, Los Angeles, CA 90017',
+      phone: '(213) 555-0789',
+      hours: 'Mon-Fri: 9AM-6PM, Sat: 9AM-3PM',
+      services: ['Full Service', 'Investment Services', 'Business Banking', 'ATM'],
+      type: 'Full Service Branch'
     },
     {
       id: 4,
-      name: 'Tech District Branch',
-      address: '321 Innovation Blvd',
-      city: 'Austin',
-      state: 'TX',
-      zip: '73301',
-      phone: '(555) 456-7890',
-      hours: {
-        weekday: '9:00 AM - 5:00 PM',
-        saturday: '10:00 AM - 2:00 PM',
-        sunday: 'Closed'
-      },
-      services: ['Full Service', 'ATM', 'Business Banking', 'Digital Services'],
-      manager: 'David Chen'
+      name: 'Chicago Loop Center',
+      address: '321 LaSalle Street, Chicago, IL 60604',
+      phone: '(312) 555-0321',
+      hours: 'Mon-Fri: 8AM-6PM, Sat: 9AM-2PM',
+      services: ['Full Service', 'Investment Services', 'Safe Deposit Boxes', 'Business Banking'],
+      type: 'Full Service Branch'
     },
     {
       id: 5,
-      name: 'Riverside Branch',
-      address: '654 River Street',
-      city: 'Miami',
-      state: 'FL',
-      zip: '33101',
-      phone: '(555) 567-8901',
-      hours: {
-        weekday: '9:00 AM - 4:00 PM',
-        saturday: '9:00 AM - 12:00 PM',
-        sunday: 'Closed'
-      },
-      services: ['Full Service', 'ATM', 'International Banking', 'Safe Deposit Boxes'],
-      manager: 'Maria Garcia'
+      name: 'Miami Brickell Branch',
+      address: '654 Brickell Avenue, Miami, FL 33131',
+      phone: '(305) 555-0654',
+      hours: 'Mon-Fri: 9AM-5PM, Sat: 9AM-1PM',
+      services: ['Full Service', 'International Banking', 'ATM'],
+      type: 'International Branch'
+    },
+    {
+      id: 6,
+      name: 'Boston Financial District',
+      address: '987 Federal Street, Boston, MA 02110',
+      phone: '(617) 555-0987',
+      hours: 'Mon-Fri: 9AM-5PM, Sat: 9AM-2PM',
+      services: ['Full Service', 'Investment Services', 'Safe Deposit Boxes'],
+      type: 'Full Service Branch'
     }
   ];
 
-  const states = ['', 'CA', 'FL', 'IL', 'NY', 'TX'];
+  const states = ['All States', 'NY', 'CA', 'IL', 'FL', 'MA'];
 
-  const handleSearch = () => {
-    let results = branchData;
-    
-    if (searchZip) {
-      results = results.filter(branch => 
-        branch.zip.includes(searchZip) || 
-        branch.city.toLowerCase().includes(searchZip.toLowerCase())
+  const handleStateFilter = (state) => {
+    setSelectedState(state);
+    if (state === 'All States' || state === '') {
+      setFilteredBranches(branches);
+    } else {
+      const filtered = branches.filter(branch => 
+        branch.address.includes(`, ${state} `)
       );
+      setFilteredBranches(filtered);
     }
-    
-    if (selectedState) {
-      results = results.filter(branch => branch.state === selectedState);
-    }
-    
-    setSearchResults(results);
   };
 
-  const styles = {
-    container: {
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-    },
-    content: {
-      maxWidth: '1200px',
-      margin: '0 auto',
-      padding: '2rem 1rem'
-    },
-    header: {
-      textAlign: 'center',
-      marginBottom: '3rem'
-    },
-    title: {
-      fontSize: 'clamp(2.5rem, 5vw, 4rem)',
-      fontWeight: '900',
-      color: '#1e293b',
-      marginBottom: '1rem',
-      background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
-      WebkitBackgroundClip: 'text',
-      WebkitTextFillColor: 'transparent',
-      backgroundClip: 'text'
-    },
-    subtitle: {
-      fontSize: '1.2rem',
-      color: '#64748b',
-      maxWidth: '600px',
-      margin: '0 auto'
-    },
-    searchSection: {
-      backgroundColor: 'white',
-      borderRadius: '16px',
-      padding: '2.5rem',
-      marginBottom: '3rem',
-      boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
-      border: '1px solid #e2e8f0'
-    },
-    searchTitle: {
-      fontSize: '1.5rem',
-      fontWeight: '700',
-      color: '#1e293b',
-      marginBottom: '2rem',
-      textAlign: 'center'
-    },
-    searchForm: {
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-      gap: '1rem',
-      alignItems: 'end'
-    },
-    inputGroup: {
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '0.5rem'
-    },
-    label: {
-      fontSize: '0.9rem',
-      fontWeight: '600',
-      color: '#374151'
-    },
-    input: {
-      padding: '0.75rem 1rem',
-      border: '2px solid #e5e7eb',
-      borderRadius: '8px',
-      fontSize: '1rem',
-      transition: 'border-color 0.3s ease'
-    },
-    select: {
-      padding: '0.75rem 1rem',
-      border: '2px solid #e5e7eb',
-      borderRadius: '8px',
-      fontSize: '1rem',
-      backgroundColor: 'white',
-      cursor: 'pointer'
-    },
-    searchButton: {
-      padding: '0.75rem 1.5rem',
-      background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
-      color: 'white',
-      border: 'none',
-      borderRadius: '8px',
-      fontSize: '1rem',
-      fontWeight: '600',
-      cursor: 'pointer',
-      transition: 'all 0.3s ease'
-    },
-    resultsSection: {
-      marginBottom: '2rem'
-    },
-    resultsHeader: {
-      fontSize: '1.5rem',
-      fontWeight: '700',
-      color: '#1e293b',
-      marginBottom: '1.5rem'
-    },
-    branchGrid: {
-      display: 'grid',
-      gap: '1.5rem'
-    },
-    branchCard: {
-      backgroundColor: 'white',
-      borderRadius: '16px',
-      padding: '2rem',
-      boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
-      border: '1px solid #e2e8f0',
-      transition: 'transform 0.3s ease, box-shadow 0.3s ease'
-    },
-    branchHeader: {
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'flex-start',
-      marginBottom: '1.5rem'
-    },
-    branchName: {
-      fontSize: '1.3rem',
-      fontWeight: '700',
-      color: '#1e293b',
-      marginBottom: '0.5rem'
-    },
-    branchAddress: {
-      fontSize: '0.95rem',
-      color: '#64748b',
-      lineHeight: '1.5'
-    },
-    branchPhone: {
-      fontSize: '1rem',
-      fontWeight: '600',
-      color: '#3b82f6',
-      textDecoration: 'none'
-    },
-    branchDetails: {
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-      gap: '1.5rem'
-    },
-    detailSection: {
-      padding: '1rem',
-      backgroundColor: '#f8fafc',
-      borderRadius: '8px',
-      border: '1px solid #e2e8f0'
-    },
-    detailTitle: {
-      fontSize: '0.9rem',
-      fontWeight: '700',
-      color: '#1e293b',
-      marginBottom: '0.75rem',
-      textTransform: 'uppercase',
-      letterSpacing: '0.5px'
-    },
-    detailText: {
-      fontSize: '0.85rem',
-      color: '#374151',
-      lineHeight: '1.4',
-      marginBottom: '0.25rem'
-    },
-    servicesList: {
-      display: 'flex',
-      flexWrap: 'wrap',
-      gap: '0.5rem'
-    },
-    serviceTag: {
-      padding: '0.25rem 0.5rem',
-      backgroundColor: '#dbeafe',
-      color: '#1e40af',
-      borderRadius: '4px',
-      fontSize: '0.75rem',
-      fontWeight: '500'
-    },
-    directionsButton: {
-      marginTop: '1rem',
-      padding: '0.5rem 1rem',
-      background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-      color: 'white',
-      border: 'none',
-      borderRadius: '6px',
-      fontSize: '0.85rem',
-      fontWeight: '600',
-      cursor: 'pointer',
-      textDecoration: 'none',
-      display: 'inline-block',
-      transition: 'all 0.3s ease'
+  const handleZipSearch = (zip) => {
+    setSearchZip(zip);
+    if (zip === '') {
+      setFilteredBranches(branches);
+    } else {
+      const filtered = branches.filter(branch => 
+        branch.address.includes(zip)
+      );
+      setFilteredBranches(filtered);
     }
   };
 
   return (
     <div style={styles.container}>
-      <MainMenu user={user} />
-      
-      <div style={styles.content}>
-        <div style={styles.header}>
-          <h1 style={styles.title}>Find a Branch</h1>
-          <p style={styles.subtitle}>
-            Locate Oakline Bank branches and ATMs near you. Visit us for 
-            personalized banking services and expert financial guidance.
+      {/* Header */}
+      <header style={styles.header}>
+        <div style={styles.headerContent}>
+          <Link href="/" style={styles.logoContainer}>
+            <img src="/images/logo-primary.png.jpg" alt="Oakline Bank" style={styles.logo} />
+            <div style={styles.brandInfo}>
+              <span style={styles.bankName}>Oakline Bank</span>
+              <span style={styles.tagline}>Your Financial Partner</span>
+            </div>
+          </Link>
+          
+          <div style={styles.headerActions}>
+            <Link href="/" style={styles.headerButton}>Home</Link>
+            {user ? (
+              <Link href="/dashboard" style={styles.headerButton}>Dashboard</Link>
+            ) : (
+              <Link href="/login" style={styles.headerButton}>Sign In</Link>
+            )}
+          </div>
+        </div>
+      </header>
+
+      {/* Hero Section */}
+      <section style={styles.heroSection}>
+        <div style={styles.heroContent}>
+          <h1 style={styles.heroTitle}>Find a Branch or ATM</h1>
+          <p style={styles.heroSubtitle}>
+            Locate Oakline Bank branches and ATMs near you for all your banking needs
           </p>
         </div>
+      </section>
 
-        <div style={styles.searchSection}>
-          <h2 style={styles.searchTitle}>Search for Branches</h2>
-          <div style={styles.searchForm}>
-            <div style={styles.inputGroup}>
-              <label style={styles.label}>ZIP Code or City</label>
-              <input
-                type="text"
-                value={searchZip}
-                onChange={(e) => setSearchZip(e.target.value)}
-                placeholder="Enter ZIP or city name"
-                style={styles.input}
-              />
-            </div>
-            <div style={styles.inputGroup}>
-              <label style={styles.label}>State</label>
-              <select
-                value={selectedState}
-                onChange={(e) => setSelectedState(e.target.value)}
-                style={styles.select}
-              >
-                <option value="">All States</option>
-                {states.slice(1).map(state => (
-                  <option key={state} value={state}>{state}</option>
-                ))}
-              </select>
-            </div>
-            <button onClick={handleSearch} style={styles.searchButton}>
-              🔍 Find Branches
-            </button>
-          </div>
-        </div>
-
-        <div style={styles.resultsSection}>
-          <h2 style={styles.resultsHeader}>
-            {searchResults.length > 0 
-              ? `Found ${searchResults.length} Branch${searchResults.length === 1 ? '' : 'es'}`
-              : 'All Oakline Bank Locations'
-            }
-          </h2>
-          
-          <div style={styles.branchGrid}>
-            {(searchResults.length > 0 ? searchResults : branchData).map((branch) => (
-              <div key={branch.id} style={styles.branchCard}>
-                <div style={styles.branchHeader}>
-                  <div>
-                    <h3 style={styles.branchName}>{branch.name}</h3>
-                    <div style={styles.branchAddress}>
-                      {branch.address}<br />
-                      {branch.city}, {branch.state} {branch.zip}
-                    </div>
-                  </div>
-                  <a href={`tel:${branch.phone}`} style={styles.branchPhone}>
-                    {branch.phone}
-                  </a>
-                </div>
-
-                <div style={styles.branchDetails}>
-                  <div style={styles.detailSection}>
-                    <div style={styles.detailTitle}>Hours</div>
-                    <div style={styles.detailText}>Mon-Fri: {branch.hours.weekday}</div>
-                    <div style={styles.detailText}>Saturday: {branch.hours.saturday}</div>
-                    <div style={styles.detailText}>Sunday: {branch.hours.sunday}</div>
-                  </div>
-
-                  <div style={styles.detailSection}>
-                    <div style={styles.detailTitle}>Services</div>
-                    <div style={styles.servicesList}>
-                      {branch.services.map((service, index) => (
-                        <span key={index} style={styles.serviceTag}>{service}</span>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div style={styles.detailSection}>
-                    <div style={styles.detailTitle}>Branch Manager</div>
-                    <div style={styles.detailText}>{branch.manager}</div>
-                    <a 
-                      href={`https://maps.google.com?q=${encodeURIComponent(branch.address + ' ' + branch.city + ' ' + branch.state)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={styles.directionsButton}
-                    >
-                      📍 Get Directions
-                    </a>
-                  </div>
-                </div>
+      {/* Main Content */}
+      <main style={styles.main}>
+        {/* Search Section */}
+        <section style={styles.searchSection}>
+          <div style={styles.searchContent}>
+            <h2 style={styles.searchTitle}>Search by Location</h2>
+            
+            <div style={styles.searchControls}>
+              <div style={styles.searchGroup}>
+                <label style={styles.searchLabel}>Search by ZIP Code</label>
+                <input
+                  type="text"
+                  placeholder="Enter ZIP code"
+                  value={searchZip}
+                  onChange={(e) => handleZipSearch(e.target.value)}
+                  style={styles.searchInput}
+                />
               </div>
-            ))}
+              
+              <div style={styles.searchGroup}>
+                <label style={styles.searchLabel}>Filter by State</label>
+                <select
+                  value={selectedState}
+                  onChange={(e) => handleStateFilter(e.target.value)}
+                  style={styles.searchSelect}
+                >
+                  {states.map(state => (
+                    <option key={state} value={state}>{state}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            
+            <div style={styles.searchStats}>
+              <span style={styles.statsText}>
+                {filteredBranches.length} location{filteredBranches.length !== 1 ? 's' : ''} found
+              </span>
+            </div>
           </div>
-        </div>
-      </div>
+        </section>
 
-      <Footer />
+        {/* ATM Network Info */}
+        <section style={styles.atmSection}>
+          <div style={styles.atmContent}>
+            <h2 style={styles.atmTitle}>ATM Network</h2>
+            <div style={styles.atmGrid}>
+              <div style={styles.atmCard}>
+                <div style={styles.atmIcon}>🏧</div>
+                <h3 style={styles.atmCardTitle}>55,000+ ATMs</h3>
+                <p style={styles.atmCardText}>Access your money at over 55,000 fee-free ATMs nationwide</p>
+              </div>
+              
+              <div style={styles.atmCard}>
+                <div style={styles.atmIcon}>🌍</div>
+                <h3 style={styles.atmCardTitle}>International Access</h3>
+                <p style={styles.atmCardText}>Use your card at ATMs worldwide with competitive exchange rates</p>
+              </div>
+              
+              <div style={styles.atmCard}>
+                <div style={styles.atmIcon}>💰</div>
+                <h3 style={styles.atmCardTitle}>No Fees</h3>
+                <p style={styles.atmCardText}>Free ATM access for all Oakline Bank customers at network locations</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Branch Listings */}
+        <section style={styles.branchSection}>
+          <div style={styles.branchContent}>
+            <h2 style={styles.branchTitle}>Branch Locations</h2>
+            
+            <div style={styles.branchList}>
+              {filteredBranches.map(branch => (
+                <div key={branch.id} style={styles.branchCard}>
+                  <div style={styles.branchHeader}>
+                    <h3 style={styles.branchName}>{branch.name}</h3>
+                    <span style={styles.branchType}>{branch.type}</span>
+                  </div>
+                  
+                  <div style={styles.branchDetails}>
+                    <div style={styles.branchInfo}>
+                      <div style={styles.infoItem}>
+                        <span style={styles.infoIcon}>📍</span>
+                        <span style={styles.infoText}>{branch.address}</span>
+                      </div>
+                      
+                      <div style={styles.infoItem}>
+                        <span style={styles.infoIcon}>📞</span>
+                        <a href={`tel:${branch.phone}`} style={styles.phoneLink}>{branch.phone}</a>
+                      </div>
+                      
+                      <div style={styles.infoItem}>
+                        <span style={styles.infoIcon}>🕒</span>
+                        <span style={styles.infoText}>{branch.hours}</span>
+                      </div>
+                    </div>
+                    
+                    <div style={styles.branchServices}>
+                      <h4 style={styles.servicesTitle}>Services Available:</h4>
+                      <div style={styles.servicesList}>
+                        {branch.services.map((service, index) => (
+                          <span key={index} style={styles.serviceTag}>{service}</span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div style={styles.branchActions}>
+                    <button style={styles.directionsButton}>
+                      📍 Get Directions
+                    </button>
+                    <button style={styles.callButton}>
+                      📞 Call Branch
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Services Info */}
+        <section style={styles.servicesSection}>
+          <div style={styles.servicesContent}>
+            <h2 style={styles.servicesTitle}>Branch Services</h2>
+            <div style={styles.servicesGrid}>
+              <div style={styles.serviceCard}>
+                <div style={styles.serviceIcon}>🏦</div>
+                <h3 style={styles.serviceCardTitle}>Full Service Banking</h3>
+                <p style={styles.serviceCardText}>All account services, loans, deposits, and customer support</p>
+              </div>
+              
+              <div style={styles.serviceCard}>
+                <div style={styles.serviceIcon}>📈</div>
+                <h3 style={styles.serviceCardTitle}>Investment Services</h3>
+                <p style={styles.serviceCardText}>Financial planning, investment accounts, and wealth management</p>
+              </div>
+              
+              <div style={styles.serviceCard}>
+                <div style={styles.serviceIcon}>🏢</div>
+                <h3 style={styles.serviceCardTitle}>Business Banking</h3>
+                <p style={styles.serviceCardText">Commercial accounts, business loans, and merchant services</p>
+              </div>
+              
+              <div style={styles.serviceCard}>
+                <div style={styles.serviceIcon}>🔒</div>
+                <h3 style={styles.serviceCardTitle}>Safe Deposit Boxes</h3>
+                <p style={styles.serviceCardText}>Secure storage for important documents and valuables</p>
+              </div>
+              
+              <div style={styles.serviceCard}>
+                <div style={styles.serviceIcon}>📝</div>
+                <h3 style={styles.serviceCardTitle}>Notary Services</h3>
+                <p style={styles.serviceCardText}>Document notarization and authentication services</p>
+              </div>
+              
+              <div style={styles.serviceCard}>
+                <div style={styles.serviceIcon}>🌍</div>
+                <h3 style={styles.serviceCardTitle}>International Banking</h3>
+                <p style={styles.serviceCardText}>Foreign exchange, international transfers, and global services</p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      {/* Footer */}
+      <footer style={styles.footer}>
+        <div style={styles.footerContent}>
+          <p style={styles.footerText}>
+            © 2024 Oakline Bank. All rights reserved. Member FDIC. Equal Housing Lender.
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }
+
+const styles = {
+  container: {
+    minHeight: '100vh',
+    backgroundColor: '#f8fafc',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+  },
+  header: {
+    backgroundColor: '#1e40af',
+    color: 'white',
+    padding: '1rem 1.5rem',
+    boxShadow: '0 4px 12px rgba(30, 64, 175, 0.2)'
+  },
+  headerContent: {
+    maxWidth: '1400px',
+    margin: '0 auto',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    flexWrap: 'wrap'
+  },
+  logoContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '1rem',
+    textDecoration: 'none',
+    color: 'white'
+  },
+  logo: {
+    height: '50px',
+    width: 'auto'
+  },
+  brandInfo: {
+    display: 'flex',
+    flexDirection: 'column'
+  },
+  bankName: {
+    fontSize: '1.5rem',
+    fontWeight: 'bold'
+  },
+  tagline: {
+    fontSize: '0.9rem',
+    color: '#bfdbfe'
+  },
+  headerActions: {
+    display: 'flex',
+    gap: '1rem'
+  },
+  headerButton: {
+    padding: '0.5rem 1rem',
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    color: 'white',
+    textDecoration: 'none',
+    borderRadius: '6px',
+    fontSize: '0.9rem',
+    fontWeight: '500',
+    transition: 'all 0.3s ease'
+  },
+  heroSection: {
+    background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
+    color: 'white',
+    padding: '3rem 1.5rem',
+    textAlign: 'center'
+  },
+  heroContent: {
+    maxWidth: '800px',
+    margin: '0 auto'
+  },
+  heroTitle: {
+    fontSize: '2.5rem',
+    fontWeight: 'bold',
+    marginBottom: '1rem'
+  },
+  heroSubtitle: {
+    fontSize: '1.1rem',
+    opacity: 0.9,
+    lineHeight: '1.6'
+  },
+  main: {
+    maxWidth: '1400px',
+    margin: '0 auto',
+    padding: '0 1.5rem'
+  },
+  searchSection: {
+    padding: '2rem 0'
+  },
+  searchContent: {
+    backgroundColor: 'white',
+    borderRadius: '12px',
+    padding: '2rem',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+    border: '1px solid #e2e8f0'
+  },
+  searchTitle: {
+    fontSize: '1.5rem',
+    fontWeight: 'bold',
+    color: '#1e293b',
+    marginBottom: '1.5rem',
+    textAlign: 'center'
+  },
+  searchControls: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+    gap: '1.5rem',
+    marginBottom: '1rem'
+  },
+  searchGroup: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.5rem'
+  },
+  searchLabel: {
+    fontSize: '0.9rem',
+    fontWeight: '600',
+    color: '#374151'
+  },
+  searchInput: {
+    padding: '0.75rem',
+    border: '2px solid #e2e8f0',
+    borderRadius: '8px',
+    fontSize: '1rem',
+    outline: 'none',
+    transition: 'border-color 0.3s ease'
+  },
+  searchSelect: {
+    padding: '0.75rem',
+    border: '2px solid #e2e8f0',
+    borderRadius: '8px',
+    fontSize: '1rem',
+    outline: 'none',
+    backgroundColor: 'white',
+    cursor: 'pointer'
+  },
+  searchStats: {
+    textAlign: 'center',
+    padding: '1rem 0'
+  },
+  statsText: {
+    color: '#64748b',
+    fontSize: '0.9rem',
+    fontWeight: '500'
+  },
+  atmSection: {
+    padding: '2rem 0'
+  },
+  atmContent: {
+    textAlign: 'center'
+  },
+  atmTitle: {
+    fontSize: '2rem',
+    fontWeight: 'bold',
+    color: '#1e293b',
+    marginBottom: '2rem'
+  },
+  atmGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+    gap: '1.5rem'
+  },
+  atmCard: {
+    backgroundColor: 'white',
+    padding: '2rem',
+    borderRadius: '12px',
+    textAlign: 'center',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+    border: '1px solid #e2e8f0'
+  },
+  atmIcon: {
+    fontSize: '2.5rem',
+    marginBottom: '1rem'
+  },
+  atmCardTitle: {
+    fontSize: '1.2rem',
+    fontWeight: 'bold',
+    color: '#1e40af',
+    marginBottom: '0.5rem'
+  },
+  atmCardText: {
+    color: '#64748b',
+    lineHeight: '1.5'
+  },
+  branchSection: {
+    padding: '2rem 0'
+  },
+  branchContent: {},
+  branchTitle: {
+    fontSize: '2rem',
+    fontWeight: 'bold',
+    color: '#1e293b',
+    marginBottom: '2rem',
+    textAlign: 'center'
+  },
+  branchList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1.5rem'
+  },
+  branchCard: {
+    backgroundColor: 'white',
+    borderRadius: '12px',
+    padding: '2rem',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+    border: '1px solid #e2e8f0'
+  },
+  branchHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '1.5rem'
+  },
+  branchName: {
+    fontSize: '1.3rem',
+    fontWeight: 'bold',
+    color: '#1e293b',
+    margin: 0
+  },
+  branchType: {
+    backgroundColor: '#1e40af',
+    color: 'white',
+    padding: '0.25rem 0.75rem',
+    borderRadius: '20px',
+    fontSize: '0.8rem',
+    fontWeight: '600'
+  },
+  branchDetails: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+    gap: '1.5rem',
+    marginBottom: '1.5rem'
+  },
+  branchInfo: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.75rem'
+  },
+  infoItem: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.75rem'
+  },
+  infoIcon: {
+    fontSize: '1rem',
+    minWidth: '20px'
+  },
+  infoText: {
+    color: '#64748b',
+    fontSize: '0.9rem'
+  },
+  phoneLink: {
+    color: '#1e40af',
+    textDecoration: 'none',
+    fontSize: '0.9rem',
+    fontWeight: '500'
+  },
+  branchServices: {},
+  servicesTitle: {
+    fontSize: '1rem',
+    fontWeight: 'bold',
+    color: '#1e293b',
+    marginBottom: '0.75rem'
+  },
+  servicesList: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '0.5rem'
+  },
+  serviceTag: {
+    backgroundColor: '#eff6ff',
+    color: '#1e40af',
+    padding: '0.25rem 0.75rem',
+    borderRadius: '20px',
+    fontSize: '0.8rem',
+    fontWeight: '500'
+  },
+  branchActions: {
+    display: 'flex',
+    gap: '1rem',
+    flexWrap: 'wrap'
+  },
+  directionsButton: {
+    padding: '0.75rem 1.5rem',
+    backgroundColor: '#1e40af',
+    color: 'white',
+    border: 'none',
+    borderRadius: '8px',
+    fontSize: '0.9rem',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease'
+  },
+  callButton: {
+    padding: '0.75rem 1.5rem',
+    backgroundColor: 'transparent',
+    color: '#1e40af',
+    border: '2px solid #1e40af',
+    borderRadius: '8px',
+    fontSize: '0.9rem',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease'
+  },
+  servicesSection: {
+    padding: '3rem 0'
+  },
+  servicesContent: {
+    textAlign: 'center'
+  },
+  servicesTitle: {
+    fontSize: '2rem',
+    fontWeight: 'bold',
+    color: '#1e293b',
+    marginBottom: '2rem'
+  },
+  servicesGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+    gap: '1.5rem'
+  },
+  serviceCard: {
+    backgroundColor: 'white',
+    padding: '1.5rem',
+    borderRadius: '12px',
+    textAlign: 'center',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+    border: '1px solid #e2e8f0'
+  },
+  serviceIcon: {
+    fontSize: '2rem',
+    marginBottom: '1rem'
+  },
+  serviceCardTitle: {
+    fontSize: '1.1rem',
+    fontWeight: 'bold',
+    color: '#1e293b',
+    marginBottom: '0.5rem'
+  },
+  serviceCardText: {
+    color: '#64748b',
+    fontSize: '0.9rem',
+    lineHeight: '1.5'
+  },
+  footer: {
+    backgroundColor: '#1f2937',
+    color: 'white',
+    padding: '2rem 1.5rem',
+    textAlign: 'center'
+  },
+  footerContent: {
+    maxWidth: '1400px',
+    margin: '0 auto'
+  },
+  footerText: {
+    color: '#d1d5db',
+    fontSize: '0.9rem'
+  }
+};

@@ -1,323 +1,540 @@
-export default function FAQ() {
-  return (
-    <div>
-      <h1>Frequently Asked Questions</h1>
-      <p>This is a placeholder for the FAQ page.</p>
-    </div>
-  );
-}
-import { useState } from 'react';
+
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import MainMenu from '../components/MainMenu';
-import Footer from '../components/Footer';
+import { supabase } from '../lib/supabaseClient';
 
 export default function FAQ() {
   const [user, setUser] = useState(null);
-  const [openFAQ, setOpenFAQ] = useState(null);
+  const [activeCategory, setActiveCategory] = useState('general');
+  const [openQuestion, setOpenQuestion] = useState(null);
 
-  const faqData = [
-    {
-      category: 'Account Opening',
-      questions: [
-        {
-          question: 'How do I open an account with Oakline Bank?',
-          answer: 'You can open an account online through our application process, visit any branch location, or call our customer service line. You\'ll need a valid ID, Social Security number, and initial deposit.'
-        },
-        {
-          question: 'What documents do I need to open an account?',
-          answer: 'You\'ll need a government-issued photo ID (driver\'s license, passport, or state ID), Social Security card or W-2, and proof of address (utility bill or bank statement).'
-        },
-        {
-          question: 'Is there a minimum deposit required?',
-          answer: 'Minimum deposits vary by account type. Checking accounts require $100, savings accounts $50, and some premium accounts may require higher minimums.'
-        }
-      ]
-    },
-    {
-      category: 'Online Banking',
-      questions: [
-        {
-          question: 'How do I access online banking?',
-          answer: 'Visit our website and click "Sign In" or download our mobile app. Use your account number and the password you set up during enrollment.'
-        },
-        {
-          question: 'Is online banking secure?',
-          answer: 'Yes, we use bank-level 256-bit SSL encryption, multi-factor authentication, and continuous monitoring to protect your information and transactions.'
-        },
-        {
-          question: 'Can I deposit checks through mobile banking?',
-          answer: 'Yes, our mobile app includes mobile check deposit. Simply take photos of the front and back of your endorsed check and submit for deposit.'
-        }
-      ]
-    },
-    {
-      category: 'Fees & Charges',
-      questions: [
-        {
-          question: 'What fees does Oakline Bank charge?',
-          answer: 'We believe in transparent pricing. Common fees include overdraft ($35), out-of-network ATM ($2.50), and wire transfers ($15 domestic, $45 international). Many fees can be waived with qualifying balances.'
-        },
-        {
-          question: 'How can I avoid monthly maintenance fees?',
-          answer: 'Most accounts waive monthly fees with a minimum daily balance or direct deposit. Specific requirements vary by account type - check your account agreement for details.'
-        },
-        {
-          question: 'Do you charge for using other bank ATMs?',
-          answer: 'We charge $2.50 for out-of-network ATM usage, but we reimburse up to $20/month in ATM fees for premium account holders.'
-        }
-      ]
-    },
-    {
-      category: 'Loans & Credit',
-      questions: [
-        {
-          question: 'What types of loans do you offer?',
-          answer: 'We offer personal loans, auto loans, home mortgages, home equity loans, and business loans. Each has competitive rates and flexible terms.'
-        },
-        {
-          question: 'How do I apply for a loan?',
-          answer: 'You can apply online, visit a branch, or call us. You\'ll need income documentation, credit information, and details about the loan purpose.'
-        },
-        {
-          question: 'What credit score do I need for a loan?',
-          answer: 'Credit requirements vary by loan type. We work with customers across the credit spectrum and offer programs for first-time borrowers and those rebuilding credit.'
-        }
-      ]
-    },
-    {
-      category: 'Security',
-      questions: [
-        {
-          question: 'How do you protect my personal information?',
-          answer: 'We employ multiple security layers including encryption, firewalls, fraud monitoring, and secure authentication. We never ask for sensitive information via email or phone.'
-        },
-        {
-          question: 'What should I do if I suspect fraudulent activity?',
-          answer: 'Contact us immediately at 1-800-OAKLINE or through secure messaging in online banking. We\'ll investigate and protect your accounts while resolving any unauthorized transactions.'
-        },
-        {
-          question: 'How do I set up account alerts?',
-          answer: 'Log into online banking or our mobile app, go to Settings > Account Alerts, and choose from various notification options including low balance, large transactions, and login alerts.'
-        }
-      ]
+  useEffect(() => {
+    checkUser();
+  }, []);
+
+  const checkUser = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    } catch (error) {
+      console.error('Error checking user:', error);
     }
-  ];
-
-  const toggleFAQ = (index) => {
-    setOpenFAQ(openFAQ === index ? null : index);
   };
 
-  const styles = {
-    container: {
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-    },
-    content: {
-      maxWidth: '1000px',
-      margin: '0 auto',
-      padding: '2rem 1rem'
-    },
-    header: {
-      textAlign: 'center',
-      marginBottom: '3rem'
-    },
-    title: {
-      fontSize: 'clamp(2.5rem, 5vw, 4rem)',
-      fontWeight: '900',
-      color: '#1e293b',
-      marginBottom: '1rem',
-      background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
-      WebkitBackgroundClip: 'text',
-      WebkitTextFillColor: 'transparent',
-      backgroundClip: 'text'
-    },
-    subtitle: {
-      fontSize: '1.2rem',
-      color: '#64748b',
-      maxWidth: '600px',
-      margin: '0 auto'
-    },
-    categorySection: {
-      backgroundColor: 'white',
-      borderRadius: '16px',
-      padding: '2rem',
-      marginBottom: '2rem',
-      boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
-      border: '1px solid #e2e8f0'
-    },
-    categoryTitle: {
-      fontSize: '1.5rem',
-      fontWeight: '700',
-      color: '#1e293b',
-      marginBottom: '1.5rem',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '0.5rem'
-    },
-    categoryIcon: {
-      fontSize: '1.2rem'
-    },
-    faqItem: {
-      borderBottom: '1px solid #f1f5f9',
-      paddingBottom: '1rem',
-      marginBottom: '1rem'
-    },
-    questionButton: {
-      width: '100%',
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      padding: '1rem 0',
-      backgroundColor: 'transparent',
-      border: 'none',
-      cursor: 'pointer',
-      fontSize: '1.1rem',
-      fontWeight: '600',
-      color: '#374151',
-      textAlign: 'left'
-    },
-    questionText: {
-      flex: 1,
-      marginRight: '1rem'
-    },
-    toggleIcon: {
-      fontSize: '1.2rem',
-      color: '#3b82f6',
-      transition: 'transform 0.3s ease'
-    },
-    answer: {
-      padding: '1rem 1.5rem',
-      backgroundColor: '#f8fafc',
-      borderRadius: '8px',
-      marginTop: '0.5rem',
-      fontSize: '0.95rem',
-      color: '#374151',
-      lineHeight: '1.6',
-      border: '1px solid #e2e8f0'
-    },
-    contactSection: {
-      backgroundColor: 'white',
-      borderRadius: '16px',
-      padding: '2.5rem',
-      textAlign: 'center',
-      boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
-      border: '1px solid #e2e8f0'
-    },
-    contactTitle: {
-      fontSize: '1.5rem',
-      fontWeight: '700',
-      color: '#1e293b',
-      marginBottom: '1rem'
-    },
-    contactText: {
-      fontSize: '1rem',
-      color: '#64748b',
-      marginBottom: '2rem'
-    },
-    contactButtons: {
-      display: 'flex',
-      gap: '1rem',
-      justifyContent: 'center',
-      flexWrap: 'wrap'
-    },
-    contactButton: {
-      padding: '0.75rem 1.5rem',
-      borderRadius: '10px',
-      textDecoration: 'none',
-      fontSize: '0.9rem',
-      fontWeight: '600',
-      transition: 'all 0.3s ease',
-      display: 'inline-flex',
-      alignItems: 'center',
-      gap: '0.5rem'
-    },
-    primaryButton: {
-      background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
-      color: 'white',
-      boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)'
-    },
-    secondaryButton: {
-      backgroundColor: 'transparent',
-      color: '#3b82f6',
-      border: '2px solid #3b82f6'
-    }
+  const faqData = {
+    general: [
+      {
+        question: "What is Oakline Bank's routing number?",
+        answer: "Our routing number is 075915826. You can use this for direct deposits, wire transfers, and ACH transactions."
+      },
+      {
+        question: "What are your customer service hours?",
+        answer: "Our customer service is available 24/7. You can reach us at 1-800-OAKLINE or through our secure messaging system."
+      },
+      {
+        question: "Is Oakline Bank FDIC insured?",
+        answer: "Yes, Oakline Bank is FDIC insured up to $250,000 per depositor, per insured bank, for each account ownership category."
+      },
+      {
+        question: "How do I reset my online banking password?",
+        answer: "Click 'Forgot Password' on the login page, enter your email address, and follow the instructions sent to your email."
+      }
+    ],
+    accounts: [
+      {
+        question: "What types of accounts do you offer?",
+        answer: "We offer 23 different account types including checking, savings, money market, CDs, business accounts, investment accounts, and specialized accounts for students, seniors, and more."
+      },
+      {
+        question: "What is the minimum balance requirement?",
+        answer: "Minimum balance requirements vary by account type. Many of our accounts have no minimum balance requirement. Check our account types page for specific details."
+      },
+      {
+        question: "Are there monthly fees?",
+        answer: "Many of our accounts have no monthly fees. For accounts that do have fees, they can often be waived by meeting certain requirements like maintaining a minimum balance or setting up direct deposit."
+      },
+      {
+        question: "How do I open a new account?",
+        answer: "You can open an account online through our application process, visit one of our branches, or call our customer service team. You'll need a valid ID and initial deposit."
+      }
+    ],
+    digital: [
+      {
+        question: "Is mobile banking secure?",
+        answer: "Yes, our mobile app uses 256-bit SSL encryption, multi-factor authentication, and biometric login options to keep your information secure."
+      },
+      {
+        question: "Can I deposit checks using my phone?",
+        answer: "Yes, our mobile deposit feature allows you to deposit checks by taking a photo. Most deposits are available the next business day."
+      },
+      {
+        question: "How do I set up mobile alerts?",
+        answer: "Log into your account, go to Settings > Notifications, and choose which alerts you'd like to receive via text, email, or push notification."
+      },
+      {
+        question: "What if I lose my phone with the banking app?",
+        answer: "Contact us immediately at 1-800-OAKLINE. We can disable mobile access and help you secure your account. You can re-enable access once you have a new device."
+      }
+    ],
+    transactions: [
+      {
+        question: "Are there limits on transfers?",
+        answer: "Transfer limits vary by account type and transaction method. Online transfers typically have daily limits that can be adjusted based on your needs."
+      },
+      {
+        question: "How long do wire transfers take?",
+        answer: "Domestic wire transfers are typically completed the same business day. International wires may take 1-3 business days depending on the destination."
+      },
+      {
+        question: "What are your ATM fees?",
+        answer: "We have over 55,000 fee-free ATMs nationwide. Using non-network ATMs may incur fees, but we reimburse ATM fees for certain account types."
+      },
+      {
+        question: "Can I schedule recurring payments?",
+        answer: "Yes, you can set up recurring transfers and bill payments through online banking or our mobile app."
+      }
+    ],
+    security: [
+      {
+        question: "How do you protect my personal information?",
+        answer: "We use advanced encryption, secure servers, multi-factor authentication, and continuous monitoring to protect your data. We never share your information without your consent."
+      },
+      {
+        question: "What should I do if I suspect fraud?",
+        answer: "Contact us immediately at 1-800-OAKLINE. We'll help secure your account, investigate the issue, and assist with any unauthorized transactions."
+      },
+      {
+        question: "Do you offer identity theft protection?",
+        answer: "Yes, we provide identity monitoring services and will assist you if your identity is compromised. Contact us for details about our protection programs."
+      },
+      {
+        question: "How can I make my account more secure?",
+        answer: "Enable multi-factor authentication, use strong passwords, set up account alerts, and never share your login credentials. Regularly monitor your account statements."
+      }
+    ]
+  };
+
+  const categories = [
+    { key: 'general', name: 'General', icon: '❓' },
+    { key: 'accounts', name: 'Accounts', icon: '🏦' },
+    { key: 'digital', name: 'Digital Banking', icon: '📱' },
+    { key: 'transactions', name: 'Transactions', icon: '💸' },
+    { key: 'security', name: 'Security', icon: '🔒' }
+  ];
+
+  const toggleQuestion = (index) => {
+    setOpenQuestion(openQuestion === index ? null : index);
   };
 
   return (
     <div style={styles.container}>
-      <MainMenu user={user} />
-      
-      <div style={styles.content}>
-        <div style={styles.header}>
-          <h1 style={styles.title}>Frequently Asked Questions</h1>
-          <p style={styles.subtitle}>
-            Find answers to common questions about Oakline Bank services, 
-            accounts, and policies.
+      {/* Header */}
+      <header style={styles.header}>
+        <div style={styles.headerContent}>
+          <Link href="/" style={styles.logoContainer}>
+            <img src="/images/logo-primary.png.jpg" alt="Oakline Bank" style={styles.logo} />
+            <div style={styles.brandInfo}>
+              <span style={styles.bankName}>Oakline Bank</span>
+              <span style={styles.tagline}>Your Financial Partner</span>
+            </div>
+          </Link>
+          
+          <div style={styles.headerActions}>
+            <Link href="/" style={styles.headerButton}>Home</Link>
+            <Link href="/support" style={styles.headerButton}>Support</Link>
+            {user ? (
+              <Link href="/dashboard" style={styles.headerButton}>Dashboard</Link>
+            ) : (
+              <Link href="/login" style={styles.headerButton}>Sign In</Link>
+            )}
+          </div>
+        </div>
+      </header>
+
+      {/* Hero Section */}
+      <section style={styles.heroSection}>
+        <div style={styles.heroContent}>
+          <h1 style={styles.heroTitle}>Frequently Asked Questions</h1>
+          <p style={styles.heroSubtitle}>
+            Find answers to common questions about Oakline Bank services and features
           </p>
         </div>
+      </section>
 
-        {faqData.map((category, categoryIndex) => (
-          <div key={categoryIndex} style={styles.categorySection}>
-            <h2 style={styles.categoryTitle}>
-              <span style={styles.categoryIcon}>
-                {category.category === 'Account Opening' && '📝'}
-                {category.category === 'Online Banking' && '💻'}
-                {category.category === 'Fees & Charges' && '💳'}
-                {category.category === 'Loans & Credit' && '🏠'}
-                {category.category === 'Security' && '🔒'}
-              </span>
-              {category.category}
+      {/* Main Content */}
+      <main style={styles.main}>
+        {/* Category Navigation */}
+        <section style={styles.categorySection}>
+          <div style={styles.categoryNav}>
+            {categories.map(category => (
+              <button
+                key={category.key}
+                onClick={() => setActiveCategory(category.key)}
+                style={{
+                  ...styles.categoryButton,
+                  ...(activeCategory === category.key ? styles.activeCategoryButton : {})
+                }}
+              >
+                <span style={styles.categoryIcon}>{category.icon}</span>
+                {category.name}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {/* FAQ Content */}
+        <section style={styles.faqSection}>
+          <div style={styles.faqContent}>
+            <h2 style={styles.faqCategoryTitle}>
+              {categories.find(cat => cat.key === activeCategory)?.name} Questions
             </h2>
             
-            {category.questions.map((faq, faqIndex) => {
-              const globalIndex = `${categoryIndex}-${faqIndex}`;
-              const isOpen = openFAQ === globalIndex;
-              
-              return (
-                <div key={faqIndex} style={styles.faqItem}>
+            <div style={styles.faqList}>
+              {faqData[activeCategory]?.map((faq, index) => (
+                <div key={index} style={styles.faqItem}>
                   <button
+                    onClick={() => toggleQuestion(index)}
                     style={styles.questionButton}
-                    onClick={() => toggleFAQ(globalIndex)}
                   >
                     <span style={styles.questionText}>{faq.question}</span>
                     <span style={{
-                      ...styles.toggleIcon,
-                      transform: isOpen ? 'rotate(45deg)' : 'rotate(0deg)'
+                      ...styles.questionIcon,
+                      transform: openQuestion === index ? 'rotate(180deg)' : 'rotate(0deg)'
                     }}>
-                      {isOpen ? '−' : '+'}
+                      ▼
                     </span>
                   </button>
                   
-                  {isOpen && (
-                    <div style={styles.answer}>
-                      {faq.answer}
+                  {openQuestion === index && (
+                    <div style={styles.answerContent}>
+                      <p style={styles.answerText}>{faq.answer}</p>
                     </div>
                   )}
                 </div>
-              );
-            })}
+              ))}
+            </div>
           </div>
-        ))}
+        </section>
 
-        <div style={styles.contactSection}>
-          <h2 style={styles.contactTitle}>Still Have Questions?</h2>
-          <p style={styles.contactText}>
-            Our customer service team is here to help you with any questions 
-            not covered in our FAQ section.
+        {/* Quick Links */}
+        <section style={styles.quickLinksSection}>
+          <div style={styles.quickLinksContent}>
+            <h2 style={styles.quickLinksTitle}>Still Need Help?</h2>
+            <div style={styles.quickLinksGrid}>
+              <Link href="/support" style={styles.quickLink}>
+                <div style={styles.quickLinkIcon}>💬</div>
+                <h3 style={styles.quickLinkTitle}>Contact Support</h3>
+                <p style={styles.quickLinkDesc}>Chat with our support team</p>
+              </Link>
+              
+              <a href="tel:+1-800-OAKLINE" style={styles.quickLink}>
+                <div style={styles.quickLinkIcon}>📞</div>
+                <h3 style={styles.quickLinkTitle}>Call Us</h3>
+                <p style={styles.quickLinkDesc}>1-800-OAKLINE (24/7)</p>
+              </a>
+              
+              <Link href="/branch-locator" style={styles.quickLink}>
+                <div style={styles.quickLinkIcon}>🏢</div>
+                <h3 style={styles.quickLinkTitle}>Visit a Branch</h3>
+                <p style={styles.quickLinkDesc}>Find locations near you</p>
+              </Link>
+              
+              <Link href="/account-types" style={styles.quickLink}>
+                <div style={styles.quickLinkIcon}>📚</div>
+                <h3 style={styles.quickLinkTitle}>Account Information</h3>
+                <p style={styles.quickLinkDesc}>Learn about our accounts</p>
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* Contact Information */}
+        <section style={styles.contactSection}>
+          <div style={styles.contactContent}>
+            <h2 style={styles.contactTitle}>Contact Information</h2>
+            <div style={styles.contactGrid}>
+              <div style={styles.contactItem}>
+                <strong>Customer Service:</strong> 1-800-OAKLINE
+              </div>
+              <div style={styles.contactItem}>
+                <strong>Email:</strong> support@theoaklinebank.com
+              </div>
+              <div style={styles.contactItem}>
+                <strong>Routing Number:</strong> 075915826
+              </div>
+              <div style={styles.contactItem}>
+                <strong>Hours:</strong> 24/7 Support Available
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      {/* Footer */}
+      <footer style={styles.footer}>
+        <div style={styles.footerContent}>
+          <p style={styles.footerText}>
+            © 2024 Oakline Bank. All rights reserved. Member FDIC. Equal Housing Lender.
           </p>
-          <div style={styles.contactButtons}>
-            <Link href="/support" style={{...styles.contactButton, ...styles.primaryButton}}>
-              💬 Contact Support
-            </Link>
-            <Link href="tel:1-800-OAKLINE" style={{...styles.contactButton, ...styles.secondaryButton}}>
-              📞 Call Us Now
-            </Link>
-          </div>
         </div>
-      </div>
-
-      <Footer />
+      </footer>
     </div>
   );
 }
+
+const styles = {
+  container: {
+    minHeight: '100vh',
+    backgroundColor: '#f8fafc',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+  },
+  header: {
+    backgroundColor: '#1e40af',
+    color: 'white',
+    padding: '1rem 1.5rem',
+    boxShadow: '0 4px 12px rgba(30, 64, 175, 0.2)'
+  },
+  headerContent: {
+    maxWidth: '1400px',
+    margin: '0 auto',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    flexWrap: 'wrap'
+  },
+  logoContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '1rem',
+    textDecoration: 'none',
+    color: 'white'
+  },
+  logo: {
+    height: '50px',
+    width: 'auto'
+  },
+  brandInfo: {
+    display: 'flex',
+    flexDirection: 'column'
+  },
+  bankName: {
+    fontSize: '1.5rem',
+    fontWeight: 'bold'
+  },
+  tagline: {
+    fontSize: '0.9rem',
+    color: '#bfdbfe'
+  },
+  headerActions: {
+    display: 'flex',
+    gap: '1rem'
+  },
+  headerButton: {
+    padding: '0.5rem 1rem',
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    color: 'white',
+    textDecoration: 'none',
+    borderRadius: '6px',
+    fontSize: '0.9rem',
+    fontWeight: '500',
+    transition: 'all 0.3s ease'
+  },
+  heroSection: {
+    background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
+    color: 'white',
+    padding: '3rem 1.5rem',
+    textAlign: 'center'
+  },
+  heroContent: {
+    maxWidth: '800px',
+    margin: '0 auto'
+  },
+  heroTitle: {
+    fontSize: '2.5rem',
+    fontWeight: 'bold',
+    marginBottom: '1rem'
+  },
+  heroSubtitle: {
+    fontSize: '1.1rem',
+    opacity: 0.9,
+    lineHeight: '1.6'
+  },
+  main: {
+    maxWidth: '1200px',
+    margin: '0 auto',
+    padding: '0 1.5rem'
+  },
+  categorySection: {
+    padding: '2rem 0'
+  },
+  categoryNav: {
+    display: 'flex',
+    gap: '0.5rem',
+    justifyContent: 'center',
+    flexWrap: 'wrap'
+  },
+  categoryButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    padding: '1rem 1.5rem',
+    backgroundColor: 'white',
+    color: '#64748b',
+    border: '2px solid #e2e8f0',
+    borderRadius: '12px',
+    cursor: 'pointer',
+    fontSize: '1rem',
+    fontWeight: '600',
+    transition: 'all 0.3s ease'
+  },
+  activeCategoryButton: {
+    backgroundColor: '#1e40af',
+    color: 'white',
+    borderColor: '#1e40af'
+  },
+  categoryIcon: {
+    fontSize: '1.2rem'
+  },
+  faqSection: {
+    padding: '2rem 0'
+  },
+  faqContent: {
+    backgroundColor: 'white',
+    borderRadius: '12px',
+    padding: '2rem',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+    border: '1px solid #e2e8f0'
+  },
+  faqCategoryTitle: {
+    fontSize: '1.8rem',
+    fontWeight: 'bold',
+    color: '#1e293b',
+    marginBottom: '2rem',
+    textAlign: 'center'
+  },
+  faqList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1rem'
+  },
+  faqItem: {
+    border: '1px solid #e2e8f0',
+    borderRadius: '8px',
+    overflow: 'hidden'
+  },
+  questionButton: {
+    width: '100%',
+    padding: '1.5rem',
+    backgroundColor: '#f8fafc',
+    border: 'none',
+    cursor: 'pointer',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    fontSize: '1rem',
+    fontWeight: '600',
+    color: '#1e293b',
+    transition: 'all 0.3s ease'
+  },
+  questionText: {
+    textAlign: 'left',
+    flex: 1
+  },
+  questionIcon: {
+    fontSize: '0.8rem',
+    color: '#64748b',
+    transition: 'transform 0.3s ease'
+  },
+  answerContent: {
+    padding: '1.5rem',
+    backgroundColor: 'white',
+    borderTop: '1px solid #e2e8f0'
+  },
+  answerText: {
+    color: '#64748b',
+    lineHeight: '1.6',
+    margin: 0
+  },
+  quickLinksSection: {
+    padding: '3rem 0'
+  },
+  quickLinksContent: {
+    textAlign: 'center'
+  },
+  quickLinksTitle: {
+    fontSize: '2rem',
+    fontWeight: 'bold',
+    color: '#1e293b',
+    marginBottom: '2rem'
+  },
+  quickLinksGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+    gap: '1.5rem'
+  },
+  quickLink: {
+    display: 'block',
+    backgroundColor: 'white',
+    padding: '2rem',
+    borderRadius: '12px',
+    textDecoration: 'none',
+    color: 'inherit',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+    border: '1px solid #e2e8f0',
+    transition: 'all 0.3s ease',
+    textAlign: 'center'
+  },
+  quickLinkIcon: {
+    fontSize: '2.5rem',
+    marginBottom: '1rem'
+  },
+  quickLinkTitle: {
+    fontSize: '1.2rem',
+    fontWeight: 'bold',
+    color: '#1e40af',
+    marginBottom: '0.5rem'
+  },
+  quickLinkDesc: {
+    color: '#64748b',
+    margin: 0
+  },
+  contactSection: {
+    padding: '2rem 0',
+    backgroundColor: 'white',
+    borderRadius: '12px',
+    margin: '2rem 0'
+  },
+  contactContent: {
+    padding: '2rem',
+    textAlign: 'center'
+  },
+  contactTitle: {
+    fontSize: '1.5rem',
+    fontWeight: 'bold',
+    color: '#1e293b',
+    marginBottom: '1.5rem'
+  },
+  contactGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+    gap: '1rem'
+  },
+  contactItem: {
+    color: '#64748b',
+    fontSize: '1rem'
+  },
+  footer: {
+    backgroundColor: '#1f2937',
+    color: 'white',
+    padding: '2rem 1.5rem',
+    textAlign: 'center'
+  },
+  footerContent: {
+    maxWidth: '1400px',
+    margin: '0 auto'
+  },
+  footerText: {
+    color: '#d1d5db',
+    fontSize: '0.9rem'
+  }
+};
