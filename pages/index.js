@@ -169,7 +169,7 @@ export default function Home() {
       color: '#f59e0b'
     },
     {
-      image: '/images/Digital_investment_dashboard_36d35f19.png',
+      image: '/images/professional-mobile-banking-1.png',
       title: 'Investment & Wealth Management',
       description: 'Grow your wealth with professional investment management and comprehensive financial planning services.',
       features: ['Professional Portfolio Management', 'Market Research & Analytics', 'Retirement Planning', 'Tax-Advantaged Accounts'],
@@ -185,7 +185,7 @@ export default function Home() {
       color: '#64748b'
     },
     {
-      image: '/images/Bank_hall_business_discussion_72f98bbe.png',
+      image: '/images/Banking_executive_team_meeting_c758f3ec.png',
       title: 'Expert Financial Advice',
       description: 'Receive personalized guidance from certified financial experts to help you achieve your financial goals.',
       features: ['Personalized Financial Planning', 'Investment Strategy Sessions', 'Retirement Planning', 'Debt Management Advice'],
@@ -193,7 +193,7 @@ export default function Home() {
       color: '#1d4ed8'
     },
     {
-      image: '/images/Modern_bank_lobby_interior_d535acc7.png',
+      image: '/images/professional-mobile-banking-2.png',
       title: 'State-of-the-Art Branches',
       description: 'Experience premium banking services in our modern, technologically advanced branch locations.',
       features: ['Advanced Self-Service Kiosks', 'Comfortable Meeting Spaces', 'High-Speed Wi-Fi', 'On-site Financial Advisors'],
@@ -201,7 +201,7 @@ export default function Home() {
       color: '#059669'
     },
     {
-      image: '/images/Digital_investment_dashboard_36d35f19.png',
+      image: '/images/professional-mobile-banking-3.png',
       title: 'User-Friendly Digital Platform',
       description: 'Navigate your finances with ease through our intuitive and comprehensive online banking platform.',
       features: ['Easy Account Management', 'Seamless Fund Transfers', 'Personalized Financial Dashboard', '24/7 Online Access'],
@@ -209,7 +209,7 @@ export default function Home() {
       color: '#f59e0b'
     },
     {
-      image: '/images/Mobile_banking_user_experience_576bb7a3.png',
+      image: '/images/modern-digital-banking-1.png',
       title: 'Instant Loan Approvals',
       description: 'Get quick access to funds with our streamlined and efficient loan application and approval process.',
       features: ['Fast Online Applications', 'Competitive Interest Rates', 'Flexible Repayment Options', 'Pre-qualification Tools'],
@@ -906,7 +906,7 @@ export default function Home() {
           <div style={styles.professionalsGrid}>
             <div style={styles.professionalCard}>
               <img
-                src="/images/Mobile_banking_user_experience_576bb7a3.png"
+                src="/images/professional-banking-hero-1.png"
                 alt="Professional using Oakline Bank mobile app"
                 style={styles.professionalImage}
               />
@@ -920,7 +920,7 @@ export default function Home() {
 
             <div style={styles.professionalCard}>
               <img
-                src="/images/Bank_hall_business_discussion_72f98bbe.png"
+                src="/images/Small_business_loan_approval_6e0d9c2c.png"
                 alt="Business professionals discussing banking solutions"
                 style={styles.professionalImage}
               />
@@ -934,8 +934,8 @@ export default function Home() {
 
             <div style={styles.professionalCard}>
               <img
-                src="/images/Digital_investment_dashboard_36d35f19.png"
-                alt="Digital investment dashboard interface"
+                src="/images/Global_currency_exchange_7f8b1e6c.png"
+                alt="Global currency exchange interface"
                 style={styles.professionalImage}
               />
               <div style={styles.professionalContent}>
