@@ -269,63 +269,65 @@ export default function Home() {
               </button>
 
               {activeDropdown === 'nav' && (
-                <div style={styles.dropdownMenu}>
-                  <div style={styles.dropdownSection}>
-                    <h4 style={styles.dropdownSectionTitle}>🏦 Banking Services</h4>
-                    <Link href="/account-types" style={styles.dropdownItem}>
-                      <span style={styles.dropdownItemIcon}>📋</span>
-                      All 23 Account Types
-                    </Link>
-                    <Link href="/loans" style={styles.dropdownItem}>
-                      <span style={styles.dropdownItemIcon}>💰</span>
-                      Loans & Credit
-                    </Link>
-                    <Link href="/cards" style={styles.dropdownItem}>
-                      <span style={styles.dropdownItemIcon}>💳</span>
-                      Credit & Debit Cards
-                    </Link>
-                    <Link href="/investments" style={styles.dropdownItem}>
-                      <span style={styles.dropdownItemIcon}>📈</span>
-                      Investment Portfolio
-                    </Link>
-                  </div>
-                  <div style={styles.dropdownSection}>
-                    <h4 style={styles.dropdownSectionTitle}>💸 Digital Services</h4>
-                    <Link href="/transfer" style={styles.dropdownItem}>
-                      <span style={styles.dropdownItemIcon}>🔄</span>
-                      Money Transfer
-                    </Link>
-                    <Link href="/bill-pay" style={styles.dropdownItem}>
-                      <span style={styles.dropdownItemIcon}>🧾</span>
-                      Pay Bills Online
-                    </Link>
-                    <Link href="/deposit-real" style={styles.dropdownItem}>
-                      <span style={styles.dropdownItemIcon}>📱</span>
-                      Mobile Deposit
-                    </Link>
-                    <Link href="/crypto" style={styles.dropdownItem}>
-                      <span style={styles.dropdownItemIcon}>₿</span>
-                      Cryptocurrency
-                    </Link>
-                  </div>
-                  <div style={styles.dropdownSection}>
-                    <h4 style={styles.dropdownSectionTitle}>🎧 Support & More</h4>
-                    <Link href="/support" style={styles.dropdownItem}>
-                      <span style={styles.dropdownItemIcon}>🎧</span>
-                      Customer Support
-                    </Link>
-                    <Link href="/branch-locator" style={styles.dropdownItem}>
-                      <span style={styles.dropdownItemIcon}>📍</span>
-                      Find Branches
-                    </Link>
-                    <Link href="/security" style={styles.dropdownItem}>
-                      <span style={styles.dropdownItemIcon}>🔒</span>
-                      Security Center
-                    </Link>
-                    <Link href="/about" style={styles.dropdownItem}>
-                      <span style={styles.dropdownItemIcon}>ℹ️</span>
-                      About Oakline Bank
-                    </Link>
+                <div style={styles.dropdownMenu} onClick={(e) => e.stopPropagation()}>
+                  <div style={styles.dropdownGrid}>
+                    <div style={styles.dropdownSection}>
+                      <h4 style={styles.dropdownSectionTitle}>🏦 Banking Services</h4>
+                      <Link href="/account-types" style={styles.dropdownItem} onClick={() => setActiveDropdown(null)}>
+                        <span style={styles.dropdownItemIcon}>📋</span>
+                        All 23 Account Types
+                      </Link>
+                      <Link href="/loans" style={styles.dropdownItem} onClick={() => setActiveDropdown(null)}>
+                        <span style={styles.dropdownItemIcon}>💰</span>
+                        Loans & Credit
+                      </Link>
+                      <Link href="/cards" style={styles.dropdownItem} onClick={() => setActiveDropdown(null)}>
+                        <span style={styles.dropdownItemIcon}>💳</span>
+                        Credit & Debit Cards
+                      </Link>
+                      <Link href="/investments" style={styles.dropdownItem} onClick={() => setActiveDropdown(null)}>
+                        <span style={styles.dropdownItemIcon}>📈</span>
+                        Investment Portfolio
+                      </Link>
+                    </div>
+                    <div style={styles.dropdownSection}>
+                      <h4 style={styles.dropdownSectionTitle}>💸 Digital Services</h4>
+                      <Link href="/transfer" style={styles.dropdownItem} onClick={() => setActiveDropdown(null)}>
+                        <span style={styles.dropdownItemIcon}>🔄</span>
+                        Money Transfer
+                      </Link>
+                      <Link href="/bill-pay" style={styles.dropdownItem} onClick={() => setActiveDropdown(null)}>
+                        <span style={styles.dropdownItemIcon}>🧾</span>
+                        Pay Bills Online
+                      </Link>
+                      <Link href="/deposit-real" style={styles.dropdownItem} onClick={() => setActiveDropdown(null)}>
+                        <span style={styles.dropdownItemIcon}>📱</span>
+                        Mobile Deposit
+                      </Link>
+                      <Link href="/crypto" style={styles.dropdownItem} onClick={() => setActiveDropdown(null)}>
+                        <span style={styles.dropdownItemIcon}>₿</span>
+                        Cryptocurrency
+                      </Link>
+                    </div>
+                    <div style={styles.dropdownSection}>
+                      <h4 style={styles.dropdownSectionTitle}>🎧 Support & More</h4>
+                      <Link href="/support" style={styles.dropdownItem} onClick={() => setActiveDropdown(null)}>
+                        <span style={styles.dropdownItemIcon}>🎧</span>
+                        Customer Support
+                      </Link>
+                      <Link href="/branch-locator" style={styles.dropdownItem} onClick={() => setActiveDropdown(null)}>
+                        <span style={styles.dropdownItemIcon}>📍</span>
+                        Find Branches
+                      </Link>
+                      <Link href="/security" style={styles.dropdownItem} onClick={() => setActiveDropdown(null)}>
+                        <span style={styles.dropdownItemIcon}>🔒</span>
+                        Security Center
+                      </Link>
+                      <Link href="/about" style={styles.dropdownItem} onClick={() => setActiveDropdown(null)}>
+                        <span style={styles.dropdownItemIcon}>ℹ️</span>
+                        About Oakline Bank
+                      </Link>
+                    </div>
                   </div>
                 </div>
               )}
@@ -631,9 +633,110 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Professional Features Section */}
+      <section style={styles.professionalFeaturesSection} id="professional-features" data-animate>
+        <div style={styles.container}>
+          <div style={{
+            ...styles.sectionHeader,
+            ...(isVisible['professional-features'] ? styles.fadeInUp : {})
+          }}>
+            <h2 style={styles.sectionTitle}>Why Choose Oakline Bank?</h2>
+            <p style={styles.sectionSubtitle}>
+              Experience the future of banking with cutting-edge technology and personalized service
+            </p>
+            <div style={styles.titleUnderline}></div>
+          </div>
+
+          <div style={styles.featuresGrid}>
+            {[
+              {
+                icon: '🔒',
+                title: 'Bank-Level Security',
+                description: 'Advanced encryption and multi-factor authentication protect your financial data.',
+                metric: '256-bit SSL',
+                color: '#1a365d'
+              },
+              {
+                icon: '⚡',
+                title: 'Instant Transfers',
+                description: 'Send money instantly to anyone, anywhere with our real-time payment system.',
+                metric: '< 1 second',
+                color: '#059669'
+              },
+              {
+                icon: '📱',
+                title: 'Mobile-First Banking',
+                description: 'Full banking functionality in your pocket with our award-winning mobile app.',
+                metric: '4.9★ Rating',
+                color: '#d97706'
+              },
+              {
+                icon: '💼',
+                title: 'Business Solutions',
+                description: 'Comprehensive business banking tools for entrepreneurs and corporations.',
+                metric: '50K+ Businesses',
+                color: '#1a365d'
+              },
+              {
+                icon: '🌍',
+                title: 'Global Reach',
+                description: 'Access your account from anywhere in the world with 24/7 customer support.',
+                metric: '190+ Countries',
+                color: '#059669'
+              },
+              {
+                icon: '📊',
+                title: 'Smart Analytics',
+                description: 'AI-powered insights to help you track spending and achieve financial goals.',
+                metric: 'Real-time Data',
+                color: '#d97706'
+              }
+            ].map((feature, index) => (
+              <div 
+                key={index}
+                style={{
+                  ...styles.professionalFeatureCard,
+                  ...(isVisible['professional-features'] ? {
+                    ...styles.slideInFromBottom,
+                    animationDelay: `${index * 0.1}s`
+                  } : {})
+                }}
+              >
+                <div style={{...styles.featureIconBadge, backgroundColor: feature.color}}>
+                  <span style={styles.featureIconLarge}>{feature.icon}</span>
+                </div>
+                <h3 style={styles.professionalFeatureTitle}>{feature.title}</h3>
+                <p style={styles.professionalFeatureDesc}>{feature.description}</p>
+                <div style={{...styles.featureMetric, borderColor: feature.color}}>
+                  <span style={{...styles.metricText, color: feature.color}}>{feature.metric}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div style={styles.enrollmentSection}>
+            <div style={styles.enrollmentCard}>
+              <h3 style={styles.enrollmentTitle}>Ready to Experience Modern Banking?</h3>
+              <p style={styles.enrollmentSubtitle}>
+                Join over 500,000 satisfied customers who trust Oakline Bank for their financial needs
+              </p>
+              <div style={styles.enrollmentButtons}>
+                <Link href="/apply" style={styles.enrollmentButtonPrimary}>
+                  <span style={styles.buttonIcon}>🚀</span>
+                  Open Account Today
+                </Link>
+                <Link href="/support" style={styles.enrollmentButtonSecondary}>
+                  <span style={styles.buttonIcon}>💬</span>
+                  Contact Us
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Enhanced Services Section */}
       <ServicesSection />
-      <FeaturesSection />
 
       {/* Enhanced Loan Section with Better Imagery */}
       <LoanApprovalSection />
@@ -1825,6 +1928,187 @@ const styles = {
     animation: 'pulseGlow 2s ease-in-out infinite'
   },
 
+  // Professional Features Section
+  professionalFeaturesSection: {
+    padding: 'clamp(4rem, 8vw, 6rem) 0',
+    backgroundColor: '#ffffff',
+    width: '100%',
+    position: 'relative'
+  },
+  featuresGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 350px), 1fr))',
+    gap: '2rem',
+    marginBottom: '4rem'
+  },
+  professionalFeatureCard: {
+    backgroundColor: 'white',
+    padding: '2.5rem',
+    borderRadius: '16px',
+    textAlign: 'center',
+    boxShadow: '0 8px 25px rgba(26, 54, 93, 0.08)',
+    border: '2px solid #e2e8f0',
+    transition: 'all 0.4s ease',
+    position: 'relative',
+    overflow: 'hidden',
+    transform: 'translateY(50px)',
+    opacity: 0
+  },
+  featureIconBadge: {
+    width: '80px',
+    height: '80px',
+    borderRadius: '50%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    margin: '0 auto 1.5rem',
+    position: 'relative',
+    boxShadow: '0 8px 20px rgba(0,0,0,0.1)'
+  },
+  featureIconLarge: {
+    fontSize: '2.2rem',
+    color: 'white'
+  },
+  professionalFeatureTitle: {
+    fontSize: '1.4rem',
+    fontWeight: '800',
+    color: '#1a365d',
+    marginBottom: '1rem',
+    letterSpacing: '-0.01em'
+  },
+  professionalFeatureDesc: {
+    fontSize: '1rem',
+    color: '#64748b',
+    lineHeight: '1.6',
+    marginBottom: '1.5rem'
+  },
+  featureMetric: {
+    display: 'inline-block',
+    padding: '0.8rem 1.5rem',
+    borderRadius: '25px',
+    border: '2px solid',
+    backgroundColor: 'rgba(255,255,255,0.8)',
+    backdropFilter: 'blur(10px)'
+  },
+  metricText: {
+    fontSize: '1rem',
+    fontWeight: '800',
+    letterSpacing: '0.5px'
+  },
+
+  // Enrollment Section
+  enrollmentSection: {
+    textAlign: 'center'
+  },
+  enrollmentCard: {
+    backgroundColor: '#f8fafc',
+    padding: 'clamp(2.5rem, 5vw, 4rem)',
+    borderRadius: '24px',
+    maxWidth: '800px',
+    margin: '0 auto',
+    border: '2px solid #e2e8f0',
+    boxShadow: '0 10px 30px rgba(26, 54, 93, 0.1)'
+  },
+  enrollmentTitle: {
+    fontSize: 'clamp(1.8rem, 4vw, 2.5rem)',
+    fontWeight: '900',
+    color: '#1a365d',
+    marginBottom: '1rem',
+    letterSpacing: '-0.02em'
+  },
+  enrollmentSubtitle: {
+    fontSize: 'clamp(1rem, 2.5vw, 1.2rem)',
+    color: '#64748b',
+    marginBottom: '2.5rem',
+    lineHeight: '1.6'
+  },
+  enrollmentButtons: {
+    display: 'flex',
+    gap: '1.5rem',
+    justifyContent: 'center',
+    flexWrap: 'wrap'
+  },
+  enrollmentButtonPrimary: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.8rem',
+    padding: 'clamp(1rem, 2.5vw, 1.3rem) clamp(1.5rem, 4vw, 2.5rem)',
+    background: 'linear-gradient(135deg, #1a365d 0%, #059669 100%)',
+    color: 'white',
+    textDecoration: 'none',
+    borderRadius: '12px',
+    fontSize: 'clamp(1rem, 2.2vw, 1.1rem)',
+    fontWeight: '800',
+    boxShadow: '0 8px 25px rgba(26, 54, 93, 0.3)',
+    transition: 'all 0.3s ease',
+    border: 'none',
+    transform: 'translateY(0)'
+  },
+  enrollmentButtonSecondary: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.8rem',
+    padding: 'clamp(1rem, 2.5vw, 1.3rem) clamp(1.5rem, 4vw, 2.5rem)',
+    backgroundColor: 'transparent',
+    color: '#1a365d',
+    textDecoration: 'none',
+    borderRadius: '12px',
+    fontSize: 'clamp(1rem, 2.2vw, 1.1rem)',
+    fontWeight: '800',
+    border: '2px solid #1a365d',
+    transition: 'all 0.3s ease'
+  },
+
+  // Dropdown Menu Fixes
+  dropdownMenu: {
+    position: 'absolute',
+    top: 'calc(100% + 0.5rem)',
+    right: 0,
+    backgroundColor: 'white',
+    borderRadius: '16px',
+    boxShadow: '0 20px 40px rgba(26, 54, 93, 0.2)',
+    border: '2px solid #e2e8f0',
+    padding: '2rem',
+    minWidth: '400px',
+    zIndex: 1000,
+    animation: 'dropdownSlideIn 0.3s ease-out'
+  },
+  dropdownGrid: {
+    display: 'grid',
+    gridTemplateColumns: '1fr',
+    gap: '2rem'
+  },
+  dropdownSection: {
+    borderBottom: '1px solid #e2e8f0',
+    paddingBottom: '1.5rem'
+  },
+  dropdownSectionTitle: {
+    fontSize: '1rem',
+    fontWeight: '800',
+    color: '#1a365d',
+    marginBottom: '1rem',
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px'
+  },
+  dropdownItem: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '1rem',
+    padding: '1rem',
+    color: '#64748b',
+    textDecoration: 'none',
+    fontSize: '0.95rem',
+    fontWeight: '600',
+    borderRadius: '10px',
+    transition: 'all 0.3s ease',
+    margin: '0.25rem 0'
+  },
+  dropdownItemIcon: {
+    fontSize: '1.2rem',
+    width: '24px',
+    textAlign: 'center'
+  },
+
   // Mobile Responsive Styles
   '@media (max-width: 768px)': {
     headerContainer: {
@@ -1873,7 +2157,27 @@ const styles = {
       top: '100%',
       left: '1rem',
       right: '1rem',
-      width: 'auto'
+      width: 'auto',
+      minWidth: 'auto'
+    },
+    dropdownGrid: {
+      gridTemplateColumns: '1fr'
+    },
+    featuresGrid: {
+      gridTemplateColumns: '1fr',
+      gap: '1.5rem'
+    },
+    enrollmentButtons: {
+      flexDirection: 'column',
+      gap: '1rem'
+    },
+    enrollmentButtonPrimary: {
+      width: '100%',
+      justifyContent: 'center'
+    },
+    enrollmentButtonSecondary: {
+      width: '100%',
+      justifyContent: 'center'
     },
     heroSection: {
       height: 'auto',
