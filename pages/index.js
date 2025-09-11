@@ -270,25 +270,61 @@ export default function Home() {
               {activeDropdown === 'nav' && (
                 <div style={styles.dropdownMenu}>
                   <div style={styles.dropdownSection}>
-                    <h4 style={styles.dropdownSectionTitle}>Banking</h4>
-                    <Link href="/account-types" style={styles.dropdownItem}>All Account Types</Link>
-                    <Link href="/loans" style={styles.dropdownItem}>Loans & Credit</Link>
-                    <Link href="/cards" style={styles.dropdownItem}>Credit Cards</Link>
-                    <Link href="/investments" style={styles.dropdownItem}>Investments</Link>
+                    <h4 style={styles.dropdownSectionTitle}>🏦 Banking Services</h4>
+                    <Link href="/account-types" style={styles.dropdownItem}>
+                      <span style={styles.dropdownItemIcon}>📋</span>
+                      All 23 Account Types
+                    </Link>
+                    <Link href="/loans" style={styles.dropdownItem}>
+                      <span style={styles.dropdownItemIcon}>💰</span>
+                      Loans & Credit
+                    </Link>
+                    <Link href="/cards" style={styles.dropdownItem}>
+                      <span style={styles.dropdownItemIcon}>💳</span>
+                      Credit & Debit Cards
+                    </Link>
+                    <Link href="/investments" style={styles.dropdownItem}>
+                      <span style={styles.dropdownItemIcon}>📈</span>
+                      Investment Portfolio
+                    </Link>
                   </div>
                   <div style={styles.dropdownSection}>
-                    <h4 style={styles.dropdownSectionTitle}>Services</h4>
-                    <Link href="/transfer" style={styles.dropdownItem}>Money Transfer</Link>
-                    <Link href="/bill-pay" style={styles.dropdownItem}>Bill Pay</Link>
-                    <Link href="/crypto" style={styles.dropdownItem}>Cryptocurrency</Link>
-                    <Link href="/financial-advisory" style={styles.dropdownItem}>Financial Advisory</Link>
+                    <h4 style={styles.dropdownSectionTitle}>💸 Digital Services</h4>
+                    <Link href="/transfer" style={styles.dropdownItem}>
+                      <span style={styles.dropdownItemIcon}>🔄</span>
+                      Money Transfer
+                    </Link>
+                    <Link href="/bill-pay" style={styles.dropdownItem}>
+                      <span style={styles.dropdownItemIcon}>🧾</span>
+                      Pay Bills Online
+                    </Link>
+                    <Link href="/deposit-real" style={styles.dropdownItem}>
+                      <span style={styles.dropdownItemIcon}>📱</span>
+                      Mobile Deposit
+                    </Link>
+                    <Link href="/crypto" style={styles.dropdownItem}>
+                      <span style={styles.dropdownItemIcon}>₿</span>
+                      Cryptocurrency
+                    </Link>
                   </div>
                   <div style={styles.dropdownSection}>
-                    <h4 style={styles.dropdownSectionTitle}>Support</h4>
-                    <Link href="/support" style={styles.dropdownItem}>Customer Support</Link>
-                    <Link href="/faq" style={styles.dropdownItem}>FAQ</Link>
-                    <Link href="/security" style={styles.dropdownItem}>Security Center</Link>
-                    <Link href="/about" style={styles.dropdownItem}>About Us</Link>
+                    <h4 style={styles.dropdownSectionTitle}>🎧 Support & More</h4>
+                    <Link href="/support" style={styles.dropdownItem}>
+                      <span style={styles.dropdownItemIcon}>🎧</span>
+                      Customer Support
+                    </Link>
+                    <Link href="/branch-locator" style={styles.dropdownItem}>
+                      <span style={styles.dropdownItemIcon}>📍</span>
+                      Find Branches
+                    </Link>
+                    <Link href="/security" style={styles.dropdownItem}>
+                      <span style={styles.dropdownItemIcon}>🔒</span>
+                      Security Center
+                    </Link>
+                    <Link href="/about" style={styles.dropdownItem}>
+                      <span style={styles.dropdownItemIcon}>ℹ️</span>
+                      About Oakline Bank
+                    </Link>
                   </div>
                 </div>
               )}
@@ -749,12 +785,12 @@ const styles = {
     alignItems: 'center',
     gap: '0.5rem',
     padding: '0.75rem 1.5rem',
-    backgroundColor: '#059669',
-    border: '2px solid #047857',
+    backgroundColor: 'white',
+    border: '2px solid #1a365d',
     borderRadius: '10px',
     fontSize: '1rem',
     fontWeight: '600',
-    color: 'white',
+    color: '#1a365d',
     cursor: 'pointer',
     transition: 'all 0.3s ease'
   },
@@ -794,13 +830,22 @@ const styles = {
     letterSpacing: '0.5px'
   },
   dropdownItem: {
-    display: 'block',
-    padding: '0.5rem 0',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.75rem',
+    padding: '0.75rem 1rem',
     color: '#64748b',
     textDecoration: 'none',
     fontSize: '0.9rem',
     fontWeight: '500',
-    transition: 'color 0.3s ease'
+    borderRadius: '8px',
+    transition: 'all 0.3s ease',
+    margin: '0.25rem 0'
+  },
+  dropdownItemIcon: {
+    fontSize: '1rem',
+    width: '20px',
+    textAlign: 'center'
   },
   authButtons: {
     display: 'flex',
