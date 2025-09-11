@@ -103,56 +103,56 @@ export default function Home() {
       title: 'Convenient ATM Network Access',
       subtitle: 'Access your money 24/7 at thousands of locations nationwide with zero fees',
       icon: '🏧',
-      gradient: 'linear-gradient(135deg, rgba(26, 54, 93, 0.8) 0%, rgba(5, 150, 105, 0.8) 100%)'
+      gradient: 'linear-gradient(135deg, rgba(26, 54, 93, 0.3) 0%, rgba(26, 54, 93, 0.4) 100%)'
     },
     {
       src: '/images/mobile_banking_app.png',
       title: 'Oakline Mobile Banking',
       subtitle: 'Complete banking control right in your pocket with our award-winning app',
       icon: '📱',
-      gradient: 'linear-gradient(135deg, rgba(26, 54, 93, 0.8) 0%, rgba(5, 150, 105, 0.8) 100%)'
+      gradient: 'linear-gradient(135deg, rgba(26, 54, 93, 0.3) 0%, rgba(26, 54, 93, 0.4) 100%)'
     },
     {
       src: '/images/handshake_business_deal.png',
       title: 'Professional Banking Partnership',
       subtitle: 'Building trust through personalized financial solutions and expert guidance',
       icon: '🤝',
-      gradient: 'linear-gradient(135deg, rgba(26, 54, 93, 0.8) 0%, rgba(5, 150, 105, 0.8) 100%)'
+      gradient: 'linear-gradient(135deg, rgba(26, 54, 93, 0.3) 0%, rgba(26, 54, 93, 0.4) 100%)'
     },
     {
       src: '/images/atm_withdrawal_transaction.png',
       title: 'Secure Transaction Processing',
       subtitle: 'Bank with confidence using our advanced security and fraud protection',
       icon: '🔒',
-      gradient: 'linear-gradient(135deg, rgba(26, 54, 93, 0.8) 0%, rgba(5, 150, 105, 0.8) 100%)'
+      gradient: 'linear-gradient(135deg, rgba(26, 54, 93, 0.3) 0%, rgba(26, 54, 93, 0.4) 100%)'
     },
     {
       src: '/images/Bank_hall_business_discussion_72f98bbe.png',
       title: 'Expert Financial Consultation',
       subtitle: 'Professional advice from certified banking specialists in our modern branches',
       icon: '💼',
-      gradient: 'linear-gradient(135deg, rgba(26, 54, 93, 0.8) 0%, rgba(5, 150, 105, 0.8) 100%)'
+      gradient: 'linear-gradient(135deg, rgba(26, 54, 93, 0.3) 0%, rgba(26, 54, 93, 0.4) 100%)'
     },
     {
       src: '/images/Modern_bank_lobby_interior_d535acc7.png',
       title: 'Modern Banking Facilities',
       subtitle: 'Experience premium banking in our state-of-the-art branch locations',
       icon: '🏦',
-      gradient: 'linear-gradient(135deg, rgba(26, 54, 93, 0.8) 0%, rgba(5, 150, 105, 0.8) 100%)'
+      gradient: 'linear-gradient(135deg, rgba(26, 54, 93, 0.3) 0%, rgba(26, 54, 93, 0.4) 100%)'
     },
     {
       src: '/images/Digital_investment_dashboard_36d35f19.png',
       title: 'Advanced Investment Platform',
       subtitle: 'Grow your wealth with cutting-edge investment tools and real-time analytics',
       icon: '📊',
-      gradient: 'linear-gradient(135deg, rgba(26, 54, 93, 0.8) 0%, rgba(5, 150, 105, 0.8) 100%)'
+      gradient: 'linear-gradient(135deg, rgba(26, 54, 93, 0.3) 0%, rgba(26, 54, 93, 0.4) 100%)'
     },
     {
       src: '/images/Mobile_banking_user_experience_576bb7a3.png',
       title: 'Seamless Digital Experience',
       subtitle: 'Enjoy intuitive banking with our user-friendly mobile and web platforms',
       icon: '⚡',
-      gradient: 'linear-gradient(135deg, rgba(26, 54, 93, 0.8) 0%, rgba(5, 150, 105, 0.8) 100%)'
+      gradient: 'linear-gradient(135deg, rgba(26, 54, 93, 0.3) 0%, rgba(26, 54, 93, 0.4) 100%)'
     }
   ];
 
@@ -820,13 +820,14 @@ const styles = {
   },
   applyButton: {
     padding: '0.6rem 1.2rem',
-    background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
-    color: 'white',
+    backgroundColor: 'white',
+    color: '#1a365d',
     borderRadius: '8px',
     textDecoration: 'none',
     fontSize: '0.9rem',
     fontWeight: '600',
-    boxShadow: '0 4px 12px rgba(4, 120, 87, 0.3)',
+    boxShadow: '0 4px 12px rgba(26, 54, 93, 0.2)',
+    border: '2px solid #1a365d',
     transition: 'all 0.3s ease'
   },
   dashboardButton: {
@@ -834,13 +835,14 @@ const styles = {
     alignItems: 'center',
     gap: '0.5rem',
     padding: '0.6rem 1.2rem',
-    background: 'linear-gradient(135deg, #d97706 0%, #92400e 100%)',
-    color: 'white',
+    backgroundColor: 'white',
+    color: '#1a365d',
     borderRadius: '8px',
     textDecoration: 'none',
     fontSize: '0.9rem',
     fontWeight: '600',
-    boxShadow: '0 4px 12px rgba(146, 64, 14, 0.3)',
+    boxShadow: '0 4px 12px rgba(26, 54, 93, 0.2)',
+    border: '2px solid #1a365d',
     transition: 'all 0.3s ease'
   },
   menuButton: {
@@ -848,13 +850,14 @@ const styles = {
     alignItems: 'center',
     gap: '0.5rem',
     padding: '0.6rem 1.2rem',
-    background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
-    color: 'white',
+    backgroundColor: 'white',
+    color: '#1a365d',
     borderRadius: '8px',
     textDecoration: 'none',
     fontSize: '0.9rem',
     fontWeight: '600',
-    boxShadow: '0 4px 12px rgba(139, 92, 246, 0.3)',
+    boxShadow: '0 4px 12px rgba(26, 54, 93, 0.2)',
+    border: '2px solid #1a365d',
     transition: 'all 0.3s ease'
   },
   buttonIcon: {
@@ -1018,7 +1021,7 @@ const styles = {
     transition: 'all 1.2s ease-in-out',
     transform: 'scale(1.05)',
     animation: 'heroImageFloat 20s ease-in-out infinite',
-    filter: 'grayscale(20%) opacity(0.3)'
+    filter: 'grayscale(10%) brightness(1.1) opacity(0.8)'
   },
   heroOverlay: {
     position: 'absolute',
@@ -1026,7 +1029,7 @@ const styles = {
     left: 0,
     right: 0,
     bottom: 0,
-    background: 'linear-gradient(135deg, rgba(26, 54, 93, 0.85) 0%, rgba(5, 150, 105, 0.85) 100%)',
+    background: 'linear-gradient(135deg, rgba(26, 54, 93, 0.3) 0%, rgba(26, 54, 93, 0.4) 100%)',
     opacity: 1
   },
   heroContent: {
