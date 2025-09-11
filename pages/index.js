@@ -1648,16 +1648,18 @@ const styles = {
     gap: '1.5rem'
   },
   accountCard: {
-    backgroundColor: 'white',
-    borderRadius: '16px',
-    overflow: 'hidden',
-    boxShadow: '0 10px 25px rgba(0,0,0,0.08)',
-    border: '2px solid #e2e8f0',
-    transition: 'all 0.4s ease',
-    cursor: 'pointer',
+    background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
+    borderRadius: '20px',
+    padding: '2rem',
+    textAlign: 'center',
+    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
+    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+    border: '1px solid rgba(226, 232, 240, 0.2)',
     position: 'relative',
-    transform: 'scale(0.8) rotateY(90deg)',
-    opacity: 0
+    overflow: 'hidden',
+    backdropFilter: 'blur(20px)',
+    transform: 'translateY(0)',
+    animation: 'fadeInScale 0.8s ease-out forwards'
   },
   flipInY: {
     animation: 'flipInY 0.8s ease-out forwards'
@@ -1676,24 +1678,30 @@ const styles = {
     filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))'
   },
   accountName: {
-    fontSize: '1.1rem',
+    fontSize: 'clamp(1.3rem, 3vw, 1.6rem)',
     fontWeight: '800',
-    color: '#1e293b',
     marginBottom: '0.5rem',
-    letterSpacing: '-0.01em'
+    color: '#ffffff',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '0.5rem'
   },
   accountRate: {
-    fontSize: '1rem',
+    fontSize: 'clamp(0.9rem, 2vw, 1.1rem)',
+    color: '#60a5fa',
     fontWeight: '700',
-    color: '#10b981',
-    marginBottom: '0.5rem'
+    marginBottom: '1rem',
+    background: 'linear-gradient(135deg, #60a5fa 0%, #93c5fd 100%)',
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
+    backgroundClip: 'text'
   },
   accountDesc: {
-    color: '#64748b',
-    fontSize: '0.9rem',
-    marginBottom: '1rem',
-    lineHeight: '1.5',
-    flex: 1
+    fontSize: 'clamp(0.9rem, 2vw, 1rem)',
+    color: '#cbd5e1',
+    marginBottom: '1.5rem',
+    lineHeight: '1.6'
   },
   accountBenefits: {
     backgroundColor: '#f8fafc',

@@ -179,7 +179,7 @@ const styles = {
   },
   heroSlider: {
     position: 'relative',
-    height: '600px',
+    height: '400px',
     overflow: 'hidden',
   },
   slideContainer: {
@@ -212,15 +212,15 @@ const styles = {
     padding: '0 20px',
   },
   heroTitle: {
-    fontSize: '48px',
+    fontSize: '36px',
     fontWeight: 'bold',
     marginBottom: '20px',
     lineHeight: '1.2',
     textShadow: '0 2px 4px rgba(0,0,0,0.3)',
   },
   heroSubtitle: {
-    fontSize: '20px',
-    marginBottom: '40px',
+    fontSize: '18px',
+    marginBottom: '30px',
     opacity: 0.95,
     lineHeight: '1.6',
   },
