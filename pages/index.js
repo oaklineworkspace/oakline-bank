@@ -119,6 +119,27 @@ export default function Home() {
       subtitle: 'Experience premium banking in our state-of-the-art branch locations',
       icon: '🏦',
       gradient: 'linear-gradient(135deg, rgba(26, 54, 93, 0.3) 0%, rgba(26, 54, 93, 0.4) 100%)'
+    },
+    {
+      src: '/images/professional-mobile-banking-1.png',
+      title: 'Professional Mobile Banking',
+      subtitle: 'Secure and intuitive banking designed for busy professionals',
+      icon: '💼',
+      gradient: 'linear-gradient(135deg, rgba(5, 150, 105, 0.3) 0%, rgba(5, 150, 105, 0.4) 100%)'
+    },
+    {
+      src: '/images/professional-mobile-banking-2.png',
+      title: 'Instant Money Transfers',
+      subtitle: 'Send and receive money instantly with our advanced transfer system',
+      icon: '⚡',
+      gradient: 'linear-gradient(135deg, rgba(5, 150, 105, 0.3) 0%, rgba(4, 120, 87, 0.4) 100%)'
+    },
+    {
+      src: '/images/professional-mobile-banking-3.png',
+      title: 'Complete Financial Control',
+      subtitle: 'Manage your entire financial portfolio from one powerful dashboard',
+      icon: '📊',
+      gradient: 'linear-gradient(135deg, rgba(26, 54, 93, 0.3) 0%, rgba(45, 90, 135, 0.4) 100%)'
     }
   ];
 
@@ -308,6 +329,13 @@ export default function Home() {
           </div>
 
           <div style={styles.headerCenter}>
+            <Link href="/enroll" style={styles.enrollButton}>
+              <span style={styles.buttonIcon}>🌐</span>
+              Enroll for Online
+            </Link>
+          </div>
+
+          <div style={styles.headerActions}>
             <div style={styles.featuresDropdown}>
               <button 
                 style={styles.featuresDropdownButton}
@@ -373,14 +401,6 @@ export default function Home() {
                 </div>
               )}
             </div>
-            
-            <Link href="/enroll" style={styles.enrollButton}>
-              <span style={styles.buttonIcon}>🌐</span>
-              Enroll for Online
-            </Link>
-          </div>
-
-          <div style={styles.headerActions}>
             <div style={styles.authButtons}>
               {user ? (
                 <>
@@ -872,7 +892,7 @@ export default function Home() {
           <div style={styles.professionalsGrid}>
             <div style={styles.professionalCard}>
               <img
-                src="/images/mobile_banking_professionals_1.png"
+                src="/images/professional-mobile-banking-1.png"
                 alt="Professional using Oakline Bank mobile app"
                 style={styles.professionalImage}
               />
@@ -886,7 +906,7 @@ export default function Home() {
 
             <div style={styles.professionalCard}>
               <img
-                src="/images/mobile_banking_professionals_2.png"
+                src="/images/professional-mobile-banking-2.png"
                 alt="Business woman using mobile banking"
                 style={styles.professionalImage}
               />
@@ -900,7 +920,7 @@ export default function Home() {
 
             <div style={styles.professionalCard}>
               <img
-                src="/images/mobile_banking_professionals_3.png"
+                src="/images/professional-mobile-banking-3.png"
                 alt="Businessman using tablet for banking"
                 style={styles.professionalImage}
               />
@@ -994,7 +1014,7 @@ const styles = {
   headerActions: {
     display: 'flex',
     alignItems: 'center',
-    gap: '2rem'
+    gap: '1rem'
   },
   bankInfo: {
     display: 'flex',
@@ -2163,32 +2183,35 @@ const styles = {
   featuresDropdownButton: {
     display: 'flex',
     alignItems: 'center',
-    gap: '0.5rem',
-    padding: '0.8rem 1.5rem',
-    backgroundColor: 'white',
+    gap: '0.8rem',
+    padding: '1rem 1.8rem',
+    background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
     color: '#1a365d',
-    border: '2px solid #1a365d',
-    borderRadius: '10px',
+    border: '2px solid #059669',
+    borderRadius: '12px',
     fontSize: '1rem',
     fontWeight: '700',
     cursor: 'pointer',
     transition: 'all 0.3s ease',
-    boxShadow: '0 4px 12px rgba(26, 54, 93, 0.2)'
+    boxShadow: '0 6px 20px rgba(5, 150, 105, 0.15)',
+    position: 'relative',
+    overflow: 'hidden'
   },
   featuresDropdownMenu: {
     position: 'absolute',
-    top: 'calc(100% + 0.5rem)',
-    left: '50%',
-    transform: 'translateX(-50%)',
+    top: 'calc(100% + 0.8rem)',
+    right: '0',
     backgroundColor: 'white',
-    borderRadius: '16px',
-    boxShadow: '0 20px 40px rgba(26, 54, 93, 0.2)',
-    border: '2px solid #e2e8f0',
-    padding: '2rem',
-    minWidth: '500px',
+    borderRadius: '20px',
+    boxShadow: '0 25px 50px rgba(26, 54, 93, 0.25)',
+    border: '2px solid #059669',
+    padding: '2.5rem',
+    minWidth: '520px',
     maxWidth: '90vw',
     zIndex: 1000,
-    animation: 'dropdownSlideIn 0.3s ease-out'
+    animation: 'dropdownSlideIn 0.4s ease-out',
+    backdropFilter: 'blur(20px)',
+    background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.95) 100%)'
   },
   featuresGrid: {
     display: 'grid',
@@ -2199,24 +2222,28 @@ const styles = {
   featureDropdownItem: {
     display: 'flex',
     alignItems: 'center',
-    gap: '1rem',
-    padding: '1rem',
-    borderRadius: '10px',
+    gap: '1.2rem',
+    padding: '1.2rem',
+    borderRadius: '12px',
     backgroundColor: '#f8fafc',
-    border: '1px solid #e2e8f0',
-    transition: 'all 0.3s ease'
+    border: '2px solid #e2e8f0',
+    transition: 'all 0.3s ease',
+    cursor: 'pointer',
+    position: 'relative',
+    overflow: 'hidden'
   },
   featureDropdownIcon: {
-    fontSize: '1.5rem',
-    width: '40px',
-    height: '40px',
+    fontSize: '1.6rem',
+    width: '50px',
+    height: '50px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#1a365d',
+    background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
     color: 'white',
     borderRadius: '50%',
-    flexShrink: 0
+    flexShrink: 0,
+    boxShadow: '0 4px 12px rgba(5, 150, 105, 0.3)'
   },
   featureDropdownTitle: {
     fontSize: '1rem',
