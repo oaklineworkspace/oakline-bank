@@ -189,6 +189,94 @@ export default function Home() {
       features: ['Professional Portfolio Management', 'Market Research & Analytics', 'Retirement Planning', 'Tax-Advantaged Accounts'],
       icon: '📈',
       color: '#8b5cf6'
+    },
+    {
+      image: '/images/atm_withdrawal_transaction.png',
+      title: 'Secure Transactions',
+      description: 'Bank with confidence using our advanced security protocols and fraud protection measures.',
+      features: ['End-to-End Encryption', 'Real-time Fraud Alerts', 'Biometric Authentication', 'Secure Online Portal'],
+      icon: '🔒',
+      color: '#64748b'
+    },
+    {
+      image: '/images/Bank_hall_business_discussion_72f98bbe.png',
+      title: 'Expert Financial Advice',
+      description: 'Receive personalized guidance from certified financial experts to help you achieve your financial goals.',
+      features: ['Personalized Financial Planning', 'Investment Strategy Sessions', 'Retirement Planning', 'Debt Management Advice'],
+      icon: '💼',
+      color: '#1d4ed8'
+    },
+    {
+      image: '/images/Modern_bank_lobby_interior_d535acc7.png',
+      title: 'State-of-the-Art Branches',
+      description: 'Experience premium banking services in our modern, technologically advanced branch locations.',
+      features: ['Advanced Self-Service Kiosks', 'Comfortable Meeting Spaces', 'High-Speed Wi-Fi', 'On-site Financial Advisors'],
+      icon: '🏦',
+      color: '#059669'
+    },
+    {
+      image: '/images/Digital_investment_dashboard_36d35f19.png',
+      title: 'User-Friendly Digital Platform',
+      description: 'Navigate your finances with ease through our intuitive and comprehensive online banking platform.',
+      features: ['Easy Account Management', 'Seamless Fund Transfers', 'Personalized Financial Dashboard', '24/7 Online Access'],
+      icon: '💻',
+      color: '#f59e0b'
+    },
+    {
+      image: '/images/Mobile_banking_user_experience_576bb7a3.png',
+      title: 'Instant Loan Approvals',
+      description: 'Get quick access to funds with our streamlined and efficient loan application and approval process.',
+      features: ['Fast Online Applications', 'Competitive Interest Rates', 'Flexible Repayment Options', 'Pre-qualification Tools'],
+      icon: '🚀',
+      color: '#dc2626'
+    },
+    {
+      image: '/images/Global_currency_exchange_7f8b1e6c.png',
+      title: 'Global Currency Exchange',
+      description: 'Manage your international finances with competitive exchange rates and global transaction capabilities.',
+      features: ['Multi-Currency Accounts', 'Preferential Exchange Rates', 'International Wire Transfers', 'Global ATM Network Access'],
+      icon: '🌍',
+      color: '#06b6d4'
+    },
+    {
+      image: '/images/Student_loan_savings_plan_203a1d8a.png',
+      title: 'Student Banking Solutions',
+      description: 'Specialized accounts and resources designed to help students manage their finances effectively.',
+      features: ['No-Fee Student Checking', 'Financial Literacy Workshops', 'Overdraft Protection Options', 'Student Credit Building'],
+      icon: '🎓',
+      color: '#8b5cf6'
+    },
+    {
+      image: '/images/Small_business_loan_approval_6e0d9c2c.png',
+      title: 'Small Business Services',
+      description: 'Tailored banking solutions to support the growth and success of your small business.',
+      features: ['Business Checking Accounts', 'Merchant Services', 'Small Business Loans', 'Payroll Solutions'],
+      icon: '🏢',
+      color: '#10b981'
+    },
+    {
+      image: '/images/Senior_citizen_banking_benefits_b7e0c6b1.png',
+      title: 'Senior Banking Privileges',
+      description: 'Exclusive benefits and dedicated services for our valued senior customers.',
+      features: ['Specialized Senior Checking', 'Discounted Fees', 'Estate Planning Assistance', 'Priority Customer Service'],
+      icon: '👴',
+      color: '#374151'
+    },
+    {
+      image: '/images/Health_savings_account_hsa_f1e4a0a0.png',
+      title: 'Health Savings Accounts (HSA)',
+      description: 'Tax-advantaged savings accounts to help you manage healthcare expenses.',
+      features: ['Triple Tax Advantage', 'Investment Options', 'Tax-Free Withdrawals for Medical Costs', 'Portable Accounts'],
+      icon: '🏥',
+      color: '#10b981'
+    },
+    {
+      image: '/images/Emergency_fund_savings_goal_8b3a0f9c.png',
+      title: 'Emergency Savings Tools',
+      description: 'Build a robust emergency fund with easy-to-use tools and high-yield savings options.',
+      features: ['Goal-Based Savings', 'Automatic Transfers', 'High-Yield Emergency Fund', 'Accessible Funds'],
+      icon: '🚨',
+      color: '#d97706'
     }
   ];
 
@@ -993,13 +1081,13 @@ const styles = {
     gap: '2rem'
   },
   dropdownSection: {
-    borderBottom: '1px solid #e2e8f0',
+    borderBottom: '1px solid #059669',
     paddingBottom: '1.5rem'
   },
   dropdownSectionTitle: {
     fontSize: '1rem',
     fontWeight: '800',
-    color: '#1a365d',
+    color: '#ffffff',
     marginBottom: '1rem',
     textTransform: 'uppercase',
     letterSpacing: '0.5px'
@@ -1009,14 +1097,14 @@ const styles = {
     alignItems: 'center',
     gap: '1rem',
     padding: '1rem',
-    color: '#374151',
+    color: '#e2e8f0',
     textDecoration: 'none',
     fontSize: '0.95rem',
     fontWeight: '600',
     borderRadius: '10px',
     transition: 'all 0.3s ease',
     margin: '0.25rem 0',
-    backgroundColor: 'transparent'
+    backgroundColor: 'rgba(255,255,255,0.05)'
   },
   dropdownItemIcon: {
     fontSize: '1.2rem',
@@ -2092,13 +2180,13 @@ const styles = {
     gap: '2rem'
   },
   dropdownSection: {
-    borderBottom: '1px solid #e2e8f0',
+    borderBottom: '1px solid #059669',
     paddingBottom: '1.5rem'
   },
   dropdownSectionTitle: {
     fontSize: '1rem',
     fontWeight: '800',
-    color: '#1a365d',
+    color: '#ffffff',
     marginBottom: '1rem',
     textTransform: 'uppercase',
     letterSpacing: '0.5px'
@@ -2108,14 +2196,14 @@ const styles = {
     alignItems: 'center',
     gap: '1rem',
     padding: '1rem',
-    color: '#374151',
+    color: '#e2e8f0',
     textDecoration: 'none',
     fontSize: '0.95rem',
     fontWeight: '600',
     borderRadius: '10px',
     transition: 'all 0.3s ease',
     margin: '0.25rem 0',
-    backgroundColor: 'transparent'
+    backgroundColor: 'rgba(255,255,255,0.05)'
   },
   dropdownItemIcon: {
     fontSize: '1.2rem',
