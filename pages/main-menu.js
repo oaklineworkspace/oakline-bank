@@ -347,30 +347,33 @@ const styles = {
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
   },
   loadingContainer: {
-    minHeight: '100vh',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#f8fafc'
+    height: '100vh',
+    background: 'linear-gradient(135deg, #1a365d 0%, #2d5a87 50%, #059669 100%)',
+    color: 'white',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
   },
   loadingSpinner: {
-    width: '40px',
-    height: '40px',
-    border: '4px solid #e2e8f0',
-    borderTop: '4px solid #1e40af',
+    width: '50px',
+    height: '50px',
+    border: '4px solid rgba(255,255,255,0.2)',
+    borderTop: '4px solid #059669',
     borderRadius: '50%',
-    animation: 'spin 1s linear infinite',
-    marginBottom: '1rem'
+    animation: 'spin 1.5s linear infinite',
+    marginBottom: '1.5rem'
   },
   loadingText: {
-    fontSize: '1rem',
-    color: '#64748b'
+    fontSize: '1.1rem',
+    color: 'white',
+    fontWeight: '500'
   },
   header: {
-    backgroundColor: '#1e40af',
-    borderBottom: '3px solid #1e3a8a',
-    boxShadow: '0 4px 12px rgba(30, 64, 175, 0.15)'
+    backgroundColor: '#1a365d',
+    borderBottom: '3px solid #059669',
+    boxShadow: '0 4px 12px rgba(26, 54, 93, 0.2)'
   },
   headerContainer: {
     maxWidth: '1400px',

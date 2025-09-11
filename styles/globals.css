@@ -29,6 +29,29 @@ body {
   100% { transform: rotate(360deg); }
 }
 
+@keyframes fadeInScale {
+  0% { 
+    opacity: 0; 
+    transform: scale(0.8) translateY(20px); 
+  }
+  100% { 
+    opacity: 1; 
+    transform: scale(1) translateY(0); 
+  }
+}
+
+@keyframes backgroundFloat {
+  0%, 100% { 
+    transform: translateX(0) translateY(0) rotate(0deg); 
+  }
+  33% { 
+    transform: translateX(10px) translateY(-10px) rotate(1deg); 
+  }
+  66% { 
+    transform: translateX(-5px) translateY(5px) rotate(-1deg); 
+  }
+}
+
 /* Fix container overflow and remove white space */
 .page-container {
   width: 100%;

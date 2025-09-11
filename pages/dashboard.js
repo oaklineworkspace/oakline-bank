@@ -409,25 +409,34 @@ const styles = {
     overflowX: 'hidden'
   },
   loadingContainer: {
-    minHeight: '100vh',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#f8fafc'
+    height: '100vh',
+    background: 'linear-gradient(135deg, #1a365d 0%, #2d5a87 50%, #059669 100%)',
+    color: 'white',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    position: 'relative',
+    overflow: 'hidden'
   },
   loadingSpinner: {
-    width: '40px',
-    height: '40px',
-    border: '4px solid #e2e8f0',
-    borderTop: '4px solid #1e40af',
+    width: '60px',
+    height: '60px',
+    border: '4px solid rgba(255,255,255,0.2)',
+    borderTop: '4px solid #059669',
+    borderRight: '4px solid #d97706',
     borderRadius: '50%',
-    animation: 'spin 1s linear infinite',
-    marginBottom: '1rem'
+    animation: 'spin 1.5s linear infinite',
+    marginBottom: '2rem',
+    boxShadow: '0 0 20px rgba(5, 150, 105, 0.3)'
   },
   loadingText: {
-    fontSize: '1rem',
-    color: '#64748b'
+    fontSize: '1.2rem',
+    color: 'white',
+    fontWeight: '600',
+    textAlign: 'center',
+    opacity: 0.95
   },
   header: {
     backgroundColor: '#1a365d',

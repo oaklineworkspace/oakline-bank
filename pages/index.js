@@ -671,9 +671,9 @@ export default function Home() {
 const styles = {
   // Main Header Styles
   mainHeader: {
-    backgroundColor: 'white',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-    borderBottom: '3px solid #3b82f6',
+    backgroundColor: '#1a365d',
+    borderBottom: '3px solid #059669',
+    boxShadow: '0 4px 12px rgba(26, 54, 93, 0.2)',
     position: 'sticky',
     top: 0,
     zIndex: 1000,
@@ -712,12 +712,12 @@ const styles = {
   bankName: {
     fontSize: '1.6rem',
     fontWeight: '800',
-    color: '#1e40af',
+    color: '#ffffff',
     lineHeight: '1'
   },
   bankTagline: {
     fontSize: '0.8rem',
-    color: '#64748b',
+    color: '#cbd5e1',
     fontWeight: '500'
   },
   headerActions: {
@@ -734,12 +734,12 @@ const styles = {
   routingInfo: {
     fontSize: '0.85rem',
     fontWeight: '600',
-    color: '#374151'
+    color: '#e2e8f0'
   },
   phoneInfo: {
     fontSize: '0.9rem',
     fontWeight: '700',
-    color: '#3b82f6'
+    color: '#059669'
   },
   navigationDropdown: {
     position: 'relative'
@@ -749,12 +749,12 @@ const styles = {
     alignItems: 'center',
     gap: '0.5rem',
     padding: '0.75rem 1.5rem',
-    backgroundColor: '#f8fafc',
-    border: '2px solid #e2e8f0',
+    backgroundColor: '#1f2937',
+    border: '2px solid #334155',
     borderRadius: '10px',
     fontSize: '1rem',
     fontWeight: '600',
-    color: '#374151',
+    color: '#e2e8f0',
     cursor: 'pointer',
     transition: 'all 0.3s ease'
   },
@@ -769,10 +769,10 @@ const styles = {
     position: 'absolute',
     top: '100%',
     right: 0,
-    backgroundColor: 'white',
+    backgroundColor: '#1f2937',
     borderRadius: '12px',
-    boxShadow: '0 10px 30px rgba(0,0,0,0.15)',
-    border: '2px solid #e2e8f0',
+    boxShadow: '0 10px 30px rgba(0,0,0,0.25)',
+    border: '2px solid #334155',
     padding: '1.5rem',
     minWidth: '300px',
     zIndex: 1000,
@@ -782,13 +782,13 @@ const styles = {
     gap: '1.5rem'
   },
   dropdownSection: {
-    borderBottom: '1px solid #f1f5f9',
+    borderBottom: '1px solid #334155',
     paddingBottom: '1rem'
   },
   dropdownSectionTitle: {
     fontSize: '0.9rem',
     fontWeight: '700',
-    color: '#1e40af',
+    color: '#059669',
     marginBottom: '0.75rem',
     textTransform: 'uppercase',
     letterSpacing: '0.5px'
@@ -796,7 +796,7 @@ const styles = {
   dropdownItem: {
     display: 'block',
     padding: '0.5rem 0',
-    color: '#374151',
+    color: '#e2e8f0',
     textDecoration: 'none',
     fontSize: '0.9rem',
     fontWeight: '500',
@@ -810,8 +810,8 @@ const styles = {
   loginButton: {
     padding: '0.6rem 1.2rem',
     backgroundColor: 'transparent',
-    border: '2px solid #3b82f6',
-    color: '#3b82f6',
+    border: '2px solid #059669',
+    color: '#059669',
     borderRadius: '8px',
     textDecoration: 'none',
     fontSize: '0.9rem',
@@ -820,13 +820,13 @@ const styles = {
   },
   applyButton: {
     padding: '0.6rem 1.2rem',
-    background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+    background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
     color: 'white',
     borderRadius: '8px',
     textDecoration: 'none',
     fontSize: '0.9rem',
     fontWeight: '600',
-    boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)',
+    boxShadow: '0 4px 12px rgba(4, 120, 87, 0.3)',
     transition: 'all 0.3s ease'
   },
   dashboardButton: {
@@ -834,13 +834,13 @@ const styles = {
     alignItems: 'center',
     gap: '0.5rem',
     padding: '0.6rem 1.2rem',
-    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+    background: 'linear-gradient(135deg, #d97706 0%, #92400e 100%)',
     color: 'white',
     borderRadius: '8px',
     textDecoration: 'none',
     fontSize: '0.9rem',
     fontWeight: '600',
-    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+    boxShadow: '0 4px 12px rgba(146, 64, 14, 0.3)',
     transition: 'all 0.3s ease'
   },
   menuButton: {
@@ -880,7 +880,7 @@ const styles = {
   announcementIcon: {
     fontSize: '1.5rem',
     marginRight: '0.5rem',
-    color: '#3b82f6' // Primary accent color
+    color: '#059669' // Primary accent color
   },
   announcementText: {
     fontWeight: '500',
@@ -888,12 +888,12 @@ const styles = {
     flexShrink: 0
   },
   announcementLink: {
-    color: '#3b82f6',
+    color: '#059669',
     textDecoration: 'none',
     fontWeight: '700',
     padding: '0.5rem 1rem',
     borderRadius: '8px',
-    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+    backgroundColor: 'rgba(5, 150, 105, 0.1)',
     transition: 'all 0.3s ease',
     marginLeft: 'auto' // Pushes the link to the right
   },
@@ -911,7 +911,7 @@ const styles = {
   },
   phoneNumber: {
     fontWeight: '700',
-    color: '#3b82f6', // Primary accent color for phone number
+    color: '#059669', // Primary accent color for phone number
     display: 'flex',
     alignItems: 'center',
     gap: '0.5rem'
@@ -1115,14 +1115,14 @@ const styles = {
     marginTop: '1rem'
   },
   heroButton: {
-    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+    background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
     color: 'white',
     textDecoration: 'none',
     padding: 'clamp(1rem, 2vw, 1.3rem) clamp(1.5rem, 4vw, 2.5rem)',
     borderRadius: '12px',
     fontSize: 'clamp(0.9rem, 2vw, 1.1rem)',
     fontWeight: '700',
-    boxShadow: '0 8px 24px rgba(16, 185, 129, 0.4)',
+    boxShadow: '0 8px 24px rgba(4, 120, 87, 0.4)',
     transition: 'all 0.3s ease',
     display: 'inline-flex',
     alignItems: 'center',
@@ -1176,7 +1176,7 @@ const styles = {
   // Enhanced Features Showcase
   featuresShowcase: {
     padding: 'clamp(4rem, 8vw, 6rem) 0',
-    backgroundColor: 'white',
+    backgroundColor: '#ffffff',
     width: '100%',
     position: 'relative'
   },
@@ -1199,7 +1199,7 @@ const styles = {
     fontWeight: '900',
     color: '#1e293b',
     marginBottom: '1rem',
-    background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+    background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
     WebkitBackgroundClip: 'text',
     WebkitTextFillColor: 'transparent',
     backgroundClip: 'text',
@@ -1216,7 +1216,7 @@ const styles = {
   titleUnderline: {
     width: '80px',
     height: '4px',
-    background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+    background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
     margin: '1.5rem auto 0',
     borderRadius: '2px',
     animation: 'underlineExpand 1s ease-out 0.5s both'
@@ -1256,13 +1256,13 @@ const styles = {
     right: '20px'
   },
   featureBadge: {
-    background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+    background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
     color: 'white',
     padding: '10px 16px',
     borderRadius: '12px',
     fontSize: '0.85rem',
     fontWeight: '700',
-    boxShadow: '0 6px 16px rgba(59, 130, 246, 0.4)',
+    boxShadow: '0 6px 16px rgba(4, 120, 87, 0.4)',
     display: 'flex',
     alignItems: 'center',
     gap: '6px',
@@ -1285,7 +1285,7 @@ const styles = {
     fontWeight: '900',
     color: '#1e293b',
     marginBottom: '1.5rem',
-    background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+    background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
     WebkitBackgroundClip: 'text',
     WebkitTextFillColor: 'transparent',
     backgroundClip: 'text',
@@ -1336,7 +1336,7 @@ const styles = {
     flexWrap: 'wrap'
   },
   featureButton: {
-    background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+    background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
     color: 'white',
     textDecoration: 'none',
     padding: '1rem 1.8rem',
@@ -1345,18 +1345,18 @@ const styles = {
     fontWeight: '700',
     transition: 'all 0.3s ease',
     display: 'inline-block',
-    boxShadow: '0 6px 16px rgba(59, 130, 246, 0.4)',
+    boxShadow: '0 6px 16px rgba(4, 120, 87, 0.4)',
     transform: 'translateY(0)'
   },
   featureButtonSecondary: {
     backgroundColor: 'transparent',
-    color: '#3b82f6',
+    color: '#059669',
     textDecoration: 'none',
     padding: '1rem 1.8rem',
     borderRadius: '10px',
     fontSize: '1rem',
     fontWeight: '700',
-    border: '2px solid #3b82f6',
+    border: '2px solid #059669',
     transition: 'all 0.3s ease',
     display: 'inline-block'
   },
@@ -1372,13 +1372,13 @@ const styles = {
     width: '10px',
     height: '10px',
     borderRadius: '50%',
-    border: '2px solid #3b82f6',
+    border: '2px solid #059669',
     background: 'transparent',
     cursor: 'pointer',
     transition: 'all 0.3s ease'
   },
   featureIndicatorActive: {
-    backgroundColor: '#3b82f6',
+    backgroundColor: '#059669',
     transform: 'scale(1.4)'
   },
 
@@ -1394,12 +1394,12 @@ const styles = {
     display: 'block'
   },
   loginLink: {
-    color: '#3b82f6',
+    color: '#059669',
     textDecoration: 'none',
     fontWeight: '700',
     padding: '0.5rem 1rem',
     borderRadius: '8px',
-    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+    backgroundColor: 'rgba(5, 150, 105, 0.1)',
     transition: 'all 0.3s ease',
     display: 'inline-block',
     marginTop: '0.5rem'
@@ -1485,7 +1485,7 @@ const styles = {
     lineHeight: '1.4'
   },
   accountButton: {
-    backgroundColor: '#3b82f6',
+    backgroundColor: '#059669',
     color: 'white',
     textDecoration: 'none',
     padding: '0.8rem 1.3rem',
@@ -1525,13 +1525,13 @@ const styles = {
     width: '10px',
     height: '10px',
     borderRadius: '50%',
-    border: '2px solid #3b82f6',
+    border: '2px solid #059669',
     background: 'transparent',
     cursor: 'pointer',
     transition: 'all 0.3s ease'
   },
   accountIndicatorActive: {
-    backgroundColor: '#3b82f6',
+    backgroundColor: '#059669',
     transform: 'scale(1.3)'
   },
 
@@ -1604,13 +1604,13 @@ const styles = {
     alignItems: 'center',
     gap: '0.8rem',
     padding: 'clamp(1rem, 2.5vw, 1.5rem) clamp(2rem, 4vw, 3rem)',
-    background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+    background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
     color: 'white',
     textDecoration: 'none',
     borderRadius: '16px',
     fontSize: 'clamp(1rem, 2.2vw, 1.2rem)',
     fontWeight: '800',
-    boxShadow: '0 10px 30px rgba(59, 130, 246, 0.4)',
+    boxShadow: '0 10px 30px rgba(4, 120, 87, 0.4)',
     transition: 'all 0.3s ease',
     marginBottom: '1rem',
     transform: 'translateY(0)'
@@ -1827,7 +1827,7 @@ if (typeof document !== 'undefined') {
 
     .heroButton:hover {
       transform: translateY(-3px);
-      box-shadow: 0 15px 35px rgba(16, 185, 129, 0.6);
+      box-shadow: 0 15px 35px rgba(4, 120, 87, 0.6);
     }
 
     .secondaryButton:hover {
@@ -1841,7 +1841,7 @@ if (typeof document !== 'undefined') {
 
     .exploreButton:hover {
       transform: translateY(-5px);
-      box-shadow: 0 20px 40px rgba(59, 130, 246, 0.6);
+      box-shadow: 0 20px 40px rgba(4, 120, 87, 0.6);
     }
 
     .topBarLink:hover {
@@ -1849,7 +1849,7 @@ if (typeof document !== 'undefined') {
     }
 
     .announcementLink:hover {
-      background-color: rgba(59, 130, 246, 0.2);
+      background-color: rgba(5, 150, 105, 0.2);
     }
   `;
   document.head.appendChild(styleSheet);
