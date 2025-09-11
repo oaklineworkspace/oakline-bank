@@ -695,6 +695,59 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Mobile Banking Professionals Section */}
+      <section style={styles.professionalsSection}>
+        <div style={styles.professionalsContainer}>
+          <h2 style={styles.professionalsTitle}>Banking Made Personal</h2>
+          <p style={styles.professionalsSubtitle}>
+            Real people, real solutions. Experience banking that puts you first.
+          </p>
+          <div style={styles.professionalsGrid}>
+            <div style={styles.professionalCard}>
+              <img 
+                src="/images/mobile_banking_professionals_1.png" 
+                alt="Professional using Oakline Bank mobile app"
+                style={styles.professionalImage}
+              />
+              <div style={styles.professionalContent}>
+                <h3 style={styles.professionalTitle}>Mobile Banking</h3>
+                <p style={styles.professionalDescription}>
+                  Access your accounts anywhere, anytime with our secure mobile banking platform.
+                </p>
+              </div>
+            </div>
+
+            <div style={styles.professionalCard}>
+              <img 
+                src="/images/mobile_banking_professionals_2.png" 
+                alt="Business woman using mobile banking"
+                style={styles.professionalImage}
+              />
+              <div style={styles.professionalContent}>
+                <h3 style={styles.professionalTitle}>Instant Transfers</h3>
+                <p style={styles.professionalDescription}>
+                  Send money instantly to friends and family with just a few taps.
+                </p>
+              </div>
+            </div>
+
+            <div style={styles.professionalCard}>
+              <img 
+                src="/images/mobile_banking_professionals_3.png" 
+                alt="Businessman using tablet for banking"
+                style={styles.professionalImage}
+              />
+              <div style={styles.professionalContent}>
+                <h3 style={styles.professionalTitle}>Full Control</h3>
+                <p style={styles.professionalDescription}>
+                  Manage all your accounts and investments from one comprehensive dashboard.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Enhanced Final CTA */}
       <div id="final-cta" data-animate style={{
         ...(isVisible['final-cta'] ? styles.pulseGlow : {})
@@ -1685,6 +1738,80 @@ const styles = {
     fontSize: '0.95rem',
     color: '#64748b',
     fontStyle: 'italic'
+  },
+
+  // Professionals Section
+  professionalsSection: {
+    padding: '80px 20px',
+    backgroundColor: '#f8fafc',
+    borderTop: '1px solid #e2e8f0'
+  },
+  professionalsContainer: {
+    maxWidth: '1200px',
+    margin: '0 auto',
+    textAlign: 'center'
+  },
+  professionalsTitle: {
+    fontSize: '2.5rem',
+    fontWeight: '700',
+    color: '#1e293b',
+    marginBottom: '1rem',
+    '@media (max-width: 768px)': {
+      fontSize: '2rem'
+    }
+  },
+  professionalsSubtitle: {
+    fontSize: '1.25rem',
+    color: '#64748b',
+    marginBottom: '3rem',
+    maxWidth: '600px',
+    margin: '0 auto 3rem',
+    '@media (max-width: 768px)': {
+      fontSize: '1rem',
+      marginBottom: '2rem'
+    }
+  },
+  professionalsGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
+    gap: '2rem',
+    '@media (max-width: 768px)': {
+      gridTemplateColumns: '1fr',
+      gap: '1.5rem'
+    }
+  },
+  professionalCard: {
+    backgroundColor: 'white',
+    borderRadius: '16px',
+    padding: '2rem',
+    boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+    border: '1px solid #e2e8f0',
+    ':hover': {
+      transform: 'translateY(-5px)',
+      boxShadow: '0 8px 30px rgba(0,0,0,0.12)'
+    }
+  },
+  professionalImage: {
+    width: '100%',
+    height: '200px',
+    objectFit: 'cover',
+    borderRadius: '12px',
+    marginBottom: '1.5rem'
+  },
+  professionalContent: {
+    textAlign: 'center'
+  },
+  professionalTitle: {
+    fontSize: '1.5rem',
+    fontWeight: '600',
+    color: '#1e40af',
+    marginBottom: '1rem'
+  },
+  professionalDescription: {
+    fontSize: '1rem',
+    color: '#64748b',
+    lineHeight: '1.6'
   },
 
   // Animation Classes

@@ -580,6 +580,15 @@ export default function Profile() {
           >
             🔒 Security Settings
           </button>
+          <button 
+            style={styles.logoutButton}
+            onClick={async () => {
+              await supabase.auth.signOut();
+              router.push('/');
+            }}
+          >
+            🚪 Sign Out
+          </button>
         </div>
       </div>
 
@@ -892,6 +901,18 @@ const styles = {
     color: '#374151',
     cursor: 'pointer',
     textAlign: 'left'
+  },
+  logoutButton: {
+    padding: '15px',
+    backgroundColor: '#dc2626',
+    border: 'none',
+    borderRadius: '8px',
+    fontSize: '14px',
+    fontWeight: '500',
+    color: 'white',
+    cursor: 'pointer',
+    textAlign: 'left',
+    transition: 'all 0.2s'
   },
   profilePictureSection: {
     display: 'flex',
