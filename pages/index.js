@@ -343,8 +343,10 @@ export default function Home() {
           </div>
 
           <div style={styles.headerCenter}>
-            <span style={styles.routingInfo}>Routing: 075915826</span>
-            <span style={styles.phoneInfo}>📞 1-800-OAKLINE</span>
+            <Link href="/apply" style={styles.enrollButton}>
+              <span style={styles.buttonIcon}>🎯</span>
+              Open Account
+            </Link>
           </div>
 
           <div style={styles.headerActions}>
@@ -978,6 +980,22 @@ const styles = {
     fontSize: '0.9rem',
     fontWeight: '700',
     color: '#059669'
+  },
+  enrollButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    padding: '0.8rem 1.5rem',
+    background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+    color: 'white',
+    textDecoration: 'none',
+    borderRadius: '10px',
+    fontSize: '1rem',
+    fontWeight: '700',
+    boxShadow: '0 4px 12px rgba(5, 150, 105, 0.3)',
+    transition: 'all 0.3s ease',
+    border: 'none',
+    cursor: 'pointer'
   },
   navigationDropdown: {
     position: 'relative'

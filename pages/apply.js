@@ -621,8 +621,8 @@ export default function Apply() {
       left: 0,
       right: 0,
       bottom: 0,
-      opacity: 0.03,
-      backgroundImage: 'radial-gradient(circle at 25% 25%, #1e40af 0%, transparent 50%), radial-gradient(circle at 75% 75%, #059669 0%, transparent 50%)',
+      opacity: 0.05,
+      backgroundImage: 'radial-gradient(circle at 25% 25%, #1a365d 0%, transparent 50%), radial-gradient(circle at 75% 75%, #059669 0%, transparent 50%)',
       zIndex: 0
     },
     content: {
@@ -655,7 +655,7 @@ export default function Apply() {
     brandText: {
       fontSize: '2.2rem',
       fontWeight: '800',
-      color: '#1e40af',
+      color: '#1a365d',
       lineHeight: '1'
     },
     brandTagline: {
@@ -671,18 +671,18 @@ export default function Apply() {
       gap: '1rem',
       marginTop: '1.5rem',
       padding: '1rem',
-      backgroundColor: 'rgba(59, 130, 246, 0.05)',
+      backgroundColor: 'rgba(26, 54, 93, 0.05)',
       borderRadius: '12px',
-      border: '1px solid rgba(59, 130, 246, 0.1)'
+      border: '1px solid rgba(26, 54, 93, 0.1)'
     },
     credential: {
       fontSize: '0.85rem',
       fontWeight: '600',
-      color: '#374151',
+      color: '#1a365d',
       padding: '0.25rem 0.75rem',
       backgroundColor: 'white',
       borderRadius: '6px',
-      border: '1px solid #e2e8f0'
+      border: '1px solid #1a365d'
     },
     title: {
       fontSize: 'clamp(28px, 5vw, 42px)',
@@ -718,7 +718,7 @@ export default function Apply() {
       boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
     },
     progressStepActive: {
-      background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
+      background: 'linear-gradient(135deg, #1a365d 0%, #2d5a87 100%)',
       color: 'white',
       transform: 'scale(1.1)'
     },
@@ -801,8 +801,8 @@ export default function Apply() {
     },
     inputFocus: {
       outline: 'none',
-      borderColor: '#3b82f6',
-      boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.1)'
+      borderColor: '#1a365d',
+      boxShadow: '0 0 0 3px rgba(26, 54, 93, 0.1)'
     },
     inputError: {
       borderColor: '#ef4444',
@@ -854,10 +854,10 @@ export default function Apply() {
       overflow: 'hidden'
     },
     accountCardSelected: {
-      borderColor: '#3b82f6',
-      backgroundColor: '#eff6ff',
+      borderColor: '#1a365d',
+      backgroundColor: '#f0f4f8',
       transform: 'translateY(-2px)',
-      boxShadow: '0 8px 25px rgba(59, 130, 246, 0.15)'
+      boxShadow: '0 8px 25px rgba(26, 54, 93, 0.15)'
     },
     accountCardHover: {
       borderColor: '#9ca3af',
@@ -954,9 +954,9 @@ export default function Apply() {
       minHeight: '52px'
     },
     primaryButton: {
-      background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
+      background: 'linear-gradient(135deg, #1a365d 0%, #2d5a87 100%)',
       color: 'white',
-      boxShadow: '0 4px 14px rgba(30, 64, 175, 0.3)'
+      boxShadow: '0 4px 14px rgba(26, 54, 93, 0.3)'
     },
     secondaryButton: {
       background: 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
@@ -1009,7 +1009,7 @@ export default function Apply() {
       marginTop: '2rem'
     },
     footerLink: {
-      color: '#3b82f6',
+      color: '#1a365d',
       textDecoration: 'none',
       fontSize: '16px',
       fontWeight: '500',
@@ -1026,7 +1026,7 @@ export default function Apply() {
         <div style={styles.header}>
           <div style={styles.logoContainer}>
             <img
-              src="/images/logo-primary.png"
+              src="/images/logo-primary.png.jpg"
               alt="Oakline Bank"
               style={styles.logo}
               onError={(e) => {
@@ -1043,6 +1043,7 @@ export default function Apply() {
             <div style={styles.credential}>FDIC Insured</div>
             <div style={styles.credential}>Member FDIC</div>
             <div style={styles.credential}>Equal Housing Lender</div>
+            <div style={styles.credential}>Routing: 075915826</div>
           </div>
           <h1 style={styles.title}>Open Your Account Today</h1>
           <p style={styles.subtitle}>
@@ -1693,8 +1694,8 @@ export default function Apply() {
 
         input:focus, select:focus {
           outline: none !important;
-          border-color: #3b82f6 !important;
-          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+          border-color: #1a365d !important;
+          box-shadow: 0 0 0 3px rgba(26, 54, 93, 0.1) !important;
         }
       `}</style>
     </div>
