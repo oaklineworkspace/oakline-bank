@@ -411,6 +411,7 @@ export default function Home() {
                       Open Account Today
                     </Link>
                   </div>
+                  </div>
                 </>
               )}
             </div>
