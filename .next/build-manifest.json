@@ -27,15 +27,20 @@
       "static/chunks/main.js",
       "static/chunks/pages/_error.js"
     ],
-    "/apply": [
+    "/account-types": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/apply.js"
+      "static/chunks/pages/account-types.js"
     ],
-    "/support": [
+    "/dashboard": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/support.js"
+      "static/chunks/pages/dashboard.js"
+    ],
+    "/main-menu": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/main-menu.js"
     ]
   },
   "ampFirstPages": []
