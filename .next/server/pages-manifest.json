@@ -4,6 +4,5 @@
   "/_document": "pages/_document.js",
   "/": "pages/index.js",
   "/account-types": "pages/account-types.js",
-  "/main-menu": "pages/main-menu.js",
-  "/dashboard": "pages/dashboard.js"
+  "/main-menu": "pages/main-menu.js"
 }
