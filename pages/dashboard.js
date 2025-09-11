@@ -194,7 +194,7 @@ export default function Dashboard() {
                 <span style={styles.navArrow}>▼</span>
               </button>
               {dropdownOpen.accounts && (
-                <div style={styles.dropdown}>
+                <div style={{ ...styles.dropdown, backgroundColor: '#1a365d' }}>
                   <Link href="/account-details" style={styles.dropdownLink}>View All Accounts</Link>
                   <Link href="/apply" style={styles.dropdownLink}>Open New Account</Link>
                   <Link href="/transactions" style={styles.dropdownLink}>Transaction History</Link>
@@ -209,7 +209,7 @@ export default function Dashboard() {
                 <span style={styles.navArrow}>▼</span>
               </button>
               {dropdownOpen.transfer && (
-                <div style={styles.dropdown}>
+                <div style={{ ...styles.dropdown, backgroundColor: '#1a365d' }}>
                   <Link href="/transfer" style={styles.dropdownLink}>Transfer Money</Link>
                   <Link href="/bill-pay" style={styles.dropdownLink}>Pay Bills</Link>
                   <Link href="/deposit-real" style={styles.dropdownLink}>Mobile Deposit</Link>
@@ -224,7 +224,7 @@ export default function Dashboard() {
                 <span style={styles.navArrow}>▼</span>
               </button>
               {dropdownOpen.services && (
-                <div style={styles.dropdown}>
+                <div style={{ ...styles.dropdown, backgroundColor: '#1a365d' }}>
                   <Link href="/loans" style={styles.dropdownLink}>Loans</Link>
                   <Link href="/investments" style={styles.dropdownLink}>Investments</Link>
                   <Link href="/cards" style={styles.dropdownLink}>Manage Cards</Link>
@@ -248,7 +248,7 @@ export default function Dashboard() {
                     <span style={styles.navArrow}>▼</span>
                   </button>
                   {dropdownOpen.profile && (
-                    <div style={styles.dropdown}>
+                    <div style={{ ...styles.dropdown, backgroundColor: '#1a365d' }}>
                       <Link href="/profile" style={styles.dropdownLink}>View Profile</Link>
                       <Link href="/security" style={styles.dropdownLink}>Security Settings</Link>
                       <Link href="/notifications" style={styles.dropdownLink}>Notifications</Link>
@@ -263,7 +263,7 @@ export default function Dashboard() {
                     <span style={styles.navArrow}>▼</span>
                   </button>
                   {dropdownOpen.quickAccess && (
-                    <div style={styles.dropdown}>
+                    <div style={{ ...styles.dropdown, backgroundColor: '#1a365d' }}>
                       <Link href="/" style={styles.dropdownLink}>Home</Link>
                       <Link href="/main-menu" style={styles.dropdownLink}>Menu</Link>
                       <Link href="/transfer" style={styles.dropdownLink}>Transfer Money</Link>
@@ -539,9 +539,6 @@ const styles = {
     transition: 'all 0.2s',
     whiteSpace: 'nowrap',
     minWidth: 'auto'
-  },
-  navItem: {
-    position: 'relative'
   },
   navIcon: {
     fontSize: '1rem'

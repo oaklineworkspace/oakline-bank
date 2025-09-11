@@ -545,9 +545,6 @@ const styles = {
     whiteSpace: 'nowrap',
     minWidth: 'auto'
   },
-  navItem: {
-    position: 'relative'
-  },
   navIcon: {
     fontSize: '1rem'
   },

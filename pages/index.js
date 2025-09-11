@@ -434,8 +434,8 @@ export default function Home() {
                     <span style={styles.buttonIcon}>☰</span>
                     Menu
                   </Link>
-                  {/* Logout Button for Main Menu Page */}
-                  <Link href="/index" style={styles.loginButton}>Logout</Link>
+                  {/* Logout Button */}
+                  <Link href="/" style={styles.loginButton}>Logout</Link>
                 </>
               ) : (
                 <>
@@ -1072,20 +1072,21 @@ const styles = {
   },
   dropdownMenu: {
     position: 'absolute',
-    top: '100%',
-    left: 0,
+    top: 'calc(100% + 0.5rem)',
+    right: 0,
     backgroundColor: 'white',
     borderRadius: '16px',
     boxShadow: '0 20px 40px rgba(26, 54, 93, 0.2)',
     border: '2px solid #e2e8f0',
     padding: '2rem',
-    minWidth: '600px',
+    minWidth: '400px',
+    maxWidth: '90vw',
     zIndex: 1000,
     animation: 'dropdownSlideIn 0.3s ease-out'
   },
   dropdownGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+    gridTemplateColumns: 'repeat(auto-fit, minWidth(250px, 1fr))',
     gap: '2rem'
   },
   dropdownSection: {
@@ -1095,7 +1096,7 @@ const styles = {
   dropdownSectionTitle: {
     fontSize: '1rem',
     fontWeight: '800',
-    color: '#1a365d',
+    color: '#1e40af',
     marginBottom: '1rem',
     textTransform: 'uppercase',
     letterSpacing: '0.5px'
@@ -1105,14 +1106,14 @@ const styles = {
     alignItems: 'center',
     gap: '1rem',
     padding: '1rem',
-    color: '#64748b',
+    color: '#374151',
     textDecoration: 'none',
     fontSize: '0.95rem',
     fontWeight: '600',
     borderRadius: '10px',
     transition: 'all 0.3s ease',
     margin: '0.25rem 0',
-    backgroundColor: 'rgba(248,250,252,0.8)'
+    border: '1px solid #f3f4f6'
   },
   dropdownItemIcon: {
     fontSize: '1.2rem',
@@ -2167,57 +2168,6 @@ const styles = {
     transition: 'all 0.3s ease'
   },
 
-  // Dropdown Menu Fixes
-  dropdownMenu: {
-    position: 'absolute',
-    top: 'calc(100% + 0.5rem)',
-    right: 0,
-    backgroundColor: 'white',
-    borderRadius: '16px',
-    boxShadow: '0 20px 40px rgba(26, 54, 93, 0.2)',
-    border: '2px solid #e2e8f0',
-    padding: '2rem',
-    minWidth: '400px',
-    zIndex: 1000,
-    animation: 'dropdownSlideIn 0.3s ease-out'
-  },
-  dropdownGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-    gap: '2rem'
-  },
-  dropdownSection: {
-    borderBottom: '1px solid #059669',
-    paddingBottom: '1.5rem'
-  },
-  dropdownSectionTitle: {
-    fontSize: '1rem',
-    fontWeight: '800',
-    color: '#ffffff',
-    marginBottom: '1rem',
-    textTransform: 'uppercase',
-    letterSpacing: '0.5px'
-  },
-  dropdownItem: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '1rem',
-    padding: '1rem',
-    color: '#e2e8f0',
-    textDecoration: 'none',
-    fontSize: '0.95rem',
-    fontWeight: '600',
-    borderRadius: '10px',
-    transition: 'all 0.3s ease',
-    margin: '0.25rem 0',
-    backgroundColor: 'rgba(255,255,255,0.05)'
-  },
-  dropdownItemIcon: {
-    fontSize: '1.2rem',
-    width: '24px',
-    textAlign: 'center'
-  },
-
   // Mobile Responsive Styles
   '@media (max-width: 768px)': {
     headerContainer: {
@@ -2261,17 +2211,23 @@ const styles = {
       textAlign: 'center',
       justifyContent: 'center'
     },
-    dropdownMenu: {
+    navigationDropdown: {
       position: 'fixed',
-      top: 'auto',
+      top: '80px',
       left: '1rem',
       right: '1rem',
-      width: 'auto',
-      minWidth: 'auto',
-      maxWidth: 'none'
+      minWidth: 'auto'
+    },
+    dropdownMenu: {
+      minWidth: '300px',
+      maxWidth: '95vw',
+      left: '2.5vw',
+      right: '2.5vw',
+      position: 'fixed'
     },
     dropdownGrid: {
-      gridTemplateColumns: '1fr'
+      gridTemplateColumns: '1fr !important',
+      gap: '1rem !important'
     },
     featuresGrid: {
       gridTemplateColumns: '1fr',
@@ -2423,13 +2379,27 @@ if (typeof document !== 'undefined') {
 
     /* Hover Effects */
     .dropdownItem:hover {
-      background-color: #1a365d;
-      color: #ffffff;
-      transform: translateY(-2px);
+      background-color: #f8fafc !important;
+      color: #1e40af !important;
+      transform: translateX(5px);
+      border-color: #3b82f6 !important;
     }
 
-    .dropdownMenu {
-      box-shadow: 0 25px 50px rgba(0,0,0,0.15) !important;
+    /* Mobile dropdown positioning */
+    @media (max-width: 768px) {
+      .dropdownMenu {
+        position: fixed !important;
+        top: 80px !important;
+        left: 1rem !important;
+        right: 1rem !important;
+        min-width: auto !important;
+        max-width: none !important;
+      }
+
+      .dropdownGrid {
+        grid-template-columns: 1fr !important;
+        gap: 1rem !important;
+      }
     }
 
     .accountCard:hover {

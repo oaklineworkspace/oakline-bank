@@ -243,6 +243,76 @@ export default function LoginPage() {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
         }
+        
+        @media (max-width: 768px) {
+          .contentWrapper {
+            grid-template-columns: 1fr !important;
+            grid-template-rows: auto 1fr !important;
+            min-height: auto !important;
+          }
+          
+          .heroSection {
+            padding: 1.5rem 1rem !important;
+            order: 2;
+            min-height: auto !important;
+          }
+          
+          .loginSection {
+            order: 1;
+            padding: 1rem !important;
+            min-height: auto !important;
+          }
+          
+          .loginCard {
+            padding: 1.5rem !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+          }
+          
+          .headerContent {
+            flex-direction: column !important;
+            gap: 1rem !important;
+            padding: 0.75rem !important;
+          }
+          
+          .headerActions {
+            width: 100% !important;
+            justify-content: center !important;
+          }
+        }
+        
+        @media (max-width: 480px) {
+          .container {
+            min-height: 100vh !important;
+          }
+          
+          .main {
+            min-height: auto !important;
+          }
+          
+          .contentWrapper {
+            display: block !important;
+            min-height: auto !important;
+          }
+          
+          .heroSection {
+            padding: 1rem !important;
+            text-align: center !important;
+          }
+          
+          .loginSection {
+            padding: 0.5rem !important;
+          }
+          
+          .loginCard {
+            padding: 1rem !important;
+            border-radius: 12px !important;
+          }
+          
+          .input {
+            font-size: 16px !important; /* Prevents zoom on iOS */
+          }
+        }
       `}</style>
     </div>
   );
@@ -590,47 +660,89 @@ const styles = {
     margin: 0
   },
 
-  // Mobile Responsive Styles
+  // Mobile Responsive Styles (add to existing styles object)
   '@media (max-width: 768px)': {
     contentWrapper: {
-      gridTemplateColumns: '1fr',
-      gridTemplateRows: 'auto 1fr'
+      gridTemplateColumns: '1fr !important',
+      gridTemplateRows: 'auto 1fr !important',
+      minHeight: 'auto !important'
     },
     heroSection: {
-      padding: '2rem 1rem',
-      order: 2
+      padding: '1.5rem 1rem !important',
+      order: 2,
+      minHeight: 'auto !important'
     },
     heroTitle: {
-      fontSize: '1.8rem'
+      fontSize: '1.5rem !important'
     },
     heroSubtitle: {
-      fontSize: '1rem'
+      fontSize: '0.9rem !important'
     },
     bankingInfo: {
-      flexDirection: 'column',
-      gap: '1rem'
+      flexDirection: 'column !important',
+      gap: '1rem !important'
     },
     infoCard: {
-      width: '100%',
-      justifyContent: 'center'
+      width: '100% !important',
+      justifyContent: 'center !important',
+      padding: '0.75rem !important'
     },
     loginSection: {
       order: 1,
-      padding: '1rem'
+      padding: '1rem !important',
+      minHeight: 'auto !important'
     },
     loginCard: {
-      padding: '1.5rem'
+      padding: '1.5rem !important',
+      maxWidth: '100% !important',
+      margin: '0 !important'
     },
     headerContent: {
-      flexDirection: 'column',
-      gap: '1rem'
+      flexDirection: 'column !important',
+      gap: '1rem !important',
+      padding: '0.75rem !important'
     },
     headerActions: {
-      width: '100%',
-      justifyContent: 'center'
+      width: '100% !important',
+      justifyContent: 'center !important'
     },
     actionButtons: {
-      gap: '0.5rem'
+      gap: '0.5rem !important'
+    },
+    loginTitle: {
+      fontSize: '1.5rem !important'
+    },
+    input: {
+      fontSize: '16px !important' // Prevents zoom on iOS
+    }
+  },
+  '@media (max-width: 480px)': {
+    container: {
+      minHeight: '100vh !important'
+    },
+    main: {
+      minHeight: 'auto !important'
+    },
+    contentWrapper: {
+      display: 'block !important',
+      minHeight: 'auto !important'
+    },
+    heroSection: {
+      padding: '1rem !important',
+      textAlign: 'center !important'
+    },
+    loginSection: {
+      padding: '0.5rem !important'
+    },
+    loginCard: {
+      padding: '1rem !important',
+      borderRadius: '12px !important'
+    },
+    dropdownMenu: {
+      minWidth: '300px !important',
+      maxWidth: '95vw !important',
+      left: '2.5vw !important',
+      right: '2.5vw !important'
     }
   }
 };
