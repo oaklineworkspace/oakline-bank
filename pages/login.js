@@ -243,76 +243,6 @@ export default function LoginPage() {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
         }
-        
-        @media (max-width: 768px) {
-          .contentWrapper {
-            grid-template-columns: 1fr !important;
-            grid-template-rows: auto 1fr !important;
-            min-height: auto !important;
-          }
-          
-          .heroSection {
-            padding: 1.5rem 1rem !important;
-            order: 2;
-            min-height: auto !important;
-          }
-          
-          .loginSection {
-            order: 1;
-            padding: 1rem !important;
-            min-height: auto !important;
-          }
-          
-          .loginCard {
-            padding: 1.5rem !important;
-            max-width: 100% !important;
-            margin: 0 !important;
-          }
-          
-          .headerContent {
-            flex-direction: column !important;
-            gap: 1rem !important;
-            padding: 0.75rem !important;
-          }
-          
-          .headerActions {
-            width: 100% !important;
-            justify-content: center !important;
-          }
-        }
-        
-        @media (max-width: 480px) {
-          .container {
-            min-height: 100vh !important;
-          }
-          
-          .main {
-            min-height: auto !important;
-          }
-          
-          .contentWrapper {
-            display: block !important;
-            min-height: auto !important;
-          }
-          
-          .heroSection {
-            padding: 1rem !important;
-            text-align: center !important;
-          }
-          
-          .loginSection {
-            padding: 0.5rem !important;
-          }
-          
-          .loginCard {
-            padding: 1rem !important;
-            border-radius: 12px !important;
-          }
-          
-          .input {
-            font-size: 16px !important; /* Prevents zoom on iOS */
-          }
-        }
       `}</style>
     </div>
   );
@@ -385,17 +315,18 @@ const styles = {
     minHeight: 'calc(100vh - 120px)'
   },
   contentWrapper: {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
+    display: 'flex',
+    flexDirection: 'column',
     minHeight: 'calc(100vh - 120px)'
   },
   heroSection: {
     background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
     color: 'white',
-    padding: '3rem',
+    padding: '2rem 1rem',
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    minHeight: '40vh'
   },
   heroContent: {
     maxWidth: '500px',
@@ -460,10 +391,11 @@ const styles = {
   },
   loginSection: {
     backgroundColor: 'white',
-    padding: '2rem',
+    padding: '2rem 1rem',
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    flex: 1
   },
   loginCard: {
     width: '100%',
@@ -660,89 +592,69 @@ const styles = {
     margin: 0
   },
 
-  // Mobile Responsive Styles (add to existing styles object)
+  // Mobile Responsive Styles
   '@media (max-width: 768px)': {
-    contentWrapper: {
-      gridTemplateColumns: '1fr !important',
-      gridTemplateRows: 'auto 1fr !important',
-      minHeight: 'auto !important'
-    },
-    heroSection: {
-      padding: '1.5rem 1rem !important',
-      order: 2,
-      minHeight: 'auto !important'
-    },
-    heroTitle: {
-      fontSize: '1.5rem !important'
-    },
-    heroSubtitle: {
-      fontSize: '0.9rem !important'
-    },
-    bankingInfo: {
-      flexDirection: 'column !important',
-      gap: '1rem !important'
-    },
-    infoCard: {
-      width: '100% !important',
-      justifyContent: 'center !important',
-      padding: '0.75rem !important'
-    },
-    loginSection: {
-      order: 1,
-      padding: '1rem !important',
-      minHeight: 'auto !important'
-    },
-    loginCard: {
-      padding: '1.5rem !important',
-      maxWidth: '100% !important',
-      margin: '0 !important'
-    },
     headerContent: {
-      flexDirection: 'column !important',
-      gap: '1rem !important',
-      padding: '0.75rem !important'
+      flexDirection: 'column',
+      gap: '1rem',
+      padding: '0.75rem'
     },
     headerActions: {
-      width: '100% !important',
-      justifyContent: 'center !important'
+      width: '100%',
+      justifyContent: 'center'
     },
-    actionButtons: {
-      gap: '0.5rem !important'
+    heroSection: {
+      padding: '1.5rem 1rem',
+      minHeight: '30vh'
+    },
+    heroTitle: {
+      fontSize: '1.8rem'
+    },
+    heroSubtitle: {
+      fontSize: '1rem'
+    },
+    bankingInfo: {
+      flexDirection: 'column',
+      gap: '1rem'
+    },
+    infoCard: {
+      width: '100%',
+      justifyContent: 'center',
+      padding: '1rem'
+    },
+    loginSection: {
+      padding: '1.5rem 1rem'
+    },
+    loginCard: {
+      padding: '2rem 1.5rem',
+      maxWidth: '100%',
+      margin: '0'
     },
     loginTitle: {
-      fontSize: '1.5rem !important'
+      fontSize: '1.6rem'
     },
     input: {
-      fontSize: '16px !important' // Prevents zoom on iOS
+      fontSize: '16px', // Prevents zoom on iOS
+      padding: '1rem'
     }
   },
   '@media (max-width: 480px)': {
-    container: {
-      minHeight: '100vh !important'
-    },
-    main: {
-      minHeight: 'auto !important'
-    },
-    contentWrapper: {
-      display: 'block !important',
-      minHeight: 'auto !important'
-    },
     heroSection: {
-      padding: '1rem !important',
-      textAlign: 'center !important'
+      padding: '1rem',
+      minHeight: '25vh'
+    },
+    heroTitle: {
+      fontSize: '1.5rem'
+    },
+    heroSubtitle: {
+      fontSize: '0.9rem'
     },
     loginSection: {
-      padding: '0.5rem !important'
+      padding: '1rem 0.5rem'
     },
     loginCard: {
-      padding: '1rem !important',
-      borderRadius: '12px !important'
-    },
-    dropdownMenu: {
-      minWidth: '300px !important',
-      maxWidth: '95vw !important',
-      left: '2.5vw !important',
-      right: '2.5vw !important'
+      padding: '1.5rem 1rem',
+      borderRadius: '12px'
     }
   }
 };

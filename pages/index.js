@@ -333,81 +333,6 @@ export default function Home() {
       <header style={styles.mainHeader}>
         <div style={styles.headerContainer}>
           <div style={styles.leftSection}>
-            <div style={styles.navigationDropdown} className="navigationDropdown">
-              <button
-                style={styles.dropdownButton}
-                onClick={() => setActiveDropdown(activeDropdown === 'nav' ? null : 'nav')}
-              >
-                <span style={styles.menuIcon}>☰</span>
-                Menu
-                <span style={styles.dropdownArrow}>▼</span>
-              </button>
-
-              {activeDropdown === 'nav' && (
-                <div style={styles.dropdownMenu} onClick={(e) => e.stopPropagation()}>
-                  <div style={styles.dropdownGrid}>
-                    <div style={styles.dropdownSection}>
-                      <h4 style={styles.dropdownSectionTitle}>🏦 Banking Services</h4>
-                      <Link href="/account-types" style={styles.dropdownItem} onClick={() => setActiveDropdown(null)}>
-                        <span style={styles.dropdownItemIcon}>📋</span>
-                        All 23 Account Types
-                      </Link>
-                      <Link href="/loans" style={styles.dropdownItem} onClick={() => setActiveDropdown(null)}>
-                        <span style={styles.dropdownItemIcon}>💰</span>
-                        Loans & Credit
-                      </Link>
-                      <Link href="/cards" style={styles.dropdownItem} onClick={() => setActiveDropdown(null)}>
-                        <span style={styles.dropdownItemIcon}>💳</span>
-                        Credit & Debit Cards
-                      </Link>
-                      <Link href="/investments" style={styles.dropdownItem} onClick={() => setActiveDropdown(null)}>
-                        <span style={styles.dropdownItemIcon}>📈</span>
-                        Investment Portfolio
-                      </Link>
-                    </div>
-                    <div style={styles.dropdownSection}>
-                      <h4 style={styles.dropdownSectionTitle}>💸 Digital Services</h4>
-                      <Link href="/transfer" style={styles.dropdownItem} onClick={() => setActiveDropdown(null)}>
-                        <span style={styles.dropdownItemIcon}>🔄</span>
-                        Money Transfer
-                      </Link>
-                      <Link href="/bill-pay" style={styles.dropdownItem} onClick={() => setActiveDropdown(null)}>
-                        <span style={styles.dropdownItemIcon}>🧾</span>
-                        Pay Bills Online
-                      </Link>
-                      <Link href="/deposit-real" style={styles.dropdownItem} onClick={() => setActiveDropdown(null)}>
-                        <span style={styles.dropdownItemIcon}>📱</span>
-                        Mobile Deposit
-                      </Link>
-                      <Link href="/crypto" style={styles.dropdownItem} onClick={() => setActiveDropdown(null)}>
-                        <span style={styles.dropdownItemIcon}>₿</span>
-                        Cryptocurrency
-                      </Link>
-                    </div>
-                    <div style={styles.dropdownSection}>
-                      <h4 style={styles.dropdownSectionTitle}>🎧 Support & More</h4>
-                      <Link href="/support" style={styles.dropdownItem} onClick={() => setActiveDropdown(null)}>
-                        <span style={styles.dropdownItemIcon}>🎧</span>
-                        Customer Support
-                      </Link>
-                      <Link href="/branch-locator" style={styles.dropdownItem} onClick={() => setActiveDropdown(null)}>
-                        <span style={styles.dropdownItemIcon}>📍</span>
-                        Find Branches
-                      </Link>
-                      <Link href="/security" style={styles.dropdownItem} onClick={() => setActiveDropdown(null)}>
-                        <span style={styles.dropdownItemIcon}>🔒</span>
-                        Security Center
-                      </Link>
-                      <Link href="/about" style={styles.dropdownItem} onClick={() => setActiveDropdown(null)}>
-                        <span style={styles.dropdownItemIcon}>ℹ️</span>
-                        About Oakline Bank
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-
             <Link href="/" style={styles.logoSection}>
               <img src="/images/logo-primary.png.jpg" alt="Oakline Bank" style={styles.headerLogo} />
               <div style={styles.brandSection}>
@@ -434,10 +359,21 @@ export default function Home() {
                     <span style={styles.buttonIcon}>☰</span>
                     Menu
                   </Link>
-                  {/* Logout Button - Assuming this should link to a logout handler or page */}
-                  <Link href="/api/auth/logout" passHref>
-                    <button style={styles.loginButton}>Logout</button>
-                  </Link>
+                  {/* Logout Button */}
+                  <button 
+                    style={styles.loginButton}
+                    onClick={async () => {
+                      try {
+                        await supabase.auth.signOut();
+                        // Redirect to public home page
+                        window.location.href = '/';
+                      } catch (error) {
+                        console.error('Error signing out:', error);
+                      }
+                    }}
+                  >
+                    Logout
+                  </button>
                 </>
               ) : (
                 <>
