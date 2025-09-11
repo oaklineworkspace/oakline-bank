@@ -432,6 +432,15 @@ button:focus, a:focus, input:focus {
   }
 }
 
+@keyframes spin {
+  0% { 
+    transform: rotate(0deg); 
+  }
+  100% { 
+    transform: rotate(360deg); 
+  }
+}
+
 /* Enhanced Hover Effects */
 .atmImageContainer:hover .imageOverlay {
   transform: translateY(0) !important;
