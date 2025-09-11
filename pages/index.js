@@ -103,56 +103,56 @@ export default function Home() {
       title: 'Convenient ATM Network Access',
       subtitle: 'Access your money 24/7 at thousands of locations nationwide with zero fees',
       icon: '🏧',
-      gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+      gradient: 'linear-gradient(135deg, rgba(26, 54, 93, 0.8) 0%, rgba(5, 150, 105, 0.8) 100%)'
     },
     {
       src: '/images/mobile_banking_app.png',
       title: 'Oakline Mobile Banking',
       subtitle: 'Complete banking control right in your pocket with our award-winning app',
       icon: '📱',
-      gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'
+      gradient: 'linear-gradient(135deg, rgba(26, 54, 93, 0.8) 0%, rgba(5, 150, 105, 0.8) 100%)'
     },
     {
       src: '/images/handshake_business_deal.png',
       title: 'Professional Banking Partnership',
       subtitle: 'Building trust through personalized financial solutions and expert guidance',
       icon: '🤝',
-      gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)'
+      gradient: 'linear-gradient(135deg, rgba(26, 54, 93, 0.8) 0%, rgba(5, 150, 105, 0.8) 100%)'
     },
     {
       src: '/images/atm_withdrawal_transaction.png',
       title: 'Secure Transaction Processing',
       subtitle: 'Bank with confidence using our advanced security and fraud protection',
       icon: '🔒',
-      gradient: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)'
+      gradient: 'linear-gradient(135deg, rgba(26, 54, 93, 0.8) 0%, rgba(5, 150, 105, 0.8) 100%)'
     },
     {
       src: '/images/Bank_hall_business_discussion_72f98bbe.png',
       title: 'Expert Financial Consultation',
       subtitle: 'Professional advice from certified banking specialists in our modern branches',
       icon: '💼',
-      gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)'
+      gradient: 'linear-gradient(135deg, rgba(26, 54, 93, 0.8) 0%, rgba(5, 150, 105, 0.8) 100%)'
     },
     {
       src: '/images/Modern_bank_lobby_interior_d535acc7.png',
       title: 'Modern Banking Facilities',
       subtitle: 'Experience premium banking in our state-of-the-art branch locations',
       icon: '🏦',
-      gradient: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)'
+      gradient: 'linear-gradient(135deg, rgba(26, 54, 93, 0.8) 0%, rgba(5, 150, 105, 0.8) 100%)'
     },
     {
       src: '/images/Digital_investment_dashboard_36d35f19.png',
       title: 'Advanced Investment Platform',
       subtitle: 'Grow your wealth with cutting-edge investment tools and real-time analytics',
       icon: '📊',
-      gradient: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)'
+      gradient: 'linear-gradient(135deg, rgba(26, 54, 93, 0.8) 0%, rgba(5, 150, 105, 0.8) 100%)'
     },
     {
       src: '/images/Mobile_banking_user_experience_576bb7a3.png',
       title: 'Seamless Digital Experience',
       subtitle: 'Enjoy intuitive banking with our user-friendly mobile and web platforms',
       icon: '⚡',
-      gradient: 'linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)'
+      gradient: 'linear-gradient(135deg, rgba(26, 54, 93, 0.8) 0%, rgba(5, 150, 105, 0.8) 100%)'
     }
   ];
 
@@ -749,12 +749,12 @@ const styles = {
     alignItems: 'center',
     gap: '0.5rem',
     padding: '0.75rem 1.5rem',
-    backgroundColor: '#1f2937',
-    border: '2px solid #334155',
+    backgroundColor: '#059669',
+    border: '2px solid #047857',
     borderRadius: '10px',
     fontSize: '1rem',
     fontWeight: '600',
-    color: '#e2e8f0',
+    color: 'white',
     cursor: 'pointer',
     transition: 'all 0.3s ease'
   },
@@ -769,10 +769,10 @@ const styles = {
     position: 'absolute',
     top: '100%',
     right: 0,
-    backgroundColor: '#1f2937',
+    backgroundColor: 'white',
     borderRadius: '12px',
-    boxShadow: '0 10px 30px rgba(0,0,0,0.25)',
-    border: '2px solid #334155',
+    boxShadow: '0 10px 30px rgba(26, 54, 93, 0.25)',
+    border: '2px solid #e2e8f0',
     padding: '1.5rem',
     minWidth: '300px',
     zIndex: 1000,
@@ -782,13 +782,13 @@ const styles = {
     gap: '1.5rem'
   },
   dropdownSection: {
-    borderBottom: '1px solid #334155',
+    borderBottom: '1px solid #e2e8f0',
     paddingBottom: '1rem'
   },
   dropdownSectionTitle: {
     fontSize: '0.9rem',
     fontWeight: '700',
-    color: '#059669',
+    color: '#1a365d',
     marginBottom: '0.75rem',
     textTransform: 'uppercase',
     letterSpacing: '0.5px'
@@ -796,7 +796,7 @@ const styles = {
   dropdownItem: {
     display: 'block',
     padding: '0.5rem 0',
-    color: '#e2e8f0',
+    color: '#64748b',
     textDecoration: 'none',
     fontSize: '0.9rem',
     fontWeight: '500',
@@ -1026,7 +1026,7 @@ const styles = {
     left: 0,
     right: 0,
     bottom: 0,
-    background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(51, 65, 85, 0.9) 100%)',
+    background: 'linear-gradient(135deg, rgba(26, 54, 93, 0.85) 0%, rgba(5, 150, 105, 0.85) 100%)',
     opacity: 1
   },
   heroContent: {

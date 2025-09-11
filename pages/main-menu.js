@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useRouter } from 'next/router';
@@ -172,10 +171,12 @@ export default function MainMenu() {
               </div>
             </Link>
           </div>
-          
+
           <div style={styles.headerRight}>
             <div style={styles.userSection}>
-              <span style={styles.welcomeText}>Welcome, {getUserDisplayName()}</span>
+              <div style={styles.scrollingWelcome}>
+                <span style={styles.welcomeText}>Welcome, {getUserDisplayName()}</span>
+              </div>
               <div style={styles.headerActions}>
                 <Link href="/" style={styles.headerButton}>
                   <span style={styles.buttonIcon}>🏠</span>
@@ -201,7 +202,7 @@ export default function MainMenu() {
           <div style={styles.searchContainer}>
             <h2 style={styles.pageTitle}>Banking Services</h2>
             <p style={styles.pageSubtitle}>Access all your banking needs in one place</p>
-            
+
             <div style={styles.searchBar}>
               <span style={styles.searchIcon}>🔍</span>
               <input
@@ -264,7 +265,7 @@ export default function MainMenu() {
                 </div>
                 <span style={styles.serviceCount}>{category.services.length} services</span>
               </div>
-              
+
               <div style={styles.servicesGrid}>
                 {category.services.map(service => (
                   <Link key={service.name} href={service.path} style={styles.serviceCard}>
@@ -287,7 +288,7 @@ export default function MainMenu() {
               </h3>
               <span style={styles.serviceCount}>{filteredServices.length} services</span>
             </div>
-            
+
             <div style={styles.servicesGrid}>
               {filteredServices.map(service => (
                 <Link key={service.name} href={service.path} style={styles.serviceCard}>
@@ -315,7 +316,7 @@ export default function MainMenu() {
                 <span style={styles.contactHours}>24/7 Available</span>
               </div>
             </div>
-            
+
             <div style={styles.contactCard}>
               <span style={styles.contactIcon}>✉️</span>
               <div style={styles.contactInfo}>
@@ -324,7 +325,7 @@ export default function MainMenu() {
                 <span style={styles.contactHours}>Response within 24 hours</span>
               </div>
             </div>
-            
+
             <Link href="/support" style={styles.contactCard}>
               <span style={styles.contactIcon}>💬</span>
               <div style={styles.contactInfo}>
@@ -426,7 +427,8 @@ const styles = {
   welcomeText: {
     fontSize: '1rem',
     fontWeight: '500',
-    color: 'white'
+    color: 'white',
+    whiteSpace: 'nowrap'
   },
   headerActions: {
     display: 'flex',
@@ -461,6 +463,12 @@ const styles = {
   },
   buttonIcon: {
     fontSize: '0.9rem'
+  },
+  scrollingWelcome: {
+    overflow: 'hidden',
+    whiteSpace: 'nowrap',
+    animation: 'scrollText 10s linear infinite',
+    padding: '0.5rem 0',
   },
   main: {
     maxWidth: '1400px',
