@@ -332,20 +332,7 @@ export default function Home() {
       {/* Single Clean Header */}
       <header style={styles.mainHeader}>
         <div style={styles.headerContainer}>
-          <Link href="/" style={styles.logoSection}>
-            <img src="/images/logo-primary.png.jpg" alt="Oakline Bank" style={styles.headerLogo} />
-            <div style={styles.brandSection}>
-              <span style={styles.bankName}>Oakline Bank</span>
-              <span style={styles.bankTagline}>Your Financial Partner</span>
-            </div>
-          </Link>
-
-          <div style={styles.headerCenter}>
-            <span style={styles.routingInfo}>Routing: 075915826</span>
-            <span style={styles.phoneInfo}>📞 1-800-OAKLINE</span>
-          </div>
-
-          <div style={styles.headerActions}>
+          <div style={styles.leftSection}>
             <div style={styles.navigationDropdown} className="navigationDropdown">
               <button
                 style={styles.dropdownButton}
@@ -421,6 +408,21 @@ export default function Home() {
               )}
             </div>
 
+            <Link href="/" style={styles.logoSection}>
+              <img src="/images/logo-primary.png.jpg" alt="Oakline Bank" style={styles.headerLogo} />
+              <div style={styles.brandSection}>
+                <span style={styles.bankName}>Oakline Bank</span>
+                <span style={styles.bankTagline}>Your Financial Partner</span>
+              </div>
+            </Link>
+          </div>
+
+          <div style={styles.headerCenter}>
+            <span style={styles.routingInfo}>Routing: 075915826</span>
+            <span style={styles.phoneInfo}>📞 1-800-OAKLINE</span>
+          </div>
+
+          <div style={styles.headerActions}>
             <div style={styles.authButtons}>
               {user ? (
                 <>
@@ -1062,16 +1064,21 @@ const styles = {
     fontSize: '0.8rem',
     transition: 'transform 0.3s ease'
   },
+  leftSection: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '1rem'
+  },
   dropdownMenu: {
     position: 'absolute',
     top: '100%',
-    right: 0,
+    left: 0,
     backgroundColor: 'white',
     borderRadius: '16px',
     boxShadow: '0 20px 40px rgba(26, 54, 93, 0.2)',
     border: '2px solid #e2e8f0',
     padding: '2rem',
-    minWidth: '400px',
+    minWidth: '600px',
     zIndex: 1000,
     animation: 'dropdownSlideIn 0.3s ease-out'
   },
@@ -1081,13 +1088,13 @@ const styles = {
     gap: '2rem'
   },
   dropdownSection: {
-    borderBottom: '1px solid #059669',
+    borderBottom: '1px solid #e2e8f0',
     paddingBottom: '1.5rem'
   },
   dropdownSectionTitle: {
     fontSize: '1rem',
     fontWeight: '800',
-    color: '#ffffff',
+    color: '#1a365d',
     marginBottom: '1rem',
     textTransform: 'uppercase',
     letterSpacing: '0.5px'
@@ -1097,14 +1104,14 @@ const styles = {
     alignItems: 'center',
     gap: '1rem',
     padding: '1rem',
-    color: '#e2e8f0',
+    color: '#64748b',
     textDecoration: 'none',
     fontSize: '0.95rem',
     fontWeight: '600',
     borderRadius: '10px',
     transition: 'all 0.3s ease',
     margin: '0.25rem 0',
-    backgroundColor: 'rgba(255,255,255,0.05)'
+    backgroundColor: 'rgba(248,250,252,0.8)'
   },
   dropdownItemIcon: {
     fontSize: '1.2rem',
@@ -2416,8 +2423,8 @@ if (typeof document !== 'undefined') {
 
     /* Hover Effects */
     .dropdownItem:hover {
-      background-color: #f8fafc;
-      color: #1a365d;
+      background-color: #1a365d;
+      color: #ffffff;
       transform: translateY(-2px);
     }
 
