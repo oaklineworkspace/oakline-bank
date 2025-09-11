@@ -15,14 +15,14 @@ export default function LoanApprovalSection() {
         {/* Main approval image */}
         <div style={styles.imageContainer}>
           <img 
-            src="/images/loan-approval.png"
-            alt="$300,000 Loan Approval Celebration"
+            src="/images/realistic-loan-approval-banner.png"
+            alt="$485,000 Home Mortgage Loan Approval Certificate"
             style={styles.approvalImage}
           />
           <div style={styles.imageOverlay}>
             <div style={styles.successBadge}>
               <span style={styles.badgeIcon}>✅</span>
-              <span style={styles.badgeText}>Instant Pre-Approval Available</span>
+              <span style={styles.badgeText}>Real Loan Approvals Daily</span>
             </div>
           </div>
         </div>
@@ -31,12 +31,12 @@ export default function LoanApprovalSection() {
         <div style={styles.content}>
           <div style={styles.header}>
             <h2 style={styles.title}>
-              Get Your Loan
-              <span style={styles.highlight}> Approved Fast</span>
+              Real Loan Approvals
+              <span style={styles.highlight}> Every Day</span>
             </h2>
             <p style={styles.subtitle}>
-              Join thousands of satisfied customers who've achieved their financial goals 
-              with Oakline Bank's competitive loan programs. From $1,000 to $500,000+.
+              Just like Sarah Rodriguez who received her $485,000 home mortgage approval, 
+              you too can achieve your financial dreams with Oakline Bank's trusted lending programs.
             </p>
           </div>
 
