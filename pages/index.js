@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { supabase } from '../lib/supabaseClient';
@@ -228,7 +227,26 @@ export default function Home() {
     <div style={styles.pageContainer}>
       <MainMenu user={user} />
       <WelcomeBanner />
-      
+
+      {/* Top Announcement Bar */}
+      <div style={styles.topBar}>
+        <div style={styles.topBarContent}>
+          <div style={styles.announcement}>
+            <span style={styles.announcementIcon}>🏦</span>
+            <span style={styles.announcementText}>
+              Member FDIC • Equal Housing Lender • NMLS ID: 234567 • Routing Number: 075915826
+            </span>
+            <Link href="/account-types" style={styles.announcementLink}>
+              View All Accounts
+            </Link>
+          </div>
+          <div style={styles.topBarLinks}>
+            <Link href="/support" style={styles.topBarLink}>Support</Link>
+            <span style={styles.phoneNumber}>📞 1-800-OAKLINE</span>
+          </div>
+        </div>
+      </div>
+
       {/* Enhanced Mobile-First Hero Section with Parallax Effect */}
       <section style={styles.heroSection} id="hero" data-animate>
         <div style={styles.heroParallax}>
@@ -253,14 +271,14 @@ export default function Home() {
               </div>
               <h1 style={styles.heroTitle}>{bankingImages[currentSlide].title}</h1>
               <p style={styles.heroSubtitle}>{bankingImages[currentSlide].subtitle}</p>
-              
+
               {/* Bank Routing Number Display */}
               <div style={styles.routingNumberCard}>
                 <div style={styles.routingLabel}>Oakline Bank Routing Number</div>
                 <div style={styles.routingNumber}>075915826</div>
                 <div style={styles.routingNote}>Use this for wire transfers, direct deposits, and ACH transactions</div>
               </div>
-              
+
               <div style={styles.heroButtons}>
                 {user ? (
                   <>
@@ -288,7 +306,7 @@ export default function Home() {
               </div>
             </div>
           </div>
-          
+
           <div style={styles.slideIndicators}>
             {bankingImages.map((_, index) => (
               <button
@@ -317,7 +335,7 @@ export default function Home() {
             </p>
             <div style={styles.titleUnderline}></div>
           </div>
-          
+
           <div style={styles.featureShowcaseContainer}>
             <div style={styles.featureContent}>
               <div style={{
@@ -339,14 +357,14 @@ export default function Home() {
                   </div>
                 </div>
               </div>
-              
+
               <div style={{
                 ...styles.featureInfo,
                 ...(isVisible['features-showcase'] ? styles.slideInFromRight : {})
               }}>
                 <h3 style={styles.featureTitle}>{bankingFeatures[currentFeatureSlide].title}</h3>
                 <p style={styles.featureDescription}>{bankingFeatures[currentFeatureSlide].description}</p>
-                
+
                 <div style={styles.featuresList}>
                   {bankingFeatures[currentFeatureSlide].features.map((feature, index) => (
                     <div key={index} style={{
@@ -364,7 +382,7 @@ export default function Home() {
                     </div>
                   ))}
                 </div>
-                
+
                 <div style={styles.featureActions}>
                   {user ? (
                     <Link href="/dashboard" style={{
@@ -388,7 +406,7 @@ export default function Home() {
               </div>
             </div>
           </div>
-          
+
           <div style={styles.featureIndicators}>
             {bankingFeatures.map((_, index) => (
               <button
@@ -430,7 +448,7 @@ export default function Home() {
             </p>
             <div style={styles.titleUnderline}></div>
           </div>
-          
+
           <div style={styles.accountCarousel}>
             <div 
               style={{
@@ -479,7 +497,7 @@ export default function Home() {
               ))}
             </div>
           </div>
-          
+
           <div style={styles.accountIndicators}>
             {Array.from({ length: Math.ceil(visibleAccountTypes.length / 6) }).map((_, index) => (
               <button
@@ -498,13 +516,13 @@ export default function Home() {
       {/* Enhanced Services Section */}
       <ServicesSection />
       <FeaturesSection />
-      
+
       {/* Enhanced Loan Section with Better Imagery */}
       <LoanApprovalSection />
-      
+
       {/* Testimonials Section */}
       <TestimonialsSection />
-      
+
       {/* Account Types Discovery Section */}
       <section style={styles.accountTypesDiscovery} id="account-types-discovery" data-animate>
         <div style={styles.container}>
@@ -519,7 +537,7 @@ export default function Home() {
             </p>
             <div style={styles.titleUnderline}></div>
           </div>
-          
+
           <div style={styles.accountTypesPreview}>
             {[
               { icon: '💳', title: 'Personal Banking', desc: 'Checking, Savings, Student, Senior accounts and more', color: '#3b82f6' },
@@ -546,7 +564,7 @@ export default function Home() {
               </div>
             ))}
           </div>
-          
+
           <div style={styles.accountTypesAction}>
             <Link href="/account-types" style={styles.exploreButton}>
               <span style={styles.buttonIcon}>🔍</span>
@@ -574,13 +592,82 @@ export default function Home() {
           variant="primary"
         />
       </div>
-      
+
       <Footer />
     </div>
   );
 }
 
 const styles = {
+  // Top Bar Styles
+  topBar: {
+    backgroundColor: '#1e293b', // Dark professional background
+    color: '#e2e8f0', // Light text for contrast
+    padding: '1rem 0',
+    width: '100%',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    fontSize: '0.9rem',
+    borderBottom: '1px solid #334155'
+  },
+  topBarContent: {
+    maxWidth: '1400px',
+    width: '100%',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '0 1.5rem',
+    flexWrap: 'wrap',
+    gap: '1rem'
+  },
+  announcement: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '1rem',
+    flexGrow: 1,
+    flexWrap: 'wrap'
+  },
+  announcementIcon: {
+    fontSize: '1.5rem',
+    marginRight: '0.5rem',
+    color: '#3b82f6' // Primary accent color
+  },
+  announcementText: {
+    fontWeight: '500',
+    color: '#94a3b8', // Slightly muted text
+    flexShrink: 0
+  },
+  announcementLink: {
+    color: '#3b82f6',
+    textDecoration: 'none',
+    fontWeight: '700',
+    padding: '0.5rem 1rem',
+    borderRadius: '8px',
+    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+    transition: 'all 0.3s ease',
+    marginLeft: 'auto' // Pushes the link to the right
+  },
+  topBarLinks: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '1.5rem'
+  },
+  topBarLink: {
+    color: '#94a3b8',
+    textDecoration: 'none',
+    fontWeight: '600',
+    transition: 'color 0.3s ease',
+    position: 'relative'
+  },
+  phoneNumber: {
+    fontWeight: '700',
+    color: '#3b82f6', // Primary accent color for phone number
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem'
+  },
+
   // Loading Screen Styles
   loadingContainer: {
     display: 'flex',
@@ -733,7 +820,7 @@ const styles = {
     lineHeight: '1.5',
     textShadow: '1px 2px 4px rgba(0,0,0,0.3)'
   },
-  
+
   // Routing Number Card
   routingNumberCard: {
     backgroundColor: 'rgba(255,255,255,0.15)',
@@ -1305,118 +1392,126 @@ if (typeof document !== 'undefined') {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
-    
+
     @keyframes progressSlide {
       0% { transform: translateX(-100%); }
       50% { transform: translateX(0%); }
       100% { transform: translateX(100%); }
     }
-    
+
     @keyframes heroImageFloat {
       0%, 100% { transform: scale(1.05) translateY(0px); }
       50% { transform: scale(1.08) translateY(-10px); }
     }
-    
+
     @keyframes heroContentSlideUp {
       0% { transform: translate(-50%, -30%) scale(0.9); opacity: 0; }
       100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
     }
-    
+
     @keyframes heroIconBounce {
       0%, 100% { transform: translateY(0px) rotate(0deg); }
       50% { transform: translateY(-10px) rotate(5deg); }
     }
-    
+
     @keyframes routingCardGlow {
       0%, 100% { box-shadow: 0 0 20px rgba(255,255,255,0.3); }
       50% { box-shadow: 0 0 30px rgba(255,255,255,0.5); }
     }
-    
+
     @keyframes buttonPulse {
       0%, 100% { transform: translateY(0px) scale(1); }
       50% { transform: translateY(-2px) scale(1.02); }
     }
-    
+
     @keyframes staggeredFadeIn {
       0% { opacity: 0; transform: translateY(30px); }
       100% { opacity: 1; transform: translateY(0); }
     }
-    
+
     @keyframes underlineExpand {
       0% { width: 0; }
       100% { width: 80px; }
     }
-    
+
     @keyframes slideInFromLeft {
       0% { transform: translateX(-100px); opacity: 0; }
       100% { transform: translateX(0); opacity: 1; }
     }
-    
+
     @keyframes slideInFromRight {
       0% { transform: translateX(100px); opacity: 0; }
       100% { transform: translateX(0); opacity: 1; }
     }
-    
+
     @keyframes slideInFromBottom {
       0% { transform: translateY(50px); opacity: 0; }
       100% { transform: translateY(0); opacity: 1; }
     }
-    
+
     @keyframes bounceInLeft {
       0% { transform: translateX(-20px); opacity: 0; }
       60% { transform: translateX(5px); opacity: 0.8; }
       100% { transform: translateX(0); opacity: 1; }
     }
-    
+
     @keyframes flipInY {
       0% { transform: scale(0.8) rotateY(90deg); opacity: 0; }
       50% { transform: scale(0.9) rotateY(0deg); opacity: 0.5; }
       100% { transform: scale(1) rotateY(0deg); opacity: 1; }
     }
-    
+
     @keyframes fadeInUp {
       0% { transform: translateY(30px); opacity: 0; }
       100% { transform: translateY(0); opacity: 1; }
     }
-    
+
     @keyframes zoomIn {
       0% { transform: scale(0.8); opacity: 0; }
       100% { transform: scale(1); opacity: 1; }
     }
-    
+
     @keyframes pulseGlow {
       0%, 100% { transform: scale(1); filter: brightness(1); }
       50% { transform: scale(1.02); filter: brightness(1.1); }
     }
-    
+
     /* Hover Effects */
     .accountCard:hover {
       transform: translateY(-8px) scale(1.02);
       box-shadow: 0 20px 40px rgba(0,0,0,0.15);
     }
-    
+
     .previewCard:hover {
       transform: translateY(-10px);
       box-shadow: 0 25px 50px rgba(0,0,0,0.15);
     }
-    
+
     .heroButton:hover {
       transform: translateY(-3px);
       box-shadow: 0 15px 35px rgba(16, 185, 129, 0.6);
     }
-    
+
     .secondaryButton:hover {
       background-color: rgba(255,255,255,0.2);
       transform: translateY(-3px);
     }
-    
+
     .featureImage:hover {
       transform: scale(1.05);
     }
-    
+
     .exploreButton:hover {
       transform: translateY(-5px);
       box-shadow: 0 20px 40px rgba(59, 130, 246, 0.6);
+    }
+
+    .topBarLink:hover {
+      color: #ffffff; /* Lighten color on hover */
+    }
+
+    .announcementLink:hover {
+      background-color: rgba(59, 130, 246, 0.2);
     }
   `;
   document.head.appendChild(styleSheet);

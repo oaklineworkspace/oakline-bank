@@ -180,7 +180,23 @@ export default function MainMenu({ user }) {
 
           {/* Desktop Menu */}
           <div style={styles.desktopMenu}>
-            {menuItems.map((item) => (
+            <Link href="/account-types" style={styles.navLink}>
+              <span style={styles.menuIcon}>🏦</span>
+              Accounts
+            </Link>
+            <Link href="/loans" style={styles.navLink}>
+              <span style={styles.menuIcon}>💰</span>
+              Loans
+            </Link>
+            <Link href="/investments" style={styles.navLink}>
+              <span style={styles.menuIcon}>📈</span>
+              Investments
+            </Link>
+            <Link href="/support" style={styles.navLink}>
+              <span style={styles.menuIcon}>🎧</span>
+              Support
+            </Link>
+            {menuItems.slice(0, 1).map((item) => (
               <div key={item.name} style={styles.menuItem}>
                 <button
                   style={{
@@ -194,8 +210,8 @@ export default function MainMenu({ user }) {
                     handleDropdownToggle(item.name);
                   }}
                 >
-                  <span style={styles.menuIcon}>{item.icon}</span>
-                  <span>{item.name}</span>
+                  <span style={styles.menuIcon}>☰</span>
+                  <span>More</span>
                   <span style={{
                     ...styles.dropdownArrow,
                     transform: activeDropdown === item.name ? 'rotate(180deg)' : 'rotate(0deg)'
@@ -491,6 +507,19 @@ const styles = {
   },
   menuIcon: {
     fontSize: '1rem'
+  },
+  navLink: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    padding: '0.75rem 1rem',
+    textDecoration: 'none',
+    color: '#374151',
+    borderRadius: '8px',
+    fontSize: '0.9rem',
+    fontWeight: '500',
+    transition: 'all 0.2s',
+    whiteSpace: 'nowrap'
   },
   dropdownArrow: {
     fontSize: '0.7rem',

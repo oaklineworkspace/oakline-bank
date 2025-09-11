@@ -12,55 +12,65 @@ export default function AccountTypes() {
       id: 1,
       name: 'Checking Account',
       category: 'Personal',
-      description: 'Perfect for everyday banking needs with easy access to your money.',
+      description: 'Our flagship checking account is designed for everyday banking with unmatched convenience and security. Enjoy unlimited transactions, comprehensive digital banking tools, and 24/7 access to your funds. This account features no minimum balance requirements and includes premium benefits like ATM fee reimbursement and overdraft protection. Perfect for individuals who want a reliable, full-service banking experience with no hidden fees.',
       icon: '💳',
       rate: '0.25% APY',
       minBalance: '$0',
       monthlyFee: '$0',
       features: [
         'No minimum balance required',
-        'Free online and mobile banking',
-        'Free debit card included',
-        'Unlimited transactions',
-        'Direct deposit available',
-        'Mobile check deposit',
-        'ATM fee reimbursement up to $10/month',
-        'Overdraft protection available'
+        'Free online and mobile banking with advanced features',
+        'Premium debit card with enhanced security chip',
+        'Unlimited transactions nationwide',
+        'Direct deposit with early access',
+        'Mobile check deposit with instant availability',
+        'ATM fee reimbursement up to $10/month nationwide',
+        'Overdraft protection with multiple coverage options',
+        'Free wire transfers (domestic)',
+        'Automatic bill pay with scheduling',
+        'Real-time fraud monitoring and alerts',
+        'FDIC insured up to $250,000'
       ],
       benefits: [
-        'Perfect for daily expenses',
-        'Easy bill payments',
-        'Quick money transfers',
-        'Real-time notifications'
+        'Perfect for daily expenses and financial management',
+        'Easy bill payments with automatic scheduling',
+        'Quick money transfers with Zelle integration',
+        'Real-time notifications for all transactions',
+        'Access to exclusive member benefits and discounts'
       ],
-      eligibility: 'Age 18+ with valid ID and Social Security Number'
+      eligibility: 'Age 18+ with valid government-issued ID, Social Security Number, and proof of address'
     },
     {
       id: 2,
       name: 'High-Yield Savings Account',
       category: 'Personal',
-      description: 'Maximize your savings with our competitive interest rates.',
+      description: 'Accelerate your savings growth with our premium high-yield savings account featuring industry-leading interest rates. This account is designed for savers who want to maximize their earnings while maintaining liquidity. With advanced savings tools, automatic round-up features, and goal-setting capabilities, you can effortlessly build your financial future. The account includes comprehensive digital banking features and is fully FDIC insured for your peace of mind.',
       icon: '💰',
       rate: '5.00% APY',
       minBalance: '$500',
       monthlyFee: '$0',
       features: [
-        'Competitive 5.00% APY',
-        'No monthly maintenance fees',
-        'FDIC insured up to $250,000',
-        'Online and mobile banking',
-        'Automatic savings programs',
-        '6 free withdrawals per month',
-        'Direct deposit available',
-        'Goal-based savings tools'
+        'Competitive 5.00% APY with monthly compounding',
+        'No monthly maintenance fees or hidden charges',
+        'FDIC insured up to $250,000 per depositor',
+        'Advanced online and mobile banking platform',
+        'Automatic savings programs with round-up features',
+        '6 free withdrawals per month (additional at $3 each)',
+        'Direct deposit with automatic allocation',
+        'Goal-based savings tools with progress tracking',
+        'Savings challenges and milestones',
+        'Interest rate alerts and market updates',
+        'Transfer scheduling and automation',
+        'Detailed savings analytics and reports'
       ],
       benefits: [
-        'High interest earnings',
-        'Safe and secure',
-        'Flexible access',
-        'Automated saving options'
+        'Industry-leading high interest earnings',
+        'Bank-grade security with advanced encryption',
+        'Flexible access with reasonable withdrawal limits',
+        'Automated saving options to build wealth effortlessly',
+        'No penalties for early withdrawal'
       ],
-      eligibility: 'Age 18+ with $500 minimum opening deposit'
+      eligibility: 'Age 18+ with $500 minimum opening deposit and U.S. residency'
     },
     {
       id: 3,
@@ -821,7 +831,7 @@ const styles = {
     transition: 'all 0.2s'
   },
   heroSection: {
-    backgroundColor: 'linear-gradient(135deg, #1e40af 0%, #3730a3 100%)',
+    background: 'linear-gradient(135deg, #1e40af 0%, #3730a3 100%)',
     padding: '4rem 2rem',
     textAlign: 'center',
     color: 'white'
@@ -908,7 +918,10 @@ const styles = {
     padding: '2rem',
     boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
     border: '1px solid #e2e8f0',
-    transition: 'all 0.3s ease'
+    transition: 'all 0.3s ease',
+    position: 'relative',
+    overflow: 'visible',
+    margin: '1rem 0'
   },
   accountHeader: {
     display: 'flex',

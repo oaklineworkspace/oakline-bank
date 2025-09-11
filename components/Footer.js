@@ -1,4 +1,3 @@
-
 import Link from 'next/link';
 
 export default function Footer() {
@@ -65,7 +64,7 @@ export default function Footer() {
               <span style={styles.infoIcon}>⚖️</span>
               <div>
                 <span style={styles.infoLabel}>Equal Housing Lender</span>
-                <span style={styles.infoValue}>NMLS ID: 123456</span>
+                <span style={styles.infoValue}>NMLS ID: 234567</span>
               </div>
             </div>
           </div>
@@ -302,11 +301,11 @@ export default function Footer() {
               </div>
               <div style={styles.bankingDetailItem}>
                 <span style={styles.detailLabel}>NMLS ID:</span>
-                <span style={styles.detailValue}>123456</span>
+                <span style={styles.detailValue}>234567</span>
               </div>
             </div>
           </div>
-          
+
           <div style={styles.legalNotice}>
             <p style={styles.legalText}>
               <strong>Banking Information:</strong> Oakline Bank is a full-service digital bank offering checking, savings, loans, and investment services. 
@@ -693,40 +692,40 @@ if (typeof document !== 'undefined') {
       box-shadow: 0 20px 40px rgba(0,0,0,0.15);
       border-color: #3b82f6;
     }
-    
+
     .quickActionBtn:hover {
       background-color: #047857;
       transform: translateY(-2px);
       box-shadow: 0 8px 20px rgba(5, 150, 105, 0.4);
     }
-    
+
     .socialLink:hover {
       transform: scale(1.1);
       background-color: rgba(255,255,255,0.2);
     }
-    
+
     .footerLink:hover {
       color: #60a5fa;
       padding-left: 8px;
     }
-    
+
     .newsletterInput:focus {
       outline: none;
       border-color: #3b82f6;
       box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
     }
-    
+
     .newsletterBtn:hover {
       background-color: #047857;
       transform: translateY(-2px);
       box-shadow: 0 8px 20px rgba(5, 150, 105, 0.4);
     }
-    
+
     .bankingInfoItem:hover {
       background-color: rgba(255,255,255,0.08);
       border-color: rgba(255,255,255,0.2);
     }
-    
+
     .contactItem:hover {
       background-color: rgba(255,255,255,0.08);
       border-color: rgba(255,255,255,0.2);
