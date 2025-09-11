@@ -1,0 +1,68 @@
+
+@media (max-width: 768px) {
+  .headerContainer {
+    flex-direction: column !important;
+    padding: 0.75rem !important;
+    gap: 1rem !important;
+  }
+  
+  .headerCenter {
+    order: 1 !important;
+    width: 100% !important;
+    text-align: center !important;
+  }
+  
+  .logoSection {
+    order: 0 !important;
+  }
+  
+  .headerActions {
+    order: 2 !important;
+    width: 100% !important;
+    justify-content: center !important;
+  }
+  
+  .authButtons {
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+    width: 100% !important;
+  }
+  
+  .featuresGrid {
+    grid-template-columns: 1fr !important;
+    gap: 1.5rem !important;
+  }
+  
+  .heroSection {
+    height: auto !important;
+    min-height: 60vh !important;
+    padding: 2rem 1rem !important;
+  }
+  
+  .heroButtons {
+    flex-direction: column !important;
+    width: 100% !important;
+    gap: 0.75rem !important;
+  }
+  
+  .featuresDropdownMenu {
+    min-width: 300px !important;
+    max-width: 95vw !important;
+    left: 50% !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    position: fixed !important;
+  }
+}
+
+/* Image fallback styles */
+.image-fallback {
+  height: 200px;
+  background: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  color: #666;
+  font-size: 2rem;
+}

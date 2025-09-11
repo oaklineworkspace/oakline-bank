@@ -345,7 +345,7 @@ export default function Home() {
                 Bank Features
                 <span style={styles.dropdownArrow}>▼</span>
               </button>
-              
+
               {activeDropdown === 'features' && (
                 <>
                   <div 
@@ -681,7 +681,7 @@ export default function Home() {
                         key={index}
                         style={{
                           ...styles.accountCard,
-                          background: user ? 'linear-gradient(135deg, #1e293b 0%, #334155 100%)' : 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+                          backgroundColor: user ? '#1e293b' : '#059669',
                           ...(isVisible['account-types'] ? {
                             ...styles.flipInY,
                             animationDelay: `${index * 0.1}s`
@@ -2425,14 +2425,14 @@ if (typeof document !== 'undefined') {
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(5, 150, 105, 0.2);
       }
-      
+
       .featuresDropdownButton:hover {
         background-color: #f0f9ff !important;
         border-color: #059669 !important;
         color: #059669 !important;
         transform: translateY(-2px);
       }
-      
+
       .dropdownButton:hover {
         transform: translateY(-3px);
         box-shadow: 0 8px 20px rgba(5, 150, 105, 0.4);
