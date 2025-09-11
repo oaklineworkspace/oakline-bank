@@ -358,6 +358,58 @@ button:focus, a:focus, input:focus {
   }
 }
 
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInFromBottom {
+  from {
+    opacity: 0;
+    transform: translateY(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes cardFloat {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(2deg);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
 @keyframes fadeInDown {
   from {
     opacity: 0;
@@ -442,12 +494,12 @@ button:focus, a:focus, input:focus {
 }
 
 /* Enhanced Hover Effects */
-.atmImageContainer:hover .imageOverlay {
-  transform: translateY(0) !important;
+.featureImageContainer:hover .featureImage {
+  transform: scale(1.05) !important;
 }
 
-.atmImageContainer:hover .atmImage {
-  transform: scale(1.05) !important;
+.featureImageContainer:hover .featureBadge {
+  transform: scale(1.1) !important;
 }
 
 .featureCard:hover {
@@ -482,26 +534,75 @@ button:focus, a:focus, input:focus {
   .heroButtons {
     flex-direction: column !important;
     align-items: stretch !important;
+    gap: 0.5rem !important;
   }
 
-  .atmGrid {
+  .featureContent {
     grid-template-columns: 1fr !important;
+    gap: 1.5rem !important;
   }
 
   .accountGrid {
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
+    gap: 1rem !important;
   }
 
   .loanContent {
     grid-template-columns: 1fr !important;
+    gap: 1.5rem !important;
   }
 
   .loanStats {
     grid-template-columns: repeat(3, 1fr) !important;
+    gap: 0.8rem !important;
+  }
+
+  .loanTypes {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.6rem !important;
+  }
+
+  .featuresList {
+    margin-bottom: 1.5rem !important;
+  }
+
+  .heroSection {
+    height: 50vh !important;
+    min-height: 350px !important;
+    max-height: 400px !important;
+  }
+
+  .heroTitle {
+    font-size: clamp(1.3rem, 4vw, 2rem) !important;
+  }
+
+  .heroSubtitle {
+    font-size: clamp(0.85rem, 2vw, 1rem) !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .accountGrid {
+    grid-template-columns: 1fr !important;
   }
 
   .loanTypes {
     grid-template-columns: 1fr !important;
+  }
+
+  .loanStats {
+    grid-template-columns: 1fr !important;
+    text-align: left !important;
+  }
+
+  .statItem {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 0.5rem !important;
+    background: rgba(59, 130, 246, 0.05) !important;
+    border-radius: 8px !important;
+    margin-bottom: 0.5rem !important;
   }
 }
 

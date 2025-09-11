@@ -16,6 +16,7 @@ export default function Home() {
   const [user, setUser] = useState(null);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [currentAccountSlide, setCurrentAccountSlide] = useState(0);
+  const [currentFeatureSlide, setCurrentFeatureSlide] = useState(0);
   const [isVisible, setIsVisible] = useState({});
   const [isLoading, setIsLoading] = useState(true);
 
@@ -44,12 +45,17 @@ export default function Home() {
     // Auto-slide for hero images
     const heroInterval = setInterval(() => {
       setCurrentSlide(prev => (prev + 1) % bankingImages.length);
-    }, 5000);
+    }, 4000);
 
     // Auto-slide for account types
     const accountInterval = setInterval(() => {
       setCurrentAccountSlide(prev => (prev + 1) % Math.ceil(accountTypes.length / 6));
-    }, 7000);
+    }, 6000);
+
+    // Auto-slide for feature showcase
+    const featureInterval = setInterval(() => {
+      setCurrentFeatureSlide(prev => (prev + 1) % bankingFeatures.length);
+    }, 5000);
 
     // Intersection Observer for scroll animations
     const observer = new IntersectionObserver(
@@ -70,86 +76,101 @@ export default function Home() {
       subscription?.unsubscribe();
       clearInterval(heroInterval);
       clearInterval(accountInterval);
+      clearInterval(featureInterval);
       observer.disconnect();
     };
   }, []);
 
   const bankingImages = [
     {
-      src: '/images/hero-mobile.jpg.PNG',
-      title: 'Mobile Banking Revolution',
-      subtitle: 'Bank anywhere, anytime with our award-winning mobile app',
-      icon: '📱'
+      src: '/images/handshake_business_deal.png',
+      title: 'Professional Banking Partnership',
+      subtitle: 'Building trust through personalized financial solutions',
+      icon: '🤝'
     },
     {
-      src: '/images/hero-debit-card-1.jpg.PNG',
-      title: 'Premium Debit Cards',
-      subtitle: 'Experience contactless payments with advanced security',
-      icon: '💳'
-    },
-    {
-      src: '/images/hero-pos.jpg.PNG',
-      title: 'ATM & POS Solutions',
-      subtitle: 'Access your money worldwide with our extensive network',
+      src: '/images/atm_withdrawal_transaction.png',
+      title: 'Convenient ATM Access',
+      subtitle: 'Withdraw cash securely from our nationwide network',
       icon: '🏧'
     },
     {
       src: '/images/Bank_hall_business_discussion_72f98bbe.png',
-      title: 'Expert Financial Advice',
-      subtitle: 'Personalized guidance from certified banking professionals',
-      icon: '👥'
-    },
-    {
-      src: '/images/Digital_investment_dashboard_36d35f19.png',
-      title: 'Smart Investment Tools',
-      subtitle: 'AI-powered investment strategies for maximum returns',
-      icon: '📊'
-    },
-    {
-      src: '/images/Mobile_banking_user_experience_576bb7a3.png',
-      title: 'Seamless User Experience',
-      subtitle: 'Intuitive design meets powerful banking functionality',
-      icon: '⚡'
+      title: 'Expert Financial Consultation',
+      subtitle: 'Professional advice from certified banking specialists',
+      icon: '💼'
     },
     {
       src: '/images/Modern_bank_lobby_interior_d535acc7.png',
       title: 'Modern Banking Facilities',
-      subtitle: 'Visit our state-of-the-art branch locations',
+      subtitle: 'Experience banking in our state-of-the-art branches',
       icon: '🏦'
+    },
+    {
+      src: '/images/Digital_investment_dashboard_36d35f19.png',
+      title: 'Digital Investment Platform',
+      subtitle: 'Manage your investments with cutting-edge technology',
+      icon: '📊'
+    },
+    {
+      src: '/images/Mobile_banking_user_experience_576bb7a3.png',
+      title: 'Mobile Banking Excellence',
+      subtitle: 'Bank anywhere with our award-winning mobile app',
+      icon: '📱'
+    }
+  ];
+
+  const bankingFeatures = [
+    {
+      image: '/images/handshake_business_deal.png',
+      title: 'Trusted Partnerships',
+      description: 'Building lasting relationships with our valued customers through transparent and reliable banking services.',
+      features: ['Personalized Service', 'Dedicated Relationship Manager', 'Priority Customer Support', '24/7 Banking Assistance']
+    },
+    {
+      image: '/images/atm_withdrawal_transaction.png',
+      title: 'Convenient Banking',
+      description: 'Access your money anytime, anywhere with our extensive ATM network and mobile banking solutions.',
+      features: ['5,000+ ATMs Nationwide', 'Mobile Check Deposit', 'Contactless Payments', 'Real-time Notifications']
+    },
+    {
+      image: '/images/Modern_bank_lobby_interior_d535acc7.png',
+      title: 'Premium Banking Experience',
+      description: 'Visit our modern branches for a comfortable and efficient banking experience with expert staff.',
+      features: ['Private Banking Suites', 'Express Service Counters', 'Digital Self-Service Kiosks', 'Comfortable Waiting Areas']
+    },
+    {
+      image: '/images/Digital_investment_dashboard_36d35f19.png',
+      title: 'Smart Investments',
+      description: 'Grow your wealth with our comprehensive investment platform and professional financial advisors.',
+      features: ['Portfolio Management', 'Market Research Tools', 'Risk Assessment', 'Retirement Planning']
     }
   ];
 
   const accountTypes = [
-    { name: 'Checking Account', icon: '💳', rate: '0.01% APY', desc: 'Everyday banking made simple', featured: true },
-    { name: 'Savings Account', icon: '💰', rate: '4.50% APY', desc: 'Grow your money with competitive rates', featured: true },
-    { name: 'Business Checking', icon: '🏢', rate: '0.01% APY', desc: 'Professional banking for businesses', featured: true },
-    { name: 'Business Savings', icon: '🏦', rate: '4.25% APY', desc: 'Business savings with higher yields', featured: false },
-    { name: 'Student Checking', icon: '🎓', rate: '0.01% APY', desc: 'No-fee banking for students', featured: false },
-    { name: 'Money Market Account', icon: '📈', rate: '4.75% APY', desc: 'Premium savings with higher yields', featured: true },
-    { name: 'Certificate of Deposit', icon: '🔒', rate: '5.25% APY', desc: 'Secure fixed-rate investments', featured: true },
-    { name: 'Retirement Account (IRA)', icon: '🏖️', rate: '4.80% APY', desc: 'Plan for your golden years', featured: false },
-    { name: 'Joint Checking', icon: '👫', rate: '0.01% APY', desc: 'Shared banking for couples', featured: false },
-    { name: 'Trust Account', icon: '🛡️', rate: '3.50% APY', desc: 'Manage assets for beneficiaries', featured: false },
-    { name: 'Investment Brokerage', icon: '📊', rate: 'Variable', desc: 'Trade stocks, bonds, and ETFs', featured: true },
+    { name: 'Premium Checking', icon: '💎', rate: '0.25% APY', desc: 'Luxury banking with exclusive perks', featured: true },
     { name: 'High-Yield Savings', icon: '⭐', rate: '5.00% APY', desc: 'Maximum earning potential', featured: true },
+    { name: 'Business Checking', icon: '🏢', rate: '0.15% APY', desc: 'Professional banking for businesses', featured: true },
+    { name: 'Investment Account', icon: '📈', rate: 'Variable', desc: 'Trade stocks, bonds, and ETFs', featured: true },
+    { name: 'Money Market', icon: '💰', rate: '4.75% APY', desc: 'Premium savings with higher yields', featured: true },
+    { name: 'Certificate of Deposit', icon: '🔒', rate: '5.25% APY', desc: 'Secure fixed-rate investments', featured: true },
+    { name: 'Student Account', icon: '🎓', rate: '2.50% APY', desc: 'No-fee banking for students', featured: false },
+    { name: 'Retirement IRA', icon: '🏖️', rate: '4.80% APY', desc: 'Plan for your golden years', featured: false },
+    { name: 'Joint Account', icon: '👫', rate: '0.50% APY', desc: 'Shared banking for couples', featured: false },
+    { name: 'Trust Account', icon: '🛡️', rate: '3.50% APY', desc: 'Manage assets for beneficiaries', featured: false },
     { name: 'Teen Account', icon: '👦', rate: '2.00% APY', desc: 'Financial education for teens', featured: false },
     { name: 'Senior Account', icon: '👴', rate: '4.00% APY', desc: 'Special benefits for seniors', featured: false },
-    { name: 'Premium Checking', icon: '💎', rate: '0.25% APY', desc: 'Luxury banking with perks', featured: false },
-    { name: 'Health Savings Account', icon: '🏥', rate: '3.75% APY', desc: 'Tax-advantaged health savings', featured: false },
-    { name: 'Business Money Market', icon: '🏗️', rate: '4.50% APY', desc: 'Business liquidity solutions', featured: false },
+    { name: 'Health Savings', icon: '🏥', rate: '3.75% APY', desc: 'Tax-advantaged health savings', featured: false },
     { name: 'International Account', icon: '🌍', rate: '3.25% APY', desc: 'Global banking solutions', featured: false },
     { name: 'Cryptocurrency Account', icon: '₿', rate: 'Variable', desc: 'Digital asset management', featured: user ? true : false },
-    { name: 'Green Investment Fund', icon: '🌱', rate: '6.00% APY', desc: 'Sustainable investing options', featured: user ? true : false },
+    { name: 'Green Investment', icon: '🌱', rate: '6.00% APY', desc: 'Sustainable investing options', featured: user ? true : false },
     { name: 'Real Estate Investment', icon: '🏠', rate: '7.50% APY', desc: 'Property investment trusts', featured: user ? true : false },
-    { name: 'Education Savings (529)', icon: '📚', rate: '4.25% APY', desc: 'Tax-free education savings', featured: false },
-    { name: 'Emergency Fund Account', icon: '🚨', rate: '4.10% APY', desc: 'Quick access emergency savings', featured: false }
-  ];
-
-  const atmFeatures = [
-    { icon: '🏧', title: '55,000+ ATMs', desc: 'Nationwide access' },
-    { icon: '🌍', title: 'Global Network', desc: 'Worldwide acceptance' },
-    { icon: '📱', title: 'Cardless ATM', desc: 'Mobile app access' },
-    { icon: '🔒', title: 'Secure Transactions', desc: 'Bank-grade security' }
+    { name: 'Education Savings', icon: '📚', rate: '4.25% APY', desc: 'Tax-free education savings', featured: false },
+    { name: 'Emergency Fund', icon: '🚨', rate: '4.10% APY', desc: 'Quick access emergency savings', featured: false },
+    { name: 'Small Business', icon: '🏪', rate: '3.80% APY', desc: 'Banking solutions for small business', featured: false },
+    { name: 'Corporate Banking', icon: '🏭', rate: '4.20% APY', desc: 'Enterprise banking solutions', featured: false },
+    { name: 'Private Banking', icon: '💎', rate: '5.50% APY', desc: 'Exclusive high-net-worth services', featured: user ? true : false },
+    { name: 'Wealth Management', icon: '👑', rate: '6.75% APY', desc: 'Comprehensive wealth solutions', featured: user ? true : false }
   ];
 
   // Show different account types based on authentication
@@ -159,7 +180,7 @@ export default function Home() {
     return (
       <div style={styles.loadingContainer}>
         <div style={styles.spinner}></div>
-        <p>Loading...</p>
+        <p style={styles.loadingText}>Loading your banking experience...</p>
       </div>
     );
   }
@@ -169,7 +190,7 @@ export default function Home() {
       <MainMenu user={user} />
       <WelcomeBanner />
       
-      {/* Enhanced Hero Section with Mobile-First Design */}
+      {/* Enhanced Mobile-First Hero Section */}
       <section style={styles.heroSection} id="hero" data-animate>
         <div style={styles.heroSlide}>
           <div style={styles.heroImageContainer}>
@@ -182,7 +203,7 @@ export default function Home() {
           </div>
           <div style={{
             ...styles.heroContent,
-            ...(isVisible.hero ? styles.slideInFromLeft : {})
+            ...(isVisible.hero ? styles.slideInFromBottom : {})
           }}>
             <div style={styles.heroIcon}>{bankingImages[currentSlide].icon}</div>
             <h1 style={styles.heroTitle}>{bankingImages[currentSlide].title}</h1>
@@ -190,7 +211,7 @@ export default function Home() {
             <div style={styles.heroButtons}>
               <Link href="/apply" style={styles.heroButton}>
                 <span style={styles.buttonIcon}>🚀</span>
-                Get Started Today
+                Start Banking Today
               </Link>
               <Link href="/login" style={styles.secondaryButton}>
                 <span style={styles.buttonIcon}>👤</span>
@@ -214,44 +235,69 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ATM & Card Services Section */}
-      <section style={styles.atmSection} id="atm-services" data-animate>
+      {/* Banking Features Showcase */}
+      <section style={styles.featuresShowcase} id="features-showcase" data-animate>
         <div style={styles.container}>
           <div style={{
             ...styles.sectionHeader,
-            ...(isVisible['atm-services'] ? styles.fadeInDown : {})
+            ...(isVisible['features-showcase'] ? styles.fadeInUp : {})
           }}>
-            <h2 style={styles.sectionTitle}>ATM & Card Services</h2>
-            <p style={styles.sectionSubtitle}>Access your money anywhere, anytime with our comprehensive card solutions</p>
+            <h2 style={styles.sectionTitle}>Why Choose Oakline Bank</h2>
+            <p style={styles.sectionSubtitle}>Discover the features that make us your trusted financial partner</p>
           </div>
           
-          <div style={styles.atmGrid}>
-            <div style={{
-              ...styles.atmImageContainer,
-              ...(isVisible['atm-services'] ? styles.slideInFromLeft : {})
-            }}>
-              <img src="/images/hero-debit-card-2.jpg.PNG" alt="ATM Card Usage" style={styles.atmImage} />
-              <div style={styles.imageOverlay}>
-                <h3 style={styles.overlayTitle}>Smart ATM Technology</h3>
-                <p style={styles.overlayDesc}>Biometric authentication and cardless transactions</p>
+          <div style={styles.featureShowcaseContainer}>
+            <div style={styles.featureContent}>
+              <div style={{
+                ...styles.featureImageContainer,
+                ...(isVisible['features-showcase'] ? styles.slideInFromLeft : {})
+              }}>
+                <img 
+                  src={bankingFeatures[currentFeatureSlide].image} 
+                  alt={bankingFeatures[currentFeatureSlide].title}
+                  style={styles.featureImage}
+                />
+                <div style={styles.featureImageOverlay}>
+                  <div style={styles.featureBadge}>
+                    <span>✨ Featured Service</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div style={{
+                ...styles.featureInfo,
+                ...(isVisible['features-showcase'] ? styles.slideInFromRight : {})
+              }}>
+                <h3 style={styles.featureTitle}>{bankingFeatures[currentFeatureSlide].title}</h3>
+                <p style={styles.featureDescription}>{bankingFeatures[currentFeatureSlide].description}</p>
+                
+                <div style={styles.featuresList}>
+                  {bankingFeatures[currentFeatureSlide].features.map((feature, index) => (
+                    <div key={index} style={styles.featureItem}>
+                      <span style={styles.featureIcon}>✓</span>
+                      <span style={styles.featureText}>{feature}</span>
+                    </div>
+                  ))}
+                </div>
+                
+                <Link href="/apply" style={styles.featureButton}>
+                  Learn More
+                </Link>
               </div>
             </div>
-            
-            <div style={{
-              ...styles.atmFeaturesGrid,
-              ...(isVisible['atm-services'] ? styles.slideInFromRight : {})
-            }}>
-              {atmFeatures.map((feature, index) => (
-                <div key={index} style={{
-                  ...styles.featureCard,
-                  animationDelay: `${index * 0.1}s`
-                }}>
-                  <div style={styles.featureIcon}>{feature.icon}</div>
-                  <h3 style={styles.featureTitle}>{feature.title}</h3>
-                  <p style={styles.featureDesc}>{feature.desc}</p>
-                </div>
-              ))}
-            </div>
+          </div>
+          
+          <div style={styles.featureIndicators}>
+            {bankingFeatures.map((_, index) => (
+              <button
+                key={index}
+                style={{
+                  ...styles.featureIndicator,
+                  ...(currentFeatureSlide === index ? styles.featureIndicatorActive : {})
+                }}
+                onClick={() => setCurrentFeatureSlide(index)}
+              />
+            ))}
           </div>
         </div>
       </section>
@@ -342,13 +388,13 @@ export default function Home() {
             <div style={styles.loanImageContainer}>
               <img 
                 src="/images/Loan_approval_celebration_banner_919a886f.png" 
-                alt="Loan Approval Celebration" 
+                alt="Loan Approval Success" 
                 style={styles.loanImage}
               />
               <div style={styles.loanImageOverlay}>
                 <div style={styles.approvalBadge}>
                   <span style={styles.badgeIcon}>✅</span>
-                  <span style={styles.badgeText}>$300K Approved!</span>
+                  <span style={styles.badgeText}>Approved in 24hrs!</span>
                 </div>
               </div>
             </div>
@@ -359,7 +405,7 @@ export default function Home() {
                 <span style={styles.highlight}> Approved Fast</span>
               </h2>
               <p style={styles.loanSubtitle}>
-                Join thousands of satisfied customers who've achieved their dreams with Oakline Bank's loan programs.
+                Join thousands of satisfied customers who've achieved their dreams with Oakline Bank's comprehensive loan programs.
               </p>
               
               <div style={styles.loanStats}>
@@ -372,7 +418,7 @@ export default function Home() {
                   <span style={styles.statLabel}>Average Approval</span>
                 </div>
                 <div style={styles.statItem}>
-                  <span style={styles.statNumber}>3.5%</span>
+                  <span style={styles.statNumber}>3.2%</span>
                   <span style={styles.statLabel}>Starting APR</span>
                 </div>
               </div>
@@ -441,20 +487,26 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     height: '100vh',
-    backgroundColor: '#ffffff'
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    color: 'white'
   },
   spinner: {
-    width: '50px',
-    height: '50px',
-    border: '5px solid #f3f3f3',
-    borderTop: '5px solid #1e3a8a',
+    width: '60px',
+    height: '60px',
+    border: '6px solid rgba(255,255,255,0.2)',
+    borderTop: '6px solid #ffffff',
     borderRadius: '50%',
     animation: 'spin 1s linear infinite',
     marginBottom: '20px'
   },
+  loadingText: {
+    fontSize: '1.2rem',
+    fontWeight: '500',
+    opacity: 0.9
+  },
   pageContainer: {
     minHeight: '100vh',
-    backgroundColor: '#ffffff',
+    background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
     width: '100%',
     overflow: 'hidden'
   },
@@ -462,9 +514,9 @@ const styles = {
   // Mobile-First Hero Section
   heroSection: {
     position: 'relative',
-    height: '100vh',
-    minHeight: '500px',
-    maxHeight: '800px',
+    height: '60vh',
+    minHeight: '400px',
+    maxHeight: '500px',
     overflow: 'hidden',
     width: '100%'
   },
@@ -494,7 +546,7 @@ const styles = {
     left: 0,
     right: 0,
     bottom: 0,
-    background: 'linear-gradient(135deg, rgba(30, 58, 138, 0.85) 0%, rgba(5, 150, 105, 0.7) 100%)'
+    background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.8) 0%, rgba(99, 102, 241, 0.7) 100%)'
   },
   heroContent: {
     position: 'absolute',
@@ -510,120 +562,234 @@ const styles = {
     transition: 'all 0.8s ease-out'
   },
   heroIcon: {
-    fontSize: 'clamp(2.5rem, 5vw, 4rem)',
-    marginBottom: '1rem',
+    fontSize: 'clamp(2rem, 4vw, 3rem)',
+    marginBottom: '0.8rem',
     display: 'block',
     filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))'
   },
   heroTitle: {
-    fontSize: 'clamp(1.8rem, 5vw, 3.5rem)',
+    fontSize: 'clamp(1.5rem, 4vw, 2.5rem)',
     fontWeight: '800',
-    marginBottom: '1rem',
+    marginBottom: '0.8rem',
     textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
-    lineHeight: '1.1',
-    background: 'linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%)',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
-    backgroundClip: 'text'
+    lineHeight: '1.1'
   },
   heroSubtitle: {
-    fontSize: 'clamp(0.9rem, 2.5vw, 1.3rem)',
-    marginBottom: '2rem',
+    fontSize: 'clamp(0.9rem, 2vw, 1.1rem)',
+    marginBottom: '1.5rem',
     opacity: 0.95,
-    maxWidth: '600px',
-    margin: '0 auto 2rem',
-    fontWeight: '300',
-    letterSpacing: '0.5px'
+    maxWidth: '500px',
+    margin: '0 auto 1.5rem',
+    fontWeight: '300'
   },
   heroButtons: {
     display: 'flex',
-    gap: '1rem',
+    gap: '0.8rem',
     justifyContent: 'center',
     flexWrap: 'wrap'
   },
   heroButton: {
-    backgroundColor: '#059669',
+    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
     color: 'white',
     textDecoration: 'none',
-    padding: 'clamp(0.8rem, 2vw, 1.2rem) clamp(1.5rem, 4vw, 2.5rem)',
-    borderRadius: '12px',
-    fontSize: 'clamp(0.9rem, 2vw, 1.1rem)',
+    padding: 'clamp(0.7rem, 1.5vw, 1rem) clamp(1.2rem, 3vw, 2rem)',
+    borderRadius: '10px',
+    fontSize: 'clamp(0.85rem, 1.8vw, 1rem)',
     fontWeight: '700',
-    boxShadow: '0 8px 20px rgba(5, 150, 105, 0.4)',
+    boxShadow: '0 6px 16px rgba(16, 185, 129, 0.4)',
     transition: 'all 0.3s ease',
     display: 'inline-flex',
     alignItems: 'center',
-    gap: '0.5rem',
-    transform: 'translateY(0)',
+    gap: '0.4rem',
     border: '2px solid transparent'
   },
   secondaryButton: {
     backgroundColor: 'transparent',
     color: 'white',
     textDecoration: 'none',
-    padding: 'clamp(0.8rem, 2vw, 1.2rem) clamp(1.5rem, 4vw, 2.5rem)',
-    borderRadius: '12px',
-    fontSize: 'clamp(0.9rem, 2vw, 1.1rem)',
+    padding: 'clamp(0.7rem, 1.5vw, 1rem) clamp(1.2rem, 3vw, 2rem)',
+    borderRadius: '10px',
+    fontSize: 'clamp(0.85rem, 1.8vw, 1rem)',
     fontWeight: '700',
     border: '2px solid white',
     transition: 'all 0.3s ease',
     display: 'inline-flex',
     alignItems: 'center',
-    gap: '0.5rem'
+    gap: '0.4rem'
   },
   buttonIcon: {
-    fontSize: '1.2em'
+    fontSize: '1.1em'
   },
   slideIndicators: {
     position: 'absolute',
-    bottom: '30px',
+    bottom: '20px',
     left: '50%',
     transform: 'translateX(-50%)',
     display: 'flex',
-    gap: '12px',
+    gap: '10px',
     zIndex: 3
   },
   indicator: {
-    width: '12px',
-    height: '12px',
+    width: '10px',
+    height: '10px',
     borderRadius: '50%',
-    border: '3px solid white',
+    border: '2px solid white',
     background: 'transparent',
     cursor: 'pointer',
     transition: 'all 0.3s ease'
   },
   indicatorActive: {
     backgroundColor: 'white',
-    transform: 'scale(1.3)',
-    boxShadow: '0 0 15px rgba(255,255,255,0.6)'
+    transform: 'scale(1.2)',
+    boxShadow: '0 0 12px rgba(255,255,255,0.6)'
+  },
+
+  // Features Showcase Section
+  featuresShowcase: {
+    padding: 'clamp(2.5rem, 5vw, 4rem) 0',
+    backgroundColor: 'white',
+    width: '100%'
+  },
+  featureShowcaseContainer: {
+    marginBottom: '2rem'
+  },
+  featureContent: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 350px), 1fr))',
+    gap: 'clamp(1.5rem, 3vw, 3rem)',
+    alignItems: 'center'
+  },
+  featureImageContainer: {
+    position: 'relative',
+    borderRadius: '16px',
+    overflow: 'hidden',
+    boxShadow: '0 15px 35px rgba(0,0,0,0.1)',
+    transition: 'all 0.8s ease-out'
+  },
+  featureImage: {
+    width: '100%',
+    height: '250px',
+    objectFit: 'cover',
+    transition: 'transform 0.3s ease'
+  },
+  featureImageOverlay: {
+    position: 'absolute',
+    top: '15px',
+    right: '15px'
+  },
+  featureBadge: {
+    background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+    color: 'white',
+    padding: '8px 16px',
+    borderRadius: '8px',
+    fontSize: '0.8rem',
+    fontWeight: '600',
+    boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)'
+  },
+  featureInfo: {
+    padding: '1rem',
+    transition: 'all 0.8s ease-out'
+  },
+  featureTitle: {
+    fontSize: 'clamp(1.5rem, 3vw, 2.2rem)',
+    fontWeight: '800',
+    color: '#1e293b',
+    marginBottom: '1rem',
+    background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
+    backgroundClip: 'text'
+  },
+  featureDescription: {
+    fontSize: 'clamp(0.95rem, 2vw, 1.1rem)',
+    color: '#64748b',
+    marginBottom: '1.5rem',
+    lineHeight: '1.6'
+  },
+  featuresList: {
+    marginBottom: '2rem'
+  },
+  featureItem: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.8rem',
+    marginBottom: '0.8rem',
+    fontSize: '0.95rem',
+    color: '#374151'
+  },
+  featureIcon: {
+    backgroundColor: '#10b981',
+    color: 'white',
+    borderRadius: '50%',
+    width: '20px',
+    height: '20px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '12px',
+    fontWeight: 'bold'
+  },
+  featureText: {
+    fontWeight: '500'
+  },
+  featureButton: {
+    background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+    color: 'white',
+    textDecoration: 'none',
+    padding: '0.8rem 1.5rem',
+    borderRadius: '8px',
+    fontSize: '0.95rem',
+    fontWeight: '600',
+    transition: 'all 0.3s ease',
+    display: 'inline-block',
+    boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)'
+  },
+  featureIndicators: {
+    display: 'flex',
+    justifyContent: 'center',
+    gap: '8px',
+    marginTop: '2rem'
+  },
+  featureIndicator: {
+    width: '8px',
+    height: '8px',
+    borderRadius: '50%',
+    border: '2px solid #3b82f6',
+    background: 'transparent',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease'
+  },
+  featureIndicatorActive: {
+    backgroundColor: '#3b82f6',
+    transform: 'scale(1.3)'
   },
 
   // Container and Common Styles
   container: {
-    maxWidth: '1400px',
+    maxWidth: '1200px',
     margin: '0 auto',
     padding: '0 1rem',
     width: '100%'
   },
   sectionHeader: {
     textAlign: 'center',
-    marginBottom: 'clamp(2rem, 5vw, 4rem)',
+    marginBottom: 'clamp(1.5rem, 4vw, 3rem)',
     transition: 'all 0.6s ease-out'
   },
   sectionTitle: {
-    fontSize: 'clamp(1.8rem, 4vw, 2.8rem)',
+    fontSize: 'clamp(1.6rem, 3.5vw, 2.5rem)',
     fontWeight: '800',
     color: '#1e293b',
-    marginBottom: '1rem',
-    background: 'linear-gradient(135deg, #1e3a8a 0%, #059669 100%)',
+    marginBottom: '0.8rem',
+    background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
     WebkitBackgroundClip: 'text',
     WebkitTextFillColor: 'transparent',
     backgroundClip: 'text'
   },
   sectionSubtitle: {
-    fontSize: 'clamp(1rem, 2.2vw, 1.2rem)',
+    fontSize: 'clamp(0.95rem, 2vw, 1.1rem)',
     color: '#64748b',
-    maxWidth: '600px',
+    maxWidth: '500px',
     margin: '0 auto',
     lineHeight: '1.6'
   },
@@ -631,97 +797,21 @@ const styles = {
     marginTop: '0.5rem'
   },
   loginLink: {
-    color: '#1e3a8a',
+    color: '#3b82f6',
     textDecoration: 'underline',
     fontWeight: '600'
   },
 
-  // ATM Section
-  atmSection: {
-    padding: 'clamp(3rem, 6vw, 6rem) 0',
-    backgroundColor: '#f8fafc',
-    width: '100%'
-  },
-  atmGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 400px), 1fr))',
-    gap: 'clamp(2rem, 4vw, 4rem)',
-    alignItems: 'center'
-  },
-  atmImageContainer: {
-    position: 'relative',
-    borderRadius: '20px',
-    overflow: 'hidden',
-    boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
-    transition: 'all 0.8s ease-out'
-  },
-  atmImage: {
-    width: '100%',
-    height: '300px',
-    objectFit: 'cover',
-    transition: 'transform 0.3s ease'
-  },
-  imageOverlay: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    background: 'linear-gradient(transparent, rgba(0,0,0,0.8))',
-    color: 'white',
-    padding: '1.5rem',
-    transform: 'translateY(100%)',
-    transition: 'transform 0.3s ease'
-  },
-  overlayTitle: {
-    fontSize: '1.3rem',
-    fontWeight: '700',
-    marginBottom: '0.5rem'
-  },
-  overlayDesc: {
-    fontSize: '0.9rem',
-    opacity: 0.9
-  },
-  atmFeaturesGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-    gap: '1.5rem',
-    transition: 'all 0.8s ease-out'
-  },
-  featureCard: {
-    backgroundColor: 'white',
-    padding: '1.5rem',
-    borderRadius: '15px',
-    textAlign: 'center',
-    boxShadow: '0 8px 25px rgba(0,0,0,0.08)',
-    transition: 'all 0.3s ease',
-    border: '1px solid #e2e8f0'
-  },
-  featureIcon: {
-    fontSize: '2.5rem',
-    marginBottom: '1rem',
-    display: 'block'
-  },
-  featureTitle: {
-    fontSize: '1.1rem',
-    fontWeight: '700',
-    color: '#1e293b',
-    marginBottom: '0.5rem'
-  },
-  featureDesc: {
-    color: '#64748b',
-    fontSize: '0.9rem'
-  },
-
   // Account Types Section
   accountTypesSection: {
-    padding: 'clamp(3rem, 6vw, 6rem) 0',
-    backgroundColor: 'white',
+    padding: 'clamp(2.5rem, 5vw, 4rem) 0',
+    background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
     width: '100%'
   },
   accountCarousel: {
     position: 'relative',
     overflow: 'hidden',
-    borderRadius: '15px'
+    borderRadius: '12px'
   },
   accountSlideContainer: {
     display: 'flex',
@@ -730,19 +820,19 @@ const styles = {
   },
   accountSlide: {
     minWidth: '100%',
-    padding: '1.5rem 0'
+    padding: '1rem 0'
   },
   accountGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 250px), 1fr))',
-    gap: '1.5rem'
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))',
+    gap: '1.2rem'
   },
   accountCard: {
     backgroundColor: 'white',
-    padding: '1.5rem',
-    borderRadius: '15px',
+    padding: '1.2rem',
+    borderRadius: '12px',
     textAlign: 'center',
-    boxShadow: '0 12px 30px rgba(0,0,0,0.06)',
+    boxShadow: '0 8px 20px rgba(0,0,0,0.06)',
     border: '2px solid #e2e8f0',
     transition: 'all 0.3s ease',
     cursor: 'pointer',
@@ -750,35 +840,35 @@ const styles = {
     overflow: 'hidden'
   },
   accountIcon: {
-    fontSize: '2.5rem',
-    marginBottom: '1rem',
+    fontSize: '2rem',
+    marginBottom: '0.8rem',
     display: 'block'
   },
   accountName: {
-    fontSize: '1.1rem',
+    fontSize: '1rem',
     fontWeight: '700',
     color: '#1e293b',
-    marginBottom: '0.5rem'
+    marginBottom: '0.4rem'
   },
   accountRate: {
-    fontSize: '1rem',
+    fontSize: '0.9rem',
     fontWeight: '600',
-    color: '#059669',
-    marginBottom: '0.5rem'
+    color: '#10b981',
+    marginBottom: '0.4rem'
   },
   accountDesc: {
     color: '#64748b',
-    fontSize: '0.85rem',
-    marginBottom: '1.5rem',
+    fontSize: '0.8rem',
+    marginBottom: '1rem',
     lineHeight: '1.4'
   },
   accountButton: {
-    backgroundColor: '#1e3a8a',
+    backgroundColor: '#3b82f6',
     color: 'white',
     textDecoration: 'none',
-    padding: '0.7rem 1.3rem',
-    borderRadius: '8px',
-    fontSize: '0.85rem',
+    padding: '0.6rem 1.1rem',
+    borderRadius: '6px',
+    fontSize: '0.8rem',
     fontWeight: '600',
     transition: 'all 0.3s ease',
     display: 'inline-block'
@@ -787,9 +877,9 @@ const styles = {
     backgroundColor: '#e2e8f0',
     color: '#64748b',
     textDecoration: 'none',
-    padding: '0.7rem 1.3rem',
-    borderRadius: '8px',
-    fontSize: '0.85rem',
+    padding: '0.6rem 1.1rem',
+    borderRadius: '6px',
+    fontSize: '0.8rem',
     fontWeight: '600',
     transition: 'all 0.3s ease',
     display: 'inline-block'
@@ -797,47 +887,47 @@ const styles = {
   accountIndicators: {
     display: 'flex',
     justifyContent: 'center',
-    gap: '10px',
-    marginTop: '2rem'
+    gap: '8px',
+    marginTop: '1.5rem'
   },
   accountIndicator: {
-    width: '10px',
-    height: '10px',
+    width: '8px',
+    height: '8px',
     borderRadius: '50%',
-    border: '2px solid #1e3a8a',
+    border: '2px solid #3b82f6',
     background: 'transparent',
     cursor: 'pointer',
     transition: 'all 0.3s ease'
   },
   accountIndicatorActive: {
-    backgroundColor: '#1e3a8a',
+    backgroundColor: '#3b82f6',
     transform: 'scale(1.2)'
   },
 
   // Loan Section
   loanSection: {
-    padding: 'clamp(3rem, 6vw, 6rem) 0',
-    backgroundColor: '#f8fafc',
+    padding: 'clamp(2.5rem, 5vw, 4rem) 0',
+    backgroundColor: 'white',
     width: '100%'
   },
   loanContent: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 400px), 1fr))',
-    gap: 'clamp(2rem, 4vw, 4rem)',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 350px), 1fr))',
+    gap: 'clamp(1.5rem, 3vw, 3rem)',
     alignItems: 'center',
     transition: 'all 0.8s ease-out'
   },
   loanImageContainer: {
     position: 'relative',
-    borderRadius: '20px',
+    borderRadius: '16px',
     overflow: 'hidden',
-    boxShadow: '0 20px 40px rgba(0,0,0,0.1)'
+    boxShadow: '0 15px 35px rgba(0,0,0,0.1)'
   },
   loanImage: {
     width: '100%',
-    height: '300px',
+    height: '250px',
     objectFit: 'cover',
-    objectPosition: 'center top'
+    objectPosition: 'center'
   },
   loanImageOverlay: {
     position: 'absolute',
@@ -845,97 +935,97 @@ const styles = {
     right: '15px'
   },
   approvalBadge: {
-    background: 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
+    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
     color: 'white',
-    padding: '12px 20px',
-    borderRadius: '12px',
+    padding: '10px 16px',
+    borderRadius: '10px',
     display: 'flex',
     alignItems: 'center',
-    gap: '8px',
-    boxShadow: '0 8px 16px rgba(5, 150, 105, 0.3)',
+    gap: '6px',
+    boxShadow: '0 6px 12px rgba(16, 185, 129, 0.3)',
     fontWeight: '700',
-    fontSize: '0.9rem'
+    fontSize: '0.85rem'
   },
   badgeIcon: {
-    fontSize: '1rem'
+    fontSize: '0.9rem'
   },
   badgeText: {
-    fontSize: '0.9rem'
+    fontSize: '0.85rem'
   },
   loanInfo: {
     padding: '1rem'
   },
   loanTitle: {
-    fontSize: 'clamp(1.8rem, 4vw, 2.8rem)',
+    fontSize: 'clamp(1.6rem, 3.5vw, 2.5rem)',
     fontWeight: '800',
     color: '#1e293b',
-    marginBottom: '1.5rem',
+    marginBottom: '1rem',
     lineHeight: '1.2'
   },
   highlight: {
-    background: 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
+    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
     WebkitBackgroundClip: 'text',
     WebkitTextFillColor: 'transparent',
     backgroundClip: 'text'
   },
   loanSubtitle: {
-    fontSize: 'clamp(1rem, 2.2vw, 1.2rem)',
+    fontSize: 'clamp(0.95rem, 2vw, 1.1rem)',
     color: '#64748b',
-    marginBottom: '2rem',
+    marginBottom: '1.5rem',
     lineHeight: '1.6'
   },
   loanStats: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))',
-    gap: '1.5rem',
-    marginBottom: '2rem'
+    gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))',
+    gap: '1rem',
+    marginBottom: '1.5rem'
   },
   statItem: {
     textAlign: 'center'
   },
   statNumber: {
-    fontSize: 'clamp(1.5rem, 3vw, 2rem)',
+    fontSize: 'clamp(1.2rem, 2.5vw, 1.6rem)',
     fontWeight: '800',
-    color: '#1e3a8a',
+    color: '#3b82f6',
     display: 'block',
     lineHeight: '1'
   },
   statLabel: {
-    fontSize: '0.85rem',
+    fontSize: '0.8rem',
     color: '#64748b',
     fontWeight: '500',
-    marginTop: '0.5rem'
+    marginTop: '0.3rem'
   },
   loanTypes: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
-    gap: '1rem',
-    marginBottom: '2rem'
+    gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
+    gap: '0.8rem',
+    marginBottom: '1.5rem'
   },
   loanType: {
     display: 'flex',
     alignItems: 'center',
-    gap: '0.7rem',
-    padding: '0.8rem',
-    backgroundColor: 'white',
-    borderRadius: '10px',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
-    fontSize: '0.9rem',
+    gap: '0.6rem',
+    padding: '0.6rem',
+    backgroundColor: '#f8fafc',
+    borderRadius: '8px',
+    boxShadow: '0 3px 8px rgba(0,0,0,0.04)',
+    fontSize: '0.85rem',
     fontWeight: '600',
     color: '#1e293b'
   },
   loanTypeIcon: {
-    fontSize: '1.3rem'
+    fontSize: '1.1rem'
   },
   loanButton: {
-    backgroundColor: '#059669',
+    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
     color: 'white',
     textDecoration: 'none',
-    padding: 'clamp(0.8rem, 2vw, 1.1rem) clamp(1.5rem, 3vw, 2rem)',
-    borderRadius: '10px',
-    fontSize: 'clamp(0.9rem, 1.8vw, 1.1rem)',
+    padding: 'clamp(0.7rem, 1.8vw, 1rem) clamp(1.2rem, 2.5vw, 1.8rem)',
+    borderRadius: '8px',
+    fontSize: 'clamp(0.85rem, 1.6vw, 1rem)',
     fontWeight: '700',
-    boxShadow: '0 6px 16px rgba(5, 150, 105, 0.3)',
+    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
     transition: 'all 0.3s ease',
     display: 'inline-block'
   },
@@ -943,9 +1033,9 @@ const styles = {
     backgroundColor: '#e2e8f0',
     color: '#64748b',
     textDecoration: 'none',
-    padding: 'clamp(0.8rem, 2vw, 1.1rem) clamp(1.5rem, 3vw, 2rem)',
-    borderRadius: '10px',
-    fontSize: 'clamp(0.9rem, 1.8vw, 1.1rem)',
+    padding: 'clamp(0.7rem, 1.8vw, 1rem) clamp(1.2rem, 2.5vw, 1.8rem)',
+    borderRadius: '8px',
+    fontSize: 'clamp(0.85rem, 1.6vw, 1rem)',
     fontWeight: '700',
     transition: 'all 0.3s ease',
     display: 'inline-block'
@@ -955,9 +1045,6 @@ const styles = {
   fadeInUp: {
     animation: 'fadeInUp 0.8s ease-out forwards'
   },
-  fadeInDown: {
-    animation: 'fadeInDown 0.8s ease-out forwards'
-  },
   fadeInLeft: {
     animation: 'fadeInLeft 0.8s ease-out forwards'
   },
@@ -966,6 +1053,9 @@ const styles = {
   },
   slideInFromRight: {
     animation: 'slideInFromRight 1s ease-out forwards'
+  },
+  slideInFromBottom: {
+    animation: 'slideInFromBottom 1s ease-out forwards'
   },
   bounceIn: {
     animation: 'bounceIn 0.8s ease-out forwards'
