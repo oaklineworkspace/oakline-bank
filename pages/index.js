@@ -1709,6 +1709,22 @@ const styles = {
 if (typeof document !== 'undefined') {
   const styleSheet = document.createElement('style');
   styleSheet.textContent = `
+    :root {
+      /* Professional Banking Color Palette */
+      --navy-blue: #1a365d;
+      --navy-blue-light: #2d5a87;
+      --navy-blue-dark: #0f2a44;
+      --banking-green: #059669;
+      --banking-green-light: #10b981;
+      --banking-green-dark: #047857;
+      --banking-gold: #d97706;
+      --banking-gold-light: #f59e0b;
+      --banking-gold-dark: #92400e;
+      --pure-white: #ffffff;
+      --off-white: #f8fafc;
+      --neutral-gray: #64748b;
+    }
+
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }

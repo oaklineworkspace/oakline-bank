@@ -404,7 +404,9 @@ const styles = {
   container: {
     minHeight: '100vh',
     backgroundColor: '#f8fafc',
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    width: '100%',
+    overflowX: 'hidden'
   },
   loadingContainer: {
     minHeight: '100vh',
@@ -428,18 +430,20 @@ const styles = {
     color: '#64748b'
   },
   header: {
-    backgroundColor: '#1e40af',
-    borderBottom: '3px solid #1e3a8a',
-    boxShadow: '0 4px 12px rgba(30, 64, 175, 0.15)'
+    backgroundColor: '#1a365d',
+    borderBottom: '3px solid #059669',
+    boxShadow: '0 4px 12px rgba(26, 54, 93, 0.2)'
   },
   headerContainer: {
-    maxWidth: '1400px',
+    maxWidth: '100%',
     margin: '0 auto',
-    padding: '0 1.5rem',
+    padding: '0.75rem 1rem',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    minHeight: '80px'
+    minHeight: '70px',
+    flexWrap: 'wrap',
+    gap: '0.5rem'
   },
   headerLeft: {
     display: 'flex',
@@ -473,12 +477,10 @@ const styles = {
   },
   mainNav: {
     display: 'flex',
-    gap: '0.5rem',
-    '@media (max-width: 768px)': {
-      width: '100%',
-      justifyContent: 'center',
-      marginTop: '1rem'
-    }
+    gap: '0.25rem',
+    flexWrap: 'wrap',
+    flex: 1,
+    justifyContent: 'center'
   },
   navItem: {
     position: 'relative'
@@ -486,17 +488,18 @@ const styles = {
   navButton: {
     display: 'flex',
     alignItems: 'center',
-    gap: '0.5rem',
-    padding: '0.75rem 1rem',
+    gap: '0.3rem',
+    padding: '0.5rem 0.75rem',
     backgroundColor: 'rgba(255,255,255,0.1)',
     color: 'white',
     border: 'none',
-    borderRadius: '8px',
+    borderRadius: '6px',
     cursor: 'pointer',
-    fontSize: '0.9rem',
+    fontSize: '0.8rem',
     fontWeight: '500',
     transition: 'all 0.2s',
-    whiteSpace: 'nowrap'
+    whiteSpace: 'nowrap',
+    minWidth: 'auto'
   },
   navIcon: {
     fontSize: '1rem'
@@ -533,12 +536,8 @@ const styles = {
   userSection: {
     display: 'flex',
     alignItems: 'center',
-    gap: '1rem',
-    '@media (max-width: 768px)': {
-      flexDirection: 'column',
-      gap: '0.5rem',
-      marginTop: '1rem'
-    }
+    gap: '0.5rem',
+    flexShrink: 0
   },
   userInfo: {
     display: 'flex',
@@ -559,20 +558,22 @@ const styles = {
   },
   userActions: {
     display: 'flex',
-    gap: '0.5rem'
+    gap: '0.25rem',
+    flexWrap: 'wrap'
   },
   actionButton: {
     display: 'flex',
     alignItems: 'center',
-    gap: '0.5rem',
-    padding: '0.5rem 0.75rem',
-    backgroundColor: 'rgba(255,255,255,0.15)',
+    gap: '0.3rem',
+    padding: '0.4rem 0.6rem',
+    backgroundColor: 'rgba(5, 150, 105, 0.2)',
     color: 'white',
     textDecoration: 'none',
     borderRadius: '6px',
-    fontSize: '0.85rem',
+    fontSize: '0.75rem',
     fontWeight: '500',
-    transition: 'all 0.2s'
+    transition: 'all 0.2s',
+    whiteSpace: 'nowrap'
   },
   logoutButton: {
     display: 'flex',
@@ -596,43 +597,78 @@ const styles = {
   '@media (max-width: 768px)': {
     headerContainer: {
       flexDirection: 'column',
-      padding: '1rem',
+      padding: '0.75rem',
       minHeight: 'auto',
-      gap: '1rem'
+      gap: '0.75rem'
     },
     mainNav: {
       width: '100%',
-      justifyContent: 'center',
-      flexWrap: 'wrap'
+      justifyContent: 'space-around',
+      order: 2
+    },
+    navButton: {
+      padding: '0.4rem 0.5rem',
+      fontSize: '0.7rem',
+      gap: '0.2rem'
     },
     userSection: {
-      flexDirection: 'column',
-      gap: '0.5rem',
-      width: '100%'
+      order: 1,
+      width: '100%',
+      justifyContent: 'space-between'
     },
-    userInfo: {
-      alignItems: 'center'
+    userActions: {
+      gap: '0.25rem'
+    },
+    actionButton: {
+      padding: '0.3rem 0.5rem',
+      fontSize: '0.7rem'
     },
     main: {
-      padding: '1rem'
+      padding: '0.75rem 0.5rem'
     },
     summaryCards: {
-      gridTemplateColumns: '1fr'
+      gridTemplateColumns: '1fr',
+      gap: '0.75rem'
+    },
+    summaryCard: {
+      padding: '1rem'
     },
     quickActions: {
-      gridTemplateColumns: 'repeat(2, 1fr)'
+      gridTemplateColumns: 'repeat(2, 1fr)',
+      gap: '0.5rem'
     },
-    accountsSection: {
-      padding: '1rem'
+    quickAction: {
+      padding: '1rem 0.5rem'
+    },
+    sectionTitle: {
+      fontSize: '1.1rem'
+    }
+  },
+  '@media (max-width: 480px)': {
+    navButton: {
+      fontSize: '0.65rem',
+      padding: '0.3rem 0.4rem'
+    },
+    actionButton: {
+      fontSize: '0.65rem',
+      padding: '0.25rem 0.4rem'
+    },
+    main: {
+      padding: '0.5rem 0.25rem'
+    },
+    quickActions: {
+      gridTemplateColumns: '1fr'
     }
   },
   main: {
-    maxWidth: '1400px',
-    margin: '0 auto',
-    padding: '2rem 1.5rem',
+    maxWidth: '100%',
+    margin: '0',
+    padding: '1rem 0.75rem',
     display: 'flex',
     flexDirection: 'column',
-    gap: '2rem'
+    gap: '1.5rem',
+    width: '100%',
+    boxSizing: 'border-box'
   },
   summarySection: {
     backgroundColor: 'white',
@@ -659,8 +695,8 @@ const styles = {
   },
   summaryCards: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-    gap: '1.5rem'
+    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+    gap: '1rem'
   },
   summaryCard: {
     display: 'flex',
@@ -704,8 +740,8 @@ const styles = {
   },
   quickActions: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-    gap: '1rem',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+    gap: '0.75rem',
     marginTop: '1rem'
   },
   quickAction: {
