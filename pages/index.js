@@ -977,45 +977,47 @@ const styles = {
     top: '100%',
     right: 0,
     backgroundColor: 'white',
-    borderRadius: '12px',
-    boxShadow: '0 10px 30px rgba(26, 54, 93, 0.25)',
+    borderRadius: '16px',
+    boxShadow: '0 20px 40px rgba(26, 54, 93, 0.2)',
     border: '2px solid #e2e8f0',
-    padding: '1.5rem',
-    minWidth: '300px',
+    padding: '2rem',
+    minWidth: '400px',
     zIndex: 1000,
-    marginTop: '0.5rem',
+    animation: 'dropdownSlideIn 0.3s ease-out'
+  },
+  dropdownGrid: {
     display: 'grid',
-    gridTemplateColumns: '1fr',
-    gap: '1.5rem'
+    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+    gap: '2rem'
   },
   dropdownSection: {
     borderBottom: '1px solid #e2e8f0',
-    paddingBottom: '1rem'
+    paddingBottom: '1.5rem'
   },
   dropdownSectionTitle: {
-    fontSize: '0.9rem',
-    fontWeight: '700',
+    fontSize: '1rem',
+    fontWeight: '800',
     color: '#1a365d',
-    marginBottom: '0.75rem',
+    marginBottom: '1rem',
     textTransform: 'uppercase',
     letterSpacing: '0.5px'
   },
   dropdownItem: {
     display: 'flex',
     alignItems: 'center',
-    gap: '0.75rem',
-    padding: '0.75rem 1rem',
+    gap: '1rem',
+    padding: '1rem',
     color: '#64748b',
     textDecoration: 'none',
-    fontSize: '0.9rem',
-    fontWeight: '500',
-    borderRadius: '8px',
+    fontSize: '0.95rem',
+    fontWeight: '600',
+    borderRadius: '10px',
     transition: 'all 0.3s ease',
     margin: '0.25rem 0'
   },
   dropdownItemIcon: {
-    fontSize: '1rem',
-    width: '20px',
+    fontSize: '1.2rem',
+    width: '24px',
     textAlign: 'center'
   },
   authButtons: {
@@ -2083,7 +2085,7 @@ const styles = {
   },
   dropdownGrid: {
     display: 'grid',
-    gridTemplateColumns: '1fr',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
     gap: '2rem'
   },
   dropdownSection: {
