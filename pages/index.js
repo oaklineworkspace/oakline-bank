@@ -328,24 +328,19 @@ export default function Home() {
             </Link>
           </div>
 
-          {/* Enrolled button */}
-          <div style={styles.headerCenter}>
-            <Link href="/enroll" style={styles.enrollButton}>
-              <span style={styles.buttonIcon}>🌐</span>
-              Enroll for Online
-            </Link>
-          </div>
-
           <div style={styles.headerActions}>
-            {/* Features Dropdown */}
+            {/* Modern Hamburger Features Dropdown */}
             <div style={styles.navigationDropdown}>
               <button 
-                style={styles.featuresDropdownButton}
+                style={styles.modernMenuButton}
                 onClick={() => setActiveDropdown(activeDropdown === 'features' ? null : 'features')}
               >
-                <span style={styles.buttonIcon}>🏦</span>
-                Bank Features
-                <span style={styles.dropdownArrow}>▼</span>
+                <div style={styles.hamburgerLines}>
+                  <span style={styles.hamburgerLine}></span>
+                  <span style={styles.hamburgerLine}></span>
+                  <span style={styles.hamburgerLine}></span>
+                </div>
+                <span style={styles.menuText}>Menu</span>
               </button>
 
               {activeDropdown === 'features' && (
@@ -417,6 +412,12 @@ export default function Home() {
                 </>
               )}
             </div>
+
+            {/* Enrollment Button */}
+            <Link href="/enroll" style={styles.enrollButton}>
+              <span style={styles.buttonIcon}>🌐</span>
+              Enroll for Online
+            </Link>
 
             {/* Auth Buttons */}
             <div style={styles.authButtons}>
@@ -1006,13 +1007,7 @@ const styles = {
     justifyContent: 'space-between',
     alignItems: 'center',
     flexWrap: 'wrap',
-    gap: '0.5rem'
-  },
-  headerCenter: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: '0.25rem'
+    gap: '1rem'
   },
   logoSection: {
     display: 'flex',
@@ -1042,7 +1037,40 @@ const styles = {
   headerActions: {
     display: 'flex',
     alignItems: 'center',
-    gap: '1rem'
+    gap: '1.5rem',
+    flex: 1,
+    justifyContent: 'flex-end'
+  },
+  modernMenuButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.8rem',
+    padding: '0.8rem 1.2rem',
+    background: 'transparent',
+    border: '2px solid rgba(255, 255, 255, 0.3)',
+    borderRadius: '12px',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    backdropFilter: 'blur(10px)',
+    color: 'white'
+  },
+  hamburgerLines: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '3px',
+    width: '20px'
+  },
+  hamburgerLine: {
+    width: '100%',
+    height: '2px',
+    backgroundColor: 'white',
+    borderRadius: '1px',
+    transition: 'all 0.3s ease'
+  },
+  menuText: {
+    fontSize: '0.9rem',
+    fontWeight: '600',
+    color: 'white'
   },
   bankInfo: {
     display: 'flex',
@@ -1068,13 +1096,14 @@ const styles = {
     background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
     color: 'white',
     textDecoration: 'none',
-    borderRadius: '10px',
+    borderRadius: '12px',
     fontSize: '1rem',
     fontWeight: '700',
     boxShadow: '0 4px 12px rgba(5, 150, 105, 0.3)',
     transition: 'all 0.3s ease',
     border: 'none',
-    cursor: 'pointer'
+    cursor: 'pointer',
+    backdropFilter: 'blur(10px)'
   },
   navigationDropdown: {
     position: 'relative'
@@ -2426,6 +2455,16 @@ if (typeof document !== 'undefined') {
       .dropdownButton:hover {
         transform: translateY(-3px);
         box-shadow: 0 8px 20px rgba(5, 150, 105, 0.4);
+      }
+
+      .modernMenuButton:hover {
+        background-color: rgba(255, 255, 255, 0.1) !important;
+        border-color: rgba(255, 255, 255, 0.5) !important;
+        transform: translateY(-2px);
+      }
+
+      .modernMenuButton:hover .hamburgerLine {
+        background-color: #059669 !important;
       }
     `;
     document.head.appendChild(dropdownStyles);
