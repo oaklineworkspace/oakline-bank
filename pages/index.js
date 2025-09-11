@@ -561,12 +561,16 @@ export default function Home() {
                   alt={bankingFeatures[currentFeatureSlide].title}
                   style={styles.featureImage}
                   onError={(e) => {
-                    if (e.target && e.target.parentNode) {
-                      e.target.style.display = 'none';
-                      const fallback = document.createElement('div');
-                      fallback.style.cssText = 'height: 300px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; border-radius: 12px; color: #666; font-size: 2rem;';
-                      fallback.textContent = '📷';
-                      e.target.parentNode.replaceChild(fallback, e.target);
+                    try {
+                      if (e.target && e.target.parentNode && e.target.parentNode.replaceChild) {
+                        e.target.style.display = 'none';
+                        const fallback = document.createElement('div');
+                        fallback.style.cssText = 'height: 300px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; border-radius: 12px; color: #666; font-size: 2rem;';
+                        fallback.textContent = '📷';
+                        e.target.parentNode.replaceChild(fallback, e.target);
+                      }
+                    } catch (error) {
+                      console.warn('Image fallback error:', error);
                     }
                   }}
                 />
@@ -1991,33 +1995,22 @@ const styles = {
     textAlign: 'center'
   },
   professionalsTitle: {
-    fontSize: '2.5rem',
+    fontSize: 'clamp(2rem, 4vw, 2.5rem)',
     fontWeight: '700',
     color: '#1e293b',
-    marginBottom: '1rem',
-    '@media (max-width: 768px)': {
-      fontSize: '2rem'
-    }
+    marginBottom: '1rem'
   },
   professionalsSubtitle: {
-    fontSize: '1.25rem',
+    fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
     color: '#64748b',
-    marginBottom: '3rem',
+    marginBottom: 'clamp(2rem, 4vw, 3rem)',
     maxWidth: '600px',
-    margin: '0 auto 3rem',
-    '@media (max-width: 768px)': {
-      fontSize: '1rem',
-      marginBottom: '2rem'
-    }
+    margin: '0 auto clamp(2rem, 4vw, 3rem)'
   },
   professionalsGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
-    gap: '2rem',
-    '@media (max-width: 768px)': {
-      gridTemplateColumns: '1fr',
-      gap: '1.5rem'
-    }
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 350px), 1fr))',
+    gap: 'clamp(1.5rem, 3vw, 2rem)'
   },
   professionalCard: {
     backgroundColor: 'white',
@@ -2025,11 +2018,7 @@ const styles = {
     padding: '2rem',
     boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
     transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-    border: '1px solid #e2e8f0',
-    ':hover': {
-      transform: 'translateY(-5px)',
-      boxShadow: '0 8px 30px rgba(0,0,0,0.12)'
-    }
+    border: '1px solid #e2e8f0'
   },
   professionalImage: {
     width: '100%',
