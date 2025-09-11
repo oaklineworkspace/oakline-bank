@@ -332,7 +332,7 @@ export default function Home() {
                       <span style={styles.featureDropdownIcon}>⚡</span>
                       <div>
                         <h4 style={styles.featureDropdownTitle}>Instant Transfers</h4>
-                        <p style={styles.featureDropdownDesc}>< 1 second processing</p>
+                        <p style={styles.featureDropdownDesc}>&lt; 1 second processing</p>
                       </div>
                     </div>
                     <div style={styles.featureDropdownItem}>
