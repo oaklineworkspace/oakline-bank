@@ -117,6 +117,7 @@ export default function Apply() {
   const [showManualState, setShowManualState] = useState(false);
   const [showManualCity, setShowManualCity] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -460,7 +461,7 @@ export default function Apply() {
         // Update existing enrollment with new token
         const { data: updatedEnrollment, error: updateError } = await supabase
           .from('enrollments')
-          .update({ 
+          .update({
             token: enrollmentToken,
             is_used: false
           })
@@ -536,9 +537,9 @@ export default function Apply() {
         const authResponse = await fetch('/api/create-auth-user', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            token: enrollmentToken, 
-            application_id: applicationId 
+          body: JSON.stringify({
+            token: enrollmentToken,
+            application_id: applicationId
           })
         });
 
@@ -639,20 +640,49 @@ export default function Apply() {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      marginBottom: '1.5rem'
+      marginBottom: '2rem',
+      gap: '1rem'
     },
     logo: {
-      height: '60px',
-      width: 'auto',
-      marginRight: '15px'
+      height: '70px',
+      width: 'auto'
+    },
+    brandSection: {
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'flex-start'
     },
     brandText: {
-      fontSize: '2rem',
-      fontWeight: '700',
-      background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
-      WebkitBackgroundClip: 'text',
-      WebkitTextFillColor: 'transparent',
-      backgroundClip: 'text'
+      fontSize: '2.2rem',
+      fontWeight: '800',
+      color: '#1e40af',
+      lineHeight: '1'
+    },
+    brandTagline: {
+      fontSize: '1rem',
+      color: '#64748b',
+      fontWeight: '500',
+      marginTop: '0.25rem'
+    },
+    bankCredentials: {
+      display: 'flex',
+      flexWrap: 'wrap',
+      justifyContent: 'center',
+      gap: '1rem',
+      marginTop: '1.5rem',
+      padding: '1rem',
+      backgroundColor: 'rgba(59, 130, 246, 0.05)',
+      borderRadius: '12px',
+      border: '1px solid rgba(59, 130, 246, 0.1)'
+    },
+    credential: {
+      fontSize: '0.85rem',
+      fontWeight: '600',
+      color: '#374151',
+      padding: '0.25rem 0.75rem',
+      backgroundColor: 'white',
+      borderRadius: '6px',
+      border: '1px solid #e2e8f0'
     },
     title: {
       fontSize: 'clamp(28px, 5vw, 42px)',
@@ -1004,7 +1034,15 @@ export default function Apply() {
                 e.target.nextSibling.style.marginLeft = '0';
               }}
             />
-            <div style={styles.brandText}>Oakline Bank</div>
+            <div style={styles.brandSection}>
+              <div style={styles.brandText}>Oakline Bank</div>
+              <div style={styles.brandTagline}>Your Trusted Financial Partner</div>
+            </div>
+          </div>
+          <div style={styles.bankCredentials}>
+            <div style={styles.credential}>FDIC Insured</div>
+            <div style={styles.credential}>Member FDIC</div>
+            <div style={styles.credential}>Equal Housing Lender</div>
           </div>
           <h1 style={styles.title}>Open Your Account Today</h1>
           <p style={styles.subtitle}>

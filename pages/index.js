@@ -18,6 +18,7 @@ export default function Home() {
   const [currentFeatureSlide, setCurrentFeatureSlide] = useState(0);
   const [isVisible, setIsVisible] = useState({});
   const [isLoading, setIsLoading] = useState(true);
+  const [activeDropdown, setActiveDropdown] = useState(null);
 
   useEffect(() => {
     // Get initial session and set up auth listener
@@ -40,6 +41,18 @@ export default function Home() {
         setIsLoading(false);
       }
     );
+
+    // Close dropdown when clicking outside
+    const handleClickOutside = (event) => {
+      if (activeDropdown && !event.target.closest('.navigationDropdown')) {
+        setActiveDropdown(null);
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    const cleanup = () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
 
     // Auto-slide for hero images
     const heroInterval = setInterval(() => {
@@ -80,6 +93,7 @@ export default function Home() {
       clearInterval(accountInterval);
       clearInterval(featureInterval);
       observer.disconnect();
+      cleanup();
     };
   }, []);
 
@@ -228,21 +242,73 @@ export default function Home() {
       <MainMenu user={user} />
       <WelcomeBanner />
 
-      {/* Top Announcement Bar */}
-      <div style={styles.topBar}>
-        <div style={styles.topBarContent}>
-          <div style={styles.announcement}>
-            <span style={styles.announcementIcon}>🏦</span>
-            <span style={styles.announcementText}>
-              Member FDIC • Equal Housing Lender • NMLS ID: 234567 • Routing Number: 075915826
-            </span>
-            <Link href="/account-types" style={styles.announcementLink}>
-              View All Accounts
-            </Link>
-          </div>
-          <div style={styles.topBarLinks}>
-            <Link href="/support" style={styles.topBarLink}>Support</Link>
-            <span style={styles.phoneNumber}>📞 1-800-OAKLINE</span>
+      {/* Simplified Header */}
+      <div style={styles.simplifiedHeader}>
+        <div style={styles.headerContainer}>
+          <Link href="/" style={styles.logoSection}>
+            <img src="/images/logo-primary.png.jpg" alt="Oakline Bank" style={styles.headerLogo} />
+            <div style={styles.brandSection}>
+              <span style={styles.bankName}>Oakline Bank</span>
+              <span style={styles.bankTagline}>Your Financial Partner</span>
+            </div>
+          </Link>
+
+          <div style={styles.headerActions}>
+            <div style={styles.bankInfo}>
+              <span style={styles.routingInfo}>Routing: 075915826</span>
+              <span style={styles.phoneInfo}>📞 1-800-OAKLINE</span>
+            </div>
+
+            <div style={styles.navigationDropdown} className="navigationDropdown">
+              <button 
+                style={styles.dropdownButton}
+                onClick={() => setActiveDropdown(activeDropdown === 'nav' ? null : 'nav')}
+              >
+                <span style={styles.menuIcon}>☰</span>
+                Menu
+                <span style={styles.dropdownArrow}>▼</span>
+              </button>
+
+              {activeDropdown === 'nav' && (
+                <div style={styles.dropdownMenu}>
+                  <div style={styles.dropdownSection}>
+                    <h4 style={styles.dropdownSectionTitle}>Banking</h4>
+                    <Link href="/account-types" style={styles.dropdownItem}>All Account Types</Link>
+                    <Link href="/loans" style={styles.dropdownItem}>Loans & Credit</Link>
+                    <Link href="/cards" style={styles.dropdownItem}>Credit Cards</Link>
+                    <Link href="/investments" style={styles.dropdownItem}>Investments</Link>
+                  </div>
+                  <div style={styles.dropdownSection}>
+                    <h4 style={styles.dropdownSectionTitle}>Services</h4>
+                    <Link href="/transfer" style={styles.dropdownItem}>Money Transfer</Link>
+                    <Link href="/bill-pay" style={styles.dropdownItem}>Bill Pay</Link>
+                    <Link href="/crypto" style={styles.dropdownItem}>Cryptocurrency</Link>
+                    <Link href="/financial-advisory" style={styles.dropdownItem}>Financial Advisory</Link>
+                  </div>
+                  <div style={styles.dropdownSection}>
+                    <h4 style={styles.dropdownSectionTitle}>Support</h4>
+                    <Link href="/support" style={styles.dropdownItem}>Customer Support</Link>
+                    <Link href="/faq" style={styles.dropdownItem}>FAQ</Link>
+                    <Link href="/security" style={styles.dropdownItem}>Security Center</Link>
+                    <Link href="/about" style={styles.dropdownItem}>About Us</Link>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div style={styles.authButtons}>
+              {user ? (
+                <Link href="/dashboard" style={styles.dashboardButton}>
+                  <span style={styles.buttonIcon}>📊</span>
+                  Dashboard
+                </Link>
+              ) : (
+                <>
+                  <Link href="/login" style={styles.loginButton}>Sign In</Link>
+                  <Link href="/apply" style={styles.applyButton}>Open Account</Link>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -599,17 +665,174 @@ export default function Home() {
 }
 
 const styles = {
-  // Top Bar Styles
-  topBar: {
-    backgroundColor: '#1e293b', // Dark professional background
-    color: '#e2e8f0', // Light text for contrast
-    padding: '1rem 0',
-    width: '100%',
+  // Simplified Header Styles
+  simplifiedHeader: {
+    backgroundColor: 'white',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+    borderBottom: '3px solid #3b82f6',
+    position: 'sticky',
+    top: 0,
+    zIndex: 1000,
+    width: '100%'
+  },
+  headerContainer: {
+    maxWidth: '1400px',
+    margin: '0 auto',
+    padding: '1rem 1.5rem',
     display: 'flex',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  },
+  logoSection: {
+    display: 'flex',
     alignItems: 'center',
+    gap: '1rem',
+    textDecoration: 'none'
+  },
+  headerLogo: {
+    height: '50px',
+    width: 'auto'
+  },
+  brandSection: {
+    display: 'flex',
+    flexDirection: 'column'
+  },
+  bankName: {
+    fontSize: '1.6rem',
+    fontWeight: '800',
+    color: '#1e40af',
+    lineHeight: '1'
+  },
+  bankTagline: {
+    fontSize: '0.8rem',
+    color: '#64748b',
+    fontWeight: '500'
+  },
+  headerActions: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '2rem'
+  },
+  bankInfo: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-end',
+    gap: '0.25rem'
+  },
+  routingInfo: {
+    fontSize: '0.85rem',
+    fontWeight: '600',
+    color: '#374151'
+  },
+  phoneInfo: {
     fontSize: '0.9rem',
-    borderBottom: '1px solid #334155'
+    fontWeight: '700',
+    color: '#3b82f6'
+  },
+  navigationDropdown: {
+    position: 'relative'
+  },
+  dropdownButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    padding: '0.75rem 1.5rem',
+    backgroundColor: '#f8fafc',
+    border: '2px solid #e2e8f0',
+    borderRadius: '10px',
+    fontSize: '1rem',
+    fontWeight: '600',
+    color: '#374151',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease'
+  },
+  menuIcon: {
+    fontSize: '1.1rem'
+  },
+  dropdownArrow: {
+    fontSize: '0.8rem',
+    transition: 'transform 0.3s ease'
+  },
+  dropdownMenu: {
+    position: 'absolute',
+    top: '100%',
+    right: 0,
+    backgroundColor: 'white',
+    borderRadius: '12px',
+    boxShadow: '0 10px 30px rgba(0,0,0,0.15)',
+    border: '2px solid #e2e8f0',
+    padding: '1.5rem',
+    minWidth: '300px',
+    zIndex: 1000,
+    marginTop: '0.5rem',
+    display: 'grid',
+    gridTemplateColumns: '1fr',
+    gap: '1.5rem'
+  },
+  dropdownSection: {
+    borderBottom: '1px solid #f1f5f9',
+    paddingBottom: '1rem'
+  },
+  dropdownSectionTitle: {
+    fontSize: '0.9rem',
+    fontWeight: '700',
+    color: '#1e40af',
+    marginBottom: '0.75rem',
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px'
+  },
+  dropdownItem: {
+    display: 'block',
+    padding: '0.5rem 0',
+    color: '#374151',
+    textDecoration: 'none',
+    fontSize: '0.9rem',
+    fontWeight: '500',
+    transition: 'color 0.3s ease'
+  },
+  authButtons: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '1rem'
+  },
+  loginButton: {
+    padding: '0.6rem 1.2rem',
+    backgroundColor: 'transparent',
+    border: '2px solid #3b82f6',
+    color: '#3b82f6',
+    borderRadius: '8px',
+    textDecoration: 'none',
+    fontSize: '0.9rem',
+    fontWeight: '600',
+    transition: 'all 0.3s ease'
+  },
+  applyButton: {
+    padding: '0.6rem 1.2rem',
+    background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+    color: 'white',
+    borderRadius: '8px',
+    textDecoration: 'none',
+    fontSize: '0.9rem',
+    fontWeight: '600',
+    boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)',
+    transition: 'all 0.3s ease'
+  },
+  dashboardButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    padding: '0.6rem 1.2rem',
+    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+    color: 'white',
+    borderRadius: '8px',
+    textDecoration: 'none',
+    fontSize: '0.9rem',
+    fontWeight: '600',
+    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+    transition: 'all 0.3s ease'
+  },
+  buttonIcon: {
+    fontSize: '1rem'
   },
   topBarContent: {
     maxWidth: '1400px',
