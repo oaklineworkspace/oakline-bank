@@ -248,14 +248,36 @@ export default function MainMenu() {
                 <span style={styles.userName}>{getUserDisplayName()}</span>
               </div>
               <div style={styles.userActions}>
-                <Link href="/" style={styles.actionButton}>
-                  <span style={styles.actionIcon}>🏠</span>
-                  Home
-                </Link>
-                <Link href="/dashboard" style={styles.actionButton}>
-                  <span style={styles.actionIcon}>📊</span>
-                  Dashboard
-                </Link>
+                <div style={styles.navItem}>
+                  <button style={styles.navButton} onClick={(e) => { e.stopPropagation(); toggleDropdown('profile'); }}>
+                    <span style={styles.navIcon}>👤</span>
+                    Profile
+                    <span style={styles.navArrow}>▼</span>
+                  </button>
+                  {dropdownOpen.profile && (
+                    <div style={styles.dropdown}>
+                      <Link href="/profile" style={styles.dropdownLink}>View Profile</Link>
+                      <Link href="/security" style={styles.dropdownLink}>Security Settings</Link>
+                      <Link href="/notifications" style={styles.dropdownLink}>Notifications</Link>
+                      <Link href="/privacy" style={styles.dropdownLink}>Privacy Settings</Link>
+                    </div>
+                  )}
+                </div>
+                <div style={styles.navItem}>
+                  <button style={styles.navButton} onClick={(e) => { e.stopPropagation(); toggleDropdown('navigation'); }}>
+                    <span style={styles.navIcon}>🧭</span>
+                    Navigate
+                    <span style={styles.navArrow}>▼</span>
+                  </button>
+                  {dropdownOpen.navigation && (
+                    <div style={styles.dropdown}>
+                      <Link href="/" style={styles.dropdownLink}>Home</Link>
+                      <Link href="/dashboard" style={styles.dropdownLink}>Dashboard</Link>
+                      <Link href="/account-types" style={styles.dropdownLink}>Account Types</Link>
+                      <Link href="/support" style={styles.dropdownLink}>Support</Link>
+                    </div>
+                  )}
+                </div>
                 <button onClick={handleLogout} style={styles.logoutButton}>
                   <span style={styles.actionIcon}>🚪</span>
                   Logout
@@ -522,6 +544,9 @@ const styles = {
     transition: 'all 0.2s',
     whiteSpace: 'nowrap',
     minWidth: 'auto'
+  },
+  navItem: {
+    position: 'relative'
   },
   navIcon: {
     fontSize: '1rem'

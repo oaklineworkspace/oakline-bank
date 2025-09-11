@@ -241,14 +241,36 @@ export default function Dashboard() {
                 <span style={styles.userName}>{getUserDisplayName()}</span>
               </div>
               <div style={styles.userActions}>
-                <Link href="/" style={styles.actionButton}>
-                  <span style={styles.actionIcon}>🏠</span>
-                  Home
-                </Link>
-                <Link href="/main-menu" style={styles.actionButton}>
-                  <span style={styles.actionIcon}>☰</span>
-                  Menu
-                </Link>
+                <div style={styles.navItem}>
+                  <button style={styles.navButton} onClick={(e) => { e.stopPropagation(); toggleDropdown('profile'); }}>
+                    <span style={styles.navIcon}>👤</span>
+                    Profile
+                    <span style={styles.navArrow}>▼</span>
+                  </button>
+                  {dropdownOpen.profile && (
+                    <div style={styles.dropdown}>
+                      <Link href="/profile" style={styles.dropdownLink}>View Profile</Link>
+                      <Link href="/security" style={styles.dropdownLink}>Security Settings</Link>
+                      <Link href="/notifications" style={styles.dropdownLink}>Notifications</Link>
+                      <Link href="/privacy" style={styles.dropdownLink}>Privacy Settings</Link>
+                    </div>
+                  )}
+                </div>
+                <div style={styles.navItem}>
+                  <button style={styles.navButton} onClick={(e) => { e.stopPropagation(); toggleDropdown('quickAccess'); }}>
+                    <span style={styles.navIcon}>⚡</span>
+                    Quick Access
+                    <span style={styles.navArrow}>▼</span>
+                  </button>
+                  {dropdownOpen.quickAccess && (
+                    <div style={styles.dropdown}>
+                      <Link href="/" style={styles.dropdownLink}>Home</Link>
+                      <Link href="/main-menu" style={styles.dropdownLink}>Menu</Link>
+                      <Link href="/transfer" style={styles.dropdownLink}>Transfer Money</Link>
+                      <Link href="/bill-pay" style={styles.dropdownLink}>Pay Bills</Link>
+                    </div>
+                  )}
+                </div>
                 <button onClick={handleLogout} style={styles.logoutButton}>
                   <span style={styles.actionIcon}>🚪</span>
                   Logout
@@ -517,6 +539,9 @@ const styles = {
     transition: 'all 0.2s',
     whiteSpace: 'nowrap',
     minWidth: 'auto'
+  },
+  navItem: {
+    position: 'relative'
   },
   navIcon: {
     fontSize: '1rem'
