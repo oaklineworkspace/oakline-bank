@@ -2,8 +2,7 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/": "pages/index.js",
-  "/loans": "pages/loans.js",
-  "/login": "pages/login.js",
-  "/account-types": "pages/account-types.js"
+  "/dashboard": "pages/dashboard.js",
+  "/account-types": "pages/account-types.js",
+  "/": "pages/index.js"
 }
