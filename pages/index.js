@@ -104,56 +104,56 @@ export default function Home() {
       title: 'Convenient ATM Network Access',
       subtitle: 'Access your money 24/7 at thousands of locations nationwide with zero fees',
       icon: '🏧',
-      gradient: 'linear-gradient(135deg, rgba(59, 130, 246, 0.3) 0%, rgba(96, 165, 250, 0.4) 100%)'
+      gradient: 'linear-gradient(135deg, rgba(26, 54, 93, 0.3) 0%, rgba(26, 54, 93, 0.4) 100%)'
     },
     {
       src: '/images/mobile_banking_app.png',
       title: 'Oakline Mobile Banking',
       subtitle: 'Complete banking control right in your pocket with our award-winning app',
       icon: '📱',
-      gradient: 'linear-gradient(135deg, rgba(59, 130, 246, 0.3) 0%, rgba(96, 165, 250, 0.4) 100%)'
+      gradient: 'linear-gradient(135deg, rgba(26, 54, 93, 0.3) 0%, rgba(26, 54, 93, 0.4) 100%)'
     },
     {
       src: '/images/handshake_business_deal.png',
       title: 'Professional Banking Partnership',
       subtitle: 'Building trust through personalized financial solutions and expert guidance',
       icon: '🤝',
-      gradient: 'linear-gradient(135deg, rgba(59, 130, 246, 0.3) 0%, rgba(96, 165, 250, 0.4) 100%)'
+      gradient: 'linear-gradient(135deg, rgba(26, 54, 93, 0.3) 0%, rgba(26, 54, 93, 0.4) 100%)'
     },
     {
       src: '/images/atm_withdrawal_transaction.png',
       title: 'Secure Transaction Processing',
       subtitle: 'Bank with confidence using our advanced security and fraud protection',
       icon: '🔒',
-      gradient: 'linear-gradient(135deg, rgba(59, 130, 246, 0.3) 0%, rgba(96, 165, 250, 0.4) 100%)'
+      gradient: 'linear-gradient(135deg, rgba(26, 54, 93, 0.3) 0%, rgba(26, 54, 93, 0.4) 100%)'
     },
     {
       src: '/images/Bank_hall_business_discussion_72f98bbe.png',
       title: 'Expert Financial Consultation',
       subtitle: 'Professional advice from certified banking specialists in our modern branches',
       icon: '💼',
-      gradient: 'linear-gradient(135deg, rgba(59, 130, 246, 0.3) 0%, rgba(96, 165, 250, 0.4) 100%)'
+      gradient: 'linear-gradient(135deg, rgba(26, 54, 93, 0.3) 0%, rgba(26, 54, 93, 0.4) 100%)'
     },
     {
       src: '/images/Modern_bank_lobby_interior_d535acc7.png',
       title: 'Modern Banking Facilities',
       subtitle: 'Experience premium banking in our state-of-the-art branch locations',
       icon: '🏦',
-      gradient: 'linear-gradient(135deg, rgba(59, 130, 246, 0.3) 0%, rgba(96, 165, 250, 0.4) 100%)'
+      gradient: 'linear-gradient(135deg, rgba(26, 54, 93, 0.3) 0%, rgba(26, 54, 93, 0.4) 100%)'
     },
     {
       src: '/images/Digital_investment_dashboard_36d35f19.png',
       title: 'Advanced Investment Platform',
       subtitle: 'Grow your wealth with cutting-edge investment tools and real-time analytics',
       icon: '📊',
-      gradient: 'linear-gradient(135deg, rgba(59, 130, 246, 0.3) 0%, rgba(96, 165, 250, 0.4) 100%)'
+      gradient: 'linear-gradient(135deg, rgba(26, 54, 93, 0.3) 0%, rgba(26, 54, 93, 0.4) 100%)'
     },
     {
       src: '/images/Mobile_banking_user_experience_576bb7a3.png',
       title: 'Seamless Digital Experience',
       subtitle: 'Enjoy intuitive banking with our user-friendly mobile and web platforms',
       icon: '⚡',
-      gradient: 'linear-gradient(135deg, rgba(59, 130, 246, 0.3) 0%, rgba(96, 165, 250, 0.4) 100%)'
+      gradient: 'linear-gradient(135deg, rgba(26, 54, 93, 0.3) 0%, rgba(26, 54, 93, 0.4) 100%)'
     }
   ];
 
