@@ -343,9 +343,9 @@ export default function Home() {
           </div>
 
           <div style={styles.headerCenter}>
-            <Link href="/apply" style={styles.enrollButton}>
-              <span style={styles.buttonIcon}>🎯</span>
-              Open Account
+            <Link href="/enroll" style={styles.enrollButton}>
+              <span style={styles.buttonIcon}>🌐</span>
+              Enroll for Online
             </Link>
           </div>
 

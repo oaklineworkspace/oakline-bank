@@ -122,8 +122,8 @@ const styles = {
   },
   imageOverlay: {
     position: 'absolute',
-    top: '20px',
-    right: '20px',
+    top: '10px',
+    left: '20px',
   },
   successBadge: {
     background: 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
