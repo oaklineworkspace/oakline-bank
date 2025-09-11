@@ -561,8 +561,13 @@ export default function Home() {
                   alt={bankingFeatures[currentFeatureSlide].title}
                   style={styles.featureImage}
                   onError={(e) => {
-                    e.target.style.display = 'none';
-                    e.target.parentNode.innerHTML = `<div style="height: 300px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; border-radius: 12px; color: #666; font-size: 2rem;">📷</div>`;
+                    if (e.target && e.target.parentNode) {
+                      e.target.style.display = 'none';
+                      const fallback = document.createElement('div');
+                      fallback.style.cssText = 'height: 300px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; border-radius: 12px; color: #666; font-size: 2rem;';
+                      fallback.textContent = '📷';
+                      e.target.parentNode.replaceChild(fallback, e.target);
+                    }
                   }}
                 />
                 <div style={styles.featureImageOverlay}>
@@ -682,7 +687,7 @@ export default function Home() {
                         key={index}
                         style={{
                           ...styles.accountCard,
-                          backgroundColor: user ? '#1e293b' : '#059669',
+                          background: user ? 'linear-gradient(135deg, #1e293b 0%, #334155 100%)' : 'linear-gradient(135deg, #059669 0%, #047857 100%)',
                           ...(isVisible['account-types'] ? {
                             ...styles.flipInY,
                             animationDelay: `${index * 0.1}s`
@@ -2296,121 +2301,13 @@ const styles = {
     transition: 'transform 0.3s ease'
   },
 
-  // Mobile Responsive Styles
-  '@media (max-width: 768px)': {
-    headerContainer: {
-      flexDirection: 'column',
-      padding: '0.75rem',
-      gap: '1rem'
-    },
-    headerCenter: {
-      order: 1,
-      width: '100%',
-      textAlign: 'center'
-    },
-    logoSection: {
-      order: 0
-    },
-    headerActions: {
-      order: 2,
-      width: '100%',
-      justifyContent: 'center'
-    },
-    authButtons: {
-      flexDirection: 'column',
-      gap: '0.5rem',
-      width: '100%'
-    },
-    dashboardButton: {
-      width: '100%',
-      justifyContent: 'center'
-    },
-    menuButton: {
-      width: '100%',
-      justifyContent: 'center'
-    },
-    loginButton: {
-      width: '100%',
-      textAlign: 'center',
-      justifyContent: 'center'
-    },
-    applyButton: {
-      width: '100%',
-      textAlign: 'center',
-      justifyContent: 'center'
-    },
-    navigationDropdown: {
-      position: 'fixed',
-      top: '80px',
-      left: '1rem',
-      right: '1rem',
-      minWidth: 'auto'
-    },
-    dropdownMenu: {
-      minWidth: '300px',
-      maxWidth: '95vw',
-      left: '2.5vw',
-      right: '2.5vw',
-      position: 'fixed'
-    },
-    dropdownGrid: {
-      gridTemplateColumns: '1fr !important',
-      gap: '1rem !important'
-    },
-    featuresGrid: {
-      gridTemplateColumns: '1fr',
-      gap: '1.5rem'
-    },
-    enrollmentButtons: {
-      flexDirection: 'column',
-      gap: '1rem'
-    },
-    enrollmentButtonPrimary: {
-      width: '100%',
-      justifyContent: 'center'
-    },
-    enrollmentButtonSecondary: {
-      width: '100%',
-      justifyContent: 'center'
-    },
-    heroSection: {
-      height: 'auto',
-      minHeight: '60vh',
-      padding: '2rem 1rem'
-    },
-    heroContent: {
-      padding: '0 0.5rem'
-    },
-    heroButtons: {
-      flexDirection: 'column',
-      width: '100%',
-      gap: '0.75rem'
-    },
-    heroButton: {
-      width: '100%',
-      justifyContent: 'center'
-    },
-    secondaryButton: {
-      width: '100%',
-      justifyContent: 'center'
-    },
-    featuresDropdownMenu: {
-      minWidth: '300px',
-      maxWidth: '95vw',
-      left: '50%',
-      top: '50%',
-      transform: 'translate(-50%, -50%)',
-      position: 'fixed'
-    },
-    featuresGrid: {
-      gridTemplateColumns: '1fr',
-      gap: '1rem'
-    },
-    featuresDropdownButton: {
-      width: '100%',
-      justifyContent: 'center'
-    }
-  }
+  // Mobile Responsive Styles - moved to responsive.css
+  mobileHeaderContainer: {
+    flexDirection: 'column',
+    padding: '0.75rem',
+    gap: '1rem'
+  },
+    // Mobile styles moved to responsive.css for proper media query support
 };
 
 // Add hover effects for dropdown items
