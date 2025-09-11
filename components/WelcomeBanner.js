@@ -1,87 +1,48 @@
-
 import { useState, useEffect } from 'react';
 
 export default function WelcomeBanner() {
-  const [currentMessage, setCurrentMessage] = useState(0);
-  const [isVisible, setIsVisible] = useState(true);
-  
+  const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
+
   const messages = [
-    {
-      icon: "🏦",
-      text: "Welcome to Oakline Bank - Your Trusted Financial Partner",
-      color: "linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)"
-    },
-    {
-      icon: "🔒",
-      text: "Experience Advanced Security with Bank-Grade Protection",
-      color: "linear-gradient(135deg, #10b981 0%, #059669 100%)"
-    },
-    {
-      icon: "📱",
-      text: "Mobile Banking Made Simple - Bank Anywhere, Anytime",
-      color: "linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)"
-    },
-    {
-      icon: "💰",
-      text: "Personal Loans Starting at 3.2% APR - Apply Today",
-      color: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)"
-    },
-    {
-      icon: "⭐",
-      text: "No Monthly Fees on Premium Accounts - Join 500K+ Customers",
-      color: "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)"
-    }
+    "🎉 Welcome to Oakline Bank - Your trusted financial partner since 1995",
+    "💳 New! Explore all 23 account types with detailed comparisons and benefits",
+    "🏦 Join over 500,000+ satisfied customers who trust Oakline Bank",
+    "📱 Award-winning mobile app - Bank anywhere, anytime with confidence",
+    "🔒 FDIC Insured • Equal Housing Lender • Your deposits are protected up to $250,000",
+    "🌟 Rated #1 Customer Service - Experience banking the way it should be"
   ];
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentMessage((prev) => (prev + 1) % messages.length);
-    }, 4000);
+      setCurrentMessageIndex((prevIndex) =>
+        prevIndex === messages.length - 1 ? 0 : prevIndex + 1
+      );
+    }, 4000); // Change message every 4 seconds
+
     return () => clearInterval(interval);
   }, [messages.length]);
 
-  const handleClose = () => {
-    setIsVisible(false);
-  };
-
-  if (!isVisible) return null;
-
   return (
     <div style={styles.banner}>
-      <div style={styles.content}>
+      <div style={styles.container}>
         <div style={styles.messageContainer}>
-          <div style={styles.iconContainer}>
-            <span style={styles.messageIcon}>
-              {messages[currentMessage].icon}
-            </span>
+          <div
+            style={styles.messageText}
+            key={currentMessageIndex}
+          >
+            {messages[currentMessageIndex]}
           </div>
-          <div style={styles.textContainer}>
-            <span style={{
-              ...styles.message,
-              background: messages[currentMessage].color,
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text'
-            }}>
-              {messages[currentMessage].text}
-            </span>
-          </div>
-          <button style={styles.closeButton} onClick={handleClose}>
-            ✕
-          </button>
         </div>
-        
+
         <div style={styles.indicators}>
           {messages.map((_, index) => (
             <button
               key={index}
               style={{
                 ...styles.indicator,
-                background: index === currentMessage ? messages[currentMessage].color : 'rgba(255,255,255,0.3)',
-                transform: index === currentMessage ? 'scale(1.2)' : 'scale(1)'
+                ...(currentMessageIndex === index ? styles.activeIndicator : {})
               }}
-              onClick={() => setCurrentMessage(index)}
-              aria-label={`Go to message ${index + 1}`}
+              onClick={() => setCurrentMessageIndex(index)}
             />
           ))}
         </div>
@@ -92,84 +53,77 @@ export default function WelcomeBanner() {
 
 const styles = {
   banner: {
-    background: 'linear-gradient(135deg, rgba(30, 58, 138, 0.95) 0%, rgba(59, 130, 246, 0.9) 50%, rgba(99, 102, 241, 0.95) 100%)',
+    background: 'linear-gradient(135deg, #1e40af 0%, #3730a3 100%)',
     color: 'white',
-    padding: 'clamp(12px, 2vw, 16px) 0',
+    padding: '1rem 0',
     position: 'relative',
     overflow: 'hidden',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-    backdropFilter: 'blur(10px)',
-    borderBottom: '1px solid rgba(255,255,255,0.1)',
-    animation: 'slideDown 0.6s ease-out'
+    width: '100%'
   },
-  content: {
+  container: {
     maxWidth: '1200px',
     margin: '0 auto',
     padding: '0 1rem',
-    position: 'relative'
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '0.75rem'
   },
   messageContainer: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 'clamp(8px, 2vw, 16px)',
-    marginBottom: '8px',
-    position: 'relative'
-  },
-  iconContainer: {
-    flexShrink: 0,
-    animation: 'bounce 2s infinite'
-  },
-  messageIcon: {
-    fontSize: 'clamp(1.2rem, 3vw, 1.8rem)',
-    filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))'
-  },
-  textContainer: {
-    flex: 1,
+    width: '100%',
     textAlign: 'center',
-    overflow: 'hidden'
-  },
-  message: {
-    fontSize: 'clamp(0.85rem, 2vw, 1.1rem)',
-    fontWeight: '600',
-    animation: 'fadeInUp 0.5s ease-in-out',
-    lineHeight: '1.4',
-    display: 'block',
-    textShadow: '1px 1px 2px rgba(0,0,0,0.2)'
-  },
-  closeButton: {
-    position: 'absolute',
-    right: '0',
-    top: '50%',
-    transform: 'translateY(-50%)',
-    background: 'rgba(255,255,255,0.2)',
-    border: 'none',
-    color: 'white',
-    borderRadius: '50%',
-    width: 'clamp(24px, 4vw, 32px)',
-    height: 'clamp(24px, 4vw, 32px)',
+    minHeight: '1.5rem',
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center',
-    cursor: 'pointer',
-    fontSize: 'clamp(12px, 2vw, 16px)',
-    fontWeight: 'bold',
-    transition: 'all 0.3s ease',
-    backdropFilter: 'blur(10px)'
+    justifyContent: 'center'
+  },
+  messageText: {
+    fontSize: 'clamp(0.85rem, 2vw, 1rem)',
+    fontWeight: '500',
+    lineHeight: '1.4',
+    animation: 'fadeInSlide 0.6s ease-out',
+    maxWidth: '100%',
+    padding: '0 1rem'
   },
   indicators: {
     display: 'flex',
-    justifyContent: 'center',
-    gap: '6px',
-    marginTop: '4px'
+    gap: '0.5rem',
+    alignItems: 'center'
   },
   indicator: {
-    width: 'clamp(6px, 1.5vw, 8px)',
-    height: 'clamp(6px, 1.5vw, 8px)',
+    width: '8px',
+    height: '8px',
     borderRadius: '50%',
+    backgroundColor: 'rgba(255, 255, 255, 0.4)',
     border: 'none',
     cursor: 'pointer',
-    transition: 'all 0.3s ease',
-    opacity: 0.7
+    transition: 'all 0.3s ease'
+  },
+  activeIndicator: {
+    backgroundColor: 'white',
+    transform: 'scale(1.2)'
   }
 };
+
+// Add CSS animation keyframes if not already present
+if (typeof document !== 'undefined') {
+  const styleSheet = document.styleSheets[0];
+  const keyframes = `
+    @keyframes fadeInSlide {
+      0% {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  `;
+
+  try {
+    styleSheet.insertRule(keyframes, styleSheet.cssRules.length);
+  } catch (e) {
+    // Keyframes might already exist
+  }
+}

@@ -1,167 +1,258 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { supabase } from '../lib/supabaseClient';
 
 export default function MainMenu({ user }) {
-  const [scrollText, setScrollText] = useState("Welcome to Oakline Bank – Secure, Convenient, and Innovative Banking Solutions for Everyone!");
-  const [dropdownOpen, setDropdownOpen] = useState({});
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState(null);
 
-  // For scrolling effect
+  const menuItems = [
+    {
+      name: 'Banking Services',
+      icon: '🏦',
+      dropdown: [
+        {
+          category: 'Personal Banking',
+          items: [
+            { name: 'Checking Accounts', href: '/apply', icon: '💳' },
+            { name: 'Savings Accounts', href: '/apply', icon: '💰' },
+            { name: 'Money Market', href: '/apply', icon: '📈' },
+            { name: 'Certificates of Deposit', href: '/apply', icon: '🔒' }
+          ]
+        },
+        {
+          category: 'Business Banking',
+          items: [
+            { name: 'Business Checking', href: '/apply', icon: '🏢' },
+            { name: 'Business Savings', href: '/apply', icon: '🏦' },
+            { name: 'Merchant Services', href: '/bill-pay', icon: '💼' },
+            { name: 'Business Loans', href: '/loans', icon: '📊' }
+          ]
+        },
+        {
+          category: 'Loans & Credit',
+          items: [
+            { name: 'Personal Loans', href: '/loans', icon: '💵' },
+            { name: 'Auto Loans', href: '/loans', icon: '🚗' },
+            { name: 'Home Mortgages', href: '/loans', icon: '🏠' },
+            { name: 'Credit Cards', href: '/cards', icon: '💳' }
+          ]
+        }
+      ]
+    },
+    {
+      name: 'Digital Banking',
+      icon: '📱',
+      dropdown: [
+        {
+          category: 'Online Services',
+          items: [
+            { name: 'Online Banking', href: '/dashboard', icon: '💻' },
+            { name: 'Mobile App', href: '/dashboard', icon: '📱' },
+            { name: 'Bill Pay', href: '/bill-pay', icon: '🧾' },
+            { name: 'Mobile Deposit', href: '/deposit-real', icon: '📥' }
+          ]
+        },
+        {
+          category: 'Transfers & Payments',
+          items: [
+            { name: 'Money Transfer', href: '/transfer', icon: '💸' },
+            { name: 'Wire Transfers', href: '/transfer', icon: '🌐' },
+            { name: 'Zelle Payments', href: '/transfer', icon: '⚡' },
+            { name: 'International Transfer', href: '/transfer', icon: '🌍' }
+          ]
+        }
+      ]
+    },
+    {
+      name: 'Investments',
+      icon: '📊',
+      dropdown: [
+        {
+          category: 'Investment Services',
+          items: [
+            { name: 'Investment Accounts', href: '/investments', icon: '📈' },
+            { name: 'Retirement Planning', href: '/investments', icon: '🏖️' },
+            { name: 'Financial Advisory', href: '/financial-advisory', icon: '👨‍💼' },
+            { name: 'Wealth Management', href: '/investments', icon: '💎' }
+          ]
+        },
+        {
+          category: 'Trading & Markets',
+          items: [
+            { name: 'Stock Trading', href: '/investments', icon: '📊' },
+            { name: 'Cryptocurrency', href: '/crypto', icon: '₿' },
+            { name: 'Market Research', href: '/market-news', icon: '📰' },
+            { name: 'Portfolio Analysis', href: '/investments', icon: '📋' }
+          ]
+        }
+      ]
+    },
+    {
+      name: 'Resources',
+      icon: '📚',
+      dropdown: [
+        {
+          category: 'Account Information',
+          items: [
+            { name: 'All Account Types', href: '/account-types', icon: '📋' },
+            { name: 'Rate Information', href: '/account-types', icon: '📊' },
+            { name: 'Fee Schedule', href: '/account-types', icon: '💰' },
+            { name: 'Compare Accounts', href: '/account-types', icon: '⚖️' }
+          ]
+        },
+        {
+          category: 'Support & Tools',
+          items: [
+            { name: 'Customer Support', href: '/support', icon: '🎧' },
+            { name: 'Branch Locator', href: '/support', icon: '📍' },
+            { name: 'Financial Education', href: '/support', icon: '🎓' },
+            { name: 'Security Center', href: '/security', icon: '🔒' }
+          ]
+        }
+      ]
+    }
+  ];
+
+  const handleDropdownToggle = (menuName) => {
+    setActiveDropdown(activeDropdown === menuName ? null : menuName);
+  };
+
+  const closeDropdowns = () => {
+    setActiveDropdown(null);
+  };
+
   useEffect(() => {
-    const interval = setInterval(() => {
-      setScrollText((prev) => prev.slice(1) + prev[0]);
-    }, 150);
-    return () => clearInterval(interval);
+    const handleClickOutside = () => {
+      closeDropdowns();
+      setMobileMenuOpen(false);
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
   }, []);
 
-  const toggleDropdown = (menu) => {
-    setDropdownOpen({ ...dropdownOpen, [menu]: !dropdownOpen[menu] });
-  };
-
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-  };
-
   return (
-    <header style={styles.header}>
-      {/* Top announcement bar */}
+    <nav style={styles.navbar} onClick={(e) => e.stopPropagation()}>
+      {/* Top Announcement Bar */}
       <div style={styles.topBar}>
-        <div style={styles.scrollText}>{scrollText}</div>
-        <div style={styles.topLinks}>
-          <Link href="/support" style={styles.topLink}>Support</Link>
-          <Link href="/faq" style={styles.topLink}>FAQ</Link>
-          <span style={styles.phone}>📞 1-800-OAKLINE</span>
+        <div style={styles.topBarContent}>
+          <div style={styles.announcement}>
+            <span style={styles.announcementIcon}>🎉</span>
+            <span style={styles.announcementText}>
+              New! Explore all 23 account types with detailed comparisons
+            </span>
+            <Link href="/account-types" style={styles.announcementLink}>
+              View All Accounts
+            </Link>
+          </div>
+          <div style={styles.topBarLinks}>
+            <Link href="/support" style={styles.topBarLink}>Support</Link>
+            <Link href="/account-types" style={styles.topBarLink}>Account Types</Link>
+            <span style={styles.phoneNumber}>📞 1-800-OAKLINE</span>
+          </div>
         </div>
       </div>
 
-      {/* Main navigation */}
-      <nav style={styles.nav}>
+      {/* Main Navigation */}
+      <div style={styles.mainNav}>
         <div style={styles.navContainer}>
+          {/* Logo */}
           <Link href="/" style={styles.logoContainer}>
-            <img src="/images/logo-primary.png.jpg" alt="Oakline Bank Logo" style={styles.logo} />
-            <span style={styles.bankName}>Oakline Bank</span>
+            <img src="/images/logo-primary.png.jpg" alt="Oakline Bank" style={styles.logo} />
+            <div style={styles.brandInfo}>
+              <span style={styles.brandName}>Oakline Bank</span>
+              <span style={styles.brandTagline}>Your Financial Partner</span>
+            </div>
           </Link>
 
           {/* Desktop Menu */}
           <div style={styles.desktopMenu}>
-            {/* Banking Services Dropdown */}
-            <div style={styles.dropdown}>
-              <button
-                style={styles.dropdownBtn}
-                onClick={() => toggleDropdown('banking')}
-                onMouseEnter={() => setDropdownOpen({ ...dropdownOpen, banking: true })}
-              >
-                Banking Services ▼
-              </button>
-              {dropdownOpen.banking && (
-                <div 
-                  style={styles.dropdownContent}
-                  onMouseLeave={() => setDropdownOpen({ ...dropdownOpen, banking: false })}
+            {menuItems.map((item) => (
+              <div key={item.name} style={styles.menuItem}>
+                <button
+                  style={{
+                    ...styles.menuButton,
+                    ...(activeDropdown === item.name ? styles.menuButtonActive : {})
+                  }}
+                  onMouseEnter={() => handleDropdownToggle(item.name)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDropdownToggle(item.name);
+                  }}
                 >
-                  <div style={styles.dropdownSection}>
-                    <h4 style={styles.dropdownHeading}>💳 Account Types</h4>
-                    <Link href="/apply" style={styles.dropdownLink}>Checking Account</Link>
-                    <Link href="/apply" style={styles.dropdownLink}>Savings Account</Link>
-                    <Link href="/apply" style={styles.dropdownLink}>Business Account</Link>
-                    <Link href="/apply" style={styles.dropdownLink}>Student Account</Link>
-                    <Link href="/apply" style={styles.dropdownLink}>Joint Account</Link>
-                  </div>
-                  <div style={styles.dropdownSection}>
-                    <h4 style={styles.dropdownHeading}>🏠 Loans & Credit</h4>
-                    <Link href="/loans" style={styles.dropdownLink}>Home Mortgage</Link>
-                    <Link href="/loans" style={styles.dropdownLink}>Personal Loan</Link>
-                    <Link href="/loans" style={styles.dropdownLink}>Auto Loan</Link>
-                    <Link href="/loans" style={styles.dropdownLink}>Business Loan</Link>
-                    <Link href="/loans" style={styles.dropdownLink}>Credit Cards</Link>
-                  </div>
-                  <div style={styles.dropdownSection}>
-                    <h4 style={styles.dropdownHeading}>💰 Investment</h4>
-                    <Link href="/investments" style={styles.dropdownLink}>Investment Portfolio</Link>
-                    {user && <Link href="/crypto" style={styles.dropdownLink}>Crypto Trading</Link>}
-                    <Link href="/financial-advisory" style={styles.dropdownLink}>Financial Advisory</Link>
-                  </div>
-                </div>
-              )}
-            </div>
+                  <span style={styles.menuIcon}>{item.icon}</span>
+                  <span>{item.name}</span>
+                  <span style={styles.dropdownArrow}>▼</span>
+                </button>
 
-            {/* Digital Banking Dropdown */}
-            <div style={styles.dropdown}>
-              <button
-                style={styles.dropdownBtn}
-                onClick={() => toggleDropdown('digital')}
-                onMouseEnter={() => setDropdownOpen({ ...dropdownOpen, digital: true })}
-              >
-                Digital Banking ▼
-              </button>
-              {dropdownOpen.digital && (
-                <div 
-                  style={styles.dropdownContent}
-                  onMouseLeave={() => setDropdownOpen({ ...dropdownOpen, digital: false })}
-                >
-                  <div style={styles.dropdownSection}>
-                    <h4 style={styles.dropdownHeading}>📱 Mobile & Online</h4>
-                    {user ? (
-                      <>
-                        <Link href="/dashboard" style={styles.dropdownLink}>Online Banking</Link>
-                        <Link href="/transfer" style={styles.dropdownLink}>Money Transfer</Link>
-                        <Link href="/bill-pay" style={styles.dropdownLink}>Bill Pay</Link>
-                        <Link href="/cards" style={styles.dropdownLink}>Manage Cards</Link>
-                      </>
-                    ) : (
-                      <>
-                        <Link href="/login" style={styles.dropdownLink}>Sign In to Access</Link>
-                        <Link href="/apply" style={styles.dropdownLink}>Open Account First</Link>
-                      </>
-                    )}
+                {activeDropdown === item.name && (
+                  <div 
+                    style={styles.megaDropdown}
+                    onMouseLeave={closeDropdowns}
+                  >
+                    <div style={styles.dropdownContent}>
+                      {item.dropdown.map((category) => (
+                        <div key={category.category} style={styles.dropdownCategory}>
+                          <h4 style={styles.categoryTitle}>{category.category}</h4>
+                          <div style={styles.categoryItems}>
+                            {category.items.map((subItem) => (
+                              <Link
+                                key={subItem.name}
+                                href={subItem.href}
+                                style={styles.dropdownItem}
+                                onClick={closeDropdowns}
+                              >
+                                <span style={styles.itemIcon}>{subItem.icon}</span>
+                                <span style={styles.itemName}>{subItem.name}</span>
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <div style={styles.dropdownSection}>
-                    <h4 style={styles.dropdownHeading}>🔒 Security</h4>
-                    <Link href="/security" style={styles.dropdownLink}>Account Security</Link>
-                    {user && <Link href="/mfa-setup" style={styles.dropdownLink}>Two-Factor Auth</Link>}
-                    {user && <Link href="/notifications" style={styles.dropdownLink}>Alert Preferences</Link>}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <Link href="/support" style={styles.navLink}>Support</Link>
-            <Link href="/market-news" style={styles.navLink}>Market News</Link>
+                )}
+              </div>
+            ))}
           </div>
 
-          {/* Action Buttons */}
-          <div style={styles.actionButtons}>
+          {/* User Actions */}
+          <div style={styles.userActions}>
             {user ? (
               <>
-                <Link href="/dashboard" style={styles.dashboardBtn}>Dashboard</Link>
-                <button onClick={handleSignOut} style={styles.signOutBtn}>Sign Out</button>
+                <Link href="/dashboard" style={styles.actionButton}>
+                  <span style={styles.actionIcon}>📊</span>
+                  Dashboard
+                </Link>
+                <Link href="/main-menu" style={styles.actionButton}>
+                  <span style={styles.actionIcon}>☰</span>
+                  Menu
+                </Link>
               </>
             ) : (
               <>
-                <Link href="/apply" style={styles.applyBtn}>Apply Now</Link>
-                <Link href="/login" style={styles.loginBtn}>Sign In</Link>
+                <Link href="/apply" style={styles.applyButton}>
+                  <span style={styles.actionIcon}>🚀</span>
+                  Apply Now
+                </Link>
+                <Link href="/login" style={styles.loginButton}>
+                  <span style={styles.actionIcon}>👤</span>
+                  Sign In
+                </Link>
               </>
             )}
           </div>
 
-          {/* Hamburger Menu Button */}
-          <button 
-            style={styles.hamburgerBtn}
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          {/* Mobile Menu Button */}
+          <button
+            style={styles.mobileMenuButton}
+            onClick={(e) => {
+              e.stopPropagation();
+              setMobileMenuOpen(!mobileMenuOpen);
+            }}
           >
-            <div style={{
-              ...styles.hamburgerLine,
-              ...(mobileMenuOpen ? styles.hamburgerLineOpen1 : {})
-            }}></div>
-            <div style={{
-              ...styles.hamburgerLine,
-              ...(mobileMenuOpen ? styles.hamburgerLineOpen2 : {})
-            }}></div>
-            <div style={{
-              ...styles.hamburgerLine,
-              ...(mobileMenuOpen ? styles.hamburgerLineOpen3 : {})
-            }}></div>
+            <span style={styles.hamburgerIcon}>☰</span>
           </button>
         </div>
 
@@ -170,366 +261,430 @@ export default function MainMenu({ user }) {
           <div style={styles.mobileMenu}>
             <div style={styles.mobileMenuContent}>
               {user ? (
-                <>
-                  <div style={styles.mobileUserInfo}>
-                    <span style={styles.welcomeText}>Welcome, {user.email}</span>
-                  </div>
-                  <Link href="/dashboard" style={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>
-                    🏠 Dashboard
+                <div style={styles.mobileUserInfo}>
+                  <span style={styles.welcomeText}>Welcome back!</span>
+                  <Link href="/dashboard" style={styles.mobileUserButton}>
+                    Go to Dashboard
                   </Link>
-                  <Link href="/transfer" style={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>
-                    💸 Transfer Money
-                  </Link>
-                  <Link href="/cards" style={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>
-                    💳 My Cards
-                  </Link>
-                  <Link href="/transactions" style={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>
-                    📊 Transactions
-                  </Link>
-                  <Link href="/investments" style={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>
-                    📈 Investments
-                  </Link>
-                  <Link href="/crypto" style={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>
-                    ₿ Crypto Trading
-                  </Link>
-                </>
+                </div>
               ) : (
-                <>
-                  <Link href="/apply" style={styles.mobilePrimaryLink} onClick={() => setMobileMenuOpen(false)}>
-                    🚀 Apply Now
-                  </Link>
-                  <Link href="/login" style={styles.mobilePrimaryLink} onClick={() => setMobileMenuOpen(false)}>
-                    👤 Sign In
-                  </Link>
-                </>
+                <div style={styles.mobileActions}>
+                  <Link href="/apply" style={styles.mobileApplyButton}>Apply Now</Link>
+                  <Link href="/login" style={styles.mobileLoginButton}>Sign In</Link>
+                </div>
               )}
               
-              <div style={styles.mobileDivider}></div>
-              
-              <Link href="/loans" style={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>
-                🏠 Loans
-              </Link>
-              <Link href="/support" style={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>
-                💬 Support
-              </Link>
-              <Link href="/faq" style={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>
-                ❓ FAQ
-              </Link>
-              <Link href="/market-news" style={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>
-                📰 Market News
-              </Link>
-              
-              {user && (
-                <>
-                  <div style={styles.mobileDivider}></div>
-                  <button 
-                    onClick={() => { handleSignOut(); setMobileMenuOpen(false); }} 
-                    style={styles.mobileSignOutBtn}
+              {menuItems.map((item) => (
+                <div key={item.name} style={styles.mobileMenuItem}>
+                  <button
+                    style={styles.mobileMenuHeader}
+                    onClick={() => handleDropdownToggle(item.name)}
                   >
-                    🚪 Sign Out
+                    <span style={styles.menuIcon}>{item.icon}</span>
+                    <span>{item.name}</span>
+                    <span style={styles.dropdownArrow}>
+                      {activeDropdown === item.name ? '▲' : '▼'}
+                    </span>
                   </button>
-                </>
-              )}
+                  
+                  {activeDropdown === item.name && (
+                    <div style={styles.mobileDropdown}>
+                      {item.dropdown.map((category) => (
+                        <div key={category.category} style={styles.mobileCategorySection}>
+                          <h5 style={styles.mobileCategoryTitle}>{category.category}</h5>
+                          {category.items.map((subItem) => (
+                            <Link
+                              key={subItem.name}
+                              href={subItem.href}
+                              style={styles.mobileDropdownItem}
+                              onClick={() => setMobileMenuOpen(false)}
+                            >
+                              <span style={styles.itemIcon}>{subItem.icon}</span>
+                              <span>{subItem.name}</span>
+                            </Link>
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
         )}
-      </nav>
-    </header>
+      </div>
+    </nav>
   );
 }
 
 const styles = {
-  header: {
+  navbar: {
     width: '100%',
-    backgroundColor: '#ffffff',
-    boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+    backgroundColor: 'white',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
     position: 'sticky',
     top: 0,
     zIndex: 1000,
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
   },
+
+  // Top Bar
   topBar: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: '8px 20px',
-    backgroundColor: '#1e3a8a',
-    color: '#ffffff',
-    fontSize: '14px',
+    backgroundColor: '#1e40af',
+    color: 'white',
+    fontSize: '0.85rem'
   },
-  scrollText: {
-    fontWeight: '500',
-    overflow: 'hidden',
-    whiteSpace: 'nowrap',
-    flex: 1,
-  },
-  topLinks: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '20px',
-  },
-  topLink: {
-    color: '#ffffff',
-    textDecoration: 'none',
-    fontSize: '13px',
-    padding: '4px 8px',
-    borderRadius: '4px',
-    transition: 'background-color 0.2s',
-  },
-  phone: {
-    fontWeight: 'bold',
-    fontSize: '13px',
-  },
-  nav: {
-    backgroundColor: '#ffffff',
-    borderBottom: '1px solid #e5e7eb',
-  },
-  navContainer: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: '15px 20px',
+  topBarContent: {
     maxWidth: '1400px',
     margin: '0 auto',
-    position: 'relative',
+    padding: '0.5rem 1rem',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  },
+  announcement: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem'
+  },
+  announcementIcon: {
+    fontSize: '1rem'
+  },
+  announcementText: {
+    fontWeight: '500'
+  },
+  announcementLink: {
+    color: '#fbbf24',
+    textDecoration: 'underline',
+    fontWeight: '600',
+    marginLeft: '0.5rem'
+  },
+  topBarLinks: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '1rem'
+  },
+  topBarLink: {
+    color: 'white',
+    textDecoration: 'none',
+    fontWeight: '500',
+    transition: 'color 0.2s'
+  },
+  phoneNumber: {
+    fontWeight: 'bold',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.25rem'
+  },
+
+  // Main Navigation
+  mainNav: {
+    backgroundColor: 'white',
+    borderBottom: '1px solid #e5e7eb'
+  },
+  navContainer: {
+    maxWidth: '1400px',
+    margin: '0 auto',
+    padding: '0 1rem',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    minHeight: '80px'
   },
   logoContainer: {
     display: 'flex',
     alignItems: 'center',
-    textDecoration: 'none',
-    gap: '12px',
+    gap: '0.75rem',
+    textDecoration: 'none'
   },
   logo: {
     height: '45px',
-    width: 'auto',
+    width: 'auto'
   },
-  bankName: {
-    fontSize: '24px',
+  brandInfo: {
+    display: 'flex',
+    flexDirection: 'column'
+  },
+  brandName: {
+    fontSize: '1.5rem',
     fontWeight: 'bold',
-    color: '#1e3a8a',
-    letterSpacing: '-0.5px',
+    color: '#1e40af',
+    lineHeight: '1'
   },
+  brandTagline: {
+    fontSize: '0.75rem',
+    color: '#64748b',
+    fontWeight: '500'
+  },
+
+  // Desktop Menu
   desktopMenu: {
     display: 'flex',
     alignItems: 'center',
-    gap: '30px',
+    gap: '0.5rem'
   },
-  dropdown: {
-    position: 'relative',
+  menuItem: {
+    position: 'relative'
   },
-  dropdownBtn: {
-    background: 'none',
-    border: 'none',
-    color: '#374151',
-    fontSize: '16px',
-    fontWeight: '500',
-    padding: '10px 15px',
-    cursor: 'pointer',
-    borderRadius: '6px',
-    transition: 'all 0.2s',
-  },
-  dropdownContent: {
-    position: 'absolute',
-    top: '100%',
-    left: '0',
-    backgroundColor: '#ffffff',
-    minWidth: '600px',
-    padding: '25px',
-    boxShadow: '0 10px 25px rgba(0,0,0,0.15)',
-    borderRadius: '12px',
-    border: '1px solid #e5e7eb',
-    zIndex: 200,
-    display: 'grid',
-    gridTemplateColumns: 'repeat(3, 1fr)',
-    gap: '25px',
-  },
-  dropdownSection: {
-    minWidth: '180px',
-  },
-  dropdownHeading: {
-    fontSize: '14px',
-    fontWeight: 'bold',
-    margin: '0 0 12px 0',
-    color: '#1e3a8a',
-    borderBottom: '1px solid #e5e7eb',
-    paddingBottom: '8px',
-  },
-  dropdownLink: {
-    display: 'block',
-    color: '#6b7280',
-    textDecoration: 'none',
-    padding: '8px 0',
-    fontSize: '14px',
-    transition: 'color 0.2s',
-    borderRadius: '4px',
-  },
-  navLink: {
-    color: '#374151',
-    textDecoration: 'none',
-    fontSize: '16px',
-    fontWeight: '500',
-    padding: '10px 15px',
-    borderRadius: '6px',
-    transition: 'all 0.2s',
-  },
-  actionButtons: {
+  menuButton: {
     display: 'flex',
     alignItems: 'center',
-    gap: '12px',
-  },
-  applyBtn: {
-    backgroundColor: '#059669',
-    color: '#ffffff',
-    textDecoration: 'none',
-    padding: '12px 24px',
-    borderRadius: '8px',
-    fontWeight: '600',
-    fontSize: '14px',
-    transition: 'all 0.2s',
-    boxShadow: '0 2px 4px rgba(5, 150, 105, 0.2)',
-  },
-  loginBtn: {
-    backgroundColor: '#1e3a8a',
-    color: '#ffffff',
-    textDecoration: 'none',
-    padding: '12px 24px',
-    borderRadius: '8px',
-    fontWeight: '600',
-    fontSize: '14px',
-    transition: 'all 0.2s',
-    boxShadow: '0 2px 4px rgba(30, 58, 138, 0.2)',
-  },
-  dashboardBtn: {
-    backgroundColor: '#059669',
-    color: '#ffffff',
-    textDecoration: 'none',
-    padding: '12px 24px',
-    borderRadius: '8px',
-    fontWeight: '600',
-    fontSize: '14px',
-    transition: 'all 0.2s',
-    boxShadow: '0 2px 4px rgba(5, 150, 105, 0.2)',
-  },
-  signOutBtn: {
-    backgroundColor: '#ef4444',
-    color: '#ffffff',
+    gap: '0.5rem',
+    padding: '0.75rem 1rem',
+    backgroundColor: 'transparent',
+    color: '#374151',
     border: 'none',
-    padding: '12px 24px',
     borderRadius: '8px',
-    fontWeight: '600',
-    fontSize: '14px',
+    cursor: 'pointer',
+    fontSize: '0.9rem',
+    fontWeight: '500',
     transition: 'all 0.2s',
-    boxShadow: '0 2px 4px rgba(239, 68, 68, 0.2)',
-    cursor: 'pointer',
+    whiteSpace: 'nowrap'
   },
-  hamburgerBtn: {
-    display: 'none',
-    flexDirection: 'column',
-    justifyContent: 'space-around',
-    width: '30px',
-    height: '30px',
-    background: 'transparent',
-    border: 'none',
-    cursor: 'pointer',
-    padding: '0',
-    zIndex: 10,
+  menuButtonActive: {
+    backgroundColor: '#eff6ff',
+    color: '#1e40af'
   },
-  hamburgerLine: {
-    width: '30px',
-    height: '3px',
-    background: '#374151',
-    borderRadius: '3px',
-    transition: 'all 0.3s linear',
-    position: 'relative',
-    transformOrigin: '1px',
+  menuIcon: {
+    fontSize: '1rem'
   },
-  hamburgerLineOpen1: {
-    transform: 'rotate(45deg)',
+  dropdownArrow: {
+    fontSize: '0.7rem',
+    transition: 'transform 0.2s'
   },
-  hamburgerLineOpen2: {
-    opacity: '0',
-    transform: 'translateX(20px)',
-  },
-  hamburgerLineOpen3: {
-    transform: 'rotate(-45deg)',
-  },
-  mobileMenu: {
+
+  // Mega Dropdown
+  megaDropdown: {
     position: 'absolute',
     top: '100%',
-    left: 0,
-    right: 0,
-    backgroundColor: '#ffffff',
-    borderTop: '1px solid #e5e7eb',
-    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-    zIndex: 100,
+    left: '50%',
+    transform: 'translateX(-50%)',
+    backgroundColor: 'white',
+    borderRadius: '12px',
+    boxShadow: '0 10px 30px rgba(0,0,0,0.15)',
+    border: '1px solid #e5e7eb',
+    padding: '1.5rem',
+    minWidth: '600px',
+    zIndex: 1000,
+    marginTop: '0.5rem'
   },
-  mobileMenuContent: {
-    padding: '20px',
-    maxHeight: '70vh',
-    overflowY: 'auto',
+  dropdownContent: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(2, 1fr)',
+    gap: '2rem'
   },
-  mobileUserInfo: {
-    backgroundColor: '#f8fafc',
-    padding: '15px',
+  dropdownCategory: {},
+  categoryTitle: {
+    fontSize: '0.9rem',
+    fontWeight: 'bold',
+    color: '#1e40af',
+    marginBottom: '0.75rem',
+    borderBottom: '1px solid #e5e7eb',
+    paddingBottom: '0.5rem'
+  },
+  categoryItems: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.5rem'
+  },
+  dropdownItem: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.75rem',
+    padding: '0.75rem',
+    textDecoration: 'none',
+    color: '#374151',
     borderRadius: '8px',
-    marginBottom: '20px',
-    textAlign: 'center',
+    transition: 'all 0.2s'
   },
-  welcomeText: {
-    fontSize: '14px',
-    color: '#1e3a8a',
-    fontWeight: '600',
+  itemIcon: {
+    fontSize: '1.1rem',
+    width: '20px',
+    textAlign: 'center'
   },
-  mobileLink: {
-    display: 'block',
+  itemName: {
+    fontSize: '0.9rem',
+    fontWeight: '500'
+  },
+
+  // User Actions
+  userActions: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.75rem'
+  },
+  actionButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    padding: '0.6rem 1rem',
+    backgroundColor: '#f1f5f9',
     color: '#374151',
     textDecoration: 'none',
-    padding: '15px 0',
-    fontSize: '16px',
-    borderBottom: '1px solid #f3f4f6',
-    fontWeight: '500',
-    transition: 'color 0.2s',
+    borderRadius: '8px',
+    fontSize: '0.85rem',
+    fontWeight: '600',
+    transition: 'all 0.2s'
   },
-  mobilePrimaryLink: {
-    display: 'block',
-    backgroundColor: '#1e3a8a',
-    color: '#ffffff',
+  applyButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    padding: '0.6rem 1.2rem',
+    backgroundColor: '#059669',
+    color: 'white',
     textDecoration: 'none',
-    padding: '15px',
-    fontSize: '16px',
     borderRadius: '8px',
+    fontSize: '0.85rem',
     fontWeight: '600',
-    textAlign: 'center',
-    marginBottom: '10px',
+    boxShadow: '0 2px 4px rgba(5, 150, 105, 0.2)',
+    transition: 'all 0.2s'
   },
-  mobileDivider: {
-    height: '1px',
-    backgroundColor: '#e5e7eb',
-    margin: '20px 0',
+  loginButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    padding: '0.6rem 1.2rem',
+    backgroundColor: '#1e40af',
+    color: 'white',
+    textDecoration: 'none',
+    borderRadius: '8px',
+    fontSize: '0.85rem',
+    fontWeight: '600',
+    boxShadow: '0 2px 4px rgba(30, 64, 175, 0.2)',
+    transition: 'all 0.2s'
   },
-  mobileSignOutBtn: {
-    width: '100%',
-    backgroundColor: '#ef4444',
-    color: '#ffffff',
+  actionIcon: {
+    fontSize: '0.9rem'
+  },
+
+  // Mobile Menu Button
+  mobileMenuButton: {
+    display: 'none',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '0.5rem',
+    backgroundColor: 'transparent',
     border: 'none',
-    padding: '15px',
-    borderRadius: '8px',
-    fontWeight: '600',
-    fontSize: '16px',
-    cursor: 'pointer',
-    marginTop: '10px',
+    cursor: 'pointer'
   },
+  hamburgerIcon: {
+    fontSize: '1.5rem',
+    color: '#374151'
+  },
+
+  // Mobile Menu
+  mobileMenu: {
+    backgroundColor: 'white',
+    borderTop: '1px solid #e5e7eb',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.08)'
+  },
+  mobileMenuContent: {
+    padding: '1rem'
+  },
+  mobileUserInfo: {
+    textAlign: 'center',
+    padding: '1rem',
+    backgroundColor: '#f8fafc',
+    borderRadius: '8px',
+    marginBottom: '1rem'
+  },
+  welcomeText: {
+    display: 'block',
+    fontSize: '0.9rem',
+    color: '#64748b',
+    marginBottom: '0.5rem'
+  },
+  mobileUserButton: {
+    display: 'inline-block',
+    padding: '0.5rem 1rem',
+    backgroundColor: '#1e40af',
+    color: 'white',
+    textDecoration: 'none',
+    borderRadius: '6px',
+    fontSize: '0.85rem',
+    fontWeight: '600'
+  },
+  mobileActions: {
+    display: 'flex',
+    gap: '0.5rem',
+    marginBottom: '1rem'
+  },
+  mobileApplyButton: {
+    flex: 1,
+    textAlign: 'center',
+    padding: '0.75rem',
+    backgroundColor: '#059669',
+    color: 'white',
+    textDecoration: 'none',
+    borderRadius: '8px',
+    fontSize: '0.9rem',
+    fontWeight: '600'
+  },
+  mobileLoginButton: {
+    flex: 1,
+    textAlign: 'center',
+    padding: '0.75rem',
+    backgroundColor: '#1e40af',
+    color: 'white',
+    textDecoration: 'none',
+    borderRadius: '8px',
+    fontSize: '0.9rem',
+    fontWeight: '600'
+  },
+  mobileMenuItem: {
+    borderBottom: '1px solid #e5e7eb'
+  },
+  mobileMenuHeader: {
+    width: '100%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: '1rem 0',
+    backgroundColor: 'transparent',
+    border: 'none',
+    cursor: 'pointer',
+    fontSize: '1rem',
+    fontWeight: '500',
+    color: '#374151'
+  },
+  mobileDropdown: {
+    paddingBottom: '1rem'
+  },
+  mobileCategorySection: {
+    marginBottom: '1rem'
+  },
+  mobileCategoryTitle: {
+    fontSize: '0.8rem',
+    fontWeight: 'bold',
+    color: '#1e40af',
+    marginBottom: '0.5rem',
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px'
+  },
+  mobileDropdownItem: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.75rem',
+    padding: '0.75rem 1rem',
+    textDecoration: 'none',
+    color: '#374151',
+    backgroundColor: '#f8fafc',
+    borderRadius: '6px',
+    marginBottom: '0.25rem',
+    transition: 'all 0.2s'
+  }
 };
 
-// Add media queries for responsive design
+// Media Queries
 if (typeof window !== 'undefined') {
-  const mediaQuery = window.matchMedia('(max-width: 768px)');
+  const mediaQuery = window.matchMedia('(max-width: 1024px)');
   
   if (mediaQuery.matches) {
     styles.desktopMenu.display = 'none';
-    styles.actionButtons.display = 'none';
-    styles.hamburgerBtn.display = 'flex';
-    styles.topLinks.display = 'none';
-    styles.dropdownContent.minWidth = '300px';
-    styles.dropdownContent.gridTemplateColumns = '1fr';
+    styles.mobileMenuButton.display = 'flex';
+    styles.topBarContent.flexDirection = 'column';
+    styles.topBarContent.gap = '0.5rem';
   }
 }

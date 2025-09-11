@@ -10,7 +10,7 @@ import FeaturesSection from '../components/FeaturesSection';
 import LoanApprovalSection from '../components/LoanApprovalSection';
 import TestimonialsSection from '../components/TestimonialsSection';
 import CTA from '../components/CTA';
-import Footer from '../components/Footer';
+
 
 export default function Home() {
   const [user, setUser] = useState(null);
@@ -117,6 +117,18 @@ export default function Home() {
       title: 'Mobile Banking Excellence',
       subtitle: 'Bank anywhere with our award-winning mobile app',
       icon: '📱'
+    },
+    {
+      src: '/images/atm_machine_people.png',
+      title: 'ATM Network Access',
+      subtitle: 'Access your money 24/7 at thousands of locations nationwide',
+      icon: '🏧'
+    },
+    {
+      src: '/images/mobile_banking_app.png',
+      title: 'Oakline Mobile App',
+      subtitle: 'Complete banking control right in your pocket',
+      icon: '📲'
     }
   ];
 
@@ -461,7 +473,56 @@ export default function Home() {
         <FeaturesSection />
         <TestimonialsSection />
         
-        {/* Enhanced CTA with Animation */}
+        {/* Account Types Discovery Section */}
+      <section style={styles.accountTypesDiscovery} id="account-types-discovery" data-animate>
+        <div style={styles.container}>
+          <div style={{
+            ...styles.sectionHeader,
+            ...(isVisible['account-types-discovery'] ? styles.fadeInUp : {})
+          }}>
+            <h2 style={styles.sectionTitle}>Explore All Our Account Types</h2>
+            <p style={styles.sectionSubtitle}>
+              Discover detailed information about all 23 account types we offer. 
+              Find comprehensive features, benefits, and eligibility requirements for each account.
+            </p>
+          </div>
+          
+          <div style={styles.accountTypesPreview}>
+            <div style={styles.previewCard}>
+              <span style={styles.previewIcon}>💳</span>
+              <h3 style={styles.previewTitle}>Personal Banking</h3>
+              <p style={styles.previewDesc}>Checking, Savings, Student, Senior accounts and more</p>
+            </div>
+            <div style={styles.previewCard}>
+              <span style={styles.previewIcon}>🏢</span>
+              <h3 style={styles.previewTitle}>Business Banking</h3>
+              <p style={styles.previewDesc}>Small Business, Corporate, and Professional accounts</p>
+            </div>
+            <div style={styles.previewCard}>
+              <span style={styles.previewIcon}>📈</span>
+              <h3 style={styles.previewTitle}>Investment Accounts</h3>
+              <p style={styles.previewDesc}>Retirement, Investment, and Wealth Management options</p>
+            </div>
+            <div style={styles.previewCard}>
+              <span style={styles.previewIcon}>🎯</span>
+              <h3 style={styles.previewTitle}>Specialized Accounts</h3>
+              <p style={styles.previewDesc}>HSA, Education, Trust, and International accounts</p>
+            </div>
+          </div>
+          
+          <div style={styles.accountTypesAction}>
+            <Link href="/account-types" style={styles.exploreButton}>
+              <span style={styles.buttonIcon}>🔍</span>
+              Explore All 23 Account Types
+            </Link>
+            <p style={styles.actionNote}>
+              Get detailed comparisons, features, and eligibility requirements
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Enhanced CTA with Animation */}
         <div id="final-cta" data-animate style={{
           ...(isVisible['final-cta'] ? styles.pulse : {})
         }}>
@@ -475,7 +536,7 @@ export default function Home() {
         </div>
       </main>
       
-      <Footer />
+      
     </div>
   );
 }
@@ -1062,5 +1123,66 @@ const styles = {
   },
   pulse: {
     animation: 'pulse 2s infinite'
+  },
+
+  // Account Types Discovery Section
+  accountTypesDiscovery: {
+    padding: 'clamp(2.5rem, 5vw, 4rem) 0',
+    background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
+    width: '100%'
+  },
+  accountTypesPreview: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 250px), 1fr))',
+    gap: '1.5rem',
+    marginBottom: '2rem'
+  },
+  previewCard: {
+    backgroundColor: 'white',
+    padding: '2rem',
+    borderRadius: '16px',
+    textAlign: 'center',
+    boxShadow: '0 8px 20px rgba(0,0,0,0.06)',
+    border: '2px solid #e2e8f0',
+    transition: 'all 0.3s ease'
+  },
+  previewIcon: {
+    fontSize: '2.5rem',
+    display: 'block',
+    marginBottom: '1rem'
+  },
+  previewTitle: {
+    fontSize: '1.2rem',
+    fontWeight: '700',
+    color: '#1e293b',
+    marginBottom: '0.75rem'
+  },
+  previewDesc: {
+    fontSize: '0.9rem',
+    color: '#64748b',
+    lineHeight: '1.5'
+  },
+  accountTypesAction: {
+    textAlign: 'center'
+  },
+  exploreButton: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.75rem',
+    padding: 'clamp(0.8rem, 2vw, 1.2rem) clamp(1.5rem, 3vw, 2.5rem)',
+    background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+    color: 'white',
+    textDecoration: 'none',
+    borderRadius: '12px',
+    fontSize: 'clamp(0.9rem, 2vw, 1.1rem)',
+    fontWeight: '700',
+    boxShadow: '0 8px 20px rgba(59, 130, 246, 0.3)',
+    transition: 'all 0.3s ease',
+    marginBottom: '1rem'
+  },
+  actionNote: {
+    fontSize: '0.9rem',
+    color: '#64748b',
+    fontStyle: 'italic'
   }
 };

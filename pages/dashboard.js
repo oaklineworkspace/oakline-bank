@@ -435,12 +435,7 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    minHeight: '80px',
-    '@media (max-width: 768px)': {
-      flexDirection: 'column',
-      padding: '1rem',
-      minHeight: 'auto'
-    }
+    minHeight: '80px'
   },
   headerLeft: {
     display: 'flex',
@@ -591,6 +586,41 @@ const styles = {
   },
   actionIcon: {
     fontSize: '0.9rem'
+  },
+
+  // Mobile Styles
+  '@media (max-width: 768px)': {
+    headerContainer: {
+      flexDirection: 'column',
+      padding: '1rem',
+      minHeight: 'auto',
+      gap: '1rem'
+    },
+    mainNav: {
+      width: '100%',
+      justifyContent: 'center',
+      flexWrap: 'wrap'
+    },
+    userSection: {
+      flexDirection: 'column',
+      gap: '0.5rem',
+      width: '100%'
+    },
+    userInfo: {
+      alignItems: 'center'
+    },
+    main: {
+      padding: '1rem'
+    },
+    summaryCards: {
+      gridTemplateColumns: '1fr'
+    },
+    quickActions: {
+      gridTemplateColumns: 'repeat(2, 1fr)'
+    },
+    accountsSection: {
+      padding: '1rem'
+    }
   },
   main: {
     maxWidth: '1400px',
