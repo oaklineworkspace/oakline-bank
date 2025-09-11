@@ -9,6 +9,7 @@ export default function AccountDetails() {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
+  const [error, setError] = useState('');
   const router = useRouter();
   const { id } = router.query;
 
@@ -29,6 +30,7 @@ export default function AccountDetails() {
       await fetchAccountDetails(user, id);
     } catch (error) {
       console.error('Error checking user:', error);
+      setError('Authentication error. Please try logging in again.');
       router.push('/login');
     } finally {
       setLoading(false);
@@ -37,52 +39,70 @@ export default function AccountDetails() {
 
   const fetchAccountDetails = async (user, accountId) => {
     try {
-      // Fetch account details
-      const { data: accountData, error: accountError } = await supabase
-        .from('accounts')
-        .select('*')
-        .eq('id', accountId)
-        .eq('user_id', user.id)
-        .single();
+      // Fetch account details with multiple query attempts
+      let accountData = null;
+      let error = null;
 
-      if (accountError && accountError.code !== 'PGRST116') {
-        console.error('Error fetching account:', accountError);
-        return;
-      }
-
-      if (!accountData) {
-        // Try fetching by email if user_id doesn't work
-        const { data: emailAccountData, error: emailError } = await supabase
+      // Try different query methods to find the account
+      const queries = [
+        // Query by account ID and user ID
+        () => supabase
+          .from('accounts')
+          .select('*')
+          .eq('id', accountId)
+          .eq('user_id', user.id)
+          .single(),
+        
+        // Query by account ID and user email
+        () => supabase
           .from('accounts')
           .select('*')
           .eq('id', accountId)
           .eq('user_email', user.email)
-          .single();
+          .single(),
+          
+        // Query by account ID with OR condition
+        () => supabase
+          .from('accounts')
+          .select('*')
+          .eq('id', accountId)
+          .or(`user_id.eq.${user.id},user_email.eq.${user.email},email.eq.${user.email}`)
+          .single()
+      ];
 
-        if (emailError && emailError.code !== 'PGRST116') {
-          console.error('Error fetching account by email:', emailError);
-          return;
+      for (const query of queries) {
+        const result = await query();
+        if (result.data && !result.error) {
+          accountData = result.data;
+          break;
         }
-
-        setAccount(emailAccountData);
-      } else {
-        setAccount(accountData);
+        error = result.error;
       }
+
+      if (!accountData) {
+        setError('Account not found or you do not have permission to view this account.');
+        return;
+      }
+
+      setAccount(accountData);
 
       // Fetch transactions for this account
       const { data: transactionsData, error: transactionsError } = await supabase
         .from('transactions')
         .select('*')
         .eq('account_id', accountId)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(20);
 
       if (transactionsError) {
         console.error('Error fetching transactions:', transactionsError);
       } else {
         setTransactions(transactionsData || []);
       }
+
     } catch (error) {
       console.error('Error fetching account details:', error);
+      setError('Error loading account details. Please try again.');
     }
   };
 
@@ -103,10 +123,45 @@ export default function AccountDetails() {
     });
   };
 
+  const getTransactionIcon = (type) => {
+    switch (type?.toLowerCase()) {
+      case 'deposit': return '📥';
+      case 'withdrawal': return '📤';
+      case 'transfer_in': return '💸';
+      case 'transfer_out': return '💰';
+      case 'bill_payment': return '🧾';
+      case 'fee': return '💳';
+      default: return '💼';
+    }
+  };
+
   if (loading) {
     return (
       <div style={styles.container}>
-        <div style={styles.loading}>Loading account details...</div>
+        <div style={styles.loading}>
+          <div style={styles.spinner}></div>
+          <p>Loading account details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div style={styles.container}>
+        <div style={styles.header}>
+          <Link href="/" style={styles.logoContainer}>
+            <img src="/images/logo-primary.png.jpg" alt="Oakline Bank" style={styles.logo} />
+            <span style={styles.logoText}>Oakline Bank</span>
+          </Link>
+          <div style={styles.routingInfo}>Routing Number: 075915826</div>
+        </div>
+        <div style={styles.errorState}>
+          <h2 style={styles.errorTitle}>⚠️ {error}</h2>
+          <Link href="/dashboard" style={styles.backButton}>
+            Back to Dashboard
+          </Link>
+        </div>
       </div>
     );
   }
@@ -114,9 +169,16 @@ export default function AccountDetails() {
   if (!account) {
     return (
       <div style={styles.container}>
-        <div style={styles.error}>
-          <h2>Account Not Found</h2>
-          <p>The requested account could not be found.</p>
+        <div style={styles.header}>
+          <Link href="/" style={styles.logoContainer}>
+            <img src="/images/logo-primary.png.jpg" alt="Oakline Bank" style={styles.logo} />
+            <span style={styles.logoText}>Oakline Bank</span>
+          </Link>
+          <div style={styles.routingInfo}>Routing Number: 075915826</div>
+        </div>
+        <div style={styles.errorState}>
+          <h2 style={styles.errorTitle}>Account Not Found</h2>
+          <p style={styles.errorDesc}>The requested account could not be found.</p>
           <Link href="/dashboard" style={styles.backButton}>
             Back to Dashboard
           </Link>
@@ -128,19 +190,18 @@ export default function AccountDetails() {
   return (
     <div style={styles.container}>
       {/* Header */}
-      <header style={styles.header}>
-        <div style={styles.headerContent}>
-          <Link href="/" style={styles.logo}>
-            <img src="/images/logo-primary.png.jpg" alt="Oakline Bank" style={styles.logoImg} />
-            <span style={styles.logoText}>Oakline Bank</span>
+      <div style={styles.header}>
+        <Link href="/" style={styles.logoContainer}>
+          <img src="/images/logo-primary.png.jpg" alt="Oakline Bank" style={styles.logo} />
+          <span style={styles.logoText}>Oakline Bank</span>
+        </Link>
+        <div style={styles.headerInfo}>
+          <div style={styles.routingInfo}>Routing Number: 075915826</div>
+          <Link href="/dashboard" style={styles.backButton}>
+            ← Back to Dashboard
           </Link>
-          <div style={styles.headerActions}>
-            <Link href="/dashboard" style={styles.backButton}>
-              ← Back to Dashboard
-            </Link>
-          </div>
         </div>
-      </header>
+      </div>
 
       <main style={styles.main}>
         {/* Account Overview */}
@@ -165,12 +226,19 @@ export default function AccountDetails() {
               <div style={styles.balanceAmount}>
                 {formatCurrency(account.balance || 0)}
               </div>
+              <div style={styles.balanceNote}>
+                Available Balance
+              </div>
             </div>
 
             <div style={styles.accountDetails}>
               <div style={styles.detailItem}>
                 <span style={styles.detailLabel}>Account Number:</span>
-                <span style={styles.detailValue}>{account.account_number}</span>
+                <span style={styles.detailValue}>****{account.account_number?.slice(-4) || 'N/A'}</span>
+              </div>
+              <div style={styles.detailItem}>
+                <span style={styles.detailLabel}>Full Account Number:</span>
+                <span style={styles.detailValue}>{account.account_number || 'N/A'}</span>
               </div>
               <div style={styles.detailItem}>
                 <span style={styles.detailLabel}>Routing Number:</span>
@@ -200,7 +268,7 @@ export default function AccountDetails() {
               <span style={styles.actionIcon}>💸</span>
               <span>Transfer Money</span>
             </Link>
-            <Link href="/deposit-real" style={styles.actionButton}>
+            <Link href="/deposit" style={styles.actionButton}>
               <span style={styles.actionIcon}>📥</span>
               <span>Make Deposit</span>
             </Link>
@@ -208,9 +276,9 @@ export default function AccountDetails() {
               <span style={styles.actionIcon}>📤</span>
               <span>Withdraw Funds</span>
             </Link>
-            <Link href="/statements" style={styles.actionButton}>
-              <span style={styles.actionIcon}>📄</span>
-              <span>Download Statement</span>
+            <Link href="/bill-pay" style={styles.actionButton}>
+              <span style={styles.actionIcon}>🧾</span>
+              <span>Pay Bills</span>
             </Link>
           </div>
         </div>
@@ -222,12 +290,20 @@ export default function AccountDetails() {
             <div style={styles.transactionsList}>
               {transactions.map(transaction => (
                 <div key={transaction.id} style={styles.transactionItem}>
-                  <div style={styles.transactionInfo}>
-                    <div style={styles.transactionDesc}>
-                      {transaction.description || transaction.transaction_type || 'Transaction'}
-                    </div>
-                    <div style={styles.transactionDate}>
-                      {formatDate(transaction.created_at)}
+                  <div style={styles.transactionLeft}>
+                    <span style={styles.transactionIcon}>
+                      {getTransactionIcon(transaction.transaction_type)}
+                    </span>
+                    <div style={styles.transactionInfo}>
+                      <div style={styles.transactionDesc}>
+                        {transaction.description || transaction.transaction_type || 'Transaction'}
+                      </div>
+                      <div style={styles.transactionDate}>
+                        {formatDate(transaction.created_at)}
+                      </div>
+                      <div style={styles.transactionStatus}>
+                        Status: {transaction.status || 'Completed'}
+                      </div>
                     </div>
                   </div>
                   <div style={{
@@ -241,7 +317,9 @@ export default function AccountDetails() {
             </div>
           ) : (
             <div style={styles.noTransactions}>
-              <p>No transactions found for this account.</p>
+              <div style={styles.noTransactionsIcon}>📊</div>
+              <h3>No transactions found</h3>
+              <p>This account has no transaction history yet.</p>
             </div>
           )}
         </div>
@@ -258,43 +336,57 @@ const styles = {
   },
   loading: {
     display: 'flex',
+    flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
     height: '50vh',
     fontSize: '1.2rem',
     color: '#64748b'
   },
-  error: {
+  spinner: {
+    width: '40px',
+    height: '40px',
+    border: '4px solid #e2e8f0',
+    borderTop: '4px solid #1e40af',
+    borderRadius: '50%',
+    animation: 'spin 1s linear infinite',
+    marginBottom: '1rem'
+  },
+  errorState: {
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
     height: '50vh',
     textAlign: 'center',
-    color: '#64748b'
+    color: '#64748b',
+    padding: '2rem'
+  },
+  errorTitle: {
+    color: '#ef4444',
+    marginBottom: '1rem'
+  },
+  errorDesc: {
+    marginBottom: '2rem',
+    fontSize: '1.1rem'
   },
   header: {
     backgroundColor: '#1e40af',
     color: 'white',
-    padding: '1rem 0',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-  },
-  headerContent: {
-    maxWidth: '1200px',
-    margin: '0 auto',
-    padding: '0 1rem',
+    padding: '1rem 2rem',
     display: 'flex',
     justifyContent: 'space-between',
-    alignItems: 'center'
+    alignItems: 'center',
+    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
   },
-  logo: {
+  logoContainer: {
     display: 'flex',
     alignItems: 'center',
-    gap: '0.5rem',
+    gap: '0.75rem',
     textDecoration: 'none',
     color: 'white'
   },
-  logoImg: {
+  logo: {
     height: '40px',
     width: 'auto'
   },
@@ -302,9 +394,16 @@ const styles = {
     fontSize: '1.5rem',
     fontWeight: 'bold'
   },
-  headerActions: {
+  headerInfo: {
     display: 'flex',
-    gap: '1rem'
+    alignItems: 'center',
+    gap: '2rem'
+  },
+  routingInfo: {
+    fontSize: '0.9rem',
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    padding: '0.5rem 1rem',
+    borderRadius: '6px'
   },
   backButton: {
     padding: '0.5rem 1rem',
@@ -374,7 +473,12 @@ const styles = {
   balanceAmount: {
     fontSize: '2.5rem',
     fontWeight: 'bold',
-    color: '#1e40af'
+    color: '#1e40af',
+    marginBottom: '0.5rem'
+  },
+  balanceNote: {
+    fontSize: '0.9rem',
+    color: '#64748b'
   },
   accountDetails: {
     display: 'flex',
@@ -446,7 +550,17 @@ const styles = {
     alignItems: 'center',
     padding: '1rem',
     backgroundColor: '#f8fafc',
-    borderRadius: '8px'
+    borderRadius: '8px',
+    border: '1px solid #e2e8f0'
+  },
+  transactionLeft: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '1rem',
+    flex: 1
+  },
+  transactionIcon: {
+    fontSize: '1.5rem'
   },
   transactionInfo: {
     flex: 1
@@ -459,6 +573,11 @@ const styles = {
   },
   transactionDate: {
     fontSize: '0.85rem',
+    color: '#64748b',
+    marginBottom: '0.25rem'
+  },
+  transactionStatus: {
+    fontSize: '0.8rem',
     color: '#64748b'
   },
   transactionAmount: {
@@ -467,7 +586,11 @@ const styles = {
   },
   noTransactions: {
     textAlign: 'center',
-    padding: '2rem',
+    padding: '3rem',
     color: '#64748b'
+  },
+  noTransactionsIcon: {
+    fontSize: '3rem',
+    marginBottom: '1rem'
   }
 };

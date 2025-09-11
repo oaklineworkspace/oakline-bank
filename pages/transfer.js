@@ -1,8 +1,11 @@
-// pages/transfer.js
+
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabaseClient';
+import Link from 'next/link';
 
 export default function Transfer() {
+  const [user, setUser] = useState(null);
   const [accounts, setAccounts] = useState([]);
   const [fromAccount, setFromAccount] = useState('');
   const [toAccountNumber, setToAccountNumber] = useState('');
@@ -21,46 +24,41 @@ export default function Transfer() {
   });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const router = useRouter();
 
   useEffect(() => {
-    fetchAccounts();
+    checkUser();
   }, []);
 
-  const fetchAccounts = async () => {
+  const checkUser = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user) {
+        router.push('/login');
+        return;
+      }
+      setUser(user);
+      await fetchAccounts(user);
+    } catch (error) {
+      console.error('Error checking user:', error);
+      router.push('/login');
+    }
+  };
 
-      // First try to get accounts linked via user_id
-      let { data, error } = await supabase
+  const fetchAccounts = async (user) => {
+    try {
+      const { data: accountsData, error } = await supabase
         .from('accounts')
         .select('*')
-        .eq('user_id', user.id)
+        .or(`user_id.eq.${user.id},user_email.eq.${user.email},email.eq.${user.email}`)
         .order('created_at', { ascending: true });
 
-      // If no accounts found via user_id, try via profile/application relationship
-      if (!data || data.length === 0) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('application_id')
-          .eq('id', user.id)
-          .single();
-
-        if (profile?.application_id) {
-          const { data: accountsData, error: accountsError } = await supabase
-            .from('accounts')
-            .select('*')
-            .eq('application_id', profile.application_id)
-            .order('created_at', { ascending: true });
-
-          data = accountsData;
-          error = accountsError;
-        }
-      }
-
       if (error) throw error;
-      setAccounts(data || []);
-      if (data?.length > 0) setFromAccount(data[0].id);
+      
+      if (accountsData && accountsData.length > 0) {
+        setAccounts(accountsData);
+        setFromAccount(accountsData[0].id.toString());
+      }
     } catch (error) {
       console.error('Error fetching accounts:', error);
       setMessage('Unable to load accounts. Please try again.');
@@ -72,7 +70,7 @@ export default function Transfer() {
   };
 
   const validateForm = () => {
-    const selectedAccountData = accounts.find(acc => acc.id === fromAccount);
+    const selectedAccountData = accounts.find(acc => acc.id.toString() === fromAccount);
     const transferAmount = parseFloat(amount);
 
     if (!fromAccount || !toAccountNumber || !amount || transferAmount <= 0) {
@@ -80,8 +78,8 @@ export default function Transfer() {
       return false;
     }
 
-    if (transferAmount > parseFloat(selectedAccountData.balance)) {
-      setMessage('Insufficient funds. Your current balance is $' + parseFloat(selectedAccountData.balance).toFixed(2));
+    if (transferAmount > parseFloat(selectedAccountData?.balance || 0)) {
+      setMessage('Insufficient funds. Your current balance is $' + parseFloat(selectedAccountData?.balance || 0).toFixed(2));
       return false;
     }
 
@@ -90,7 +88,6 @@ export default function Transfer() {
       return false;
     }
 
-    // Validate transfer type specific fields
     switch (transferType) {
       case 'domestic_external':
         if (!transferDetails.recipient_name || !transferDetails.routing_number || !transferDetails.bank_name) {
@@ -133,63 +130,31 @@ export default function Transfer() {
     setMessage('');
 
     try {
-      const selectedAccountData = accounts.find(acc => acc.id === fromAccount);
+      const selectedAccountData = accounts.find(acc => acc.id.toString() === fromAccount);
       const transferAmount = parseFloat(amount);
       const fee = calculateFee();
       const totalDeduction = transferAmount + fee;
 
-      if (totalDeduction > parseFloat(selectedAccountData.balance)) {
+      if (totalDeduction > parseFloat(selectedAccountData?.balance || 0)) {
         setMessage(`Insufficient funds including fees. Total needed: $${totalDeduction.toFixed(2)}`);
         setLoading(false);
         return;
-      }
-
-      // For internal transfers, check if recipient account exists
-      if (transferType === 'internal') {
-        const { data: recipientAccount } = await supabase
-          .from('accounts')
-          .select('id, account_number, user_id')
-          .eq('account_number', toAccountNumber)
-          .single();
-
-        if (!recipientAccount) {
-          setMessage('Recipient account not found. Please verify the account number.');
-          setLoading(false);
-          return;
-        }
-
-        // Update recipient account balance
-        const { data: recipientAccountData } = await supabase
-          .from('accounts')
-          .select('balance')
-          .eq('id', recipientAccount.id)
-          .single();
-
-        const newRecipientBalance = parseFloat(recipientAccountData.balance) + transferAmount;
-        await supabase
-          .from('accounts')
-          .update({ balance: newRecipientBalance, updated_at: new Date().toISOString() })
-          .eq('id', recipientAccount.id);
-
-        // Create recipient transaction record
-        await supabase.from('transactions').insert([{
-          account_id: recipientAccount.id,
-          type: 'transfer_in',
-          amount: transferAmount,
-          status: 'completed',
-          reference: `Internal transfer from ${selectedAccountData.account_number} - ${transferDetails.memo || 'Transfer'}`
-        }]);
       }
 
       // Create sender transaction record
       const { error: transactionError } = await supabase
         .from('transactions')
         .insert([{
+          user_id: user.id,
+          user_email: user.email,
           account_id: fromAccount,
-          type: 'transfer_out',
+          account_type: selectedAccountData?.account_type || 'checking',
           amount: -transferAmount,
+          transaction_type: 'transfer_out',
+          description: `${transferType.toUpperCase()} transfer to ${toAccountNumber} - ${transferDetails.recipient_name} - ${transferDetails.memo || 'Transfer'}`,
           status: transferType === 'internal' ? 'completed' : 'pending',
-          reference: `${transferType.toUpperCase()} transfer to ${toAccountNumber} - ${transferDetails.recipient_name} - ${transferDetails.memo || 'Transfer'}`
+          category: 'transfer',
+          created_at: new Date().toISOString()
         }]);
 
       if (transactionError) throw transactionError;
@@ -197,31 +162,18 @@ export default function Transfer() {
       // Create fee transaction if applicable
       if (fee > 0) {
         await supabase.from('transactions').insert([{
+          user_id: user.id,
+          user_email: user.email,
           account_id: fromAccount,
-          type: 'fee',
+          account_type: selectedAccountData?.account_type || 'checking',
           amount: -fee,
+          transaction_type: 'fee',
+          description: `${transferType.toUpperCase()} transfer fee`,
           status: 'completed',
-          reference: `${transferType.toUpperCase()} transfer fee`
+          category: 'fee',
+          created_at: new Date().toISOString()
         }]);
       }
-
-      // Update sender account balance
-      const newBalance = parseFloat(selectedAccountData.balance) - totalDeduction;
-      const { error: updateError } = await supabase
-        .from('accounts')
-        .update({ balance: newBalance, updated_at: new Date().toISOString() })
-        .eq('id', fromAccount);
-
-      if (updateError) throw updateError;
-
-      // Create notification
-      const { data: { user } } = await supabase.auth.getUser();
-      await supabase.from('notifications').insert([{
-        user_id: user.id,
-        type: 'transfer',
-        title: 'Transfer Processed',
-        message: `$${transferAmount.toFixed(2)} transferred from account ${selectedAccountData.account_number} to ${toAccountNumber}${fee > 0 ? ` (Fee: $${fee.toFixed(2)})` : ''}`
-      }]);
 
       setMessage(`✅ Transfer of $${transferAmount.toFixed(2)} has been processed successfully!${fee > 0 ? ` Fee: $${fee.toFixed(2)}` : ''}`);
       setAmount('');
@@ -232,7 +184,11 @@ export default function Transfer() {
       });
       
       // Refresh accounts to show updated balance
-      fetchAccounts();
+      fetchAccounts(user);
+
+      setTimeout(() => {
+        router.push('/dashboard');
+      }, 3000);
 
     } catch (error) {
       console.error('Transfer error:', error);
@@ -242,32 +198,11 @@ export default function Transfer() {
     }
   };
 
-  const inputStyle = {
-    width: '100%',
-    padding: '12px',
-    border: '2px solid #e1e5e9',
-    borderRadius: '8px',
-    fontSize: '14px',
-    marginBottom: '15px',
-    boxSizing: 'border-box'
-  };
-
-  const selectStyle = {
-    ...inputStyle,
-    backgroundColor: 'white'
-  };
-
-  const buttonStyle = {
-    width: '100%',
-    padding: '15px',
-    backgroundColor: '#007bff',
-    color: 'white',
-    border: 'none',
-    borderRadius: '8px',
-    fontSize: '16px',
-    fontWeight: 'bold',
-    cursor: loading ? 'not-allowed' : 'pointer',
-    opacity: loading ? 0.6 : 1
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(amount || 0);
   };
 
   const renderTransferTypeFields = () => {
@@ -275,150 +210,150 @@ export default function Transfer() {
       case 'internal':
         return (
           <>
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
-              Recipient Name:
-            </label>
-            <input
-              type="text"
-              style={inputStyle}
-              value={transferDetails.recipient_name}
-              onChange={(e) => handleTransferDetailsChange('recipient_name', e.target.value)}
-              placeholder="Name for reference"
-              required
-            />
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Recipient Name *</label>
+              <input
+                type="text"
+                style={styles.input}
+                value={transferDetails.recipient_name}
+                onChange={(e) => handleTransferDetailsChange('recipient_name', e.target.value)}
+                placeholder="Name for reference"
+                required
+              />
+            </div>
             
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
-              Memo (Optional):
-            </label>
-            <input
-              type="text"
-              style={inputStyle}
-              value={transferDetails.memo}
-              onChange={(e) => handleTransferDetailsChange('memo', e.target.value)}
-              placeholder="What's this transfer for?"
-            />
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Memo (Optional)</label>
+              <input
+                type="text"
+                style={styles.input}
+                value={transferDetails.memo}
+                onChange={(e) => handleTransferDetailsChange('memo', e.target.value)}
+                placeholder="What's this transfer for?"
+              />
+            </div>
           </>
         );
 
       case 'domestic_external':
         return (
           <>
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
-              Recipient Name:
-            </label>
-            <input
-              type="text"
-              style={inputStyle}
-              value={transferDetails.recipient_name}
-              onChange={(e) => handleTransferDetailsChange('recipient_name', e.target.value)}
-              placeholder="Full name on account"
-              required
-            />
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Recipient Name *</label>
+              <input
+                type="text"
+                style={styles.input}
+                value={transferDetails.recipient_name}
+                onChange={(e) => handleTransferDetailsChange('recipient_name', e.target.value)}
+                placeholder="Full name on account"
+                required
+              />
+            </div>
             
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
-              Bank Name:
-            </label>
-            <input
-              type="text"
-              style={inputStyle}
-              value={transferDetails.bank_name}
-              onChange={(e) => handleTransferDetailsChange('bank_name', e.target.value)}
-              placeholder="Recipient's bank name"
-              required
-            />
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Bank Name *</label>
+              <input
+                type="text"
+                style={styles.input}
+                value={transferDetails.bank_name}
+                onChange={(e) => handleTransferDetailsChange('bank_name', e.target.value)}
+                placeholder="Recipient's bank name"
+                required
+              />
+            </div>
             
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
-              Routing Number:
-            </label>
-            <input
-              type="text"
-              style={inputStyle}
-              value={transferDetails.routing_number}
-              onChange={(e) => handleTransferDetailsChange('routing_number', e.target.value)}
-              placeholder="123456789"
-              maxLength="9"
-              required
-            />
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Routing Number *</label>
+              <input
+                type="text"
+                style={styles.input}
+                value={transferDetails.routing_number}
+                onChange={(e) => handleTransferDetailsChange('routing_number', e.target.value)}
+                placeholder="123456789"
+                maxLength="9"
+                required
+              />
+            </div>
             
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
-              Memo (Optional):
-            </label>
-            <input
-              type="text"
-              style={inputStyle}
-              value={transferDetails.memo}
-              onChange={(e) => handleTransferDetailsChange('memo', e.target.value)}
-              placeholder="Purpose of transfer"
-            />
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Memo (Optional)</label>
+              <input
+                type="text"
+                style={styles.input}
+                value={transferDetails.memo}
+                onChange={(e) => handleTransferDetailsChange('memo', e.target.value)}
+                placeholder="Purpose of transfer"
+              />
+            </div>
           </>
         );
 
       case 'international':
         return (
           <>
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
-              Recipient Name:
-            </label>
-            <input
-              type="text"
-              style={inputStyle}
-              value={transferDetails.recipient_name}
-              onChange={(e) => handleTransferDetailsChange('recipient_name', e.target.value)}
-              placeholder="Full name on account"
-              required
-            />
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Recipient Name *</label>
+              <input
+                type="text"
+                style={styles.input}
+                value={transferDetails.recipient_name}
+                onChange={(e) => handleTransferDetailsChange('recipient_name', e.target.value)}
+                placeholder="Full name on account"
+                required
+              />
+            </div>
             
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
-              Country:
-            </label>
-            <input
-              type="text"
-              style={inputStyle}
-              value={transferDetails.country}
-              onChange={(e) => handleTransferDetailsChange('country', e.target.value)}
-              placeholder="Destination country"
-              required
-            />
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Country *</label>
+              <input
+                type="text"
+                style={styles.input}
+                value={transferDetails.country}
+                onChange={(e) => handleTransferDetailsChange('country', e.target.value)}
+                placeholder="Destination country"
+                required
+              />
+            </div>
             
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
-              SWIFT Code:
-            </label>
-            <input
-              type="text"
-              style={inputStyle}
-              value={transferDetails.swift_code}
-              onChange={(e) => handleTransferDetailsChange('swift_code', e.target.value)}
-              placeholder="ABCDUS33XXX"
-              required
-            />
+            <div style={styles.formGroup}>
+              <label style={styles.label}>SWIFT Code *</label>
+              <input
+                type="text"
+                style={styles.input}
+                value={transferDetails.swift_code}
+                onChange={(e) => handleTransferDetailsChange('swift_code', e.target.value)}
+                placeholder="ABCDUS33XXX"
+                required
+              />
+            </div>
             
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
-              Purpose of Transfer:
-            </label>
-            <select
-              style={selectStyle}
-              value={transferDetails.purpose}
-              onChange={(e) => handleTransferDetailsChange('purpose', e.target.value)}
-              required
-            >
-              <option value="">Select purpose</option>
-              <option value="family_support">Family Support</option>
-              <option value="education">Education</option>
-              <option value="business">Business</option>
-              <option value="investment">Investment</option>
-              <option value="personal">Personal</option>
-              <option value="other">Other</option>
-            </select>
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Purpose of Transfer *</label>
+              <select
+                style={styles.select}
+                value={transferDetails.purpose}
+                onChange={(e) => handleTransferDetailsChange('purpose', e.target.value)}
+                required
+              >
+                <option value="">Select purpose</option>
+                <option value="family_support">Family Support</option>
+                <option value="education">Education</option>
+                <option value="business">Business</option>
+                <option value="investment">Investment</option>
+                <option value="personal">Personal</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
             
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
-              Recipient Address:
-            </label>
-            <textarea
-              style={{...inputStyle, minHeight: '80px', resize: 'vertical'}}
-              value={transferDetails.recipient_address}
-              onChange={(e) => handleTransferDetailsChange('recipient_address', e.target.value)}
-              placeholder="Complete address of recipient"
-            />
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Recipient Address</label>
+              <textarea
+                style={{...styles.input, minHeight: '80px', resize: 'vertical'}}
+                value={transferDetails.recipient_address}
+                onChange={(e) => handleTransferDetailsChange('recipient_address', e.target.value)}
+                placeholder="Complete address of recipient"
+              />
+            </div>
           </>
         );
 
@@ -427,160 +362,348 @@ export default function Transfer() {
     }
   };
 
-  if (accounts.length === 0) {
+  if (accounts.length === 0 && !loading) {
     return (
-      <div style={{
-        maxWidth: '600px',
-        margin: '40px auto',
-        padding: '40px',
-        textAlign: 'center',
-        backgroundColor: '#f8f9fa',
-        borderRadius: '12px'
-      }}>
-        <h1 style={{ color: '#007bff' }}>No Accounts Found</h1>
-        <p>You need to have at least one account to make transfers. Please contact support or apply for an account first.</p>
+      <div style={styles.container}>
+        <div style={styles.header}>
+          <Link href="/" style={styles.logoContainer}>
+            <img src="/images/logo-primary.png.jpg" alt="Oakline Bank" style={styles.logo} />
+            <span style={styles.logoText}>Oakline Bank</span>
+          </Link>
+          <div style={styles.routingInfo}>Routing Number: 075915826</div>
+        </div>
+        <div style={styles.emptyState}>
+          <h1 style={styles.emptyTitle}>No Accounts Found</h1>
+          <p style={styles.emptyDesc}>You need to have at least one account to make transfers. Please contact support or apply for an account first.</p>
+          <Link href="/apply" style={styles.emptyButton}>Apply for Account</Link>
+        </div>
       </div>
     );
   }
 
-  const selectedAccountData = accounts.find(acc => acc.id === fromAccount);
+  const selectedAccountData = accounts.find(acc => acc.id.toString() === fromAccount);
   const fee = calculateFee();
   const totalAmount = (parseFloat(amount) || 0) + fee;
 
   return (
-    <div style={{
-      maxWidth: '600px',
-      margin: '40px auto',
-      padding: '40px',
-      backgroundColor: '#f8f9fa',
-      borderRadius: '12px',
-      fontFamily: 'Arial, sans-serif'
-    }}>
-      <h1 style={{ color: '#007bff', textAlign: 'center', marginBottom: '30px' }}>
-        💸 Transfer Funds
-      </h1>
-
-      {message && (
-        <div style={{
-          padding: '15px',
-          marginBottom: '20px',
-          borderRadius: '8px',
-          backgroundColor: message.includes('✅') ? '#e8f5e8' : '#ffebee',
-          border: `1px solid ${message.includes('✅') ? '#4caf50' : '#f44336'}`,
-          color: message.includes('✅') ? '#2e7d32' : '#c62828'
-        }}>
-          {message}
+    <div style={styles.container}>
+      {/* Header */}
+      <div style={styles.header}>
+        <Link href="/" style={styles.logoContainer}>
+          <img src="/images/logo-primary.png.jpg" alt="Oakline Bank" style={styles.logo} />
+          <span style={styles.logoText}>Oakline Bank</span>
+        </Link>
+        <div style={styles.headerInfo}>
+          <div style={styles.routingInfo}>Routing Number: 075915826</div>
+          <Link href="/dashboard" style={styles.backButton}>← Back to Dashboard</Link>
         </div>
-      )}
+      </div>
 
-      <form onSubmit={handleSubmit}>
-        <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
-          Transfer From Account:
-        </label>
-        <select
-          style={selectStyle}
-          value={fromAccount}
-          onChange={(e) => setFromAccount(e.target.value)}
-          required
-        >
-          <option value="">Choose account to transfer from</option>
-          {accounts.map(account => (
-            <option key={account.id} value={account.id}>
-              {account.account_name || account.account_type?.replace('_', ' ')?.toUpperCase()} - ****{account.account_number?.slice(-4)} - Balance: ${parseFloat(account.balance || 0).toFixed(2)}
-            </option>
-          ))}
-        </select>
-
-        <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
-          Transfer Type:
-        </label>
-        <select
-          style={selectStyle}
-          value={transferType}
-          onChange={(e) => setTransferType(e.target.value)}
-          required
-        >
-          <option value="internal">🏦 Internal Transfer (Free - Same Bank)</option>
-          <option value="domestic_external">🇺🇸 Domestic External ($2-5 fee)</option>
-          <option value="international">🌍 International Transfer ($30 fee)</option>
-        </select>
-
-        <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
-          To Account Number:
-        </label>
-        <input
-          type="text"
-          style={inputStyle}
-          value={toAccountNumber}
-          onChange={(e) => setToAccountNumber(e.target.value)}
-          placeholder={transferType === 'internal' ? 'Oakline Bank account number' : 'Recipient account number'}
-          required
-        />
-
-        <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
-          Transfer Amount ($):
-        </label>
-        <input
-          type="number"
-          style={inputStyle}
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          placeholder="Enter amount"
-          step="0.01"
-          min="0.01"
-          max={selectedAccountData ? parseFloat(selectedAccountData.balance) - fee : 25000}
-          required
-        />
-
-        <div style={{ 
-          backgroundColor: 'white', 
-          padding: '20px', 
-          borderRadius: '8px', 
-          marginBottom: '20px',
-          border: '1px solid #e1e5e9' 
-        }}>
-          <h3 style={{ color: '#007bff', marginBottom: '15px' }}>
-            Transfer Details
-          </h3>
-          {renderTransferTypeFields()}
+      <div style={styles.content}>
+        <div style={styles.titleSection}>
+          <h1 style={styles.title}>💸 Transfer Funds</h1>
+          <p style={styles.subtitle}>Send money securely with bank-level encryption</p>
         </div>
 
-        {fee > 0 && (
+        {message && (
           <div style={{
-            backgroundColor: '#fff3cd',
-            border: '1px solid #ffeaa7',
-            borderRadius: '8px',
-            padding: '15px',
-            marginBottom: '20px'
+            ...styles.message,
+            backgroundColor: message.includes('✅') ? '#d4edda' : '#f8d7da',
+            color: message.includes('✅') ? '#155724' : '#721c24',
+            borderColor: message.includes('✅') ? '#c3e6cb' : '#f5c6cb'
           }}>
-            <strong>Fee Notice:</strong> This transfer type incurs a ${fee.toFixed(2)} fee.<br/>
-            <strong>Total Deduction:</strong> ${totalAmount.toFixed(2)}
+            {message}
           </div>
         )}
 
-        <button type="submit" style={buttonStyle} disabled={loading}>
-          {loading ? 'Processing Transfer...' : `Transfer $${(parseFloat(amount) || 0).toFixed(2)}${fee > 0 ? ` (+$${fee.toFixed(2)} fee)` : ''}`}
-        </button>
-      </form>
+        <form onSubmit={handleSubmit} style={styles.form}>
+          <div style={styles.formGroup}>
+            <label style={styles.label}>Transfer From Account *</label>
+            <select
+              style={styles.select}
+              value={fromAccount}
+              onChange={(e) => setFromAccount(e.target.value)}
+              required
+            >
+              <option value="">Choose account to transfer from</option>
+              {accounts.map(account => (
+                <option key={account.id} value={account.id}>
+                  {account.account_name || account.account_type?.replace('_', ' ')?.toUpperCase()} - 
+                  ****{account.account_number?.slice(-4)} - 
+                  Balance: {formatCurrency(account.balance || 0)}
+                </option>
+              ))}
+            </select>
+          </div>
 
-      <div style={{
-        marginTop: '20px',
-        padding: '15px',
-        backgroundColor: 'white',
-        borderRadius: '8px',
-        border: '1px solid #e1e5e9',
-        fontSize: '12px',
-        color: '#666'
-      }}>
-        <strong>Transfer Information:</strong>
-        <ul style={{ margin: '10px 0', paddingLeft: '20px' }}>
-          <li><strong>Internal:</strong> Instant transfers between Oakline Bank accounts</li>
-          <li><strong>Domestic:</strong> 1-3 business days to other US banks</li>
-          <li><strong>International:</strong> 3-5 business days worldwide</li>
-          <li>All transfers are secured with bank-level encryption</li>
-          <li>Daily transfer limit: $25,000 (contact support for higher limits)</li>
-        </ul>
+          <div style={styles.formGroup}>
+            <label style={styles.label}>Transfer Type *</label>
+            <select
+              style={styles.select}
+              value={transferType}
+              onChange={(e) => setTransferType(e.target.value)}
+              required
+            >
+              <option value="internal">🏦 Internal Transfer (Free - Same Bank)</option>
+              <option value="domestic_external">🇺🇸 Domestic External ($2-5 fee)</option>
+              <option value="international">🌍 International Transfer ($30 fee)</option>
+            </select>
+          </div>
+
+          <div style={styles.formGroup}>
+            <label style={styles.label}>To Account Number *</label>
+            <input
+              type="text"
+              style={styles.input}
+              value={toAccountNumber}
+              onChange={(e) => setToAccountNumber(e.target.value)}
+              placeholder={transferType === 'internal' ? 'Oakline Bank account number' : 'Recipient account number'}
+              required
+            />
+          </div>
+
+          <div style={styles.formGroup}>
+            <label style={styles.label}>Transfer Amount ($) *</label>
+            <input
+              type="number"
+              style={styles.input}
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              placeholder="Enter amount"
+              step="0.01"
+              min="0.01"
+              max={selectedAccountData ? parseFloat(selectedAccountData.balance || 0) - fee : 25000}
+              required
+            />
+          </div>
+
+          <div style={styles.detailsSection}>
+            <h3 style={styles.sectionTitle}>Transfer Details</h3>
+            {renderTransferTypeFields()}
+          </div>
+
+          {fee > 0 && (
+            <div style={styles.feeNotice}>
+              <h4 style={styles.feeTitle}>💰 Fee Notice</h4>
+              <p>This transfer type incurs a {formatCurrency(fee)} fee.</p>
+              <p><strong>Total Deduction: {formatCurrency(totalAmount)}</strong></p>
+            </div>
+          )}
+
+          <button
+            type="submit"
+            style={{
+              ...styles.submitButton,
+              opacity: loading ? 0.7 : 1,
+              cursor: loading ? 'not-allowed' : 'pointer'
+            }}
+            disabled={loading}
+          >
+            {loading ? '🔄 Processing Transfer...' : `Transfer ${formatCurrency(parseFloat(amount) || 0)}${fee > 0 ? ` (+${formatCurrency(fee)} fee)` : ''}`}
+          </button>
+        </form>
+
+        <div style={styles.infoSection}>
+          <h4 style={styles.infoTitle}>🔒 Transfer Information</h4>
+          <ul style={styles.infoList}>
+            <li><strong>Internal:</strong> Instant transfers between Oakline Bank accounts</li>
+            <li><strong>Domestic:</strong> 1-3 business days to other US banks</li>
+            <li><strong>International:</strong> 3-5 business days worldwide</li>
+            <li>All transfers are secured with bank-level encryption</li>
+            <li>Daily transfer limit: $25,000 (contact support for higher limits)</li>
+          </ul>
+        </div>
       </div>
     </div>
   );
 }
+
+const styles = {
+  container: {
+    minHeight: '100vh',
+    backgroundColor: '#f8fafc',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+  },
+  header: {
+    backgroundColor: '#1e40af',
+    color: 'white',
+    padding: '1rem 2rem',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+  },
+  logoContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.75rem',
+    textDecoration: 'none',
+    color: 'white'
+  },
+  logo: {
+    height: '40px',
+    width: 'auto'
+  },
+  logoText: {
+    fontSize: '1.5rem',
+    fontWeight: 'bold'
+  },
+  headerInfo: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '2rem'
+  },
+  routingInfo: {
+    fontSize: '0.9rem',
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    padding: '0.5rem 1rem',
+    borderRadius: '6px'
+  },
+  backButton: {
+    padding: '0.5rem 1rem',
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    color: 'white',
+    textDecoration: 'none',
+    borderRadius: '6px',
+    fontSize: '0.9rem',
+    border: '1px solid rgba(255,255,255,0.3)'
+  },
+  content: {
+    maxWidth: '800px',
+    margin: '0 auto',
+    padding: '2rem 1rem'
+  },
+  titleSection: {
+    textAlign: 'center',
+    marginBottom: '2rem'
+  },
+  title: {
+    fontSize: '2.5rem',
+    fontWeight: 'bold',
+    color: '#1e293b',
+    marginBottom: '0.5rem'
+  },
+  subtitle: {
+    fontSize: '1.1rem',
+    color: '#64748b'
+  },
+  form: {
+    backgroundColor: 'white',
+    padding: '2rem',
+    borderRadius: '16px',
+    boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+    marginBottom: '2rem'
+  },
+  formGroup: {
+    marginBottom: '1.5rem'
+  },
+  label: {
+    display: 'block',
+    fontSize: '0.9rem',
+    fontWeight: '600',
+    color: '#374151',
+    marginBottom: '0.5rem'
+  },
+  select: {
+    width: '100%',
+    padding: '0.75rem',
+    border: '2px solid #e2e8f0',
+    borderRadius: '8px',
+    fontSize: '1rem',
+    backgroundColor: 'white',
+    boxSizing: 'border-box'
+  },
+  input: {
+    width: '100%',
+    padding: '0.75rem',
+    border: '2px solid #e2e8f0',
+    borderRadius: '8px',
+    fontSize: '1rem',
+    boxSizing: 'border-box'
+  },
+  detailsSection: {
+    backgroundColor: '#f8fafc',
+    padding: '1.5rem',
+    borderRadius: '12px',
+    marginBottom: '1.5rem',
+    border: '2px solid #e2e8f0'
+  },
+  sectionTitle: {
+    color: '#1e40af',
+    marginBottom: '1rem',
+    fontSize: '1.2rem'
+  },
+  feeNotice: {
+    backgroundColor: '#fff3cd',
+    border: '2px solid #fbbf24',
+    borderRadius: '12px',
+    padding: '1rem',
+    marginBottom: '1.5rem'
+  },
+  feeTitle: {
+    color: '#92400e',
+    marginBottom: '0.5rem',
+    fontSize: '1rem'
+  },
+  submitButton: {
+    width: '100%',
+    padding: '1rem',
+    backgroundColor: '#1e40af',
+    color: 'white',
+    border: 'none',
+    borderRadius: '12px',
+    fontSize: '1rem',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'all 0.2s'
+  },
+  message: {
+    padding: '1rem',
+    borderRadius: '8px',
+    border: '2px solid',
+    marginBottom: '2rem',
+    fontSize: '0.9rem'
+  },
+  infoSection: {
+    backgroundColor: 'white',
+    padding: '1.5rem',
+    borderRadius: '12px',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.08)'
+  },
+  infoTitle: {
+    color: '#1e40af',
+    marginBottom: '1rem',
+    fontSize: '1.1rem'
+  },
+  infoList: {
+    margin: 0,
+    paddingLeft: '1.5rem',
+    color: '#374151',
+    lineHeight: '1.6'
+  },
+  emptyState: {
+    textAlign: 'center',
+    padding: '4rem 2rem',
+    maxWidth: '600px',
+    margin: '0 auto'
+  },
+  emptyTitle: {
+    fontSize: '2rem',
+    color: '#1e293b',
+    marginBottom: '1rem'
+  },
+  emptyDesc: {
+    fontSize: '1.1rem',
+    color: '#64748b',
+    marginBottom: '2rem'
+  },
+  emptyButton: {
+    padding: '1rem 2rem',
+    backgroundColor: '#1e40af',
+    color: 'white',
+    textDecoration: 'none',
+    borderRadius: '12px',
+    fontSize: '1rem',
+    fontWeight: '600'
+  }
+};

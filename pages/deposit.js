@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabaseClient';
+import Link from 'next/link';
 
 export default function MobileDeposit() {
   const [user, setUser] = useState(null);
@@ -41,12 +42,15 @@ export default function MobileDeposit() {
         .or(`user_id.eq.${user.id},user_email.eq.${user.email},email.eq.${user.email}`)
         .in('account_type', ['checking', 'savings']);
 
+      if (error) throw error;
+
       if (accountsData && accountsData.length > 0) {
         setAccounts(accountsData);
         setSelectedAccount(accountsData[0].id.toString());
       }
     } catch (error) {
       console.error('Error fetching accounts:', error);
+      setMessage('Error loading accounts. Please try again.');
     }
   };
 
@@ -84,12 +88,14 @@ export default function MobileDeposit() {
       return;
     }
 
+    if (parseFloat(amount) > 10000) {
+      setMessage('Mobile deposits are limited to $10,000 per transaction');
+      return;
+    }
+
     setLoading(true);
     
     try {
-      // In a real implementation, you would upload images to storage
-      // and use OCR to read check details
-      
       const selectedAccountData = accounts.find(acc => acc.id.toString() === selectedAccount);
       
       // Create pending transaction
@@ -136,16 +142,33 @@ export default function MobileDeposit() {
     }
   };
 
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(amount || 0);
+  };
+
   return (
     <div style={styles.container}>
+      {/* Header */}
       <div style={styles.header}>
-        <button onClick={() => router.back()} style={styles.backButton}>
-          ← Back
-        </button>
-        <h1 style={styles.title}>📥 Mobile Check Deposit</h1>
+        <Link href="/" style={styles.logoContainer}>
+          <img src="/images/logo-primary.png.jpg" alt="Oakline Bank" style={styles.logo} />
+          <span style={styles.logoText}>Oakline Bank</span>
+        </Link>
+        <div style={styles.headerInfo}>
+          <div style={styles.routingInfo}>Routing Number: 075915826</div>
+          <Link href="/dashboard" style={styles.backButton}>← Back to Dashboard</Link>
+        </div>
       </div>
 
       <div style={styles.content}>
+        <div style={styles.titleSection}>
+          <h1 style={styles.title}>📥 Mobile Check Deposit</h1>
+          <p style={styles.subtitle}>Deposit checks quickly and securely from your device</p>
+        </div>
+
         <div style={styles.instructionsCard}>
           <h3 style={styles.instructionsTitle}>📋 Deposit Instructions</h3>
           <ul style={styles.instructionsList}>
@@ -157,9 +180,22 @@ export default function MobileDeposit() {
           </ul>
         </div>
 
+        {message && (
+          <div style={{
+            ...styles.message,
+            backgroundColor: message.includes('✅') ? '#d4edda' : '#f8d7da',
+            color: message.includes('✅') ? '#155724' : '#721c24',
+            borderColor: message.includes('✅') ? '#c3e6cb' : '#f5c6cb'
+          }}>
+            {message}
+          </div>
+        )}
+
         <form onSubmit={handleDeposit} style={styles.form}>
+          <h3 style={styles.formTitle}>Deposit Check</h3>
+
           <div style={styles.formGroup}>
-            <label style={styles.label}>Deposit To Account</label>
+            <label style={styles.label}>Deposit To Account *</label>
             <select
               value={selectedAccount}
               onChange={(e) => setSelectedAccount(e.target.value)}
@@ -169,14 +205,16 @@ export default function MobileDeposit() {
               <option value="">Select Account</option>
               {accounts.map(account => (
                 <option key={account.id} value={account.id}>
-                  {account.account_name || account.account_type} - {account.account_number}
+                  {account.account_name || account.account_type?.replace('_', ' ')?.toUpperCase()} - 
+                  ****{account.account_number?.slice(-4)} - 
+                  {formatCurrency(account.balance || 0)}
                 </option>
               ))}
             </select>
           </div>
 
           <div style={styles.formGroup}>
-            <label style={styles.label}>Deposit Amount ($)</label>
+            <label style={styles.label}>Deposit Amount ($) *</label>
             <input
               type="number"
               step="0.01"
@@ -188,19 +226,25 @@ export default function MobileDeposit() {
               placeholder="0.00"
               required
             />
+            <div style={styles.limitNote}>Daily deposit limit: $10,000</div>
           </div>
 
           <div style={styles.uploadSection}>
             <div style={styles.uploadGroup}>
-              <label style={styles.label}>Check Front</label>
-              <input
-                id="checkFront"
-                type="file"
-                accept="image/*"
-                onChange={(e) => handleFileUpload(e, 'front')}
-                style={styles.fileInput}
-                required
-              />
+              <label style={styles.label}>Check Front *</label>
+              <div style={styles.uploadArea}>
+                <input
+                  id="checkFront"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleFileUpload(e, 'front')}
+                  style={styles.fileInput}
+                  required
+                />
+                <div style={styles.uploadText}>
+                  📷 Click to upload front of check
+                </div>
+              </div>
               {checkFront && (
                 <div style={styles.filePreview}>
                   ✅ {checkFront.name}
@@ -209,15 +253,20 @@ export default function MobileDeposit() {
             </div>
 
             <div style={styles.uploadGroup}>
-              <label style={styles.label}>Check Back</label>
-              <input
-                id="checkBack"
-                type="file"
-                accept="image/*"
-                onChange={(e) => handleFileUpload(e, 'back')}
-                style={styles.fileInput}
-                required
-              />
+              <label style={styles.label}>Check Back *</label>
+              <div style={styles.uploadArea}>
+                <input
+                  id="checkBack"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleFileUpload(e, 'back')}
+                  style={styles.fileInput}
+                  required
+                />
+                <div style={styles.uploadText}>
+                  📷 Click to upload back of check
+                </div>
+              </div>
               {checkBack && (
                 <div style={styles.filePreview}>
                   ✅ {checkBack.name}
@@ -239,17 +288,6 @@ export default function MobileDeposit() {
           </button>
         </form>
 
-        {message && (
-          <div style={{
-            ...styles.message,
-            backgroundColor: message.includes('✅') ? '#d4edda' : '#f8d7da',
-            color: message.includes('✅') ? '#155724' : '#721c24',
-            borderColor: message.includes('✅') ? '#c3e6cb' : '#f5c6cb'
-          }}>
-            {message}
-          </div>
-        )}
-
         <div style={styles.securityNote}>
           <h4 style={styles.securityTitle}>🔒 Security & Limits</h4>
           <ul style={styles.securityList}>
@@ -257,6 +295,7 @@ export default function MobileDeposit() {
             <li>Mobile deposits are encrypted and secure</li>
             <li>Funds availability subject to verification</li>
             <li>Keep your original check until deposit clears</li>
+            <li>Processing time: 1-2 business days</li>
           </ul>
         </div>
       </div>
@@ -267,35 +306,71 @@ export default function MobileDeposit() {
 const styles = {
   container: {
     minHeight: '100vh',
-    backgroundColor: '#f1f5f9',
+    backgroundColor: '#f8fafc',
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
   },
   header: {
     backgroundColor: '#1e40af',
     color: 'white',
-    padding: '1rem',
+    padding: '1rem 2rem',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+  },
+  logoContainer: {
     display: 'flex',
     alignItems: 'center',
-    gap: '1rem'
+    gap: '0.75rem',
+    textDecoration: 'none',
+    color: 'white'
+  },
+  logo: {
+    height: '40px',
+    width: 'auto'
+  },
+  logoText: {
+    fontSize: '1.5rem',
+    fontWeight: 'bold'
+  },
+  headerInfo: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '2rem'
+  },
+  routingInfo: {
+    fontSize: '0.9rem',
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    padding: '0.5rem 1rem',
+    borderRadius: '6px'
   },
   backButton: {
-    background: 'rgba(255,255,255,0.2)',
-    color: 'white',
-    border: 'none',
     padding: '0.5rem 1rem',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    fontSize: '0.9rem'
-  },
-  title: {
-    fontSize: '1.5rem',
-    fontWeight: 'bold',
-    margin: 0
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    color: 'white',
+    textDecoration: 'none',
+    borderRadius: '6px',
+    fontSize: '0.9rem',
+    border: '1px solid rgba(255,255,255,0.3)'
   },
   content: {
     maxWidth: '800px',
     margin: '0 auto',
     padding: '2rem 1rem'
+  },
+  titleSection: {
+    textAlign: 'center',
+    marginBottom: '2rem'
+  },
+  title: {
+    fontSize: '2.5rem',
+    fontWeight: 'bold',
+    color: '#1e293b',
+    marginBottom: '0.5rem'
+  },
+  subtitle: {
+    fontSize: '1.1rem',
+    color: '#64748b'
   },
   instructionsCard: {
     backgroundColor: 'white',
@@ -322,6 +397,11 @@ const styles = {
     marginBottom: '2rem',
     boxShadow: '0 4px 12px rgba(0,0,0,0.08)'
   },
+  formTitle: {
+    color: '#1e40af',
+    marginBottom: '1.5rem',
+    fontSize: '1.3rem'
+  },
   formGroup: {
     marginBottom: '1.5rem'
   },
@@ -338,7 +418,8 @@ const styles = {
     border: '2px solid #e2e8f0',
     borderRadius: '8px',
     fontSize: '1rem',
-    backgroundColor: 'white'
+    backgroundColor: 'white',
+    boxSizing: 'border-box'
   },
   input: {
     width: '100%',
@@ -347,6 +428,11 @@ const styles = {
     borderRadius: '8px',
     fontSize: '1rem',
     boxSizing: 'border-box'
+  },
+  limitNote: {
+    fontSize: '0.8rem',
+    color: '#64748b',
+    marginTop: '0.25rem'
   },
   uploadSection: {
     display: 'grid',
@@ -361,11 +447,28 @@ const styles = {
     display: 'flex',
     flexDirection: 'column'
   },
-  fileInput: {
-    padding: '0.75rem',
-    border: '2px dashed #e2e8f0',
+  uploadArea: {
+    position: 'relative',
+    border: '2px dashed #cbd5e1',
     borderRadius: '8px',
+    padding: '2rem',
+    textAlign: 'center',
+    backgroundColor: '#f8fafc',
+    cursor: 'pointer',
+    transition: 'all 0.2s'
+  },
+  fileInput: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    opacity: 0,
     cursor: 'pointer'
+  },
+  uploadText: {
+    color: '#64748b',
+    fontSize: '0.9rem'
   },
   filePreview: {
     marginTop: '0.5rem',
@@ -373,7 +476,8 @@ const styles = {
     backgroundColor: '#dcfce7',
     color: '#16a34a',
     borderRadius: '4px',
-    fontSize: '0.9rem'
+    fontSize: '0.9rem',
+    textAlign: 'center'
   },
   submitButton: {
     width: '100%',
@@ -390,7 +494,7 @@ const styles = {
   message: {
     padding: '1rem',
     borderRadius: '8px',
-    border: '1px solid',
+    border: '2px solid',
     marginBottom: '2rem',
     fontSize: '0.9rem'
   },
@@ -398,7 +502,7 @@ const styles = {
     backgroundColor: '#fffbeb',
     padding: '1.5rem',
     borderRadius: '12px',
-    border: '1px solid #fbbf24'
+    border: '2px solid #fbbf24'
   },
   securityTitle: {
     color: '#92400e',
