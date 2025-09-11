@@ -434,8 +434,10 @@ export default function Home() {
                     <span style={styles.buttonIcon}>☰</span>
                     Menu
                   </Link>
-                  {/* Logout Button */}
-                  <Link href="/" style={styles.loginButton}>Logout</Link>
+                  {/* Logout Button - Assuming this should link to a logout handler or page */}
+                  <Link href="/api/auth/logout" passHref>
+                    <button style={styles.loginButton}>Logout</button>
+                  </Link>
                 </>
               ) : (
                 <>
@@ -1086,18 +1088,18 @@ const styles = {
   },
   dropdownGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minWidth(250px, 1fr))',
-    gap: '2rem'
+    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+    gap: '1.5rem'
   },
   dropdownSection: {
     borderBottom: '1px solid #e2e8f0',
-    paddingBottom: '1.5rem'
+    paddingBottom: '1rem'
   },
   dropdownSectionTitle: {
-    fontSize: '1rem',
+    fontSize: '0.9rem',
     fontWeight: '800',
     color: '#1e40af',
-    marginBottom: '1rem',
+    marginBottom: '0.75rem',
     textTransform: 'uppercase',
     letterSpacing: '0.5px'
   },
