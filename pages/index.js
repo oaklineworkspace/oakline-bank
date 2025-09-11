@@ -308,6 +308,72 @@ export default function Home() {
           </div>
 
           <div style={styles.headerCenter}>
+            <div style={styles.featuresDropdown}>
+              <button 
+                style={styles.featuresDropdownButton}
+                onClick={() => setActiveDropdown(activeDropdown === 'features' ? null : 'features')}
+              >
+                <span style={styles.buttonIcon}>🏦</span>
+                Bank Features
+                <span style={styles.dropdownArrow}>▼</span>
+              </button>
+              
+              {activeDropdown === 'features' && (
+                <div style={styles.featuresDropdownMenu}>
+                  <div style={styles.featuresGrid}>
+                    <div style={styles.featureDropdownItem}>
+                      <span style={styles.featureDropdownIcon}>🔒</span>
+                      <div>
+                        <h4 style={styles.featureDropdownTitle}>Bank-Level Security</h4>
+                        <p style={styles.featureDropdownDesc}>256-bit SSL encryption</p>
+                      </div>
+                    </div>
+                    <div style={styles.featureDropdownItem}>
+                      <span style={styles.featureDropdownIcon}>⚡</span>
+                      <div>
+                        <h4 style={styles.featureDropdownTitle}>Instant Transfers</h4>
+                        <p style={styles.featureDropdownDesc}>< 1 second processing</p>
+                      </div>
+                    </div>
+                    <div style={styles.featureDropdownItem}>
+                      <span style={styles.featureDropdownIcon}>📱</span>
+                      <div>
+                        <h4 style={styles.featureDropdownTitle}>Mobile Banking</h4>
+                        <p style={styles.featureDropdownDesc}>4.9★ rated app</p>
+                      </div>
+                    </div>
+                    <div style={styles.featureDropdownItem}>
+                      <span style={styles.featureDropdownIcon}>💼</span>
+                      <div>
+                        <h4 style={styles.featureDropdownTitle}>Business Solutions</h4>
+                        <p style={styles.featureDropdownDesc}>50K+ businesses</p>
+                      </div>
+                    </div>
+                    <div style={styles.featureDropdownItem}>
+                      <span style={styles.featureDropdownIcon}>🌍</span>
+                      <div>
+                        <h4 style={styles.featureDropdownTitle}>Global Reach</h4>
+                        <p style={styles.featureDropdownDesc}>190+ countries</p>
+                      </div>
+                    </div>
+                    <div style={styles.featureDropdownItem}>
+                      <span style={styles.featureDropdownIcon}>📊</span>
+                      <div>
+                        <h4 style={styles.featureDropdownTitle}>Smart Analytics</h4>
+                        <p style={styles.featureDropdownDesc}>Real-time insights</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div style={styles.dropdownCTA}>
+                    <Link href="/apply" style={styles.dropdownButton}>
+                      <span style={styles.buttonIcon}>🚀</span>
+                      Open Account Today
+                    </Link>
+                  </div>
+                </div>
+              )}
+            </div>
+            
             <Link href="/enroll" style={styles.enrollButton}>
               <span style={styles.buttonIcon}>🌐</span>
               Enroll for Online
@@ -1421,7 +1487,7 @@ const styles = {
   // Enhanced Features Showcase
   featuresShowcase: {
     padding: 'clamp(4rem, 8vw, 6rem) 0',
-    backgroundColor: '#ffffff',
+    backgroundColor: '#f8fafc',
     width: '100%',
     position: 'relative'
   },
@@ -1961,7 +2027,7 @@ const styles = {
   // Professional Features Section
   professionalFeaturesSection: {
     padding: 'clamp(4rem, 8vw, 6rem) 0',
-    backgroundColor: '#ffffff',
+    backgroundColor: 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)',
     width: '100%',
     position: 'relative'
   },
@@ -2089,6 +2155,104 @@ const styles = {
     transition: 'all 0.3s ease'
   },
 
+  // Features Dropdown Styles
+  featuresDropdown: {
+    position: 'relative',
+    display: 'inline-block'
+  },
+  featuresDropdownButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    padding: '0.8rem 1.5rem',
+    backgroundColor: 'white',
+    color: '#1a365d',
+    border: '2px solid #1a365d',
+    borderRadius: '10px',
+    fontSize: '1rem',
+    fontWeight: '700',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    boxShadow: '0 4px 12px rgba(26, 54, 93, 0.2)'
+  },
+  featuresDropdownMenu: {
+    position: 'absolute',
+    top: 'calc(100% + 0.5rem)',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    backgroundColor: 'white',
+    borderRadius: '16px',
+    boxShadow: '0 20px 40px rgba(26, 54, 93, 0.2)',
+    border: '2px solid #e2e8f0',
+    padding: '2rem',
+    minWidth: '500px',
+    maxWidth: '90vw',
+    zIndex: 1000,
+    animation: 'dropdownSlideIn 0.3s ease-out'
+  },
+  featuresGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(2, 1fr)',
+    gap: '1.5rem',
+    marginBottom: '2rem'
+  },
+  featureDropdownItem: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '1rem',
+    padding: '1rem',
+    borderRadius: '10px',
+    backgroundColor: '#f8fafc',
+    border: '1px solid #e2e8f0',
+    transition: 'all 0.3s ease'
+  },
+  featureDropdownIcon: {
+    fontSize: '1.5rem',
+    width: '40px',
+    height: '40px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#1a365d',
+    color: 'white',
+    borderRadius: '50%',
+    flexShrink: 0
+  },
+  featureDropdownTitle: {
+    fontSize: '1rem',
+    fontWeight: '700',
+    color: '#1a365d',
+    marginBottom: '0.25rem'
+  },
+  featureDropdownDesc: {
+    fontSize: '0.85rem',
+    color: '#059669',
+    fontWeight: '600'
+  },
+  dropdownCTA: {
+    textAlign: 'center',
+    paddingTop: '1.5rem',
+    borderTop: '1px solid #e2e8f0'
+  },
+  dropdownButton: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    padding: '1rem 2rem',
+    background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+    color: 'white',
+    textDecoration: 'none',
+    borderRadius: '10px',
+    fontSize: '1rem',
+    fontWeight: '700',
+    boxShadow: '0 4px 12px rgba(5, 150, 105, 0.3)',
+    transition: 'all 0.3s ease'
+  },
+  dropdownArrow: {
+    fontSize: '0.8rem',
+    transition: 'transform 0.3s ease'
+  },
+
   // Mobile Responsive Styles
   '@media (max-width: 768px)': {
     headerContainer: {
@@ -2186,9 +2350,55 @@ const styles = {
     secondaryButton: {
       width: '100%',
       justifyContent: 'center'
+    },
+    featuresDropdownMenu: {
+      minWidth: '300px',
+      maxWidth: '95vw',
+      left: '50%',
+      transform: 'translateX(-50%)',
+      position: 'fixed',
+      top: '80px'
+    },
+    featuresGrid: {
+      gridTemplateColumns: '1fr',
+      gap: '1rem'
+    },
+    featuresDropdownButton: {
+      width: '100%',
+      justifyContent: 'center'
     }
   }
 };
+
+// Add hover effects for dropdown items
+if (typeof document !== 'undefined') {
+  const existingStyle = document.querySelector('#dropdown-styles');
+  if (!existingStyle) {
+    const dropdownStyles = document.createElement('style');
+    dropdownStyles.id = 'dropdown-styles';
+    dropdownStyles.textContent = `
+      .featureDropdownItem:hover {
+        background-color: #e0f2fe !important;
+        border-color: #059669 !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(5, 150, 105, 0.2);
+      }
+      
+      .featuresDropdownButton:hover {
+        background-color: #f0f9ff !important;
+        border-color: #059669 !important;
+        color: #059669 !important;
+        transform: translateY(-2px);
+      }
+      
+      .dropdownButton:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(5, 150, 105, 0.4);
+      }
+    `;
+    document.head.appendChild(dropdownStyles);
+  }
+}
 
 // Add CSS animations to the document
 if (typeof document !== 'undefined') {
