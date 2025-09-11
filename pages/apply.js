@@ -1,1702 +1,933 @@
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { supabase } from '../lib/supabaseClient';
 
-const ACCOUNT_TYPES = [
-  { id: 1, name: 'Checking Account', description: 'Perfect for everyday banking needs', icon: '💳', rate: '0.01% APY' },
-  { id: 2, name: 'Savings Account', description: 'Grow your money with competitive rates', icon: '💰', rate: '4.50% APY' },
-  { id: 3, name: 'Business Checking', description: 'Designed for business operations', icon: '🏢', rate: '0.01% APY' },
-  { id: 4, name: 'Business Savings', description: 'Business savings with higher yields', icon: '🏦', rate: '4.25% APY' },
-  { id: 5, name: 'Student Checking', description: 'No-fee checking for students', icon: '🎓', rate: '0.01% APY' },
-  { id: 6, name: 'Money Market Account', description: 'Premium savings with higher yields', icon: '📈', rate: '4.75% APY' },
-  { id: 7, name: 'Certificate of Deposit (CD)', description: 'Secure your future with fixed rates', icon: '🔒', rate: '5.25% APY' },
-  { id: 8, name: 'Retirement Account (IRA)', description: 'Plan for your retirement', icon: '🏖️', rate: '4.80% APY' },
-  { id: 9, name: 'Joint Checking Account', description: 'Shared checking for couples', icon: '👫', rate: '0.01% APY' },
-  { id: 10, name: 'Trust Account', description: 'Manage assets for beneficiaries', icon: '🛡️', rate: '3.50% APY' },
-  { id: 11, name: 'Investment Brokerage Account', description: 'Trade stocks, bonds, and more', icon: '📊', rate: 'Variable' },
-  { id: 12, name: 'High-Yield Savings Account', description: 'Maximum earning potential', icon: '💎', rate: '5.00% APY' },
-  { id: 13, name: 'International Checking', description: 'Banking without borders', icon: '🌍', rate: '0.01% APY' },
-  { id: 14, name: 'Foreign Currency Account', description: 'Hold multiple currencies', icon: '💱', rate: 'Variable' },
-  { id: 15, name: 'Cryptocurrency Wallet', description: 'Digital asset storage', icon: '₿', rate: 'Variable' },
-  { id: 16, name: 'Loan Repayment Account', description: 'Streamline your loan payments', icon: '💳', rate: 'N/A' },
-  { id: 17, name: 'Mortgage Account', description: 'Home financing solutions', icon: '🏠', rate: 'Variable' },
-  { id: 18, name: 'Auto Loan Account', description: 'Vehicle financing made easy', icon: '🚗', rate: 'Variable' },
-  { id: 19, name: 'Credit Card Account', description: 'Flexible spending power', icon: '💳', rate: 'Variable APR' },
-  { id: 20, name: 'Prepaid Card Account', description: 'Controlled spending solution', icon: '🎫', rate: 'N/A' },
-  { id: 21, name: 'Payroll Account', description: 'Direct deposit convenience', icon: '💼', rate: '0.01% APY' },
-  { id: 22, name: 'Nonprofit/Charity Account', description: 'Special rates for nonprofits', icon: '❤️', rate: '2.50% APY' },
-  { id: 23, name: 'Escrow Account', description: 'Secure transaction holding', icon: '🔐', rate: '1.50% APY' },
-];
-
-const COUNTRIES = [
-  { code: 'US', name: 'United States' },
-  { code: 'CA', name: 'Canada' },
-  { code: 'GB', name: 'United Kingdom' },
-  { code: 'AU', name: 'Australia' },
-  { code: 'DE', name: 'Germany' },
-  { code: 'FR', name: 'France' },
-  { code: 'IT', name: 'Italy' },
-  { code: 'ES', name: 'Spain' },
-  { code: 'NL', name: 'Netherlands' },
-  { code: 'SE', name: 'Sweden' },
-  { code: 'NO', name: 'Norway' },
-  { code: 'DK', name: 'Denmark' },
-  { code: 'FI', name: 'Finland' },
-  { code: 'IE', name: 'Ireland' },
-  { code: 'NZ', name: 'New Zealand' },
-  { code: 'JP', name: 'Japan' },
-  { code: 'KR', name: 'South Korea' },
-  { code: 'CN', name: 'China' },
-  { code: 'IN', name: 'India' },
-  { code: 'BR', name: 'Brazil' },
-  { code: 'MX', name: 'Mexico' },
-  { code: 'ZA', name: 'South Africa' },
-  { code: 'NG', name: 'Nigeria' },
-  { code: 'EG', name: 'Egypt' },
-  { code: 'KE', name: 'Kenya' },
-  { code: 'SA', name: 'Saudi Arabia' },
-  { code: 'AE', name: 'UAE' },
-  { code: 'RU', name: 'Russia' },
-  { code: 'TR', name: 'Turkey' },
-  { code: 'AR', name: 'Argentina' },
-  { code: 'OTHER', name: 'Other / Enter Manually' }
-];
-
-const STATES_BY_COUNTRY = {
-  US: [
-    'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut',
-    'Delaware', 'Florida', 'Georgia', 'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa',
-    'Kansas', 'Kentucky', 'Louisiana', 'Maine', 'Maryland', 'Massachusetts', 'Michigan',
-    'Minnesota', 'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire',
-    'New Jersey', 'New Mexico', 'New York', 'North Carolina', 'North Dakota', 'Ohio',
-    'Oklahoma', 'Oregon', 'Pennsylvania', 'Rhode Island', 'South Carolina', 'South Dakota',
-    'Tennessee', 'Texas', 'Utah', 'Vermont', 'Virginia', 'Washington', 'West Virginia',
-    'Wisconsin', 'Wyoming'
-  ],
-  CA: [
-    'Alberta', 'British Columbia', 'Manitoba', 'New Brunswick', 'Newfoundland and Labrador',
-    'Northwest Territories', 'Nova Scotia', 'Nunavut', 'Ontario', 'Prince Edward Island',
-    'Quebec', 'Saskatchewan', 'Yukon'
-  ],
-  AU: [
-    'Australian Capital Territory', 'New South Wales', 'Northern Territory', 'Queensland',
-    'South Australia', 'Tasmania', 'Victoria', 'Western Australia'
-  ],
-  IN: [
-    'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh', 'Goa', 'Gujarat',
-    'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka', 'Kerala', 'Madhya Pradesh',
-    'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab',
-    'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura', 'Uttar Pradesh',
-    'Uttarakhand', 'West Bengal'
-  ],
-  BR: [
-    'Acre', 'Alagoas', 'Amapá', 'Amazonas', 'Bahia', 'Ceará', 'Distrito Federal', 'Espírito Santo',
-    'Goiás', 'Maranhão', 'Mato Grosso', 'Mato Grosso do Sul', 'Minas Gerais', 'Pará', 'Paraíba',
-    'Paraná', 'Pernambuco', 'Piauí', 'Rio de Janeiro', 'Rio Grande do Norte', 'Rio Grande do Sul',
-    'Rondônia', 'Roraima', 'Santa Catarina', 'São Paulo', 'Sergipe', 'Tocantins'
-  ]
-};
-
-const MAJOR_CITIES_BY_STATE = {
-  'California': ['Los Angeles', 'San Francisco', 'San Diego', 'Sacramento', 'San Jose', 'Fresno'],
-  'New York': ['New York City', 'Buffalo', 'Rochester', 'Syracuse', 'Albany', 'Yonkers'],
-  'Texas': ['Houston', 'Dallas', 'Austin', 'San Antonio', 'Fort Worth', 'El Paso'],
-  'Florida': ['Miami', 'Orlando', 'Tampa', 'Jacksonville', 'Fort Lauderdale', 'Tallahassee'],
-  'Illinois': ['Chicago', 'Springfield', 'Rockford', 'Peoria', 'Elgin', 'Waukegan'],
-  'Ontario': ['Toronto', 'Ottawa', 'Hamilton', 'London', 'Mississauga', 'Windsor'],
-  'British Columbia': ['Vancouver', 'Victoria', 'Surrey', 'Burnaby', 'Richmond', 'Abbotsford']
-};
-
 export default function Apply() {
-  const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState({});
-  const [showManualCountry, setShowManualCountry] = useState(false);
-  const [showManualState, setShowManualState] = useState(false);
-  const [showManualCity, setShowManualCity] = useState(false);
-  const [submitSuccess, setSubmitSuccess] = useState(false);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [user, setUser] = useState(null);
   const [formData, setFormData] = useState({
+    // Personal Information
     firstName: '',
-    middleName: '',
     lastName: '',
-    mothersMaidenName: '',
     email: '',
     phone: '',
     dateOfBirth: '',
     ssn: '',
-    idNumber: '',
-    country: 'US',
-    manualCountry: '',
+
+    // Address Information
     address: '',
     city: '',
-    manualCity: '',
     state: '',
-    manualState: '',
     zipCode: '',
-    accountTypes: [],
+
+    // Employment Information
     employmentStatus: '',
+    employer: '',
     annualIncome: '',
-    agreeToTerms: false
+
+    // Account Selection
+    accountType: '',
+    initialDeposit: '',
+
+    // Identity Verification
+    idType: '',
+    idNumber: '',
+
+    // Terms
+    termsAccepted: false,
+    privacyAccepted: false
   });
 
-  const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  const validatePhone = (phone) => /^[\d\s\-\(\)]{10,}$/.test(phone);
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user ?? null);
+    };
+    getUser();
+  }, []);
 
-  const getEffectiveCountry = () => {
-    return formData.country === 'OTHER' ? formData.manualCountry : formData.country;
-  };
-
-  const getEffectiveState = () => {
-    return showManualState ? formData.manualState : formData.state;
-  };
-
-  const getEffectiveCity = () => {
-    return showManualCity ? formData.manualCity : formData.city;
-  };
-
-  const getAvailableStates = () => {
-    const country = getEffectiveCountry();
-    return STATES_BY_COUNTRY[country] || [];
-  };
-
-  const getAvailableCities = () => {
-    const state = getEffectiveState();
-    return MAJOR_CITIES_BY_STATE[state] || [];
-  };
-
-  const shouldShowManualState = () => {
-    const country = getEffectiveCountry();
-    return !STATES_BY_COUNTRY[country] || showManualState;
-  };
-
-  const shouldShowManualCity = () => {
-    const state = getEffectiveState();
-    return !MAJOR_CITIES_BY_STATE[state] || showManualCity;
-  };
-
-  const validateStep = (step) => {
-    const newErrors = {};
-
-    if (step === 1) {
-      if (!formData.firstName.trim()) newErrors.firstName = 'First name is required';
-      if (!formData.lastName.trim()) newErrors.lastName = 'Last name is required';
-      if (!formData.email.trim()) {
-        newErrors.email = 'Email is required';
-      } else if (!validateEmail(formData.email)) {
-        newErrors.email = 'Invalid email format';
-      }
-      if (!formData.phone.trim()) {
-        newErrors.phone = 'Phone number is required';
-      } else if (!validatePhone(formData.phone)) {
-        newErrors.phone = 'Invalid phone number';
-      }
-      if (!formData.dateOfBirth) newErrors.dateOfBirth = 'Date of birth is required';
-
-      if (!getEffectiveCountry()) newErrors.country = 'Country is required';
-
-      if (getEffectiveCountry() === 'US') {
-        if (!formData.ssn.trim()) newErrors.ssn = 'SSN is required';
-      } else {
-        if (!formData.idNumber.trim()) newErrors.idNumber = 'Government ID Number is required';
-      }
+  const accountTypes = [
+    {
+      id: 'premium-checking',
+      name: 'Premium Checking',
+      icon: '💎',
+      rate: '0.25% APY',
+      description: 'Luxury banking with exclusive perks and premium benefits',
+      minDeposit: 100,
+      features: ['No monthly fees', 'Premium debit card', 'Concierge service', 'Free checks']
+    },
+    {
+      id: 'high-yield-savings',
+      name: 'High-Yield Savings',
+      icon: '⭐',
+      rate: '5.00% APY',
+      description: 'Maximum earning potential with competitive rates',
+      minDeposit: 25,
+      features: ['High interest rates', 'No minimum balance', 'Mobile banking', 'Compound interest']
+    },
+    {
+      id: 'business-checking',
+      name: 'Business Checking',
+      icon: '🏢',
+      rate: '0.15% APY',
+      description: 'Professional banking solutions for growing businesses',
+      minDeposit: 500,
+      features: ['Business banking', 'Merchant services', 'Payroll integration', 'Professional support']
+    },
+    {
+      id: 'investment-account',
+      name: 'Investment Account',
+      icon: '📈',
+      rate: 'Variable',
+      description: 'Trade stocks, bonds, ETFs, and mutual funds',
+      minDeposit: 1000,
+      features: ['Commission-free trades', 'Research tools', 'Advisory services', 'Portfolio management']
     }
-
-    if (step === 2) {
-      if (!formData.address.trim()) newErrors.address = 'Address is required';
-      if (!getEffectiveCity()) newErrors.city = 'City is required';
-      if (!getEffectiveState()) newErrors.state = 'State/Province is required';
-      if (!formData.zipCode.trim()) newErrors.zipCode = 'ZIP/Postal code is required';
-    }
-
-    if (step === 3) {
-      if (formData.accountTypes.length === 0) newErrors.accountTypes = 'Select at least one account type';
-      if (!formData.employmentStatus) newErrors.employmentStatus = 'Employment status is required';
-      if (!formData.annualIncome) newErrors.annualIncome = 'Annual income is required';
-      if (!formData.agreeToTerms) newErrors.agreeToTerms = 'You must agree to terms';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+  ];
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-
-    setFormData(prev => {
-      const newData = {
-        ...prev,
-        [name]: type === 'checkbox' ? checked : value
-      };
-
-      // Handle country change
-      if (name === 'country') {
-        setShowManualCountry(value === 'OTHER');
-        if (value !== 'OTHER') {
-          newData.manualCountry = '';
-        }
-        // Reset state and city when country changes
-        newData.state = '';
-        newData.manualState = '';
-        newData.city = '';
-        newData.manualCity = '';
-        setShowManualState(false);
-        setShowManualCity(false);
-      }
-
-      // Handle state change
-      if (name === 'state') {
-        // Reset city when state changes
-        newData.city = '';
-        newData.manualCity = '';
-        setShowManualCity(false);
-      }
-
-      return newData;
-    });
-
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
-    }
-  };
-
-  const toggleAccountType = (accountId) => {
-    setFormData(prev => {
-      const selected = prev.accountTypes.includes(accountId)
-        ? prev.accountTypes.filter(id => id !== accountId)
-        : [...prev.accountTypes, accountId];
-      return { ...prev, accountTypes: selected };
-    });
-
-    if (errors.accountTypes) {
-      setErrors(prev => ({ ...prev, accountTypes: '' }));
-    }
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
   };
 
   const handleNext = () => {
-    if (validateStep(currentStep)) {
-      setCurrentStep(prev => prev + 1);
+    if (currentStep < 5) {
+      setCurrentStep(currentStep + 1);
     }
   };
 
-  const handleBack = () => {
-    setCurrentStep(prev => prev - 1);
+  const handlePrevious = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    }
   };
 
-  const handleSubmit = async () => {
-    if (!validateStep(3)) return;
-
-    setLoading(true);
-    setErrors({});
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
 
     try {
-      const effectiveCountry = getEffectiveCountry();
-      const effectiveState = getEffectiveState();
-      const effectiveCity = getEffectiveCity();
-
-      // Insert application data
-      const { data: applicationData, error: applicationError } = await supabase
-        .from('applications')
-        .insert([{
-          first_name: formData.firstName.trim(),
-          middle_name: formData.middleName.trim(), // Added middle name
-          last_name: formData.lastName.trim(),
-          email: formData.email.trim().toLowerCase(),
-          phone: formData.phone.trim(),
-          date_of_birth: formData.dateOfBirth,
-          country: effectiveCountry,
-          ssn: effectiveCountry === 'US' ? formData.ssn.trim() : null,
-          id_number: effectiveCountry !== 'US' ? formData.idNumber.trim() : null,
-          address: formData.address.trim(),
-          city: effectiveCity,
-          state: effectiveState,
-          zip_code: formData.zipCode.trim(),
-          employment_status: formData.employmentStatus,
-          annual_income: formData.annualIncome,
-          account_types: formData.accountTypes.map(id => {
-            const accountType = ACCOUNT_TYPES.find(at => at.id === id);
-            // Convert account type names to enum values expected by database
-            const enumMapping = {
-              'Checking Account': 'checking_account',
-              'Savings Account': 'savings_account',
-              'Business Checking': 'business_checking',
-              'Business Savings': 'business_savings',
-              'Student Checking': 'student_checking',
-              'Money Market Account': 'money_market',
-              'Certificate of Deposit (CD)': 'certificate_of_deposit',
-              'Retirement Account (IRA)': 'retirement_ira',
-              'Joint Checking Account': 'joint_checking',
-              'Trust Account': 'trust_account',
-              'Investment Brokerage Account': 'investment_brokerage',
-              'High-Yield Savings Account': 'high_yield_savings',
-              'International Checking': 'international_checking',
-              'Foreign Currency Account': 'foreign_currency',
-              'Cryptocurrency Wallet': 'cryptocurrency_wallet',
-              'Loan Repayment Account': 'loan_repayment',
-              'Mortgage Account': 'mortgage',
-              'Auto Loan Account': 'auto_loan',
-              'Credit Card Account': 'credit_card',
-              'Prepaid Card Account': 'prepaid_card',
-              'Payroll Account': 'payroll_account',
-              'Nonprofit/Charity Account': 'nonprofit_charity',
-              'Escrow Account': 'escrow_account'
-            };
-            return enumMapping[accountType?.name] || accountType?.name?.toLowerCase().replace(/\s+/g, '_');
-          }),
-          agree_to_terms: formData.agreeToTerms
-        }])
-        .select()
-        .single();
-
-      if (applicationError) throw applicationError;
-
-      const applicationId = applicationData.id;
-
-      // Helper function to check if account number is taken
-      const isAccountNumberTaken = async (num) => {
-        const { data, error } = await supabase
-          .from('accounts')
-          .select('account_number')
-          .eq('account_number', num)
-          .single();
-
-        return !error && data; // Returns true if account number exists
-      };
-
-      // Generate unique random 10-digit account number
-      const generateAccountNumber = async () => {
-        let num;
-        let attempts = 0;
-        const maxAttempts = 100;
-
-        do {
-          // Generate a random 10-digit number (ensuring it doesn't start with 0)
-          num = (Math.floor(Math.random() * 9000000000) + 1000000000).toString();
-          attempts++;
-        } while (await isAccountNumberTaken(num) && attempts < maxAttempts);
-
-        if (attempts === maxAttempts) {
-          throw new Error('Could not generate a unique account number after multiple attempts.');
-        }
-        return num;
-      };
-
-      // Create accounts for each selected account type
-      const accountNumbers = [];
-      const accountTypes = [];
-
-      for (const accountTypeId of formData.accountTypes) {
-        const accountType = ACCOUNT_TYPES.find(at => at.id === accountTypeId);
-        const accountNumber = await generateAccountNumber();
-
-        const enumMapping = {
-          'Checking Account': 'checking_account',
-          'Savings Account': 'savings_account',
-          'Business Checking': 'business_checking',
-          'Business Savings': 'business_savings',
-          'Student Checking': 'student_checking',
-          'Money Market Account': 'money_market',
-          'Certificate of Deposit (CD)': 'certificate_of_deposit',
-          'Retirement Account (IRA)': 'retirement_ira',
-          'Joint Checking Account': 'joint_checking',
-          'Trust Account': 'trust_account',
-          'Investment Brokerage Account': 'investment_brokerage',
-          'High-Yield Savings Account': 'high_yield_savings',
-          'International Checking': 'international_checking',
-          'Foreign Currency Account': 'foreign_currency',
-          'Cryptocurrency Wallet': 'cryptocurrency_wallet',
-          'Loan Repayment Account': 'loan_repayment',
-          'Mortgage Account': 'mortgage',
-          'Auto Loan Account': 'auto_loan',
-          'Credit Card Account': 'credit_card',
-          'Prepaid Card Account': 'prepaid_card',
-          'Payroll Account': 'payroll_account',
-          'Nonprofit/Charity Account': 'nonprofit_charity',
-          'Escrow Account': 'escrow_account'
-        };
-
-        const dbAccountType = enumMapping[accountType.name] || accountType.name.toLowerCase().replace(/\s+/g, '_');
-
-        const { error: accountError } = await supabase
-          .from('accounts')
-          .insert([{
-            application_id: applicationId,
-            account_number: accountNumber,
-            account_type: dbAccountType,
-            balance: 0.00,
-            routing_number: '075915826'
-          }])
-          .select()
-          .single();
-
-        if (accountError) {
-          console.error('Account creation error:', accountError);
-        } else {
-          accountNumbers.push(accountNumber);
-          accountTypes.push(accountType.name);
-        }
-      }
-
-      // Generate enrollment token
-      const enrollmentToken = `enroll_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
-
-      // Create enrollment record with proper error handling
-      let enrollmentRecord = null;
-      let enrollmentError = null;
-
-      console.log('Creating enrollment record for:', formData.email);
-
-      // First, check if enrollment already exists
-      const { data: existingEnrollment } = await supabase
-        .from('enrollments')
-        .select('*')
-        .eq('email', formData.email.trim().toLowerCase())
-        .eq('application_id', applicationId)
-        .single();
-
-      if (existingEnrollment) {
-        // Update existing enrollment with new token
-        const { data: updatedEnrollment, error: updateError } = await supabase
-          .from('enrollments')
-          .update({
-            token: enrollmentToken,
-            is_used: false
-          })
-          .eq('email', formData.email.trim().toLowerCase())
-          .eq('application_id', applicationId)
-          .select()
-          .single();
-
-        if (updateError) {
-          console.error('Error updating enrollment record:', updateError);
-          enrollmentError = updateError;
-        } else {
-          enrollmentRecord = updatedEnrollment;
-          console.log('Updated existing enrollment record');
-        }
-      } else {
-        // Create new enrollment record
-        const { data: newEnrollmentData, error: insertError } = await supabase
-          .from('enrollments')
-          .insert([{
-            email: formData.email.trim().toLowerCase(),
-            token: enrollmentToken,
-            is_used: false,
-            application_id: applicationId
-          }])
-          .select()
-          .single();
-
-        if (insertError) {
-          console.error('Error creating enrollment record:', insertError);
-          enrollmentError = insertError;
-        } else {
-          enrollmentRecord = newEnrollmentData;
-          console.log('Created new enrollment record with application_id:', applicationId);
-        }
-      }
-
-      // Create a preliminary profile record (will be completed during enrollment)
-      try {
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert([{
-            application_id: applicationId,
-            email: formData.email.trim().toLowerCase(),
-            first_name: formData.firstName.trim(),
-            middle_name: formData.middleName.trim(),
-            last_name: formData.lastName.trim(),
-            phone: formData.phone.trim(),
-            date_of_birth: formData.dateOfBirth,
-            country: effectiveCountry,
-            address: formData.address.trim(),
-            city: effectiveCity,
-            state: effectiveState,
-            zip_code: formData.zipCode.trim(),
-            ssn: effectiveCountry === 'US' ? formData.ssn.trim() : null,
-            id_number: effectiveCountry !== 'US' ? formData.idNumber.trim() : null,
-            enrollment_completed: false
-          }])
-          .single();
-
-        if (profileError && profileError.code !== '23505') { // Ignore duplicate key errors
-          console.error('Error creating profile record:', profileError);
-        } else {
-          console.log('Profile record created or already exists');
-        }
-      } catch (profileInsertError) {
-        console.log('Profile creation skipped:', profileInsertError.message);
-      }
-
-      // Create Supabase Auth user immediately after successful application creation
-      try {
-        console.log('Creating auth user for application:', applicationId);
-        const authResponse = await fetch('/api/create-auth-user', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            token: enrollmentToken,
-            application_id: applicationId
-          })
-        });
-
-        if (!authResponse.ok) {
-          const authError = await authResponse.json();
-          console.error('Failed to create auth user:', authError);
-          // Don't fail the entire process for auth user creation issues
-        } else {
-          const authResult = await authResponse.json();
-          console.log('Auth user created successfully:', authResult);
-        }
-      } catch (authError) {
-        console.error('Auth user creation failed:', authError);
-        // Don't fail the entire process for auth user creation issues
-      }
-
-      // Send welcome email with enrollment link
-      try {
-        const emailResponse = await fetch('/api/send-welcome-email', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: formData.email.trim().toLowerCase(),
-            first_name: formData.firstName.trim(),
-            middle_name: formData.middleName.trim(),
-            last_name: formData.lastName.trim(),
-            account_numbers: accountNumbers,
-            account_types: accountTypes,
-            application_id: applicationId,
-            country: effectiveCountry,
-            enrollment_token: enrollmentToken
-          })
-        });
-
-        if (!emailResponse.ok) {
-          const errorData = await emailResponse.json();
-          console.error('Failed to send welcome email:', errorData.message || errorResponse.statusText);
-        } else {
-          console.log('Welcome email sent successfully');
-        }
-      } catch (emailError) {
-        console.error('Email sending failed:', emailError);
-        // Don't fail the entire process for email issues
-      }
-
-      // Show success message
-      setSubmitSuccess(true);
-
-      // Redirect to success page after a delay
-      setTimeout(() => {
-        router.push('/dashboard');
-      }, 3000);
-
+      // Simulate submission
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      alert('Application submitted successfully! We will review your application and contact you within 24 hours.');
+      // Reset form or redirect
     } catch (error) {
-      console.error('Application submission error:', error);
-      // Check if the error is due to a duplicate email for enrollments
-      if (error.message.includes('duplicate key value violates unique constraint "enrollments_email_key"')) {
-        setErrors({ submit: 'An account with this email already exists. Please try another email or log in.' });
-      } else {
-        setErrors({ submit: 'Failed to submit application. Please try again.' });
-      }
+      alert('Error submitting application. Please try again.');
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
   };
 
-  const styles = {
-    container: {
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif',
-      padding: '2rem 1rem',
-      position: 'relative',
-      overflow: 'hidden'
-    },
-    backgroundPattern: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      opacity: 0.03,
-      backgroundImage: 'radial-gradient(circle at 25% 25%, #1e40af 0%, transparent 50%), radial-gradient(circle at 75% 75%, #059669 0%, transparent 50%)',
-      zIndex: 0
-    },
-    content: {
-      maxWidth: '1000px',
-      margin: '0 auto',
-      position: 'relative',
-      zIndex: 1
-    },
-    header: {
-      textAlign: 'center',
-      marginBottom: '3rem',
-      animation: 'fadeInUp 0.8s ease'
-    },
-    logoContainer: {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginBottom: '2rem',
-      gap: '1rem'
-    },
-    logo: {
-      height: '70px',
-      width: 'auto'
-    },
-    brandSection: {
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'flex-start'
-    },
-    brandText: {
-      fontSize: '2.2rem',
-      fontWeight: '800',
-      color: '#1e40af',
-      lineHeight: '1'
-    },
-    brandTagline: {
-      fontSize: '1rem',
-      color: '#64748b',
-      fontWeight: '500',
-      marginTop: '0.25rem'
-    },
-    bankCredentials: {
-      display: 'flex',
-      flexWrap: 'wrap',
-      justifyContent: 'center',
-      gap: '1rem',
-      marginTop: '1.5rem',
-      padding: '1rem',
-      backgroundColor: 'rgba(59, 130, 246, 0.05)',
-      borderRadius: '12px',
-      border: '1px solid rgba(59, 130, 246, 0.1)'
-    },
-    credential: {
-      fontSize: '0.85rem',
-      fontWeight: '600',
-      color: '#374151',
-      padding: '0.25rem 0.75rem',
-      backgroundColor: 'white',
-      borderRadius: '6px',
-      border: '1px solid #e2e8f0'
-    },
-    title: {
-      fontSize: 'clamp(28px, 5vw, 42px)',
-      fontWeight: '700',
-      color: '#1e293b',
-      marginBottom: '1rem',
-      lineHeight: 1.2
-    },
-    subtitle: {
-      fontSize: '18px',
-      color: '#64748b',
-      fontWeight: '500',
-      maxWidth: '600px',
-      margin: '0 auto'
-    },
-    progressContainer: {
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginBottom: '3rem',
-      gap: '1rem'
-    },
-    progressStep: {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      width: '50px',
-      height: '50px',
-      borderRadius: '50%',
-      fontSize: '16px',
-      fontWeight: '600',
-      transition: 'all 0.3s ease',
-      boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-    },
-    progressStepActive: {
-      background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
-      color: 'white',
-      transform: 'scale(1.1)'
-    },
-    progressStepCompleted: {
-      background: 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
-      color: 'white'
-    },
-    progressStepPending: {
-      background: '#e2e8f0',
-      color: '#64748b'
-    },
-    progressLine: {
-      height: '3px',
-      width: '60px',
-      borderRadius: '2px',
-      transition: 'all 0.3s ease'
-    },
-    progressLineCompleted: {
-      background: 'linear-gradient(135deg, #059669 0%, #10b981 100%)'
-    },
-    progressLinePending: {
-      background: '#e2e8f0'
-    },
-    formCard: {
-      background: 'white',
-      borderRadius: '24px',
-      padding: '3rem',
-      boxShadow: '0 20px 60px rgba(0,0,0,0.08)',
-      border: '1px solid #e2e8f0',
-      marginBottom: '2rem',
-      animation: 'fadeInUp 0.6s ease'
-    },
-    sectionTitle: {
-      fontSize: '24px',
-      fontWeight: '700',
-      color: '#1e293b',
-      marginBottom: '2rem',
-      textAlign: 'center',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: '10px'
-    },
-    formGrid: {
-      display: 'grid',
-      gap: '1.5rem'
-    },
-    gridCols2: {
-      gridTemplateColumns: 'repeat(2, 1fr)'
-    },
-    gridCols3: {
-      gridTemplateColumns: 'repeat(3, 1fr)'
-    },
-    inputGroup: {
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '8px'
-    },
-    label: {
-      fontSize: '14px',
-      fontWeight: '600',
-      color: '#374151',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '5px'
-    },
-    required: {
-      color: '#ef4444'
-    },
-    input: {
-      width: '100%',
-      padding: '14px 16px',
-      border: '2px solid #e5e7eb',
-      borderRadius: '12px',
-      fontSize: '16px',
-      fontWeight: '500',
-      transition: 'all 0.3s ease',
-      backgroundColor: '#ffffff',
-      fontFamily: 'inherit'
-    },
-    inputFocus: {
-      outline: 'none',
-      borderColor: '#3b82f6',
-      boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.1)'
-    },
-    inputError: {
-      borderColor: '#ef4444',
-      backgroundColor: '#fef2f2'
-    },
-    select: {
-      width: '100%',
-      padding: '14px 16px',
-      border: '2px solid #e5e7eb',
-      borderRadius: '12px',
-      fontSize: '16px',
-      fontWeight: '500',
-      backgroundColor: '#ffffff',
-      cursor: 'pointer',
-      transition: 'all 0.3s ease'
-    },
-    errorMessage: {
-      color: '#ef4444',
-      fontSize: '13px',
-      fontWeight: '500',
-      marginTop: '4px',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '4px'
-    },
-    toggleButton: {
-      fontSize: '12px',
-      color: '#3b82f6',
-      background: 'none',
-      border: 'none',
-      cursor: 'pointer',
-      textDecoration: 'underline',
-      padding: '4px 0'
-    },
-    accountTypesGrid: {
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-      gap: '1rem',
-      marginTop: '1rem'
-    },
-    accountCard: {
-      border: '2px solid #e5e7eb',
-      borderRadius: '16px',
-      padding: '1.5rem',
-      cursor: 'pointer',
-      transition: 'all 0.3s ease',
-      backgroundColor: 'white',
-      position: 'relative',
-      overflow: 'hidden'
-    },
-    accountCardSelected: {
-      borderColor: '#3b82f6',
-      backgroundColor: '#eff6ff',
-      transform: 'translateY(-2px)',
-      boxShadow: '0 8px 25px rgba(59, 130, 246, 0.15)'
-    },
-    accountCardHover: {
-      borderColor: '#9ca3af',
-      transform: 'translateY(-1px)',
-      boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-    },
-    accountHeader: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '12px',
-      marginBottom: '8px'
-    },
-    accountIcon: {
-      fontSize: '24px',
-      padding: '8px',
-      borderRadius: '10px',
-      backgroundColor: '#f1f5f9'
-    },
-    accountName: {
-      fontSize: '16px',
-      fontWeight: '600',
-      color: '#1e293b'
-    },
-    accountDescription: {
-      fontSize: '14px',
-      color: '#64748b',
-      marginBottom: '12px',
-      lineHeight: 1.5
-    },
-    accountRate: {
-      fontSize: '14px',
-      fontWeight: '600',
-      color: '#059669',
-      backgroundColor: '#ecfdf5',
-      padding: '4px 8px',
-      borderRadius: '6px',
-      display: 'inline-block'
-    },
-    checkboxContainer: {
-      display: 'flex',
-      alignItems: 'flex-start',
-      gap: '12px',
-      padding: '1.5rem',
-      backgroundColor: '#f8fafc',
-      borderRadius: '12px',
-      border: '2px solid #e2e8f0',
-      marginTop: '1.5rem',
-      position: 'relative',
-      zIndex: 10
-    },
-    checkbox: {
-      width: '20px',
-      height: '20px',
-      marginTop: '2px',
-      cursor: 'pointer',
-      accentColor: '#059669',
-      transform: 'scale(1.2)',
-      position: 'relative',
-      zIndex: 11
-    },
-    checkboxLabel: {
-      fontSize: '15px',
-      color: '#374151',
-      lineHeight: 1.6,
-      cursor: 'pointer',
-      fontWeight: '500',
-      flex: 1,
-      userSelect: 'none',
-      paddingTop: '1px'
-    },
-    link: {
-      color: '#3b82f6',
-      textDecoration: 'none',
-      fontWeight: '600'
-    },
-    buttonContainer: {
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginTop: '3rem',
-      gap: '1rem'
-    },
-    button: {
-      padding: '14px 28px',
-      borderRadius: '12px',
-      fontSize: '16px',
-      fontWeight: '600',
-      border: 'none',
-      cursor: 'pointer',
-      transition: 'all 0.3s ease',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '8px',
-      minHeight: '52px'
-    },
-    primaryButton: {
-      background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
-      color: 'white',
-      boxShadow: '0 4px 14px rgba(30, 64, 175, 0.3)'
-    },
-    secondaryButton: {
-      background: 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
-      color: 'white',
-      boxShadow: '0 4px 14px rgba(5, 150, 105, 0.3)'
-    },
-    outlineButton: {
-      background: 'transparent',
-      color: '#6b7280',
-      border: '2px solid #d1d5db'
-    },
-    buttonDisabled: {
-      background: '#9ca3af',
-      cursor: 'not-allowed',
-      boxShadow: 'none'
-    },
-    errorAlert: {
-      backgroundColor: '#fef2f2',
-      border: '1px solid #fecaca',
-      borderRadius: '12px',
-      padding: '1rem',
-      marginTop: '1rem'
-    },
-    errorAlertText: {
-      color: '#dc2626',
-      fontSize: '14px',
-      fontWeight: '500'
-    },
-    successAlert: {
-      backgroundColor: '#f0fdf4',
-      border: '1px solid #bbf7d0',
-      borderRadius: '12px',
-      padding: '1.5rem',
-      marginTop: '1rem',
-      textAlign: 'center'
-    },
-    successAlertText: {
-      color: '#16a34a',
-      fontSize: '16px',
-      fontWeight: '600',
-      marginBottom: '0.5rem'
-    },
-    successMessage: {
-      color: '#15803d',
-      fontSize: '14px',
-      fontWeight: '500'
-    },
-    footerLinks: {
-      textAlign: 'center',
-      marginTop: '2rem'
-    },
-    footerLink: {
-      color: '#3b82f6',
-      textDecoration: 'none',
-      fontSize: '16px',
-      fontWeight: '500',
-      transition: 'color 0.3s ease'
-    }
-  };
-
-  return (
-    <div style={styles.container}>
-      <div style={styles.backgroundPattern}></div>
-
-      <div style={styles.content}>
-        {/* Header */}
-        <div style={styles.header}>
-          <div style={styles.logoContainer}>
-            <img
-              src="/images/logo-primary.png"
-              alt="Oakline Bank"
-              style={styles.logo}
-              onError={(e) => {
-                e.target.style.display = 'none';
-                e.target.nextSibling.style.marginLeft = '0';
-              }}
-            />
-            <div style={styles.brandSection}>
-              <div style={styles.brandText}>Oakline Bank</div>
-              <div style={styles.brandTagline}>Your Trusted Financial Partner</div>
-            </div>
-          </div>
-          <div style={styles.bankCredentials}>
-            <div style={styles.credential}>FDIC Insured</div>
-            <div style={styles.credential}>Member FDIC</div>
-            <div style={styles.credential}>Equal Housing Lender</div>
-          </div>
-          <h1 style={styles.title}>Open Your Account Today</h1>
-          <p style={styles.subtitle}>
-            Join thousands of satisfied customers and experience modern banking at its finest
-          </p>
-        </div>
-
-        {/* Progress Steps */}
-        <div style={styles.progressContainer}>
-          {[1, 2, 3].map((step, index) => (
-            <div key={step} style={{display: 'flex', alignItems: 'center'}}>
-              <div style={{
-                ...styles.progressStep,
-                ...(step === currentStep ? styles.progressStepActive :
-                   step < currentStep ? styles.progressStepCompleted : styles.progressStepPending)
-              }}>
-                {step < currentStep ? '✓' : step}
-              </div>
-              {index < 2 && (
-                <div style={{
-                  ...styles.progressLine,
-                  ...(step < currentStep ? styles.progressLineCompleted : styles.progressLinePending)
-                }} />
-              )}
-            </div>
-          ))}
-        </div>
-
-        {/* Form Card */}
-        <div style={styles.formCard}>
-          <h2 style={styles.sectionTitle}>
-            {currentStep === 1 && (
-              <>
-                <span>👤</span> Personal Information
-              </>
-            )}
-            {currentStep === 2 && (
-              <>
-                <span>🏠</span> Address Details
-              </>
-            )}
-            {currentStep === 3 && (
-              <>
-                <span>💼</span> Account & Employment
-              </>
-            )}
-          </h2>
-
-          {/* Step 1: Personal Information */}
-          {currentStep === 1 && (
+  const renderStep = () => {
+    switch (currentStep) {
+      case 1:
+        return (
+          <div style={styles.stepContent}>
+            <h2 style={styles.stepTitle}>Personal Information</h2>
             <div style={styles.formGrid}>
-              <div style={{...styles.formGrid, ...styles.gridCols2}}>
-                <div style={styles.inputGroup}>
-                  <label style={styles.label}>
-                    First Name <span style={styles.required}>*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="firstName"
-                    value={formData.firstName}
-                    onChange={handleInputChange}
-                    style={{
-                      ...styles.input,
-                      ...(errors.firstName ? styles.inputError : {})
-                    }}
-                    placeholder="Enter your first name"
-                  />
-                  {errors.firstName && (
-                    <div style={styles.errorMessage}>⚠️ {errors.firstName}</div>
-                  )}
-                </div>
-
-                <div style={styles.inputGroup}>
-                  <label style={styles.label}>Middle Name</label>
-                  <input
-                    type="text"
-                    name="middleName"
-                    value={formData.middleName}
-                    onChange={handleInputChange}
-                    style={styles.input}
-                    placeholder="Enter your middle name"
-                  />
-                </div>
-              </div>
-
-              <div style={{...styles.formGrid, ...styles.gridCols2}}>
-                <div style={styles.inputGroup}>
-                  <label style={styles.label}>
-                    Last Name <span style={styles.required}>*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="lastName"
-                    value={formData.lastName}
-                    onChange={handleInputChange}
-                    style={{
-                      ...styles.input,
-                      ...(errors.lastName ? styles.inputError : {})
-                    }}
-                    placeholder="Enter your last name"
-                  />
-                  {errors.lastName && (
-                    <div style={styles.errorMessage}>⚠️ {errors.lastName}</div>
-                  )}
-                </div>
-
-                <div style={styles.inputGroup}>
-                  <label style={styles.label}>Mother's Maiden Name</label>
-                  <input
-                    type="text"
-                    name="mothersMaidenName"
-                    value={formData.mothersMaidenName}
-                    onChange={handleInputChange}
-                    style={styles.input}
-                    placeholder="Enter your mother's maiden name"
-                  />
-                </div>
-              </div>
-
               <div style={styles.inputGroup}>
-                <label style={styles.label}>
-                  Email Address <span style={styles.required}>*</span>
-                </label>
+                <label style={styles.label}>First Name *</label>
+                <input
+                  type="text"
+                  name="firstName"
+                  value={formData.firstName}
+                  onChange={handleInputChange}
+                  style={styles.input}
+                  required
+                />
+              </div>
+              <div style={styles.inputGroup}>
+                <label style={styles.label}>Last Name *</label>
+                <input
+                  type="text"
+                  name="lastName"
+                  value={formData.lastName}
+                  onChange={handleInputChange}
+                  style={styles.input}
+                  required
+                />
+              </div>
+              <div style={styles.inputGroup}>
+                <label style={styles.label}>Email Address *</label>
                 <input
                   type="email"
                   name="email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  style={{
-                    ...styles.input,
-                    ...(errors.email ? styles.inputError : {})
-                  }}
-                  placeholder="Enter your email address"
+                  style={styles.input}
+                  required
                 />
-                {errors.email && (
-                  <div style={styles.errorMessage}>⚠️ {errors.email}</div>
-                )}
               </div>
-
-              <div style={{...styles.formGrid, ...styles.gridCols2}}>
-                <div style={styles.inputGroup}>
-                  <label style={styles.label}>
-                    Phone Number <span style={styles.required}>*</span>
-                  </label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    style={{
-                      ...styles.input,
-                      ...(errors.phone ? styles.inputError : {})
-                    }}
-                    placeholder="(555) 123-4567"
-                  />
-                  {errors.phone && (
-                    <div style={styles.errorMessage}>⚠️ {errors.phone}</div>
-                  )}
-                </div>
-
-                <div style={styles.inputGroup}>
-                  <label style={styles.label}>
-                    Date of Birth <span style={styles.required}>*</span>
-                  </label>
-                  <input
-                    type="date"
-                    name="dateOfBirth"
-                    value={formData.dateOfBirth}
-                    onChange={handleInputChange}
-                    style={{
-                      ...styles.input,
-                      ...(errors.dateOfBirth ? styles.inputError : {})
-                    }}
-                  />
-                  {errors.dateOfBirth && (
-                    <div style={styles.errorMessage}>⚠️ {errors.dateOfBirth}</div>
-                  )}
-                </div>
-              </div>
-
               <div style={styles.inputGroup}>
-                <label style={styles.label}>
-                  Country <span style={styles.required}>*</span>
-                </label>
-                <select
-                  name="country"
-                  value={formData.country}
-                  onChange={handleInputChange}
-                  style={{
-                    ...styles.select,
-                    ...(errors.country ? styles.inputError : {})
-                  }}
-                >
-                  {COUNTRIES.map(country => (
-                    <option key={country.code} value={country.code}>
-                      {country.name}
-                    </option>
-                  ))}
-                </select>
-                {showManualCountry && (
-                  <input
-                    type="text"
-                    name="manualCountry"
-                    value={formData.manualCountry}
-                    onChange={handleInputChange}
-                    style={styles.input}
-                    placeholder="Enter your country"
-                  />
-                )}
-                {errors.country && (
-                  <div style={styles.errorMessage}>⚠️ {errors.country}</div>
-                )}
-              </div>
-
-              <div style={styles.inputGroup}>
-                <label style={styles.label}>
-                  {getEffectiveCountry() === 'US' ? 'Social Security Number' : 'Government ID Number'} <span style={styles.required}>*</span>
-                </label>
+                <label style={styles.label}>Phone Number *</label>
                 <input
-                  type="text"
-                  name={getEffectiveCountry() === 'US' ? 'ssn' : 'idNumber'}
-                  value={getEffectiveCountry() === 'US' ? formData.ssn : formData.idNumber}
+                  type="tel"
+                  name="phone"
+                  value={formData.phone}
                   onChange={handleInputChange}
-                  style={{
-                    ...styles.input,
-                    ...((getEffectiveCountry() === 'US' ? errors.ssn : errors.idNumber) ? styles.inputError : {})
-                  }}
-                  placeholder={getEffectiveCountry() === 'US' ? 'XXX-XX-XXXX' : 'Enter your government ID number'}
+                  style={styles.input}
+                  required
                 />
-                {getEffectiveCountry() === 'US' && errors.ssn && (
-                  <div style={styles.errorMessage}>⚠️ {errors.ssn}</div>
-                )}
-                {getEffectiveCountry() !== 'US' && errors.idNumber && (
-                  <div style={styles.errorMessage}>⚠️ {errors.idNumber}</div>
-                )}
+              </div>
+              <div style={styles.inputGroup}>
+                <label style={styles.label}>Date of Birth *</label>
+                <input
+                  type="date"
+                  name="dateOfBirth"
+                  value={formData.dateOfBirth}
+                  onChange={handleInputChange}
+                  style={styles.input}
+                  required
+                />
+              </div>
+              <div style={styles.inputGroup}>
+                <label style={styles.label}>Social Security Number *</label>
+                <input
+                  type="password"
+                  name="ssn"
+                  value={formData.ssn}
+                  onChange={handleInputChange}
+                  style={styles.input}
+                  placeholder="XXX-XX-XXXX"
+                  required
+                />
               </div>
             </div>
-          )}
+          </div>
+        );
 
-          {/* Step 2: Address Information */}
-          {currentStep === 2 && (
+      case 2:
+        return (
+          <div style={styles.stepContent}>
+            <h2 style={styles.stepTitle}>Address Information</h2>
             <div style={styles.formGrid}>
-              <div style={styles.inputGroup}>
-                <label style={styles.label}>
-                  Street Address <span style={styles.required}>*</span>
-                </label>
+              <div style={{...styles.inputGroup, gridColumn: '1 / -1'}}>
+                <label style={styles.label}>Street Address *</label>
                 <input
                   type="text"
                   name="address"
                   value={formData.address}
                   onChange={handleInputChange}
-                  style={{
-                    ...styles.input,
-                    ...(errors.address ? styles.inputError : {})
-                  }}
-                  placeholder="123 Main Street"
+                  style={styles.input}
+                  required
                 />
-                {errors.address && (
-                  <div style={styles.errorMessage}>⚠️ {errors.address}</div>
-                )}
               </div>
-
-              <div style={{...styles.formGrid, ...styles.gridCols3}}>
-                <div style={styles.inputGroup}>
-                  <label style={styles.label}>
-                    City <span style={styles.required}>*</span>
-                  </label>
-                  {shouldShowManualCity() ? (
-                    <input
-                      type="text"
-                      name="manualCity"
-                      value={formData.manualCity}
-                      onChange={handleInputChange}
-                      style={{
-                        ...styles.input,
-                        ...(errors.city ? styles.inputError : {})
-                      }}
-                      placeholder="Enter your city"
-                    />
-                  ) : (
-                    <select
-                      name="city"
-                      value={formData.city}
-                      onChange={handleInputChange}
-                      style={{
-                        ...styles.select,
-                        ...(errors.city ? styles.inputError : {})
-                      }}
-                    >
-                      <option value="">Select City</option>
-                      {getAvailableCities().map(city => (
-                        <option key={city} value={city}>{city}</option>
-                      ))}
-                    </select>
-                  )}
-                  {getAvailableCities().length > 0 && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShowManualCity(!showManualCity);
-                        setFormData(prev => ({ ...prev, city: '', manualCity: '' }));
-                      }}
-                      style={styles.toggleButton}
-                    >
-                      {showManualCity ? 'Select from list' : 'Enter manually'}
-                    </button>
-                  )}
-                  {errors.city && (
-                    <div style={styles.errorMessage}>⚠️ {errors.city}</div>
-                  )}
-                </div>
-
-                <div style={styles.inputGroup}>
-                  <label style={styles.label}>
-                    State / Province <span style={styles.required}>*</span>
-                  </label>
-                  {shouldShowManualState() ? (
-                    <input
-                      type="text"
-                      name="manualState"
-                      value={formData.manualState}
-                      onChange={handleInputChange}
-                      style={{
-                        ...styles.input,
-                        ...(errors.state ? styles.inputError : {})
-                      }}
-                      placeholder="Enter your state/province"
-                    />
-                  ) : (
-                    <select
-                      name="state"
-                      value={formData.state}
-                      onChange={handleInputChange}
-                      style={{
-                        ...styles.select,
-                        ...(errors.state ? styles.inputError : {})
-                      }}
-                    >
-                      <option value="">Select State/Province</option>
-                      {getAvailableStates().map(state => (
-                        <option key={state} value={state}>{state}</option>
-                      ))}
-                    </select>
-                  )}
-                  {getAvailableStates().length > 0 && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShowManualState(!showManualState);
-                        setFormData(prev => ({ ...prev, state: '', manualState: '', city: '', manualCity: '' }));
-                        setShowManualCity(false);
-                      }}
-                      style={styles.toggleButton}
-                    >
-                      {showManualState ? 'Select from list' : 'Enter manually'}
-                    </button>
-                  )}
-                  {errors.state && (
-                    <div style={styles.errorMessage}>⚠️ {errors.state}</div>
-                  )}
-                </div>
-
-                <div style={styles.inputGroup}>
-                  <label style={styles.label}>
-                    ZIP / Postal Code <span style={styles.required}>*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="zipCode"
-                    value={formData.zipCode}
-                    onChange={handleInputChange}
-                    style={{
-                      ...styles.input,
-                      ...(errors.zipCode ? styles.inputError : {})
-                    }}
-                    placeholder="12345"
-                  />
-                  {errors.zipCode && (
-                    <div style={styles.errorMessage}>⚠️ {errors.zipCode}</div>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Step 3: Account & Employment */}
-          {currentStep === 3 && (
-            <div style={styles.formGrid}>
               <div style={styles.inputGroup}>
-                <label style={styles.label}>
-                  Choose Your Account Types <span style={styles.required}>*</span>
-                </label>
-                {errors.accountTypes && (
-                  <div style={styles.errorMessage}>⚠️ {errors.accountTypes}</div>
-                )}
-                <div style={styles.accountTypesGrid}>
-                  {ACCOUNT_TYPES.map(account => (
-                    <div
-                      key={account.id}
-                      onClick={() => toggleAccountType(account.id)}
-                      style={{
-                        ...styles.accountCard,
-                        ...(formData.accountTypes.includes(account.id) ? styles.accountCardSelected : {})
-                      }}
-                      onMouseEnter={(e) => {
-                        if (!formData.accountTypes.includes(account.id)) {
-                          Object.assign(e.target.style, styles.accountCardHover);
-                        }
-                      }}
-                      onMouseLeave={(e) => {
-                        if (!formData.accountTypes.includes(account.id)) {
-                          e.target.style.borderColor = '#e5e7eb';
-                          e.target.style.transform = 'translateY(0)';
-                          e.target.style.boxShadow = 'none';
-                        }
-                      }}
-                    >
-                      <div style={styles.accountHeader}>
-                        <div style={{
-                          ...styles.accountIcon,
-                          backgroundColor: formData.accountTypes.includes(account.id) ? '#dbeafe' : '#f1f5f9'
-                        }}>
-                          {account.icon}
-                        </div>
-                        <div style={styles.accountName}>{account.name}</div>
-                      </div>
-                      <div style={styles.accountDescription}>{account.description}</div>
-                      <div style={styles.accountRate}>{account.rate}</div>
-                      {formData.accountTypes.includes(account.id) && (
-                        <div style={{
-                          position: 'absolute',
-                          top: '12px',
-                          right: '12px',
-                          backgroundColor: '#0070f3',
-                          color: 'white',
-                          borderRadius: '50%',
-                          width: '24px',
-                          height: '24px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: '14px'
-                        }}>
-                          ✓
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
+                <label style={styles.label}>City *</label>
+                <input
+                  type="text"
+                  name="city"
+                  value={formData.city}
+                  onChange={handleInputChange}
+                  style={styles.input}
+                  required
+                />
               </div>
-
-              <div style={{...styles.formGrid, ...styles.gridCols2}}>
-                <div style={styles.inputGroup}>
-                  <label style={styles.label}>
-                    Employment Status <span style={styles.required}>*</span>
-                  </label>
-                  <select
-                    name="employmentStatus"
-                    value={formData.employmentStatus}
-                    onChange={handleInputChange}
-                    style={{
-                      ...styles.select,
-                      ...(errors.employmentStatus ? styles.inputError : {})
-                    }}
-                  >
-                    <option value="">Select Status</option>
-                    <option value="employed_fulltime">Employed Full-time</option>
-                    <option value="employed_parttime">Employed Part-time</option>
-                    <option value="self_employed">Self-employed</option>
-                    <option value="retired">Retired</option>
-                    <option value="student">Student</option>
-                    <option value="unemployed">Unemployed</option>
-                  </select>
-                  {errors.employmentStatus && (
-                    <div style={styles.errorMessage}>⚠️ {errors.employmentStatus}</div>
-                  )}
-                </div>
-
-                <div style={styles.inputGroup}>
-                  <label style={styles.label}>
-                    Annual Income <span style={styles.required}>*</span>
-                  </label>
-                  <select
-                    name="annualIncome"
-                    value={formData.annualIncome}
-                    onChange={handleInputChange}
-                    style={{
-                      ...styles.select,
-                      ...(errors.annualIncome ? styles.inputError : {})
-                    }}
-                  >
-                    <option value="">Select Income Range</option>
-                    <option value="under_25k">Under $25,000</option>
-                    <option value="25k_50k">$25,000 - $50,000</option>
-                    <option value="50k_75k">$50,000 - $75,000</option>
-                    <option value="75k_100k">$75,000 - $100,000</option>
-                    <option value="100k_150k">$100,000 - $150,000</option>
-                    <option value="over_150k">Over $150,000</option>
-                  </select>
-                  {errors.annualIncome && (
-                    <div style={styles.errorMessage}>⚠️ {errors.annualIncome}</div>
-                  )}
-                </div>
+              <div style={styles.inputGroup}>
+                <label style={styles.label}>State *</label>
+                <select
+                  name="state"
+                  value={formData.state}
+                  onChange={handleInputChange}
+                  style={styles.select}
+                  required
+                >
+                  <option value="">Select State</option>
+                  <option value="CA">California</option>
+                  <option value="NY">New York</option>
+                  <option value="TX">Texas</option>
+                  <option value="FL">Florida</option>
+                  {/* Add more states as needed */}
+                </select>
               </div>
-
-              <div style={{
-                ...styles.checkboxContainer,
-                borderColor: formData.agreeToTerms ? '#059669' : '#e2e8f0',
-                backgroundColor: formData.agreeToTerms ? '#f0fdf4' : '#f8fafc'
-              }}>
-                <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
-                  <input
-                    type="checkbox"
-                    name="agreeToTerms"
-                    checked={formData.agreeToTerms}
-                    onChange={handleInputChange}
-                    style={styles.checkbox}
-                  />
-                  {formData.agreeToTerms && (
-                    <span style={{color: '#059669', fontSize: '16px', fontWeight: 'bold'}}>✓</span>
-                  )}
-                </div>
-                <label
-                  style={styles.checkboxLabel}
-                  onClick={() => handleInputChange({target: {name: 'agreeToTerms', type: 'checkbox', checked: !formData.agreeToTerms}})}
-                >
-                  I agree to the{' '}
-                  <Link href="/terms" style={styles.link}>
-                    Terms of Service
-                  </Link>{' '}
-                  and{' '}
-                  <Link href="/privacy" style={styles.link}>
-                    Privacy Policy
-                  </Link>{' '}
-                  <span style={styles.required}>*</span>
-                </label>
+              <div style={styles.inputGroup}>
+                <label style={styles.label}>ZIP Code *</label>
+                <input
+                  type="text"
+                  name="zipCode"
+                  value={formData.zipCode}
+                  onChange={handleInputChange}
+                  style={styles.input}
+                  required
+                />
               </div>
-              {errors.agreeToTerms && (
-                <div style={styles.errorMessage}>⚠️ {errors.agreeToTerms}</div>
-              )}
-
-              {errors.submit && (
-                <div style={styles.errorAlert}>
-                  <div style={styles.errorAlertText}>⚠️ {errors.submit}</div>
-                </div>
-              )}
-
-              {submitSuccess && (
-                <div style={styles.successAlert}>
-                  <div style={styles.successAlertText}>🎉 Application Submitted Successfully!</div>
-                  <div style={styles.successMessage}>
-                    Your account has been created and a welcome email with enrollment instructions has been sent to {formData.email}.
-                    Please check your inbox (and spam folder) for the enrollment link.
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Navigation Buttons */}
-          <div style={styles.buttonContainer}>
-            {currentStep > 1 && (
-              <button
-                onClick={handleBack}
-                style={{...styles.button, ...styles.outlineButton}}
-              >
-                ← Back
-              </button>
-            )}
-
-            <div style={{marginLeft: currentStep === 1 ? 'auto' : '0'}}>
-              {currentStep < 3 ? (
-                <button
-                  onClick={handleNext}
-                  style={{...styles.button, ...styles.primaryButton}}
-                >
-                  Next Step →
-                </button>
-              ) : (
-                <button
-                  onClick={handleSubmit}
-                  disabled={loading || !formData.agreeToTerms}
-                  style={{
-                    ...styles.button,
-                    ...styles.secondaryButton,
-                    ...(loading || !formData.agreeToTerms ? styles.buttonDisabled : {})
-                  }}
-                >
-                  {loading ? (
-                    <>
-                      <span style={{
-                        width: '16px',
-                        height: '16px',
-                        border: '2px solid #ffffff40',
-                        borderTop: '2px solid #ffffff',
-                        borderRadius: '50%',
-                        animation: 'spin 1s linear infinite'
-                      }}></span>
-                      Submitting...
-                    </>
-                  ) : (
-                    <>
-                      🎉 Submit Application
-                    </>
-                  )}
-                </button>
-              )}
             </div>
           </div>
-        </div>
+        );
 
-        <div style={styles.footerLinks}>
-          <Link href="/login" style={styles.footerLink}>
-            Already have an account? Sign In
+      case 3:
+        return (
+          <div style={styles.stepContent}>
+            <h2 style={styles.stepTitle}>Employment Information</h2>
+            <div style={styles.formGrid}>
+              <div style={styles.inputGroup}>
+                <label style={styles.label}>Employment Status *</label>
+                <select
+                  name="employmentStatus"
+                  value={formData.employmentStatus}
+                  onChange={handleInputChange}
+                  style={styles.select}
+                  required
+                >
+                  <option value="">Select Status</option>
+                  <option value="employed">Employed</option>
+                  <option value="self-employed">Self-Employed</option>
+                  <option value="unemployed">Unemployed</option>
+                  <option value="retired">Retired</option>
+                  <option value="student">Student</option>
+                </select>
+              </div>
+              <div style={styles.inputGroup}>
+                <label style={styles.label}>Employer</label>
+                <input
+                  type="text"
+                  name="employer"
+                  value={formData.employer}
+                  onChange={handleInputChange}
+                  style={styles.input}
+                />
+              </div>
+              <div style={{...styles.inputGroup, gridColumn: '1 / -1'}}>
+                <label style={styles.label}>Annual Income *</label>
+                <input
+                  type="number"
+                  name="annualIncome"
+                  value={formData.annualIncome}
+                  onChange={handleInputChange}
+                  style={styles.input}
+                  placeholder="$0"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+        );
+
+      case 4:
+        return (
+          <div style={styles.stepContent}>
+            <h2 style={styles.stepTitle}>Choose Your Account</h2>
+            <div style={styles.accountGrid}>
+              {accountTypes.map((account) => (
+                <div
+                  key={account.id}
+                  style={{
+                    ...styles.accountCard,
+                    ...(formData.accountType === account.id ? styles.accountCardSelected : {})
+                  }}
+                  onClick={() => setFormData(prev => ({ ...prev, accountType: account.id }))}
+                >
+                  <div style={styles.accountIcon}>{account.icon}</div>
+                  <h3 style={styles.accountName}>{account.name}</h3>
+                  <div style={styles.accountRate}>{account.rate}</div>
+                  <p style={styles.accountDescription}>{account.description}</p>
+                  <div style={styles.minDeposit}>Min. Deposit: ${account.minDeposit}</div>
+                  <ul style={styles.featuresList}>
+                    {account.features.map((feature, index) => (
+                      <li key={index} style={styles.featureItem}>
+                        <span style={styles.checkmark}>✓</span>
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+
+            {formData.accountType && (
+              <div style={styles.depositSection}>
+                <label style={styles.label}>Initial Deposit Amount *</label>
+                <input
+                  type="number"
+                  name="initialDeposit"
+                  value={formData.initialDeposit}
+                  onChange={handleInputChange}
+                  style={styles.input}
+                  placeholder="$0"
+                  required
+                />
+              </div>
+            )}
+          </div>
+        );
+
+      case 5:
+        return (
+          <div style={styles.stepContent}>
+            <h2 style={styles.stepTitle}>Terms & Verification</h2>
+            <div style={styles.termsSection}>
+              <div style={styles.checkboxGroup}>
+                <input
+                  type="checkbox"
+                  id="terms"
+                  name="termsAccepted"
+                  checked={formData.termsAccepted}
+                  onChange={handleInputChange}
+                  style={styles.checkbox}
+                  required
+                />
+                <label htmlFor="terms" style={styles.checkboxLabel}>
+                  I agree to the <Link href="/terms" style={styles.link}>Terms of Service</Link> and 
+                  <Link href="/disclosures" style={styles.link}> Account Disclosures</Link>
+                </label>
+              </div>
+
+              <div style={styles.checkboxGroup}>
+                <input
+                  type="checkbox"
+                  id="privacy"
+                  name="privacyAccepted"
+                  checked={formData.privacyAccepted}
+                  onChange={handleInputChange}
+                  style={styles.checkbox}
+                  required
+                />
+                <label htmlFor="privacy" style={styles.checkboxLabel}>
+                  I agree to the <Link href="/privacy" style={styles.link}>Privacy Policy</Link>
+                </label>
+              </div>
+            </div>
+
+            <div style={styles.summarySection}>
+              <h3 style={styles.summaryTitle}>Application Summary</h3>
+              <div style={styles.summaryGrid}>
+                <div style={styles.summaryItem}>
+                  <strong>Name:</strong> {formData.firstName} {formData.lastName}
+                </div>
+                <div style={styles.summaryItem}>
+                  <strong>Email:</strong> {formData.email}
+                </div>
+                <div style={styles.summaryItem}>
+                  <strong>Account Type:</strong> {accountTypes.find(a => a.id === formData.accountType)?.name}
+                </div>
+                <div style={styles.summaryItem}>
+                  <strong>Initial Deposit:</strong> ${formData.initialDeposit}
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div style={styles.pageContainer}>
+      {/* Header */}
+      <header style={styles.header}>
+        <div style={styles.headerContainer}>
+          <Link href="/" style={styles.logoSection}>
+            <img src="/images/logo-primary.png.jpg" alt="Oakline Bank" style={styles.logo} />
+            <div>
+              <div style={styles.bankName}>Oakline Bank</div>
+              <div style={styles.bankTagline}>Your Financial Partner</div>
+            </div>
           </Link>
+
+          <div style={styles.headerActions}>
+            {user ? (
+              <Link href="/dashboard" style={styles.dashboardLink}>
+                <span style={styles.buttonIcon}>📊</span>
+                Dashboard
+              </Link>
+            ) : (
+              <Link href="/login" style={styles.loginLink}>
+                Sign In
+              </Link>
+            )}
+          </div>
         </div>
-      </div>
+      </header>
 
-      <style jsx>{`
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
+      {/* Main Content */}
+      <main style={styles.main}>
+        <div style={styles.container}>
+          {/* Progress Indicator */}
+          <div style={styles.progressContainer}>
+            <div style={styles.progressHeader}>
+              <h1 style={styles.mainTitle}>Open Your Oakline Bank Account</h1>
+              <p style={styles.mainSubtitle}>Step {currentStep} of 5</p>
+            </div>
 
-        @keyframes spin {
-          from {
-            transform: rotate(0deg);
-          }
-          to {
-            transform: rotate(360deg);
-          }
-        }
+            <div style={styles.progressBar}>
+              {[1, 2, 3, 4, 5].map((step) => (
+                <div
+                  key={step}
+                  style={{
+                    ...styles.progressStep,
+                    ...(step <= currentStep ? styles.progressStepActive : {})
+                  }}
+                >
+                  <div style={styles.stepNumber}>{step}</div>
+                  <div style={styles.stepLabel}>
+                    {step === 1 && 'Personal'}
+                    {step === 2 && 'Address'}
+                    {step === 3 && 'Employment'}
+                    {step === 4 && 'Account'}
+                    {step === 5 && 'Review'}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
 
-        @media (max-width: 768px) {
-          .grid-cols-2 {
-            grid-template-columns: 1fr !important;
-          }
-          .grid-cols-3 {
-            grid-template-columns: 1fr !important;
-          }
-        }
+          {/* Form Content */}
+          <div style={styles.formContainer}>
+            <form onSubmit={currentStep === 5 ? handleSubmit : (e) => e.preventDefault()}>
+              {renderStep()}
 
-        input:focus, select:focus {
-          outline: none !important;
-          border-color: #3b82f6 !important;
-          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
-        }
-      `}</style>
+              {/* Navigation Buttons */}
+              <div style={styles.buttonContainer}>
+                {currentStep > 1 && (
+                  <button
+                    type="button"
+                    onClick={handlePrevious}
+                    style={styles.secondaryButton}
+                  >
+                    Previous
+                  </button>
+                )}
+
+                {currentStep < 5 ? (
+                  <button
+                    type="button"
+                    onClick={handleNext}
+                    style={styles.primaryButton}
+                    disabled={!formData.firstName || !formData.lastName || !formData.email}
+                  >
+                    Next Step
+                  </button>
+                ) : (
+                  <button
+                    type="submit"
+                    style={{
+                      ...styles.primaryButton,
+                      ...(isSubmitting ? styles.buttonDisabled : {})
+                    }}
+                    disabled={isSubmitting || !formData.termsAccepted || !formData.privacyAccepted}
+                  >
+                    {isSubmitting ? 'Submitting...' : 'Submit Application'}
+                  </button>
+                )}
+              </div>
+            </form>
+          </div>
+        </div>
+      </main>
+
+      {/* Footer */}
+      <footer style={styles.footer}>
+        <div style={styles.footerContent}>
+          <p style={styles.footerText}>
+            © 2024 Oakline Bank. Member FDIC. Equal Housing Lender.
+          </p>
+          <div style={styles.footerLinks}>
+            <Link href="/privacy" style={styles.footerLink}>Privacy</Link>
+            <Link href="/terms" style={styles.footerLink}>Terms</Link>
+            <Link href="/support" style={styles.footerLink}>Support</Link>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
+
+const styles = {
+  pageContainer: {
+    minHeight: '100vh',
+    backgroundColor: '#f8fafc',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+  },
+
+  // Header Styles
+  header: {
+    backgroundColor: '#1a365d',
+    borderBottom: '3px solid #059669',
+    boxShadow: '0 4px 12px rgba(26, 54, 93, 0.2)'
+  },
+  headerContainer: {
+    maxWidth: '1200px',
+    margin: '0 auto',
+    padding: '1rem',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  },
+  logoSection: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '1rem',
+    textDecoration: 'none'
+  },
+  logo: {
+    height: '40px',
+    width: 'auto'
+  },
+  bankName: {
+    fontSize: '1.4rem',
+    fontWeight: '800',
+    color: '#ffffff'
+  },
+  bankTagline: {
+    fontSize: '0.75rem',
+    color: '#cbd5e1'
+  },
+  headerActions: {
+    display: 'flex',
+    gap: '1rem'
+  },
+  dashboardLink: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    padding: '0.5rem 1rem',
+    backgroundColor: 'white',
+    color: '#1a365d',
+    textDecoration: 'none',
+    borderRadius: '8px',
+    fontWeight: '600',
+    fontSize: '0.9rem'
+  },
+  loginLink: {
+    padding: '0.5rem 1rem',
+    color: '#059669',
+    textDecoration: 'none',
+    borderRadius: '8px',
+    fontWeight: '600',
+    fontSize: '0.9rem',
+    border: '2px solid #059669'
+  },
+
+  // Main Content
+  main: {
+    padding: '2rem 0',
+    minHeight: 'calc(100vh - 200px)'
+  },
+  container: {
+    maxWidth: '1000px',
+    margin: '0 auto',
+    padding: '0 1rem'
+  },
+
+  // Progress Section
+  progressContainer: {
+    marginBottom: '3rem'
+  },
+  progressHeader: {
+    textAlign: 'center',
+    marginBottom: '2rem'
+  },
+  mainTitle: {
+    fontSize: '2.5rem',
+    fontWeight: '900',
+    color: '#1a365d',
+    marginBottom: '0.5rem'
+  },
+  mainSubtitle: {
+    fontSize: '1.1rem',
+    color: '#64748b'
+  },
+  progressBar: {
+    display: 'flex',
+    justifyContent: 'center',
+    gap: '2rem',
+    flexWrap: 'wrap'
+  },
+  progressStep: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '0.5rem',
+    opacity: 0.5
+  },
+  progressStepActive: {
+    opacity: 1
+  },
+  stepNumber: {
+    width: '40px',
+    height: '40px',
+    borderRadius: '50%',
+    backgroundColor: '#059669',
+    color: 'white',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontWeight: '700'
+  },
+  stepLabel: {
+    fontSize: '0.9rem',
+    fontWeight: '600',
+    color: '#64748b'
+  },
+
+  // Form Container
+  formContainer: {
+    backgroundColor: 'white',
+    borderRadius: '20px',
+    padding: '3rem',
+    boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
+    border: '2px solid #e2e8f0'
+  },
+  stepContent: {
+    marginBottom: '2rem'
+  },
+  stepTitle: {
+    fontSize: '1.8rem',
+    fontWeight: '800',
+    color: '#1a365d',
+    marginBottom: '1.5rem',
+    textAlign: 'center'
+  },
+
+  // Form Elements
+  formGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+    gap: '1.5rem'
+  },
+  inputGroup: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.5rem'
+  },
+  label: {
+    fontSize: '0.9rem',
+    fontWeight: '600',
+    color: '#374151'
+  },
+  input: {
+    padding: '0.75rem',
+    borderRadius: '8px',
+    border: '2px solid #e2e8f0',
+    fontSize: '1rem',
+    transition: 'border-color 0.3s ease'
+  },
+  select: {
+    padding: '0.75rem',
+    borderRadius: '8px',
+    border: '2px solid #e2e8f0',
+    fontSize: '1rem',
+    backgroundColor: 'white',
+    transition: 'border-color 0.3s ease'
+  },
+
+  // Account Selection
+  accountGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+    gap: '1.5rem',
+    marginBottom: '2rem'
+  },
+  accountCard: {
+    padding: '2rem',
+    border: '2px solid #e2e8f0',
+    borderRadius: '16px',
+    textAlign: 'center',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    backgroundColor: 'white'
+  },
+  accountCardSelected: {
+    borderColor: '#059669',
+    backgroundColor: '#f0fdf4',
+    boxShadow: '0 8px 25px rgba(5, 150, 105, 0.15)'
+  },
+  accountIcon: {
+    fontSize: '3rem',
+    marginBottom: '1rem'
+  },
+  accountName: {
+    fontSize: '1.3rem',
+    fontWeight: '800',
+    color: '#1a365d',
+    marginBottom: '0.5rem'
+  },
+  accountRate: {
+    fontSize: '1.1rem',
+    fontWeight: '700',
+    color: '#059669',
+    marginBottom: '1rem'
+  },
+  accountDescription: {
+    fontSize: '0.95rem',
+    color: '#64748b',
+    marginBottom: '1rem',
+    lineHeight: '1.5'
+  },
+  minDeposit: {
+    fontSize: '0.9rem',
+    fontWeight: '600',
+    color: '#374151',
+    marginBottom: '1rem'
+  },
+  featuresList: {
+    listStyle: 'none',
+    padding: 0,
+    margin: 0
+  },
+  featureItem: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    fontSize: '0.85rem',
+    color: '#64748b',
+    marginBottom: '0.5rem'
+  },
+  checkmark: {
+    color: '#059669',
+    fontWeight: '700'
+  },
+  depositSection: {
+    maxWidth: '300px',
+    margin: '0 auto'
+  },
+
+  // Terms Section
+  termsSection: {
+    marginBottom: '2rem'
+  },
+  checkboxGroup: {
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: '0.75rem',
+    marginBottom: '1rem'
+  },
+  checkbox: {
+    width: '18px',
+    height: '18px',
+    marginTop: '2px'
+  },
+  checkboxLabel: {
+    fontSize: '0.95rem',
+    color: '#374151',
+    lineHeight: '1.5'
+  },
+  link: {
+    color: '#059669',
+    textDecoration: 'none',
+    fontWeight: '600'
+  },
+
+  // Summary Section
+  summarySection: {
+    backgroundColor: '#f8fafc',
+    padding: '1.5rem',
+    borderRadius: '12px',
+    marginBottom: '2rem'
+  },
+  summaryTitle: {
+    fontSize: '1.2rem',
+    fontWeight: '700',
+    color: '#1a365d',
+    marginBottom: '1rem'
+  },
+  summaryGrid: {
+    display: 'grid',
+    gap: '0.75rem'
+  },
+  summaryItem: {
+    fontSize: '0.95rem',
+    color: '#374151'
+  },
+
+  // Buttons
+  buttonContainer: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    gap: '1rem',
+    paddingTop: '2rem',
+    borderTop: '2px solid #e2e8f0'
+  },
+  primaryButton: {
+    padding: '1rem 2rem',
+    backgroundColor: '#059669',
+    color: 'white',
+    border: 'none',
+    borderRadius: '10px',
+    fontSize: '1rem',
+    fontWeight: '700',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    boxShadow: '0 4px 12px rgba(5, 150, 105, 0.3)'
+  },
+  secondaryButton: {
+    padding: '1rem 2rem',
+    backgroundColor: 'transparent',
+    color: '#1a365d',
+    border: '2px solid #1a365d',
+    borderRadius: '10px',
+    fontSize: '1rem',
+    fontWeight: '700',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease'
+  },
+  buttonDisabled: {
+    opacity: 0.6,
+    cursor: 'not-allowed'
+  },
+  buttonIcon: {
+    fontSize: '1rem'
+  },
+
+  // Footer
+  footer: {
+    backgroundColor: '#1a365d',
+    color: 'white',
+    padding: '2rem 0',
+    marginTop: '3rem'
+  },
+  footerContent: {
+    maxWidth: '1200px',
+    margin: '0 auto',
+    padding: '0 1rem',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: '1rem'
+  },
+  footerText: {
+    fontSize: '0.9rem',
+    opacity: 0.8
+  },
+  footerLinks: {
+    display: 'flex',
+    gap: '2rem'
+  },
+  footerLink: {
+    color: '#cbd5e1',
+    textDecoration: 'none',
+    fontSize: '0.9rem',
+    transition: 'color 0.3s ease'
+  },
+
+  // Mobile Responsive
+  '@media (max-width: 768px)': {
+    headerContainer: {
+      flexDirection: 'column',
+      gap: '1rem'
+    },
+    mainTitle: {
+      fontSize: '2rem'
+    },
+    formContainer: {
+      padding: '2rem 1rem'
+    },
+    progressBar: {
+      gap: '1rem'
+    },
+    buttonContainer: {
+      flexDirection: 'column'
+    },
+    footerContent: {
+      flexDirection: 'column',
+      textAlign: 'center'
+    }
+  }
+};
