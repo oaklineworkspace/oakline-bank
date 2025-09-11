@@ -555,14 +555,15 @@ export default function Home() {
 
           <div style={styles.featureShowcaseContainer}>
             <div style={styles.featureContent}>
-              <div style={{
-                ...styles.featureImageContainer,
-                ...(isVisible['features-showcase'] ? styles.slideInFromLeft : {})
-              }}>
+              <div style={styles.featureImageContainer}>
                 <img
                   src={bankingFeatures[currentFeatureSlide].image}
                   alt={bankingFeatures[currentFeatureSlide].title}
                   style={styles.featureImage}
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    e.target.parentNode.innerHTML = `<div style="height: 300px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; border-radius: 12px; color: #666; font-size: 2rem;">📷</div>`;
+                  }}
                 />
                 <div style={styles.featureImageOverlay}>
                   <div style={{
