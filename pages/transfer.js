@@ -58,77 +58,78 @@ export default function Transfer() {
       }
 
       let accountsData = [];
-      let userApplication = null;
       
-      // Method 1: Get user's application first for security validation
-      try {
-        const { data: appData, error: appError } = await supabase
-          .from('applications')
-          .select('id')
-          .eq('email', user.email)
-          .single();
+      // First, get the user's profile to find their application_id
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('application_id')
+        .eq('id', user.id)
+        .single();
 
-        if (appData && !appError) {
-          userApplication = appData;
-        }
-      } catch (appError) {
-        console.log('No application found for user email');
-      }
-
-      // Method 2: Try by user_id with strict validation
-      const { data: accountsByUserId, error: userIdError } = await supabase
-        .from('accounts')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('status', 'active')
-        .order('created_at', { ascending: true });
-
-      if (accountsByUserId && accountsByUserId.length > 0) {
-        // Double-check these accounts actually belong to this user
-        const userOwnedAccounts = accountsByUserId.filter(account => {
-          const belongsToUser = account.user_id === user.id;
-          const belongsToEmail = account.email === user.email || account.user_email === user.email;
-          const belongsToApplication = userApplication && account.application_id === userApplication.id;
-          
-          return belongsToUser && (belongsToEmail || belongsToApplication);
-        });
-
-        if (userOwnedAccounts.length > 0) {
-          accountsData = userOwnedAccounts;
-          console.log('Found validated accounts by user_id:', accountsData.length);
-        }
-      }
-
-      // Method 3: If no accounts found by user_id, try through application
-      if (accountsData.length === 0 && userApplication) {
-        const { data: accountsByAppId, error: appAccountsError } = await supabase
+      if (profileError || !profile?.application_id) {
+        console.log('No profile/application found, trying direct account lookup');
+        
+        // Fallback: Try direct account lookup by user_id only
+        const { data: directAccounts, error: directError } = await supabase
           .from('accounts')
           .select('*')
-          .eq('application_id', userApplication.id)
+          .eq('user_id', user.id)
           .eq('status', 'active')
           .order('created_at', { ascending: true });
 
-        if (accountsByAppId && accountsByAppId.length > 0) {
-          // Validate these accounts belong to the current user
-          const validatedAccounts = accountsByAppId.filter(account => {
-            const emailMatches = account.email === user.email || account.user_email === user.email;
-            const appMatches = account.application_id === userApplication.id;
-            return emailMatches && appMatches;
-          });
+        if (!directError && directAccounts && directAccounts.length > 0) {
+          // Additional security check - ensure these accounts really belong to this user
+          accountsData = directAccounts.filter(account => account.user_id === user.id);
+        }
+      } else {
+        // Primary method: Get accounts through application_id with security validation
+        const { data: accounts, error: accountsError } = await supabase
+          .from('accounts')
+          .select(`
+            *,
+            applications!inner (
+              id,
+              email,
+              first_name,
+              last_name
+            )
+          `)
+          .eq('application_id', profile.application_id)
+          .eq('status', 'active')
+          .order('created_at', { ascending: true });
 
-          if (validatedAccounts.length > 0) {
-            accountsData = validatedAccounts;
-            console.log('Found validated accounts by application_id:', accountsData.length);
+        if (!accountsError && accounts && accounts.length > 0) {
+          // Security validation: ensure the application belongs to the current user
+          const validAccounts = accounts.filter(account => {
+            const applicationMatches = account.application_id === profile.application_id;
+            const emailMatches = account.applications?.email === user.email;
+            return applicationMatches && emailMatches;
+          });
+          
+          if (validAccounts.length > 0) {
+            accountsData = validAccounts;
+            console.log('Found validated accounts through application:', accountsData.length);
           }
         }
       }
 
       // Final validation and setup
       if (accountsData.length > 0) {
-        setAccounts(accountsData);
-        setFromAccount(accountsData[0].id.toString());
-        setMessage('');
-        console.log('Successfully loaded user accounts:', accountsData.length);
+        // One final security check - ensure all accounts belong to the current user
+        const secureAccounts = accountsData.filter(account => {
+          return account.user_id === user.id || 
+                 (account.applications && account.applications.email === user.email);
+        });
+        
+        if (secureAccounts.length > 0) {
+          setAccounts(secureAccounts);
+          setFromAccount(secureAccounts[0].id.toString());
+          setMessage('');
+          console.log('Successfully loaded secure user accounts:', secureAccounts.length);
+        } else {
+          setAccounts([]);
+          setMessage('No verified accounts found. Please contact support.');
+        }
       } else {
         setAccounts([]);
         setMessage('No accounts found for your profile. Please contact support or apply for an account first.');

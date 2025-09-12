@@ -48,7 +48,7 @@ export default function Home() {
       if (activeDropdown) {
         const dropdownElement = event.target.closest('.navigationDropdown');
         const backdropElement = event.target.closest('[style*="backdrop"]');
-        
+
         if (!dropdownElement && !backdropElement) {
           setActiveDropdown(null);
         }
@@ -61,7 +61,7 @@ export default function Home() {
         setActiveDropdown(null);
       }
     });
-    
+
     const cleanup = () => {
       document.removeEventListener('click', handleClickOutside);
       document.removeEventListener('keydown', (e) => {
@@ -1451,9 +1451,9 @@ export default function Home() {
 const styles = {
   // Main Header Styles
   mainHeader: {
-    backgroundColor: '#1a365d',
-    borderBottom: '3px solid #059669',
-    boxShadow: '0 4px 12px rgba(26, 54, 93, 0.2)',
+    backgroundColor: '#1A3E6F',
+    borderBottom: '3px solid #FFC857',
+    boxShadow: '0 4px 12px rgba(26, 62, 111, 0.2)',
     position: 'sticky',
     top: 0,
     zIndex: 1000,
@@ -1496,7 +1496,7 @@ const styles = {
   bankName: {
     fontSize: '1.6rem',
     fontWeight: '800',
-    color: '#ffffff',
+    color: 'white',
     lineHeight: '1'
   },
   bankTagline: {
@@ -2615,7 +2615,7 @@ const styles = {
     padding: '2.5rem',
     borderRadius: '20px',
     textAlign: 'center',
-    boxShadow: '0 15px 35px rgba(0,0,0,0.08)',
+    boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
     border: '2px solid #e2e8f0',
     transition: 'all 0.4s ease',
     position: 'relative',
