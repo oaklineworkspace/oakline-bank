@@ -47,7 +47,7 @@ export default function LoginPage() {
       <header style={styles.header}>
         <div style={styles.headerContent}>
           <Link href="/" style={styles.logoContainer}>
-            <img src="/images/logo-primary.png.jpg" alt="Oakline Bank" style={styles.logo} />
+            <img src="/images/logo-primary.png" alt="Oakline Bank" style={styles.logo} />
             <div style={styles.brandInfo}>
               <span style={styles.bankName}>Oakline Bank</span>
               <span style={styles.tagline}>Your Financial Partner</span>

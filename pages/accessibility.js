@@ -153,7 +153,7 @@ export default function Accessibility() {
             <li style={styles.listItem}>Braille materials</li>
             <li style={styles.listItem}>Audio recordings</li>
             <li style={styles.listItem}>Electronic formats compatible with screen readers</li>
-            <li style={styles.listItem">Plain language versions of complex documents</li>
+            <li style={styles.listItem}>Plain language versions of complex documents</li>
           </ul>
         </div>
 

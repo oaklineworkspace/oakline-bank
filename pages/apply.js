@@ -1026,7 +1026,7 @@ export default function Apply() {
         <div style={styles.header}>
           <div style={styles.logoContainer}>
             <img
-              src="/images/logo-primary.png.jpg"
+              src="/images/logo-primary.png"
               alt="Oakline Bank"
               style={styles.logo}
               onError={(e) => {
