@@ -49,63 +49,70 @@ export default function Transfer() {
     try {
       console.log('Fetching accounts for user:', { id: user.id, email: user.email });
       
-      // Try multiple approaches to find accounts
-      let accountsData = [];
-      
-      // First, get user's application to find linked accounts
-      const { data: userApplication, error: appError } = await supabase
-        .from('applications')
-        .select('id')
-        .eq('email', user.email)
-        .single();
-
-      if (userApplication) {
-        // Try to find accounts linked to the application
-        const { data: accountsByAppId, error: error1 } = await supabase
-          .from('accounts')
-          .select('*')
-          .eq('application_id', userApplication.id)
-          .order('created_at', { ascending: true });
-
-        if (accountsByAppId && accountsByAppId.length > 0) {
-          accountsData = accountsByAppId;
-        }
+      // Ensure we have a valid user
+      if (!user || !user.id || !user.email) {
+        console.error('Invalid user object');
+        setMessage('Authentication error. Please log in again.');
+        setAccounts([]);
+        return;
       }
 
-      // If no accounts found by application, try other methods
-      if (accountsData.length === 0) {
-        // Try by user_id
-        const { data: accountsByUserId, error: error2 } = await supabase
-          .from('accounts')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: true });
+      let accountsData = [];
+      
+      // Method 1: Try by user_id (most reliable)
+      const { data: accountsByUserId, error: userIdError } = await supabase
+        .from('accounts')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .order('created_at', { ascending: true });
 
-        if (accountsByUserId && accountsByUserId.length > 0) {
-          accountsData = accountsByUserId;
-        } else {
-          // Try by email variations
-          const { data: accountsByEmail, error: error3 } = await supabase
+      if (accountsByUserId && accountsByUserId.length > 0) {
+        accountsData = accountsByUserId;
+        console.log('Found accounts by user_id:', accountsData.length);
+      } else {
+        // Method 2: Try through user's application
+        const { data: userApplication, error: appError } = await supabase
+          .from('applications')
+          .select('id')
+          .eq('email', user.email)
+          .single();
+
+        if (userApplication && !appError) {
+          const { data: accountsByAppId, error: appAccountsError } = await supabase
             .from('accounts')
             .select('*')
-            .or(`user_email.eq.${user.email},email.eq.${user.email}`)
+            .eq('application_id', userApplication.id)
+            .eq('status', 'active')
             .order('created_at', { ascending: true });
 
-          if (accountsByEmail && accountsByEmail.length > 0) {
-            accountsData = accountsByEmail;
+          if (accountsByAppId && accountsByAppId.length > 0) {
+            accountsData = accountsByAppId;
+            console.log('Found accounts by application_id:', accountsData.length);
           }
         }
       }
 
-      console.log('Found accounts:', accountsData);
-      
-      if (accountsData && accountsData.length > 0) {
-        setAccounts(accountsData);
-        setFromAccount(accountsData[0].id.toString());
-        setMessage(''); // Clear any error messages
+      // Validate that accounts belong to the current user
+      if (accountsData.length > 0) {
+        // Additional security check - ensure accounts belong to current user
+        const validAccounts = accountsData.filter(account => {
+          return account.user_id === user.id || 
+                 (account.application_id && userApplication?.id === account.application_id);
+        });
+
+        if (validAccounts.length > 0) {
+          setAccounts(validAccounts);
+          setFromAccount(validAccounts[0].id.toString());
+          setMessage('');
+          console.log('Successfully loaded user accounts:', validAccounts.length);
+        } else {
+          setAccounts([]);
+          setMessage('No valid accounts found for your user. Please contact support.');
+        }
       } else {
         setAccounts([]);
-        setMessage('No accounts found. Please contact support if you believe this is an error.');
+        setMessage('No accounts found. Please contact support to set up your accounts.');
       }
     } catch (error) {
       console.error('Error fetching accounts:', error);

@@ -45,14 +45,28 @@ export default function Home() {
 
     // Close dropdown when clicking outside
     const handleClickOutside = (event) => {
-      if (activeDropdown && !event.target.closest('.navigationDropdown')) {
-        setActiveDropdown(null);
+      if (activeDropdown) {
+        const dropdownElement = event.target.closest('.navigationDropdown');
+        const backdropElement = event.target.closest('[style*="backdrop"]');
+        
+        if (!dropdownElement && !backdropElement) {
+          setActiveDropdown(null);
+        }
       }
     };
 
     document.addEventListener('click', handleClickOutside);
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && activeDropdown) {
+        setActiveDropdown(null);
+      }
+    });
+    
     const cleanup = () => {
       document.removeEventListener('click', handleClickOutside);
+      document.removeEventListener('keydown', (e) => {
+        if (e.key === 'Escape') setActiveDropdown(null);
+      });
     };
 
     // Auto-slide for hero images
@@ -360,33 +374,23 @@ export default function Home() {
                   <div style={styles.bankingDropdownMenuCentered}>
                     <div style={styles.bankingDropdownGrid}>
                       <div style={styles.bankingDropdownSection}>
-                        <h4 style={styles.bankingDropdownSectionTitle}>💳 Account Types</h4>
-                        <Link href="/account-types" style={styles.bankingDropdownLink}>
-                          <span style={styles.bankingDropdownIcon}>💰</span>
+                        <h4 style={styles.bankingDropdownSectionTitle}>💳 All 23 Account Types</h4>
+                        <div style={styles.accountTypesList}>
+                          {accountTypes.slice(0, 8).map((account, index) => (
+                            <Link key={index} href="/account-types" style={styles.bankingDropdownLink}>
+                              <span style={styles.bankingDropdownIcon}>{account.icon}</span>
+                              <div>
+                                <div style={styles.bankingDropdownTitle}>{account.name}</div>
+                                <div style={styles.bankingDropdownDesc}>{account.rate}</div>
+                              </div>
+                            </Link>
+                          ))}
+                        </div>
+                        <Link href="/account-types" style={styles.viewAllAccountsLink}>
+                          <span style={styles.bankingDropdownIcon}>👀</span>
                           <div>
-                            <div style={styles.bankingDropdownTitle}>Checking Accounts</div>
-                            <div style={styles.bankingDropdownDesc}>Premium & standard options</div>
-                          </div>
-                        </Link>
-                        <Link href="/account-types" style={styles.bankingDropdownLink}>
-                          <span style={styles.bankingDropdownIcon}>⭐</span>
-                          <div>
-                            <div style={styles.bankingDropdownTitle}>Savings Accounts</div>
-                            <div style={styles.bankingDropdownDesc}>High-yield savings</div>
-                          </div>
-                        </Link>
-                        <Link href="/account-types" style={styles.bankingDropdownLink}>
-                          <span style={styles.bankingDropdownIcon}>🏢</span>
-                          <div>
-                            <div style={styles.bankingDropdownTitle}>Business Accounts</div>
-                            <div style={styles.bankingDropdownDesc}>Professional banking</div>
-                          </div>
-                        </Link>
-                        <Link href="/cards" style={styles.bankingDropdownLink}>
-                          <span style={styles.bankingDropdownIcon}>💳</span>
-                          <div>
-                            <div style={styles.bankingDropdownTitle}>Debit & Credit Cards</div>
-                            <div style={styles.bankingDropdownDesc}>Rewards & cashback</div>
+                            <div style={styles.bankingDropdownTitle}>View All 23 Account Types</div>
+                            <div style={styles.bankingDropdownDesc}>Complete list with details</div>
                           </div>
                         </Link>
                       </div>
@@ -1454,9 +1458,9 @@ export default function Home() {
 const styles = {
   // Main Header Styles
   mainHeader: {
-    background: 'linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%)',
-    borderBottom: '3px solid #3b82f6',
-    boxShadow: '0 4px 20px rgba(30, 58, 138, 0.3)',
+    backgroundColor: '#1a365d',
+    borderBottom: '3px solid #059669',
+    boxShadow: '0 4px 12px rgba(26, 54, 93, 0.2)',
     position: 'sticky',
     top: 0,
     zIndex: 1000,
@@ -1519,7 +1523,7 @@ const styles = {
     alignItems: 'center',
     gap: '0.5rem',
     padding: '0.6rem 0.9rem',
-    backgroundColor: 'transparent',
+    backgroundColor: 'rgba(255,255,255,0.1)',
     border: '2px solid rgba(255, 255, 255, 0.3)',
     borderRadius: '8px',
     cursor: 'pointer',
@@ -1740,6 +1744,26 @@ const styles = {
     fontSize: '0.8rem',
     color: '#64748b',
     fontWeight: '500'
+  },
+  accountTypesList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.5rem',
+    maxHeight: '300px',
+    overflowY: 'auto',
+    marginBottom: '1rem'
+  },
+  viewAllAccountsLink: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.75rem',
+    padding: '0.8rem',
+    borderRadius: '8px',
+    backgroundColor: '#f0f9ff',
+    border: '2px solid #0ea5e9',
+    textDecoration: 'none',
+    transition: 'all 0.3s ease',
+    cursor: 'pointer'
   },
   bankingDropdownCTA: {
     display: 'flex',
