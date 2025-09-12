@@ -52,35 +52,47 @@ export default function Transfer() {
       // Try multiple approaches to find accounts
       let accountsData = [];
       
-      // First try by user_id
-      const { data: accountsByUserId, error: error1 } = await supabase
-        .from('accounts')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: true });
+      // First, get user's application to find linked accounts
+      const { data: userApplication, error: appError } = await supabase
+        .from('applications')
+        .select('id')
+        .eq('email', user.email)
+        .single();
 
-      if (accountsByUserId && accountsByUserId.length > 0) {
-        accountsData = accountsByUserId;
-      } else {
-        // Try by email if user_id doesn't work
-        const { data: accountsByEmail, error: error2 } = await supabase
+      if (userApplication) {
+        // Try to find accounts linked to the application
+        const { data: accountsByAppId, error: error1 } = await supabase
           .from('accounts')
           .select('*')
-          .eq('user_email', user.email)
+          .eq('application_id', userApplication.id)
           .order('created_at', { ascending: true });
 
-        if (accountsByEmail && accountsByEmail.length > 0) {
-          accountsData = accountsByEmail;
+        if (accountsByAppId && accountsByAppId.length > 0) {
+          accountsData = accountsByAppId;
+        }
+      }
+
+      // If no accounts found by application, try other methods
+      if (accountsData.length === 0) {
+        // Try by user_id
+        const { data: accountsByUserId, error: error2 } = await supabase
+          .from('accounts')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: true });
+
+        if (accountsByUserId && accountsByUserId.length > 0) {
+          accountsData = accountsByUserId;
         } else {
-          // Try by email field
-          const { data: accountsByEmailField, error: error3 } = await supabase
+          // Try by email variations
+          const { data: accountsByEmail, error: error3 } = await supabase
             .from('accounts')
             .select('*')
-            .eq('email', user.email)
+            .or(`user_email.eq.${user.email},email.eq.${user.email}`)
             .order('created_at', { ascending: true });
 
-          if (accountsByEmailField && accountsByEmailField.length > 0) {
-            accountsData = accountsByEmailField;
+          if (accountsByEmail && accountsByEmail.length > 0) {
+            accountsData = accountsByEmail;
           }
         }
       }

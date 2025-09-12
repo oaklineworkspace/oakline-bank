@@ -50,18 +50,54 @@ export default function Dashboard() {
         setUserProfile(profile);
       }
 
-      // Fetch accounts
-      let { data: accountsData } = await supabase
-        .from('accounts')
-        .select('*')
-        .eq('user_id', user.id);
+      // Fetch accounts with better error handling
+      let accountsData = [];
 
-      if (!accountsData || accountsData.length === 0) {
-        const { data: emailAccounts } = await supabase
-          .from('accounts')
-          .select('*')
-          .eq('email', user.email);
-        accountsData = emailAccounts;
+      try {
+        // First try to get user's application to find linked accounts
+        const { data: userApplication } = await supabase
+          .from('applications')
+          .select('id')
+          .eq('email', user.email)
+          .single();
+
+        if (userApplication) {
+          // Try to find accounts linked to the application
+          const { data: accountsByAppId } = await supabase
+            .from('accounts')
+            .select('*')
+            .eq('application_id', userApplication.id)
+            .order('created_at', { ascending: true });
+
+          if (accountsByAppId && accountsByAppId.length > 0) {
+            accountsData = accountsByAppId;
+          }
+        }
+
+        // If no accounts found by application, try other methods
+        if (accountsData.length === 0) {
+          const { data: accountsByUserId } = await supabase
+            .from('accounts')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: true });
+
+          if (accountsByUserId && accountsByUserId.length > 0) {
+            accountsData = accountsByUserId;
+          } else {
+            // Try by email
+            const { data: accountsByEmail } = await supabase
+              .from('accounts')
+              .select('*')
+              .or(`user_email.eq.${user.email},email.eq.${user.email}`)
+              .order('created_at', { ascending: true });
+
+            accountsData = accountsByEmail || [];
+          }
+        }
+      } catch (accountError) {
+        console.error('Error fetching accounts:', accountError);
+        accountsData = [];
       }
 
       setAccounts(accountsData || []);

@@ -1517,11 +1517,11 @@ const styles = {
   modernMenuButton: {
     display: 'flex',
     alignItems: 'center',
-    gap: '0.8rem',
-    padding: '0.8rem 1.2rem',
+    gap: '0.5rem',
+    padding: '0.6rem 0.9rem',
     backgroundColor: 'transparent',
     border: '2px solid rgba(255, 255, 255, 0.3)',
-    borderRadius: '12px',
+    borderRadius: '8px',
     cursor: 'pointer',
     transition: 'all 0.3s ease',
     backdropFilter: 'blur(10px)',
@@ -1530,8 +1530,8 @@ const styles = {
   hamburgerLines: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '3px',
-    width: '20px'
+    gap: '2px',
+    width: '16px'
   },
   hamburgerLine: {
     width: '100%',
@@ -1541,7 +1541,7 @@ const styles = {
     transition: 'all 0.3s ease'
   },
   menuText: {
-    fontSize: '0.9rem',
+    fontSize: '0.8rem',
     fontWeight: '600',
     color: 'white'
   },
@@ -1662,17 +1662,17 @@ const styles = {
     left: '50%',
     transform: 'translate(-50%, -50%)',
     backgroundColor: 'white',
-    borderRadius: '20px',
-    boxShadow: '0 25px 50px rgba(26, 54, 93, 0.25)',
+    borderRadius: '16px',
+    boxShadow: '0 15px 30px rgba(26, 54, 93, 0.2)',
     border: '2px solid #059669',
-    padding: '2.5rem',
-    minWidth: '520px',
-    maxWidth: '90vw',
-    maxHeight: '80vh',
+    padding: '1.5rem',
+    minWidth: '420px',
+    maxWidth: '85vw',
+    maxHeight: '70vh',
     overflowY: 'auto',
     zIndex: 10000,
     animation: 'dropdownSlideIn 0.4s ease-out',
-    backdropFilter: 'blur(20px)',
+    backdropFilter: 'blur(15px)',
     background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.95) 100%)'
   },
   dropdownBackdrop: {
@@ -1687,8 +1687,8 @@ const styles = {
   bankingDropdownGrid: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '1.5rem',
-    marginBottom: '1.5rem'
+    gap: '1rem',
+    marginBottom: '1rem'
   },
   bankingDropdownSection: {
     display: 'flex',
@@ -1708,9 +1708,9 @@ const styles = {
   bankingDropdownLink: {
     display: 'flex',
     alignItems: 'center',
-    gap: '1rem',
-    padding: '0.875rem',
-    borderRadius: '10px',
+    gap: '0.75rem',
+    padding: '0.6rem',
+    borderRadius: '8px',
     backgroundColor: '#f8fafc',
     border: '1px solid #e2e8f0',
     textDecoration: 'none',
