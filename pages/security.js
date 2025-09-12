@@ -15,7 +15,14 @@ export default function Security() {
     smsAlerts: false,
     loginAlerts: true,
     transactionAlerts: true,
-    accountAccessAlerts: true
+    accountAccessAlerts: true,
+    fraudAlerts: true,
+    passwordChangeAlerts: true,
+    deviceLoginAlerts: true,
+    largeTransactionAlerts: true,
+    internationalTransactionAlerts: false,
+    accountLockAlerts: true,
+    suspiciousActivityAlerts: true
   });
   const [sessions, setSessions] = useState([]);
   const router = useRouter();
@@ -261,7 +268,7 @@ export default function Security() {
               checked={securitySettings.emailAlerts}
               onChange={(e) => updateSecuritySetting('emailAlerts', e.target.checked)}
             />
-            <span style={styles.slider}></span>
+            <span style={{...styles.slider, backgroundColor: securitySettings.emailAlerts ? '#10b981' : '#cbd5e0'}}></span>
           </label>
         </div>
 
@@ -278,7 +285,7 @@ export default function Security() {
               checked={securitySettings.loginAlerts}
               onChange={(e) => updateSecuritySetting('loginAlerts', e.target.checked)}
             />
-            <span style={styles.slider}></span>
+            <span style={{...styles.slider, backgroundColor: securitySettings.loginAlerts ? '#10b981' : '#cbd5e0'}}></span>
           </label>
         </div>
 
@@ -295,7 +302,143 @@ export default function Security() {
               checked={securitySettings.transactionAlerts}
               onChange={(e) => updateSecuritySetting('transactionAlerts', e.target.checked)}
             />
-            <span style={styles.slider}></span>
+            <span style={{...styles.slider, backgroundColor: securitySettings.transactionAlerts ? '#10b981' : '#cbd5e0'}}></span>
+          </label>
+        </div>
+
+        <div style={styles.securityItem}>
+          <div style={styles.securityInfo}>
+            <h3 style={styles.securityLabel}>SMS Alerts</h3>
+            <p style={styles.securityDescription}>
+              Receive security alerts via SMS
+            </p>
+          </div>
+          <label style={styles.switch}>
+            <input
+              type="checkbox"
+              checked={securitySettings.smsAlerts}
+              onChange={(e) => updateSecuritySetting('smsAlerts', e.target.checked)}
+            />
+            <span style={{...styles.slider, backgroundColor: securitySettings.smsAlerts ? '#10b981' : '#cbd5e0'}}></span>
+          </label>
+        </div>
+
+        <div style={styles.securityItem}>
+          <div style={styles.securityInfo}>
+            <h3 style={styles.securityLabel}>Fraud Detection Alerts</h3>
+            <p style={styles.securityDescription}>
+              Get notified of suspicious or fraudulent activity
+            </p>
+          </div>
+          <label style={styles.switch}>
+            <input
+              type="checkbox"
+              checked={securitySettings.fraudAlerts}
+              onChange={(e) => updateSecuritySetting('fraudAlerts', e.target.checked)}
+            />
+            <span style={{...styles.slider, backgroundColor: securitySettings.fraudAlerts ? '#10b981' : '#cbd5e0'}}></span>
+          </label>
+        </div>
+
+        <div style={styles.securityItem}>
+          <div style={styles.securityInfo}>
+            <h3 style={styles.securityLabel}>Password Change Alerts</h3>
+            <p style={styles.securityDescription}>
+              Be notified when your password is changed
+            </p>
+          </div>
+          <label style={styles.switch}>
+            <input
+              type="checkbox"
+              checked={securitySettings.passwordChangeAlerts}
+              onChange={(e) => updateSecuritySetting('passwordChangeAlerts', e.target.checked)}
+            />
+            <span style={{...styles.slider, backgroundColor: securitySettings.passwordChangeAlerts ? '#10b981' : '#cbd5e0'}}></span>
+          </label>
+        </div>
+
+        <div style={styles.securityItem}>
+          <div style={styles.securityInfo}>
+            <h3 style={styles.securityLabel}>New Device Login Alerts</h3>
+            <p style={styles.securityDescription}>
+              Get alerted when you login from a new device
+            </p>
+          </div>
+          <label style={styles.switch}>
+            <input
+              type="checkbox"
+              checked={securitySettings.deviceLoginAlerts}
+              onChange={(e) => updateSecuritySetting('deviceLoginAlerts', e.target.checked)}
+            />
+            <span style={{...styles.slider, backgroundColor: securitySettings.deviceLoginAlerts ? '#10b981' : '#cbd5e0'}}></span>
+          </label>
+        </div>
+
+        <div style={styles.securityItem}>
+          <div style={styles.securityInfo}>
+            <h3 style={styles.securityLabel}>Large Transaction Alerts</h3>
+            <p style={styles.securityDescription}>
+              Receive alerts for transactions over $1,000
+            </p>
+          </div>
+          <label style={styles.switch}>
+            <input
+              type="checkbox"
+              checked={securitySettings.largeTransactionAlerts}
+              onChange={(e) => updateSecuritySetting('largeTransactionAlerts', e.target.checked)}
+            />
+            <span style={{...styles.slider, backgroundColor: securitySettings.largeTransactionAlerts ? '#10b981' : '#cbd5e0'}}></span>
+          </label>
+        </div>
+
+        <div style={styles.securityItem}>
+          <div style={styles.securityInfo}>
+            <h3 style={styles.securityLabel}>International Transaction Alerts</h3>
+            <p style={styles.securityDescription}>
+              Get notified of transactions made outside the US
+            </p>
+          </div>
+          <label style={styles.switch}>
+            <input
+              type="checkbox"
+              checked={securitySettings.internationalTransactionAlerts}
+              onChange={(e) => updateSecuritySetting('internationalTransactionAlerts', e.target.checked)}
+            />
+            <span style={{...styles.slider, backgroundColor: securitySettings.internationalTransactionAlerts ? '#10b981' : '#cbd5e0'}}></span>
+          </label>
+        </div>
+
+        <div style={styles.securityItem}>
+          <div style={styles.securityInfo}>
+            <h3 style={styles.securityLabel}>Account Lock Alerts</h3>
+            <p style={styles.securityDescription}>
+              Be notified when your account is locked or frozen
+            </p>
+          </div>
+          <label style={styles.switch}>
+            <input
+              type="checkbox"
+              checked={securitySettings.accountLockAlerts}
+              onChange={(e) => updateSecuritySetting('accountLockAlerts', e.target.checked)}
+            />
+            <span style={{...styles.slider, backgroundColor: securitySettings.accountLockAlerts ? '#10b981' : '#cbd5e0'}}></span>
+          </label>
+        </div>
+
+        <div style={styles.securityItem}>
+          <div style={styles.securityInfo}>
+            <h3 style={styles.securityLabel}>Suspicious Activity Alerts</h3>
+            <p style={styles.securityDescription}>
+              Receive alerts for unusual account activity patterns
+            </p>
+          </div>
+          <label style={styles.switch}>
+            <input
+              type="checkbox"
+              checked={securitySettings.suspiciousActivityAlerts}
+              onChange={(e) => updateSecuritySetting('suspiciousActivityAlerts', e.target.checked)}
+            />
+            <span style={{...styles.slider, backgroundColor: securitySettings.suspiciousActivityAlerts ? '#10b981' : '#cbd5e0'}}></span>
           </label>
         </div>
       </div>
@@ -452,6 +595,36 @@ export default function Security() {
         @keyframes spin {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
+        }
+        
+        .switch input {
+          opacity: 0;
+          width: 0;
+          height: 0;
+        }
+        
+        .slider:before {
+          position: absolute;
+          content: "";
+          height: 18px;
+          width: 18px;
+          left: 3px;
+          bottom: 3px;
+          background-color: white;
+          transition: 0.4s;
+          border-radius: 50%;
+        }
+        
+        input:checked + .slider:before {
+          transform: translateX(26px);
+        }
+        
+        .slider.round {
+          border-radius: 24px;
+        }
+        
+        .slider.round:before {
+          border-radius: 50%;
         }
       `}</style>
     </div>
@@ -626,7 +799,7 @@ const styles = {
     right: 0,
     bottom: 0,
     backgroundColor: '#cbd5e0',
-    transition: '0.3s',
+    transition: '0.4s',
     borderRadius: '24px'
   },
   sessionItem: {

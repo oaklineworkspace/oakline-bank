@@ -673,7 +673,7 @@ export default function Home() {
             <h1 style={styles.heroTitle}>{bankingImages[currentSlide].title}</h1>
             <p style={styles.heroSubtitle}>{bankingImages[currentSlide].subtitle}</p>
 
-            {/* Bank Routing Number Display */}
+            {/* Routing Number Display */}
             <div style={styles.routingNumberCard}>
               <div style={styles.routingLabel}>Oakline Bank Routing Number</div>
               <div style={styles.routingNumber}>075915826</div>
@@ -1953,7 +1953,8 @@ const styles = {
     height: 'clamp(500px, 70vh, 700px)',
     overflow: 'hidden',
     width: '100%',
-    background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)'
+    background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
+    padding: '2.5rem 1rem',
   },
   heroParallax: {
     position: 'relative',
@@ -2040,6 +2041,35 @@ const styles = {
     lineHeight: '1.5',
     textShadow: '1px 2px 4px rgba(0,0,0,0.3)'
   },
+  heroActions: {
+    display: 'flex',
+    gap: '1rem',
+    justifyContent: 'center',
+    flexWrap: 'wrap',
+    marginTop: '1.5rem'
+  },
+  primaryButton: {
+    backgroundColor: '#10b981',
+    color: 'white',
+    border: 'none',
+    padding: '12px 24px',
+    borderRadius: '8px',
+    fontSize: '16px',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease'
+  },
+  secondaryButton: {
+    backgroundColor: 'transparent',
+    color: 'white',
+    border: '2px solid white',
+    padding: '12px 24px',
+    borderRadius: '8px',
+    fontSize: '16px',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease'
+  },
 
   // Routing Number Card
   routingNumberCard: {
@@ -2098,21 +2128,6 @@ const styles = {
     border: 'none',
     transform: 'translateY(0)',
     animation: 'buttonPulse 2s ease-in-out infinite'
-  },
-  secondaryButton: {
-    backgroundColor: 'transparent',
-    color: 'white',
-    textDecoration: 'none',
-    padding: 'clamp(1rem, 2vw, 1.3rem) clamp(1.5rem, 4vw, 2.5rem)',
-    borderRadius: '12px',
-    fontSize: 'clamp(0.9rem, 2vw, 1.1rem)',
-    fontWeight: '700',
-    border: '2px solid white',
-    transition: 'all 0.3s ease',
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '0.5rem',
-    backdropFilter: 'blur(10px)'
   },
 
   // Slide Indicators
@@ -2795,7 +2810,7 @@ const styles = {
     textDecoration: 'none',
     borderRadius: '12px',
     fontSize: 'clamp(1rem, 2.2vw, 1.1rem)',
-    fontWeight: '800',
+    fontWeight: '700',
     border: '2px solid #1a365d',
     transition: 'all 0.3s ease'
   },
@@ -3007,13 +3022,7 @@ const styles = {
     cursor: 'pointer'
   },
 
-  // Mobile Responsive Styles - moved to responsive.css
-  mobileHeaderContainer: {
-    flexDirection: 'column',
-    padding: '0.75rem',
-    gap: '1rem'
-  },
-    // Debit Card Showcase Section
+  // Debit Card Showcase Section
   debitCardShowcase: {
     padding: 'clamp(4rem, 8vw, 6rem) 0',
     backgroundColor: '#ffffff',
