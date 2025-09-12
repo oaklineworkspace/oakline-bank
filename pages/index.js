@@ -319,7 +319,8 @@ export default function Home() {
       {/* Single Clean Header */}
       <header style={styles.mainHeader}>
         <div style={styles.headerContainer}>
-          <div style={styles.leftSection}>
+          <div style={styles.topHeaderRow}>
+            {/* Logo Section */}
             <Link href="/" style={styles.logoSection}>
               <img src="/images/logo-primary.png.jpg" alt="Oakline Bank" style={styles.headerLogo} />
               <div style={styles.brandSection}>
@@ -327,50 +328,8 @@ export default function Home() {
                 <span style={styles.bankTagline}>Your Financial Partner</span>
               </div>
             </Link>
-          </div>
 
-          <div style={styles.headerActions}>
-            {/* Auth Buttons - Moved to Left */}
-            <div style={styles.authButtons}>
-              {user ? (
-                <>
-                  <Link href="/dashboard" style={styles.dashboardButtonWhite}>
-                    <span style={styles.buttonIcon}>📊</span>
-                    Dashboard
-                  </Link>
-                  <Link href="/main-menu" style={styles.menuButtonWhite}>
-                    <span style={styles.buttonIcon}>☰</span>
-                    Menu
-                  </Link>
-                  {/* Logout Button */}
-                  <button 
-                    style={styles.logoutButtonWhite}
-                    onClick={async () => {
-                      try {
-                        await supabase.auth.signOut();
-                        // Redirect to public home page
-                        window.location.href = '/';
-                      } catch (error) {
-                        console.error('Error signing out:', error);
-                      }
-                    }}
-                  >
-                    Logout
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link href="/enroll" style={styles.enrollButtonWhite}>
-                    <span style={styles.buttonIcon}>🌐</span>
-                    Enroll Online
-                  </Link>
-                  <Link href="/login" style={styles.loginButtonWhite}>Sign In</Link>
-                  <Link href="/apply" style={styles.applyButtonWhite}>Open Account</Link>
-                </>
-              )}
-            </div>
-
-            {/* Banking Features Dropdown - Moved to Right */}
+            {/* Banking Features Dropdown - Same level as logo */}
             <div style={styles.navigationDropdown}>
               <button 
                 style={styles.modernMenuButton}
@@ -486,6 +445,48 @@ export default function Home() {
                       </Link>
                     </div>
                   </div>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Auth Buttons Row */}
+          <div style={styles.authButtonsRow}>
+            <div style={styles.authButtons}>
+              {user ? (
+                <>
+                  <Link href="/dashboard" style={styles.dashboardButtonWhite}>
+                    <span style={styles.buttonIcon}>📊</span>
+                    Dashboard
+                  </Link>
+                  <Link href="/main-menu" style={styles.menuButtonWhite}>
+                    <span style={styles.buttonIcon}>☰</span>
+                    Menu
+                  </Link>
+                  {/* Logout Button */}
+                  <button 
+                    style={styles.logoutButtonWhite}
+                    onClick={async () => {
+                      try {
+                        await supabase.auth.signOut();
+                        // Redirect to public home page
+                        window.location.href = '/';
+                      } catch (error) {
+                        console.error('Error signing out:', error);
+                      }
+                    }}
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link href="/enroll" style={styles.enrollButtonWhite}>
+                    <span style={styles.buttonIcon}>🌐</span>
+                    Enroll Online
+                  </Link>
+                  <Link href="/login" style={styles.loginButtonWhite}>Sign In</Link>
+                  <Link href="/apply" style={styles.applyButtonWhite}>Open Account</Link>
                 </>
               )}
             </div>
@@ -750,7 +751,7 @@ export default function Home() {
                         key={index}
                         style={{
                           ...styles.accountCard,
-                          background: user ? 'linear-gradient(135deg, #1e293b 0%, #334155 100%)' : 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+                          backgroundImage: user ? 'linear-gradient(135deg, #1e293b 0%, #334155 100%)' : 'linear-gradient(135deg, #059669 0%, #047857 100%)',
                           ...(isVisible['account-types'] ? {
                             ...styles.flipInY,
                             animationDelay: `${index * 0.1}s`
@@ -1058,10 +1059,20 @@ const styles = {
     margin: '0 auto',
     padding: '1rem 1rem',
     display: 'flex',
+    flexDirection: 'column',
+    gap: '1rem'
+  },
+  topHeaderRow: {
+    display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    flexWrap: 'wrap',
-    gap: '1rem'
+    width: '100%'
+  },
+  authButtonsRow: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%'
   },
   logoSection: {
     display: 'flex',
@@ -2006,7 +2017,8 @@ const styles = {
     overflow: 'hidden',
     backdropFilter: 'blur(20px)',
     transform: 'translateY(0)',
-    animation: 'fadeInScale 0.8s ease-out forwards'
+    animation: 'fadeInScale 0.8s ease-out forwards',
+    background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)'
   },
   flipInY: {
     animation: 'flipInY 0.8s ease-out forwards'

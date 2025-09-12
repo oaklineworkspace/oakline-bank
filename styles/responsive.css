@@ -1,13 +1,12 @@
 @media (max-width: 768px) {
   .headerContainer {
-    flex-direction: column !important;
     padding: 0.75rem !important;
-    gap: 1rem !important;
+    gap: 0.75rem !important;
   }
 
-  .headerCenter {
-    order: 1 !important;
-    width: 100% !important;
+  .topHeaderRow {
+    flex-direction: column !important;
+    gap: 1rem !important;
     text-align: center !important;
   }
 
@@ -15,11 +14,13 @@
     order: 0 !important;
   }
 
-  .headerActions {
+  .navigationDropdown {
+    order: 1 !important;
+  }
+
+  .authButtonsRow {
     order: 2 !important;
-    width: 100% !important;
-    justify-content: space-between !important;
-    flex-wrap: wrap !important;
+    margin-top: 0.5rem !important;
   }
 
   .authButtons {
