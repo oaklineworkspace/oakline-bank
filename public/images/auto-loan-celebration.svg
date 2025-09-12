@@ -1,0 +1,37 @@
+
+<svg width="800" height="600" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg5" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#dc2626;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ef4444;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="800" height="600" fill="url(#bg5)"/>
+  
+  <!-- Car silhouette -->
+  <ellipse cx="400" cy="450" rx="150" ry="50" fill="#374151" opacity="0.8"/>
+  <rect x="300" y="420" width="200" height="30" rx="15" fill="#374151" opacity="0.8"/>
+  <circle cx="340" cy="470" r="20" fill="#1e293b"/>
+  <circle cx="460" cy="470" r="20" fill="#1e293b"/>
+  
+  <!-- Person with keys -->
+  <ellipse cx="200" cy="400" rx="50" ry="100" fill="#1e293b" opacity="0.8"/>
+  <circle cx="180" cy="380" r="8" fill="#fbbf24"/>
+  
+  <!-- Approval Certificate -->
+  <rect x="100" y="100" width="600" height="250" rx="20" fill="white" stroke="#dc2626" stroke-width="4"/>
+  
+  <!-- Certificate Content -->
+  <text x="400" y="150" text-anchor="middle" fill="#dc2626" font-family="Arial, sans-serif" font-size="32" font-weight="bold">AUTO LOAN APPROVED</text>
+  <text x="400" y="190" text-anchor="middle" fill="#374151" font-family="Arial, sans-serif" font-size="18">Michael Rodriguez</text>
+  <text x="400" y="230" text-anchor="middle" fill="#dc2626" font-family="Arial, sans-serif" font-size="32" font-weight="bold">$28,500</text>
+  <text x="400" y="260" text-anchor="middle" fill="#374151" font-family="Arial, sans-serif" font-size="16">2024 Honda Civic</text>
+  <text x="400" y="285" text-anchor="middle" fill="#374151" font-family="Arial, sans-serif" font-size="16">4.99% APR | 60 Months</text>
+  <text x="400" y="320" text-anchor="middle" fill="#1e40af" font-family="Arial, sans-serif" font-size="20" font-weight="bold">OAKLINE BANK</text>
+  
+  <!-- Stars -->
+  <polygon points="150,50 155,65 170,65 158,75 163,90 150,80 137,90 142,75 130,65 145,65" fill="#fbbf24"/>
+  <polygon points="650,80 655,95 670,95 658,105 663,120 650,110 637,120 642,105 630,95 645,95" fill="#fbbf24"/>
+</svg>

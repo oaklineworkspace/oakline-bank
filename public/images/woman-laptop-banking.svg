@@ -1,0 +1,45 @@
+
+<svg width="800" height="600" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f8fafc;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#e2e8f0;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="screen" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e40af;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="800" height="600" fill="url(#bg2)"/>
+  
+  <!-- Desk -->
+  <rect x="100" y="450" width="600" height="150" fill="#8b5cf6" rx="10"/>
+  
+  <!-- Woman silhouette -->
+  <ellipse cx="200" cy="400" rx="40" ry="60" fill="#374151"/>
+  <ellipse cx="200" cy="340" rx="25" ry="25" fill="#374151"/>
+  
+  <!-- Laptop -->
+  <rect x="250" y="380" width="300" height="200" fill="#374151" rx="15"/>
+  <rect x="270" y="400" width="260" height="160" fill="url(#screen)" rx="10"/>
+  
+  <!-- Screen Content -->
+  <text x="400" y="430" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="20" font-weight="bold">OAKLINE BANK</text>
+  <text x="400" y="450" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12">Online Banking Dashboard</text>
+  
+  <!-- Account Balance -->
+  <rect x="290" y="470" width="220" height="60" fill="rgba(255,255,255,0.2)" rx="8"/>
+  <text x="400" y="490" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12">Total Balance</text>
+  <text x="400" y="510" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="18" font-weight="bold">$45,237.85</text>
+  
+  <!-- Menu Items -->
+  <circle cx="310" cy="550" r="8" fill="rgba(255,255,255,0.3)"/>
+  <circle cx="340" cy="550" r="8" fill="rgba(255,255,255,0.3)"/>
+  <circle cx="370" cy="550" r="8" fill="rgba(255,255,255,0.3)"/>
+  
+  <!-- Professional elements -->
+  <rect x="600" y="300" width="80" height="60" fill="#10b981" rx="5"/>
+  <text x="640" y="335" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">SECURE</text>
+</svg>

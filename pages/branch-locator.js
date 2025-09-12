@@ -1,321 +1,437 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { supabase } from '../lib/supabaseClient';
+import Head from 'next/head';
 
 export default function BranchLocator() {
-  const [user, setUser] = useState(null);
-  const [selectedState, setSelectedState] = useState('');
-  const [searchZip, setSearchZip] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedState, setSelectedState] = useState('all');
+  const [branches, setBranches] = useState([]);
   const [filteredBranches, setFilteredBranches] = useState([]);
 
-  useEffect(() => {
-    checkUser();
-    setFilteredBranches(branches);
-  }, []);
-
-  const checkUser = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-    } catch (error) {
-      console.error('Error checking user:', error);
-    }
-  };
-
-  const branches = [
+  const branchData = [
     {
       id: 1,
-      name: 'Manhattan Financial Center',
-      address: '123 Financial District, New York, NY 10005',
-      phone: '(212) 555-0123',
-      hours: 'Mon-Fri: 9AM-5PM, Sat: 9AM-2PM',
-      services: ['Full Service', 'Investment Services', 'Safe Deposit Boxes', 'Notary'],
-      type: 'Full Service Branch'
+      name: 'Oakline Bank - Downtown Manhattan',
+      address: '250 Broadway, New York, NY 10007',
+      phone: '(212) 555-0150',
+      hours: {
+        monday: '9:00 AM - 6:00 PM',
+        tuesday: '9:00 AM - 6:00 PM',
+        wednesday: '9:00 AM - 6:00 PM',
+        thursday: '9:00 AM - 6:00 PM',
+        friday: '9:00 AM - 6:00 PM',
+        saturday: '9:00 AM - 4:00 PM',
+        sunday: 'Closed'
+      },
+      services: ['Full Service Branch', 'ATM', 'Safe Deposit Boxes', 'Notary Services', 'Investment Services'],
+      manager: 'Sarah Johnson',
+      state: 'NY',
+      city: 'New York',
+      featured: true
     },
     {
       id: 2,
-      name: 'Brooklyn Heights Branch',
-      address: '456 Montague Street, Brooklyn, NY 11201',
-      phone: '(718) 555-0456',
-      hours: 'Mon-Fri: 9AM-5PM, Sat: 9AM-1PM',
-      services: ['Full Service', 'ATM', 'Safe Deposit Boxes'],
-      type: 'Community Branch'
+      name: 'Oakline Bank - Beverly Hills',
+      address: '9500 Wilshire Blvd, Beverly Hills, CA 90212',
+      phone: '(310) 555-0200',
+      hours: {
+        monday: '9:00 AM - 5:00 PM',
+        tuesday: '9:00 AM - 5:00 PM',
+        wednesday: '9:00 AM - 5:00 PM',
+        thursday: '9:00 AM - 5:00 PM',
+        friday: '9:00 AM - 5:00 PM',
+        saturday: '10:00 AM - 3:00 PM',
+        sunday: 'Closed'
+      },
+      services: ['Full Service Branch', 'ATM', 'Private Banking', 'Wealth Management', 'Business Services'],
+      manager: 'Michael Chen',
+      state: 'CA',
+      city: 'Beverly Hills',
+      featured: true
     },
     {
       id: 3,
-      name: 'Los Angeles Downtown',
-      address: '789 Wilshire Blvd, Los Angeles, CA 90017',
-      phone: '(213) 555-0789',
-      hours: 'Mon-Fri: 9AM-6PM, Sat: 9AM-3PM',
-      services: ['Full Service', 'Investment Services', 'Business Banking', 'ATM'],
-      type: 'Full Service Branch'
+      name: 'Oakline Bank - Downtown Chicago',
+      address: '135 S LaSalle St, Chicago, IL 60603',
+      phone: '(312) 555-0300',
+      hours: {
+        monday: '8:30 AM - 5:30 PM',
+        tuesday: '8:30 AM - 5:30 PM',
+        wednesday: '8:30 AM - 5:30 PM',
+        thursday: '8:30 AM - 5:30 PM',
+        friday: '8:30 AM - 5:30 PM',
+        saturday: '9:00 AM - 2:00 PM',
+        sunday: 'Closed'
+      },
+      services: ['Full Service Branch', 'ATM', 'Business Banking', 'Commercial Lending', 'Treasury Services'],
+      manager: 'David Rodriguez',
+      state: 'IL',
+      city: 'Chicago',
+      featured: false
     },
     {
       id: 4,
-      name: 'Chicago Loop Center',
-      address: '321 LaSalle Street, Chicago, IL 60604',
-      phone: '(312) 555-0321',
-      hours: 'Mon-Fri: 8AM-6PM, Sat: 9AM-2PM',
-      services: ['Full Service', 'Investment Services', 'Safe Deposit Boxes', 'Business Banking'],
-      type: 'Full Service Branch'
+      name: 'Oakline Bank - Miami Beach',
+      address: '1701 Collins Ave, Miami Beach, FL 33139',
+      phone: '(305) 555-0400',
+      hours: {
+        monday: '9:00 AM - 5:00 PM',
+        tuesday: '9:00 AM - 5:00 PM',
+        wednesday: '9:00 AM - 5:00 PM',
+        thursday: '9:00 AM - 5:00 PM',
+        friday: '9:00 AM - 5:00 PM',
+        saturday: '9:00 AM - 3:00 PM',
+        sunday: 'Closed'
+      },
+      services: ['Full Service Branch', 'ATM', 'International Banking', 'Safe Deposit Boxes', 'Mortgage Services'],
+      manager: 'Maria Gonzalez',
+      state: 'FL',
+      city: 'Miami Beach',
+      featured: false
     },
     {
       id: 5,
-      name: 'Miami Brickell Branch',
-      address: '654 Brickell Avenue, Miami, FL 33131',
-      phone: '(305) 555-0654',
-      hours: 'Mon-Fri: 9AM-5PM, Sat: 9AM-1PM',
-      services: ['Full Service', 'International Banking', 'ATM'],
-      type: 'International Branch'
+      name: 'Oakline Bank - Austin Downtown',
+      address: '200 Congress Ave, Austin, TX 78701',
+      phone: '(512) 555-0500',
+      hours: {
+        monday: '9:00 AM - 6:00 PM',
+        tuesday: '9:00 AM - 6:00 PM',
+        wednesday: '9:00 AM - 6:00 PM',
+        thursday: '9:00 AM - 6:00 PM',
+        friday: '9:00 AM - 6:00 PM',
+        saturday: '9:00 AM - 4:00 PM',
+        sunday: '12:00 PM - 4:00 PM'
+      },
+      services: ['Full Service Branch', 'ATM', 'Business Banking', 'Student Services', 'Financial Advisory'],
+      manager: 'Jennifer Wilson',
+      state: 'TX',
+      city: 'Austin',
+      featured: true
     },
     {
       id: 6,
-      name: 'Boston Financial District',
-      address: '987 Federal Street, Boston, MA 02110',
-      phone: '(617) 555-0987',
-      hours: 'Mon-Fri: 9AM-5PM, Sat: 9AM-2PM',
-      services: ['Full Service', 'Investment Services', 'Safe Deposit Boxes'],
-      type: 'Full Service Branch'
+      name: 'Oakline Bank - Seattle Waterfront',
+      address: '1400 Western Ave, Seattle, WA 98101',
+      phone: '(206) 555-0600',
+      hours: {
+        monday: '8:30 AM - 5:30 PM',
+        tuesday: '8:30 AM - 5:30 PM',
+        wednesday: '8:30 AM - 5:30 PM',
+        thursday: '8:30 AM - 5:30 PM',
+        friday: '8:30 AM - 5:30 PM',
+        saturday: '10:00 AM - 3:00 PM',
+        sunday: 'Closed'
+      },
+      services: ['Full Service Branch', 'ATM', 'Tech Business Banking', 'Investment Services', 'Green Banking'],
+      manager: 'Robert Kim',
+      state: 'WA',
+      city: 'Seattle',
+      featured: false
+    },
+    {
+      id: 7,
+      name: 'Oakline Bank - Boston Financial District',
+      address: '100 Federal St, Boston, MA 02110',
+      phone: '(617) 555-0700',
+      hours: {
+        monday: '8:00 AM - 6:00 PM',
+        tuesday: '8:00 AM - 6:00 PM',
+        wednesday: '8:00 AM - 6:00 PM',
+        thursday: '8:00 AM - 6:00 PM',
+        friday: '8:00 AM - 6:00 PM',
+        saturday: '9:00 AM - 3:00 PM',
+        sunday: 'Closed'
+      },
+      services: ['Full Service Branch', 'ATM', 'Private Banking', 'Estate Planning', 'Trust Services'],
+      manager: 'Patricia Thompson',
+      state: 'MA',
+      city: 'Boston',
+      featured: false
+    },
+    {
+      id: 8,
+      name: 'Oakline Bank - Denver Tech Center',
+      address: '7900 E Union Ave, Denver, CO 80237',
+      phone: '(303) 555-0800',
+      hours: {
+        monday: '9:00 AM - 5:00 PM',
+        tuesday: '9:00 AM - 5:00 PM',
+        wednesday: '9:00 AM - 5:00 PM',
+        thursday: '9:00 AM - 5:00 PM',
+        friday: '9:00 AM - 5:00 PM',
+        saturday: '9:00 AM - 2:00 PM',
+        sunday: 'Closed'
+      },
+      services: ['Full Service Branch', 'ATM', 'Business Banking', 'SBA Lending', 'Cash Management'],
+      manager: 'Thomas Anderson',
+      state: 'CO',
+      city: 'Denver',
+      featured: false
     }
   ];
 
-  const states = ['All States', 'NY', 'CA', 'IL', 'FL', 'MA'];
+  const states = [...new Set(branchData.map(branch => branch.state))].sort();
 
-  const handleStateFilter = (state) => {
-    setSelectedState(state);
-    if (state === 'All States' || state === '') {
-      setFilteredBranches(branches);
-    } else {
-      const filtered = branches.filter(branch => 
-        branch.address.includes(`, ${state} `)
-      );
-      setFilteredBranches(filtered);
-    }
-  };
+  useEffect(() => {
+    setBranches(branchData);
+    setFilteredBranches(branchData);
+  }, []);
 
-  const handleZipSearch = (zip) => {
-    setSearchZip(zip);
-    if (zip === '') {
-      setFilteredBranches(branches);
-    } else {
-      const filtered = branches.filter(branch => 
-        branch.address.includes(zip)
-      );
-      setFilteredBranches(filtered);
+  useEffect(() => {
+    let filtered = branches;
+
+    if (selectedState !== 'all') {
+      filtered = filtered.filter(branch => branch.state === selectedState);
     }
-  };
+
+    if (searchQuery) {
+      filtered = filtered.filter(branch =>
+        branch.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        branch.city.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        branch.address.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    setFilteredBranches(filtered);
+  }, [searchQuery, selectedState, branches]);
 
   return (
-    <div style={styles.container}>
-      {/* Header */}
-      <header style={styles.header}>
-        <div style={styles.headerContent}>
-          <Link href="/" style={styles.logoContainer}>
-            <img src="/images/logo-primary.png.jpg" alt="Oakline Bank" style={styles.logo} />
-            <div style={styles.brandInfo}>
-              <span style={styles.bankName}>Oakline Bank</span>
-              <span style={styles.tagline}>Your Financial Partner</span>
-            </div>
-          </Link>
-          
-          <div style={styles.headerActions}>
-            <Link href="/" style={styles.headerButton}>Home</Link>
-            {user ? (
-              <Link href="/dashboard" style={styles.headerButton}>Dashboard</Link>
-            ) : (
-              <Link href="/login" style={styles.headerButton}>Sign In</Link>
-            )}
+    <>
+      <Head>
+        <title>Branch Locator - Oakline Bank</title>
+        <meta name="description" content="Find Oakline Bank branches and ATMs near you. Get location details, hours, and services available at each branch." />
+      </Head>
+
+      <div style={styles.container}>
+        {/* Header */}
+        <header style={styles.header}>
+          <div style={styles.headerContent}>
+            <Link href="/" style={styles.logoContainer}>
+              <img src="/images/logo-primary.png" alt="Oakline Bank" style={styles.logo} />
+              <span style={styles.brandName}>Oakline Bank</span>
+            </Link>
+            <Link href="/" style={styles.backButton}>← Back to Home</Link>
           </div>
-        </div>
-      </header>
+        </header>
 
-      {/* Hero Section */}
-      <section style={styles.heroSection}>
-        <div style={styles.heroContent}>
-          <h1 style={styles.heroTitle}>Find a Branch or ATM</h1>
-          <p style={styles.heroSubtitle}>
-            Locate Oakline Bank branches and ATMs near you for all your banking needs
-          </p>
-        </div>
-      </section>
+        {/* Hero Section */}
+        <section style={styles.heroSection}>
+          <div style={styles.heroContent}>
+            <h1 style={styles.heroTitle}>Find a Branch or ATM</h1>
+            <p style={styles.heroSubtitle}>
+              Locate the nearest Oakline Bank branch or ATM with our convenient branch locator.
+            </p>
+          </div>
+        </section>
 
-      {/* Main Content */}
-      <main style={styles.main}>
         {/* Search Section */}
         <section style={styles.searchSection}>
-          <div style={styles.searchContent}>
-            <h2 style={styles.searchTitle}>Search by Location</h2>
-            
-            <div style={styles.searchControls}>
-              <div style={styles.searchGroup}>
-                <label style={styles.searchLabel}>Search by ZIP Code</label>
-                <input
-                  type="text"
-                  placeholder="Enter ZIP code"
-                  value={searchZip}
-                  onChange={(e) => handleZipSearch(e.target.value)}
-                  style={styles.searchInput}
-                />
-              </div>
-              
-              <div style={styles.searchGroup}>
-                <label style={styles.searchLabel}>Filter by State</label>
-                <select
-                  value={selectedState}
-                  onChange={(e) => handleStateFilter(e.target.value)}
-                  style={styles.searchSelect}
-                >
-                  {states.map(state => (
-                    <option key={state} value={state}>{state}</option>
-                  ))}
-                </select>
-              </div>
+          <div style={styles.searchContainer}>
+            <div style={styles.searchInputContainer}>
+              <input
+                type="text"
+                placeholder="Search by city, address, or branch name..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={styles.searchInput}
+              />
+              <button style={styles.searchButton}>🔍</button>
             </div>
             
-            <div style={styles.searchStats}>
-              <span style={styles.statsText}>
-                {filteredBranches.length} location{filteredBranches.length !== 1 ? 's' : ''} found
-              </span>
+            <div style={styles.filterContainer}>
+              <label style={styles.filterLabel}>Filter by State:</label>
+              <select
+                value={selectedState}
+                onChange={(e) => setSelectedState(e.target.value)}
+                style={styles.filterSelect}
+              >
+                <option value="all">All States</option>
+                {states.map(state => (
+                  <option key={state} value={state}>{state}</option>
+                ))}
+              </select>
             </div>
           </div>
         </section>
+
+        {/* Map Placeholder */}
+        <section style={styles.mapSection}>
+          <div style={styles.mapPlaceholder}>
+            <div style={styles.mapContent}>
+              <h3 style={styles.mapTitle}>Interactive Branch Map</h3>
+              <p style={styles.mapSubtitle}>
+                Our interactive map shows all {filteredBranches.length} branch{filteredBranches.length !== 1 ? 'es' : ''} and ATM locations
+              </p>
+              <div style={styles.mapStats}>
+                <div style={styles.mapStat}>
+                  <div style={styles.statIcon}>🏦</div>
+                  <div style={styles.statNumber}>{filteredBranches.length}</div>
+                  <div style={styles.statLabel}>Branches</div>
+                </div>
+                <div style={styles.mapStat}>
+                  <div style={styles.statIcon}>🏧</div>
+                  <div style={styles.statNumber}>55,000+</div>
+                  <div style={styles.statLabel}>ATMs</div>
+                </div>
+                <div style={styles.mapStat}>
+                  <div style={styles.statIcon}>🌍</div>
+                  <div style={styles.statNumber}>{states.length}</div>
+                  <div style={styles.statLabel}>States</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Branch Results */}
+        <main style={styles.main}>
+          <div style={styles.resultsHeader}>
+            <h2 style={styles.resultsTitle}>
+              {filteredBranches.length} Branch{filteredBranches.length !== 1 ? 'es' : ''} Found
+            </h2>
+            {selectedState !== 'all' && (
+              <div style={styles.activeFilter}>
+                Showing results for: <strong>{selectedState}</strong>
+                <button onClick={() => setSelectedState('all')} style={styles.clearFilter}>✕</button>
+              </div>
+            )}
+          </div>
+
+          <div style={styles.branchGrid}>
+            {filteredBranches.map(branch => (
+              <div key={branch.id} style={styles.branchCard}>
+                <div style={styles.branchHeader}>
+                  <h3 style={styles.branchName}>{branch.name}</h3>
+                  {branch.featured && <div style={styles.featuredBadge}>Featured</div>}
+                </div>
+                
+                <div style={styles.branchDetails}>
+                  <div style={styles.branchInfo}>
+                    <div style={styles.infoItem}>
+                      <span style={styles.infoIcon}>📍</span>
+                      <span style={styles.infoText}>{branch.address}</span>
+                    </div>
+                    
+                    <div style={styles.infoItem}>
+                      <span style={styles.infoIcon}>📞</span>
+                      <span style={styles.infoText}>{branch.phone}</span>
+                    </div>
+                    
+                    <div style={styles.infoItem}>
+                      <span style={styles.infoIcon}>👤</span>
+                      <span style={styles.infoText}>Manager: {branch.manager}</span>
+                    </div>
+                  </div>
+
+                  <div style={styles.servicesSection}>
+                    <h4 style={styles.servicesTitle}>Services Available</h4>
+                    <div style={styles.servicesTags}>
+                      {branch.services.map((service, index) => (
+                        <span key={index} style={styles.serviceTag}>{service}</span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div style={styles.hoursSection}>
+                    <h4 style={styles.hoursTitle}>Hours of Operation</h4>
+                    <div style={styles.hoursList}>
+                      {Object.entries(branch.hours).map(([day, hours]) => (
+                        <div key={day} style={styles.hoursItem}>
+                          <span style={styles.dayName}>{day.charAt(0).toUpperCase() + day.slice(1)}:</span>
+                          <span style={styles.hoursTime}>{hours}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div style={styles.branchActions}>
+                    <button style={styles.directionsButton}>Get Directions</button>
+                    <button style={styles.callButton}>Call Branch</button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {filteredBranches.length === 0 && (
+            <div style={styles.noResults}>
+              <div style={styles.noResultsIcon}>🔍</div>
+              <h3 style={styles.noResultsTitle}>No Branches Found</h3>
+              <p style={styles.noResultsText}>
+                Try adjusting your search criteria or clearing the filters.
+              </p>
+              <button onClick={() => {setSearchQuery(''); setSelectedState('all');}} style={styles.clearFiltersButton}>
+                Clear All Filters
+              </button>
+            </div>
+          )}
+        </main>
 
         {/* ATM Network Info */}
         <section style={styles.atmSection}>
-          <div style={styles.atmContent}>
-            <h2 style={styles.atmTitle}>ATM Network</h2>
-            <div style={styles.atmGrid}>
-              <div style={styles.atmCard}>
-                <div style={styles.atmIcon}>🏧</div>
-                <h3 style={styles.atmCardTitle}>55,000+ ATMs</h3>
-                <p style={styles.atmCardText}>Access your money at over 55,000 fee-free ATMs nationwide</p>
+          <div style={styles.atmContainer}>
+            <h2 style={styles.atmTitle}>Access Over 55,000 Fee-Free ATMs</h2>
+            <p style={styles.atmSubtitle}>
+              Use our extensive ATM network across the country without paying fees.
+            </p>
+            <div style={styles.atmFeatures}>
+              <div style={styles.atmFeature}>
+                <div style={styles.atmFeatureIcon}>🏧</div>
+                <h3 style={styles.atmFeatureTitle}>Fee-Free Access</h3>
+                <p style={styles.atmFeatureDesc}>No fees at any Oakline Bank ATM or partner network ATMs</p>
               </div>
-              
-              <div style={styles.atmCard}>
-                <div style={styles.atmIcon}>🌍</div>
-                <h3 style={styles.atmCardTitle}>International Access</h3>
-                <p style={styles.atmCardText}>Use your card at ATMs worldwide with competitive exchange rates</p>
+              <div style={styles.atmFeature}>
+                <div style={styles.atmFeatureIcon}>📱</div>
+                <h3 style={styles.atmFeatureTitle}>Mobile ATM Locator</h3>
+                <p style={styles.atmFeatureDesc}>Find the nearest ATM using our mobile banking app</p>
               </div>
-              
-              <div style={styles.atmCard}>
-                <div style={styles.atmIcon}>💰</div>
-                <h3 style={styles.atmCardTitle}>No Fees</h3>
-                <p style={styles.atmCardText}>Free ATM access for all Oakline Bank customers at network locations</p>
+              <div style={styles.atmFeature}>
+                <div style={styles.atmFeatureIcon}>⏰</div>
+                <h3 style={styles.atmFeatureTitle}>24/7 Access</h3>
+                <p style={styles.atmFeatureDesc}>Access your money anytime, day or night</p>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Branch Listings */}
-        <section style={styles.branchSection}>
-          <div style={styles.branchContent}>
-            <h2 style={styles.branchTitle}>Branch Locations</h2>
-            
-            <div style={styles.branchList}>
-              {filteredBranches.map(branch => (
-                <div key={branch.id} style={styles.branchCard}>
-                  <div style={styles.branchHeader}>
-                    <h3 style={styles.branchName}>{branch.name}</h3>
-                    <span style={styles.branchType}>{branch.type}</span>
-                  </div>
-                  
-                  <div style={styles.branchDetails}>
-                    <div style={styles.branchInfo}>
-                      <div style={styles.infoItem}>
-                        <span style={styles.infoIcon}>📍</span>
-                        <span style={styles.infoText}>{branch.address}</span>
-                      </div>
-                      
-                      <div style={styles.infoItem}>
-                        <span style={styles.infoIcon}>📞</span>
-                        <a href={`tel:${branch.phone}`} style={styles.phoneLink}>{branch.phone}</a>
-                      </div>
-                      
-                      <div style={styles.infoItem}>
-                        <span style={styles.infoIcon}>🕒</span>
-                        <span style={styles.infoText}>{branch.hours}</span>
-                      </div>
-                    </div>
-                    
-                    <div style={styles.branchServices}>
-                      <h4 style={styles.servicesTitle}>Services Available:</h4>
-                      <div style={styles.servicesList}>
-                        {branch.services.map((service, index) => (
-                          <span key={index} style={styles.serviceTag}>{service}</span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div style={styles.branchActions}>
-                    <button style={styles.directionsButton}>
-                      📍 Get Directions
-                    </button>
-                    <button style={styles.callButton}>
-                      📞 Call Branch
-                    </button>
-                  </div>
+        {/* Contact Section */}
+        <section style={styles.contactSection}>
+          <div style={styles.contactCard}>
+            <h2 style={styles.contactTitle}>Need Help Finding a Location?</h2>
+            <p style={styles.contactSubtitle}>
+              Our customer service team is here to help you find the perfect banking location.
+            </p>
+            <div style={styles.contactOptions}>
+              <div style={styles.contactOption}>
+                <div style={styles.contactIcon}>📞</div>
+                <div>
+                  <h3 style={styles.contactOptionTitle}>Call Customer Service</h3>
+                  <p style={styles.contactOptionDesc}>1-800-OAKLINE</p>
                 </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Services Info */}
-        <section style={styles.servicesSection}>
-          <div style={styles.servicesContent}>
-            <h2 style={styles.servicesTitle}>Branch Services</h2>
-            <div style={styles.servicesGrid}>
-              <div style={styles.serviceCard}>
-                <div style={styles.serviceIcon}>🏦</div>
-                <h3 style={styles.serviceCardTitle}>Full Service Banking</h3>
-                <p style={styles.serviceCardText}>All account services, loans, deposits, and customer support</p>
               </div>
-              
-              <div style={styles.serviceCard}>
-                <div style={styles.serviceIcon}>📈</div>
-                <h3 style={styles.serviceCardTitle}>Investment Services</h3>
-                <p style={styles.serviceCardText}>Financial planning, investment accounts, and wealth management</p>
-              </div>
-              
-              <div style={styles.serviceCard}>
-                <div style={styles.serviceIcon}>🏢</div>
-                <h3 style={styles.serviceCardTitle}>Business Banking</h3>
-                <p style={styles.serviceCardText">Commercial accounts, business loans, and merchant services</p>
-              </div>
-              
-              <div style={styles.serviceCard}>
-                <div style={styles.serviceIcon}>🔒</div>
-                <h3 style={styles.serviceCardTitle}>Safe Deposit Boxes</h3>
-                <p style={styles.serviceCardText}>Secure storage for important documents and valuables</p>
-              </div>
-              
-              <div style={styles.serviceCard}>
-                <div style={styles.serviceIcon}>📝</div>
-                <h3 style={styles.serviceCardTitle}>Notary Services</h3>
-                <p style={styles.serviceCardText}>Document notarization and authentication services</p>
-              </div>
-              
-              <div style={styles.serviceCard}>
-                <div style={styles.serviceIcon}>🌍</div>
-                <h3 style={styles.serviceCardTitle}>International Banking</h3>
-                <p style={styles.serviceCardText}>Foreign exchange, international transfers, and global services</p>
+              <div style={styles.contactOption}>
+                <div style={styles.contactIcon}>💬</div>
+                <div>
+                  <h3 style={styles.contactOptionTitle}>Live Chat Support</h3>
+                  <p style={styles.contactOptionDesc}>Available 24/7</p>
+                </div>
               </div>
             </div>
           </div>
         </section>
-      </main>
 
-      {/* Footer */}
-      <footer style={styles.footer}>
-        <div style={styles.footerContent}>
-          <p style={styles.footerText}>
-            © 2024 Oakline Bank. All rights reserved. Member FDIC. Equal Housing Lender.
-          </p>
-        </div>
-      </footer>
-    </div>
+        {/* Footer */}
+        <footer style={styles.footer}>
+          <div style={styles.footerContent}>
+            <p style={styles.footerText}>
+              © 2024 Oakline Bank. All rights reserved. Member FDIC. Equal Housing Lender.
+            </p>
+          </div>
+        </footer>
+      </div>
+    </>
   );
 }
 
@@ -326,199 +442,204 @@ const styles = {
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
   },
   header: {
-    backgroundColor: '#1e40af',
-    color: 'white',
-    padding: '1rem 1.5rem',
-    boxShadow: '0 4px 12px rgba(30, 64, 175, 0.2)'
+    backgroundColor: '#1a365d',
+    padding: '1rem 0',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
   },
   headerContent: {
-    maxWidth: '1400px',
+    maxWidth: '1200px',
     margin: '0 auto',
+    padding: '0 2rem',
     display: 'flex',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    flexWrap: 'wrap'
+    alignItems: 'center'
   },
   logoContainer: {
     display: 'flex',
     alignItems: 'center',
     gap: '1rem',
-    textDecoration: 'none',
-    color: 'white'
+    textDecoration: 'none'
   },
   logo: {
-    height: '50px',
+    height: '40px',
     width: 'auto'
   },
-  brandInfo: {
-    display: 'flex',
-    flexDirection: 'column'
-  },
-  bankName: {
+  brandName: {
+    color: 'white',
     fontSize: '1.5rem',
     fontWeight: 'bold'
   },
-  tagline: {
-    fontSize: '0.9rem',
-    color: '#bfdbfe'
-  },
-  headerActions: {
-    display: 'flex',
-    gap: '1rem'
-  },
-  headerButton: {
-    padding: '0.5rem 1rem',
-    backgroundColor: 'rgba(255,255,255,0.15)',
+  backButton: {
     color: 'white',
     textDecoration: 'none',
+    padding: '0.5rem 1rem',
+    backgroundColor: 'rgba(255,255,255,0.1)',
     borderRadius: '6px',
-    fontSize: '0.9rem',
-    fontWeight: '500',
-    transition: 'all 0.3s ease'
+    transition: 'all 0.2s'
   },
   heroSection: {
-    background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
-    color: 'white',
-    padding: '3rem 1.5rem',
-    textAlign: 'center'
+    background: 'linear-gradient(135deg, #1a365d 0%, #2c5282 100%)',
+    padding: '4rem 2rem',
+    textAlign: 'center',
+    color: 'white'
   },
   heroContent: {
     maxWidth: '800px',
     margin: '0 auto'
   },
   heroTitle: {
-    fontSize: '2.5rem',
+    fontSize: 'clamp(2rem, 4vw, 3rem)',
     fontWeight: 'bold',
     marginBottom: '1rem'
   },
   heroSubtitle: {
-    fontSize: '1.1rem',
+    fontSize: 'clamp(1rem, 2vw, 1.2rem)',
     opacity: 0.9,
     lineHeight: '1.6'
   },
-  main: {
-    maxWidth: '1400px',
-    margin: '0 auto',
-    padding: '0 1.5rem'
-  },
   searchSection: {
-    padding: '2rem 0'
-  },
-  searchContent: {
-    backgroundColor: 'white',
-    borderRadius: '12px',
     padding: '2rem',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-    border: '1px solid #e2e8f0'
+    backgroundColor: 'white',
+    borderBottom: '1px solid #e2e8f0'
   },
-  searchTitle: {
-    fontSize: '1.5rem',
-    fontWeight: 'bold',
-    color: '#1e293b',
-    marginBottom: '1.5rem',
-    textAlign: 'center'
-  },
-  searchControls: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-    gap: '1.5rem',
-    marginBottom: '1rem'
-  },
-  searchGroup: {
+  searchContainer: {
+    maxWidth: '800px',
+    margin: '0 auto',
     display: 'flex',
     flexDirection: 'column',
-    gap: '0.5rem'
+    gap: '1rem'
   },
-  searchLabel: {
-    fontSize: '0.9rem',
+  searchInputContainer: {
+    display: 'flex',
+    gap: '1rem'
+  },
+  searchInput: {
+    flex: 1,
+    padding: '1rem',
+    border: '2px solid #e2e8f0',
+    borderRadius: '8px',
+    fontSize: '1rem'
+  },
+  searchButton: {
+    padding: '1rem 1.5rem',
+    backgroundColor: '#1a365d',
+    color: 'white',
+    border: 'none',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    fontSize: '1rem'
+  },
+  filterContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '1rem'
+  },
+  filterLabel: {
     fontWeight: '600',
     color: '#374151'
   },
-  searchInput: {
+  filterSelect: {
     padding: '0.75rem',
     border: '2px solid #e2e8f0',
-    borderRadius: '8px',
+    borderRadius: '6px',
     fontSize: '1rem',
-    outline: 'none',
-    transition: 'border-color 0.3s ease'
+    backgroundColor: 'white'
   },
-  searchSelect: {
-    padding: '0.75rem',
-    border: '2px solid #e2e8f0',
-    borderRadius: '8px',
-    fontSize: '1rem',
-    outline: 'none',
-    backgroundColor: 'white',
-    cursor: 'pointer'
+  mapSection: {
+    padding: '3rem 2rem',
+    backgroundColor: '#f1f5f9'
   },
-  searchStats: {
-    textAlign: 'center',
-    padding: '1rem 0'
+  mapPlaceholder: {
+    maxWidth: '1200px',
+    margin: '0 auto',
+    height: '300px',
+    backgroundColor: 'linear-gradient(135deg, #1a365d 0%, #2c5282 100%)',
+    borderRadius: '12px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: 'linear-gradient(135deg, #1a365d 0%, #2c5282 100%)',
+    color: 'white'
   },
-  statsText: {
-    color: '#64748b',
-    fontSize: '0.9rem',
-    fontWeight: '500'
-  },
-  atmSection: {
-    padding: '2rem 0'
-  },
-  atmContent: {
+  mapContent: {
     textAlign: 'center'
   },
-  atmTitle: {
+  mapTitle: {
     fontSize: '2rem',
     fontWeight: 'bold',
-    color: '#1e293b',
-    marginBottom: '2rem'
-  },
-  atmGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-    gap: '1.5rem'
-  },
-  atmCard: {
-    backgroundColor: 'white',
-    padding: '2rem',
-    borderRadius: '12px',
-    textAlign: 'center',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-    border: '1px solid #e2e8f0'
-  },
-  atmIcon: {
-    fontSize: '2.5rem',
     marginBottom: '1rem'
   },
-  atmCardTitle: {
-    fontSize: '1.2rem',
-    fontWeight: 'bold',
-    color: '#1e40af',
-    marginBottom: '0.5rem'
+  mapSubtitle: {
+    fontSize: '1.1rem',
+    opacity: 0.9,
+    marginBottom: '2rem'
   },
-  atmCardText: {
-    color: '#64748b',
-    lineHeight: '1.5'
+  mapStats: {
+    display: 'flex',
+    gap: '3rem',
+    justifyContent: 'center'
   },
-  branchSection: {
-    padding: '2rem 0'
-  },
-  branchContent: {},
-  branchTitle: {
-    fontSize: '2rem',
-    fontWeight: 'bold',
-    color: '#1e293b',
-    marginBottom: '2rem',
+  mapStat: {
     textAlign: 'center'
   },
-  branchList: {
+  statIcon: {
+    fontSize: '2rem',
+    marginBottom: '0.5rem'
+  },
+  statNumber: {
+    fontSize: '2rem',
+    fontWeight: 'bold',
+    marginBottom: '0.25rem'
+  },
+  statLabel: {
+    fontSize: '0.9rem',
+    opacity: 0.8
+  },
+  main: {
+    maxWidth: '1200px',
+    margin: '0 auto',
+    padding: '2rem'
+  },
+  resultsHeader: {
     display: 'flex',
-    flexDirection: 'column',
-    gap: '1.5rem'
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '2rem',
+    flexWrap: 'wrap',
+    gap: '1rem'
+  },
+  resultsTitle: {
+    fontSize: '1.8rem',
+    fontWeight: 'bold',
+    color: '#1a365d'
+  },
+  activeFilter: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    padding: '0.5rem 1rem',
+    backgroundColor: '#e0f2fe',
+    color: '#0369a1',
+    borderRadius: '20px',
+    fontSize: '0.9rem'
+  },
+  clearFilter: {
+    backgroundColor: 'transparent',
+    border: 'none',
+    color: '#0369a1',
+    cursor: 'pointer',
+    fontWeight: 'bold',
+    padding: '0 0.25rem'
+  },
+  branchGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
+    gap: '2rem'
   },
   branchCard: {
     backgroundColor: 'white',
     borderRadius: '12px',
-    padding: '2rem',
+    overflow: 'hidden',
     boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
     border: '1px solid #e2e8f0'
   },
@@ -526,151 +647,252 @@ const styles = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: '1.5rem'
+    padding: '1.5rem 1.5rem 1rem',
+    borderBottom: '1px solid #e2e8f0'
   },
   branchName: {
     fontSize: '1.3rem',
     fontWeight: 'bold',
-    color: '#1e293b',
+    color: '#1a365d',
     margin: 0
   },
-  branchType: {
-    backgroundColor: '#1e40af',
+  featuredBadge: {
+    backgroundColor: '#10b981',
     color: 'white',
     padding: '0.25rem 0.75rem',
-    borderRadius: '20px',
+    borderRadius: '15px',
     fontSize: '0.8rem',
     fontWeight: '600'
   },
   branchDetails: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-    gap: '1.5rem',
-    marginBottom: '1.5rem'
+    padding: '1.5rem'
   },
   branchInfo: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.75rem'
+    marginBottom: '1.5rem'
   },
   infoItem: {
     display: 'flex',
     alignItems: 'center',
-    gap: '0.75rem'
+    gap: '0.75rem',
+    marginBottom: '0.75rem'
   },
   infoIcon: {
-    fontSize: '1rem',
-    minWidth: '20px'
+    fontSize: '1.1rem',
+    width: '20px'
   },
   infoText: {
-    color: '#64748b',
-    fontSize: '0.9rem'
+    color: '#374151',
+    fontSize: '0.95rem'
   },
-  phoneLink: {
-    color: '#1e40af',
-    textDecoration: 'none',
-    fontSize: '0.9rem',
-    fontWeight: '500'
+  servicesSection: {
+    marginBottom: '1.5rem'
   },
-  branchServices: {},
   servicesTitle: {
     fontSize: '1rem',
     fontWeight: 'bold',
-    color: '#1e293b',
+    color: '#1a365d',
     marginBottom: '0.75rem'
   },
-  servicesList: {
+  servicesTags: {
     display: 'flex',
     flexWrap: 'wrap',
     gap: '0.5rem'
   },
   serviceTag: {
-    backgroundColor: '#eff6ff',
-    color: '#1e40af',
+    backgroundColor: '#f1f5f9',
+    color: '#1a365d',
     padding: '0.25rem 0.75rem',
-    borderRadius: '20px',
+    borderRadius: '15px',
     fontSize: '0.8rem',
     fontWeight: '500'
   },
+  hoursSection: {
+    marginBottom: '1.5rem'
+  },
+  hoursTitle: {
+    fontSize: '1rem',
+    fontWeight: 'bold',
+    color: '#1a365d',
+    marginBottom: '0.75rem'
+  },
+  hoursList: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(2, 1fr)',
+    gap: '0.25rem'
+  },
+  hoursItem: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    fontSize: '0.85rem'
+  },
+  dayName: {
+    fontWeight: '600',
+    color: '#374151'
+  },
+  hoursTime: {
+    color: '#64748b'
+  },
   branchActions: {
     display: 'flex',
-    gap: '1rem',
-    flexWrap: 'wrap'
+    gap: '1rem'
   },
   directionsButton: {
-    padding: '0.75rem 1.5rem',
-    backgroundColor: '#1e40af',
+    flex: 1,
+    padding: '0.75rem',
+    backgroundColor: '#1a365d',
     color: 'white',
     border: 'none',
-    borderRadius: '8px',
-    fontSize: '0.9rem',
-    fontWeight: '600',
+    borderRadius: '6px',
     cursor: 'pointer',
-    transition: 'all 0.3s ease'
+    fontWeight: '600'
   },
   callButton: {
-    padding: '0.75rem 1.5rem',
+    flex: 1,
+    padding: '0.75rem',
     backgroundColor: 'transparent',
-    color: '#1e40af',
-    border: '2px solid #1e40af',
-    borderRadius: '8px',
-    fontSize: '0.9rem',
-    fontWeight: '600',
+    color: '#1a365d',
+    border: '2px solid #1a365d',
+    borderRadius: '6px',
     cursor: 'pointer',
-    transition: 'all 0.3s ease'
+    fontWeight: '600'
   },
-  servicesSection: {
-    padding: '3rem 0'
-  },
-  servicesContent: {
-    textAlign: 'center'
-  },
-  servicesTitle: {
-    fontSize: '2rem',
-    fontWeight: 'bold',
-    color: '#1e293b',
-    marginBottom: '2rem'
-  },
-  servicesGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-    gap: '1.5rem'
-  },
-  serviceCard: {
-    backgroundColor: 'white',
-    padding: '1.5rem',
-    borderRadius: '12px',
+  noResults: {
     textAlign: 'center',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+    padding: '4rem 2rem',
+    backgroundColor: 'white',
+    borderRadius: '12px',
     border: '1px solid #e2e8f0'
   },
-  serviceIcon: {
-    fontSize: '2rem',
+  noResultsIcon: {
+    fontSize: '4rem',
     marginBottom: '1rem'
   },
-  serviceCardTitle: {
-    fontSize: '1.1rem',
+  noResultsTitle: {
+    fontSize: '1.5rem',
     fontWeight: 'bold',
-    color: '#1e293b',
-    marginBottom: '0.5rem'
+    color: '#1a365d',
+    marginBottom: '1rem'
   },
-  serviceCardText: {
+  noResultsText: {
     color: '#64748b',
-    fontSize: '0.9rem',
+    marginBottom: '2rem'
+  },
+  clearFiltersButton: {
+    padding: '0.75rem 1.5rem',
+    backgroundColor: '#1a365d',
+    color: 'white',
+    border: 'none',
+    borderRadius: '6px',
+    cursor: 'pointer',
+    fontWeight: '600'
+  },
+  atmSection: {
+    padding: '4rem 2rem',
+    backgroundColor: '#1a365d',
+    color: 'white'
+  },
+  atmContainer: {
+    maxWidth: '1200px',
+    margin: '0 auto',
+    textAlign: 'center'
+  },
+  atmTitle: {
+    fontSize: '2.5rem',
+    fontWeight: 'bold',
+    marginBottom: '1rem'
+  },
+  atmSubtitle: {
+    fontSize: '1.2rem',
+    opacity: 0.9,
+    marginBottom: '3rem'
+  },
+  atmFeatures: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+    gap: '2rem'
+  },
+  atmFeature: {
+    textAlign: 'center'
+  },
+  atmFeatureIcon: {
+    fontSize: '3rem',
+    marginBottom: '1rem'
+  },
+  atmFeatureTitle: {
+    fontSize: '1.3rem',
+    fontWeight: 'bold',
+    marginBottom: '0.75rem'
+  },
+  atmFeatureDesc: {
+    opacity: 0.9,
     lineHeight: '1.5'
   },
+  contactSection: {
+    padding: '3rem 2rem',
+    backgroundColor: '#f8fafc'
+  },
+  contactCard: {
+    maxWidth: '800px',
+    margin: '0 auto',
+    textAlign: 'center',
+    backgroundColor: 'white',
+    padding: '3rem',
+    borderRadius: '12px',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+  },
+  contactTitle: {
+    fontSize: '2rem',
+    fontWeight: 'bold',
+    color: '#1a365d',
+    marginBottom: '1rem'
+  },
+  contactSubtitle: {
+    color: '#64748b',
+    marginBottom: '2rem'
+  },
+  contactOptions: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+    gap: '2rem'
+  },
+  contactOption: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '1rem'
+  },
+  contactIcon: {
+    fontSize: '2rem',
+    backgroundColor: '#f1f5f9',
+    padding: '1rem',
+    borderRadius: '50%',
+    width: '60px',
+    height: '60px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  contactOptionTitle: {
+    fontSize: '1.1rem',
+    fontWeight: 'bold',
+    color: '#1a365d',
+    marginBottom: '0.25rem'
+  },
+  contactOptionDesc: {
+    color: '#64748b',
+    fontSize: '0.95rem'
+  },
   footer: {
-    backgroundColor: '#1f2937',
+    backgroundColor: '#1a365d',
     color: 'white',
-    padding: '2rem 1.5rem',
+    padding: '2rem',
     textAlign: 'center'
   },
   footerContent: {
-    maxWidth: '1400px',
+    maxWidth: '1200px',
     margin: '0 auto'
   },
   footerText: {
-    color: '#d1d5db',
+    color: '#cbd5e0',
     fontSize: '0.9rem'
   }
 };
