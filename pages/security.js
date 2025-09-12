@@ -105,12 +105,22 @@ export default function Security() {
         throw new Error('Password must be at least 8 characters long');
       }
 
-      // Update password
-      const { error } = await supabase.auth.updateUser({
+      // Verify current password by attempting to sign in
+      const { error: verifyError } = await supabase.auth.signInWithPassword({
+        email: user.email,
+        password: passwordData.currentPassword
+      });
+
+      if (verifyError) {
+        throw new Error('Current password is incorrect');
+      }
+
+      // If verification successful, update password
+      const { error: updateError } = await supabase.auth.updateUser({
         password: passwordData.newPassword
       });
 
-      if (error) throw error;
+      if (updateError) throw updateError;
 
       setMessage('Password updated successfully!');
       setShowPasswordModal(false);

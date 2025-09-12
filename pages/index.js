@@ -328,7 +328,7 @@ export default function Home() {
               </div>
             </Link>
 
-            {/* Banking Features Dropdown - Same level as logo */}
+            {/* Banking Services Dropdown */}
             <div style={styles.navigationDropdown}>
               <button
                 style={styles.modernMenuButton}
@@ -339,58 +339,72 @@ export default function Home() {
                   <span style={styles.hamburgerLine}></span>
                   <span style={styles.hamburgerLine}></span>
                 </div>
-                <span style={styles.menuText}>Banking</span>
+                <span style={styles.menuText}>Banking Services</span>
               </button>
 
               {activeDropdown === 'banking' && (
                 <div style={styles.bankingDropdownMenu}>
                     <div style={styles.bankingDropdownGrid}>
                       <div style={styles.bankingDropdownSection}>
-                        <h4 style={styles.bankingDropdownSectionTitle}>💳 Personal Banking</h4>
+                        <h4 style={styles.bankingDropdownSectionTitle}>💳 Account Types</h4>
                         <Link href="/account-types" style={styles.bankingDropdownLink}>
                           <span style={styles.bankingDropdownIcon}>💰</span>
                           <div>
-                            <div style={styles.bankingDropdownTitle}>Premium Checking</div>
-                            <div style={styles.bankingDropdownDesc}>0.25% APY, no fees</div>
+                            <div style={styles.bankingDropdownTitle}>Checking Accounts</div>
+                            <div style={styles.bankingDropdownDesc}>Premium & standard options</div>
                           </div>
                         </Link>
                         <Link href="/account-types" style={styles.bankingDropdownLink}>
                           <span style={styles.bankingDropdownIcon}>⭐</span>
                           <div>
-                            <div style={styles.bankingDropdownTitle}>High-Yield Savings</div>
-                            <div style={styles.bankingDropdownDesc}>5.00% APY guaranteed</div>
+                            <div style={styles.bankingDropdownTitle}>Savings Accounts</div>
+                            <div style={styles.bankingDropdownDesc}>High-yield savings</div>
+                          </div>
+                        </Link>
+                        <Link href="/account-types" style={styles.bankingDropdownLink}>
+                          <span style={styles.bankingDropdownIcon}>🏢</span>
+                          <div>
+                            <div style={styles.bankingDropdownTitle}>Business Accounts</div>
+                            <div style={styles.bankingDropdownDesc}>Professional banking</div>
                           </div>
                         </Link>
                         <Link href="/cards" style={styles.bankingDropdownLink}>
                           <span style={styles.bankingDropdownIcon}>💳</span>
                           <div>
-                            <div style={styles.bankingDropdownTitle}>Rewards Debit Card</div>
-                            <div style={styles.bankingDropdownDesc}>Cashback on purchases</div>
+                            <div style={styles.bankingDropdownTitle}>Debit & Credit Cards</div>
+                            <div style={styles.bankingDropdownDesc}>Rewards & cashback</div>
                           </div>
                         </Link>
                       </div>
 
                       <div style={styles.bankingDropdownSection}>
-                        <h4 style={styles.bankingDropdownSectionTitle}>🏠 Lending Solutions</h4>
+                        <h4 style={styles.bankingDropdownSectionTitle}>🏠 Loans & Credit</h4>
                         <Link href="/loans" style={styles.bankingDropdownLink}>
                           <span style={styles.bankingDropdownIcon}>🏡</span>
                           <div>
                             <div style={styles.bankingDropdownTitle}>Home Mortgages</div>
-                            <div style={styles.bankingDropdownDesc}>Fixed rates from 6.5%</div>
+                            <div style={styles.bankingDropdownDesc}>Fixed & variable rates</div>
                           </div>
                         </Link>
                         <Link href="/loans" style={styles.bankingDropdownLink}>
                           <span style={styles.bankingDropdownIcon}>🚗</span>
                           <div>
                             <div style={styles.bankingDropdownTitle}>Auto Loans</div>
-                            <div style={styles.bankingDropdownDesc}>Fast approval, low rates</div>
+                            <div style={styles.bankingDropdownDesc}>Fast approval process</div>
                           </div>
                         </Link>
                         <Link href="/loans" style={styles.bankingDropdownLink}>
                           <span style={styles.bankingDropdownIcon}>💼</span>
                           <div>
                             <div style={styles.bankingDropdownTitle}>Personal Loans</div>
-                            <div style={styles.bankingDropdownDesc}>Up to $50K, same day</div>
+                            <div style={styles.bankingDropdownDesc}>Up to $50K available</div>
+                          </div>
+                        </Link>
+                        <Link href="/loans" style={styles.bankingDropdownLink}>
+                          <span style={styles.bankingDropdownIcon}>🎓</span>
+                          <div>
+                            <div style={styles.bankingDropdownTitle}>Student Loans</div>
+                            <div style={styles.bankingDropdownDesc}>Education financing</div>
                           </div>
                         </Link>
                       </div>
@@ -400,15 +414,22 @@ export default function Home() {
                         <Link href="/investments" style={styles.bankingDropdownLink}>
                           <span style={styles.bankingDropdownIcon}>📊</span>
                           <div>
-                            <div style={styles.bankingDropdownTitle}>Portfolio Management</div>
-                            <div style={styles.bankingDropdownDesc}>Professional advisors</div>
+                            <div style={styles.bankingDropdownTitle}>Investment Accounts</div>
+                            <div style={styles.bankingDropdownDesc}>Portfolio management</div>
                           </div>
                         </Link>
-                        <Link href="/account-types" style={styles.bankingDropdownLink}>
+                        <Link href="/investments" style={styles.bankingDropdownLink}>
                           <span style={styles.bankingDropdownIcon}>🏖️</span>
                           <div>
                             <div style={styles.bankingDropdownTitle}>Retirement Planning</div>
                             <div style={styles.bankingDropdownDesc}>IRA & 401k options</div>
+                          </div>
+                        </Link>
+                        <Link href="/crypto" style={styles.bankingDropdownLink}>
+                          <span style={styles.bankingDropdownIcon}>₿</span>
+                          <div>
+                            <div style={styles.bankingDropdownTitle}>Cryptocurrency</div>
+                            <div style={styles.bankingDropdownDesc}>Digital asset trading</div>
                           </div>
                         </Link>
                       </div>
@@ -426,119 +447,9 @@ export default function Home() {
                   </div>
               )}
             </div>
-            {/* NEW DROPDOWN */}
+
+            {/* Digital Services Dropdown */}
             <div style={styles.navigationDropdown}>
-              <button
-                style={styles.modernMenuButton}
-                onClick={() => setActiveDropdown(activeDropdown === 'loans' ? null : 'loans')}
-              >
-                <div style={styles.hamburgerLines}>
-                  <span style={styles.hamburgerLine}></span>
-                  <span style={styles.hamburgerLine}></span>
-                  <span style={styles.hamburgerLine}></span>
-                </div>
-                <span style={styles.menuText}>Loans & Credit</span>
-              </button>
-
-              {activeDropdown === 'loans' && (
-                <div style={styles.bankingDropdownMenu}>
-                    <div style={styles.bankingDropdownGrid}>
-                      <div style={styles.bankingDropdownSection}>
-                        <h4 style={styles.bankingDropdownSectionTitle}>🏠 Personal Loans</h4>
-                        <Link href="/loans" style={styles.bankingDropdownLink}>
-                          <span style={styles.bankingDropdownIcon}>💼</span>
-                          <div>
-                            <div style={styles.bankingDropdownTitle}>Personal Loans</div>
-                            <div style={styles.bankingDropdownDesc}>Up to $50K, same day</div>
-                          </div>
-                        </Link>
-                        <Link href="/loans" style={styles.bankingDropdownLink}>
-                          <span style={styles.bankingDropdownIcon}>🚗</span>
-                          <div>
-                            <div style={styles.bankingDropdownTitle}>Auto Loans</div>
-                            <div style={styles.bankingDropdownDesc}>Fast approval, low rates</div>
-                          </div>
-                        </Link>
-                        <Link href="/loans" style={styles.bankingDropdownLink}>
-                          <span style={styles.bankingDropdownIcon}>🏡</span>
-                          <div>
-                            <div style={styles.bankingDropdownTitle}>Home Mortgages</div>
-                            <div style={styles.bankingDropdownDesc}>Fixed rates from 6.5%</div>
-                          </div>
-                        </Link>
-                        <Link href="/loans" style={styles.bankingDropdownLink}>
-                          <span style={styles.bankingDropdownIcon}>🔄</span>
-                          <div>
-                            <div style={styles.bankingDropdownTitle}>Refinancing</div>
-                            <div style={styles.bankingDropdownDesc}>Lower your monthly payments</div>
-                          </div>
-                        </Link>
-                      </div>
-
-                      <div style={styles.bankingDropdownSection}>
-                        <h4 style={styles.bankingDropdownSectionTitle}>💳 Credit Cards & More</h4>
-                        <Link href="/cards" style={styles.bankingDropdownLink}>
-                          <span style={styles.bankingDropdownIcon}>💳</span>
-                          <div>
-                            <div style={styles.bankingDropdownTitle}>Credit Cards</div>
-                            <div style={styles.bankingDropdownDesc}>Rewards, cashback, travel</div>
-                          </div>
-                        </Link>
-                        <Link href="/loans" style={styles.bankingDropdownLink}>
-                          <span style={styles.bankingDropdownIcon}>🏠</span>
-                          <div>
-                            <div style={styles.bankingDropdownTitle}>Home Equity</div>
-                            <div style={styles.bankingDropdownDesc}>Access your home equity</div>
-                          </div>
-                        </Link>
-                        <Link href="/loans" style={styles.bankingDropdownLink}>
-                          <span style={styles.bankingDropdownIcon}>🎓</span>
-                          <div>
-                            <div style={styles.bankingDropdownTitle}>Student Loans</div>
-                            <div style={styles.bankingDropdownDesc}>Finance your education</div>
-                          </div>
-                        </Link>
-                        <Link href="/loans" style={styles.bankingDropdownLink}>
-                          <span style={styles.bankingDropdownIcon}>🏗️</span>
-                          <div>
-                            <div style={styles.bankingDropdownTitle}>Construction Loans</div>
-                            <div style={styles.bankingDropdownDesc}>Fund your building projects</div>
-                          </div>
-                        </Link>
-                      </div>
-
-                      <div style={styles.bankingDropdownSection}>
-                        <h4 style={styles.bankingDropdownSectionTitle}>🏢 Business & Agricultural</h4>
-                        <Link href="/loans" style={styles.bankingDropdownLink}>
-                          <span style={styles.bankingDropdownIcon}>🏢</span>
-                          <div>
-                            <div style={styles.bankingDropdownTitle}>Business Loans</div>
-                            <div style={styles.bankingDropdownDesc}>Grow your enterprise</div>
-                          </div>
-                        </Link>
-                        <Link href="/loans" style={styles.bankingDropdownLink}>
-                          <span style={styles.bankingDropdownIcon}>🚜</span>
-                          <div>
-                            <div style={styles.bankingDropdownTitle}>Agricultural Loans</div>
-                            <div style={styles.bankingDropdownDesc}>Support your farming needs</div>
-                          </div>
-                        </Link>
-                      </div>
-                    </div>
-                    <div style={styles.bankingDropdownCTA}>
-                      <Link href="/apply" style={styles.bankingDropdownButton}>
-                        <span style={styles.buttonIcon}>🚀</span>
-                        Apply for Loan
-                      </Link>
-                      <Link href="/support" style={styles.bankingDropdownSecondaryButton}>
-                        <span style={styles.buttonIcon}>💬</span>
-                        Loan Support
-                      </Link>
-                    </div>
-                  </div>
-              )}
-            </div>
-             <div style={styles.navigationDropdown}>
               <button
                 style={styles.modernMenuButton}
                 onClick={() => setActiveDropdown(activeDropdown === 'digital' ? null : 'digital')}
@@ -548,102 +459,116 @@ export default function Home() {
                   <span style={styles.hamburgerLine}></span>
                   <span style={styles.hamburgerLine}></span>
                 </div>
-                <span style={styles.menuText}>Digital Banking</span>
+                <span style={styles.menuText}>Digital Services</span>
               </button>
 
               {activeDropdown === 'digital' && (
                 <div style={styles.bankingDropdownMenu}>
                     <div style={styles.bankingDropdownGrid}>
                       <div style={styles.bankingDropdownSection}>
-                        <h4 style={styles.bankingDropdownSectionTitle}>💻 Online Services</h4>
-                        <Link href="/online-banking" style={styles.bankingDropdownLink}>
+                        <h4 style={styles.bankingDropdownSectionTitle}>💻 Online Banking</h4>
+                        <Link href={user ? "/dashboard" : "/login"} style={styles.bankingDropdownLink}>
                           <span style={styles.bankingDropdownIcon}>🖥️</span>
                           <div>
                             <div style={styles.bankingDropdownTitle}>Online Banking</div>
-                            <div style={styles.bankingDropdownDesc}>Access your accounts 24/7</div>
+                            <div style={styles.bankingDropdownDesc}>Access accounts 24/7</div>
                           </div>
                         </Link>
-                        <Link href="/wire-transfers" style={styles.bankingDropdownLink}>
-                          <span style={styles.bankingDropdownIcon}>➡️</span>
+                        <Link href={user ? "/transfer" : "/login"} style={styles.bankingDropdownLink}>
+                          <span style={styles.bankingDropdownIcon}>💸</span>
                           <div>
-                            <div style={styles.bankingDropdownTitle}>Wire Transfers</div>
-                            <div style={styles.bankingDropdownDesc}>Secure domestic & international</div>
+                            <div style={styles.bankingDropdownTitle}>Money Transfers</div>
+                            <div style={styles.bankingDropdownDesc}>Send money instantly</div>
                           </div>
                         </Link>
-                        <Link href="/bill-pay" style={styles.bankingDropdownLink}>
+                        <Link href={user ? "/bill-pay" : "/login"} style={styles.bankingDropdownLink}>
                           <span style={styles.bankingDropdownIcon}>🧾</span>
                           <div>
                             <div style={styles.bankingDropdownTitle}>Bill Pay Service</div>
-                            <div style={styles.bankingDropdownDesc}>Pay bills with ease</div>
+                            <div style={styles.bankingDropdownDesc}>Pay bills easily</div>
                           </div>
                         </Link>
-                        <Link href="/card-management" style={styles.bankingDropdownLink}>
-                          <span style={styles.bankingDropdownIcon}>💳</span>
-                          <div>
-                            <div style={styles.bankingDropdownTitle}>Card Management</div>
-                            <div style={styles.bankingDropdownDesc}>Control your cards</div>
-                          </div>
-                        </Link>
-                      </div>
-
-                      <div style={styles.bankingDropdownSection}>
-                        <h4 style={styles.bankingDropdownSectionTitle}>⚙️ Account Settings</h4>
-                        <Link href="/account-alerts" style={styles.bankingDropdownLink}>
-                          <span style={styles.bankingDropdownIcon}>🔔</span>
-                          <div>
-                            <div style={styles.bankingDropdownTitle}>Account Alerts</div>
-                            <div style={styles.bankingDropdownDesc}>Stay informed of activity</div>
-                          </div>
-                        </Link>
-                        <Link href="/security" style={styles.bankingDropdownLink}>
-                          <span style={styles.bankingDropdownIcon}>🔒</span>
-                          <div>
-                            <div style={styles.bankingDropdownTitle}>Security Settings</div>
-                            <div style={styles.bankingDropdownDesc}>Protect your accounts</div>
-                          </div>
-                        </Link>
-                        <Link href="/two-factor-auth" style={styles.bankingDropdownLink}>
-                          <span style={styles.bankingDropdownIcon}>🔑</span>
-                          <div>
-                            <div style={styles.bankingDropdownTitle}>Two-Factor Auth</div>
-                            <div style={styles.bankingDropdownDesc}>Enhanced login security</div>
-                          </div>
-                        </Link>
-                        <Link href="/profile-settings" style={styles.bankingDropdownLink}>
-                          <span style={styles.bankingDropdownIcon}>👤</span>
-                          <div>
-                            <div style={styles.bankingDropdownTitle}>Profile Settings</div>
-                            <div style={styles.bankingDropdownDesc}>Update your information</div>
-                          </div>
-                        </Link>
-                      </div>
-
-                      <div style={styles.bankingDropdownSection}>
-                        <h4 style={styles.bankingDropdownSectionTitle}>📱 Mobile Features</h4>
-                        <Link href="/mobile-deposit" style={styles.bankingDropdownLink}>
+                        <Link href={user ? "/deposit-real" : "/login"} style={styles.bankingDropdownLink}>
                           <span style={styles.bankingDropdownIcon}>📱</span>
                           <div>
                             <div style={styles.bankingDropdownTitle}>Mobile Deposit</div>
-                            <div style={styles.bankingDropdownDesc}>Deposit checks on the go</div>
+                            <div style={styles.bankingDropdownDesc}>Deposit checks on-the-go</div>
                           </div>
                         </Link>
-                        <Link href="/zelle-payments" style={styles.bankingDropdownLink}>
-                          <span style={styles.bankingDropdownIcon}>💸</span>
+                      </div>
+
+                      <div style={styles.bankingDropdownSection}>
+                        <h4 style={styles.bankingDropdownSectionTitle}>🔒 Security & Support</h4>
+                        <Link href={user ? "/security" : "/login"} style={styles.bankingDropdownLink}>
+                          <span style={styles.bankingDropdownIcon}>🛡️</span>
                           <div>
-                            <div style={styles.bankingDropdownTitle}>Zelle Payments</div>
-                            <div style={styles.bankingDropdownDesc}>Send money easily</div>
+                            <div style={styles.bankingDropdownTitle}>Security Settings</div>
+                            <div style={styles.bankingDropdownDesc}>Protect your account</div>
+                          </div>
+                        </Link>
+                        <Link href={user ? "/notifications" : "/login"} style={styles.bankingDropdownLink}>
+                          <span style={styles.bankingDropdownIcon}>🔔</span>
+                          <div>
+                            <div style={styles.bankingDropdownTitle}>Account Alerts</div>
+                            <div style={styles.bankingDropdownDesc}>Stay informed</div>
+                          </div>
+                        </Link>
+                        <Link href="/support" style={styles.bankingDropdownLink}>
+                          <span style={styles.bankingDropdownIcon}>💬</span>
+                          <div>
+                            <div style={styles.bankingDropdownTitle}>Customer Support</div>
+                            <div style={styles.bankingDropdownDesc}>24/7 assistance</div>
+                          </div>
+                        </Link>
+                        <Link href="/branch-locator" style={styles.bankingDropdownLink}>
+                          <span style={styles.bankingDropdownIcon}>📍</span>
+                          <div>
+                            <div style={styles.bankingDropdownTitle}>Branch Locator</div>
+                            <div style={styles.bankingDropdownDesc}>Find locations</div>
+                          </div>
+                        </Link>
+                      </div>
+
+                      <div style={styles.bankingDropdownSection}>
+                        <h4 style={styles.bankingDropdownSectionTitle}>📚 Resources</h4>
+                        <Link href="/financial-education" style={styles.bankingDropdownLink}>
+                          <span style={styles.bankingDropdownIcon}>🎓</span>
+                          <div>
+                            <div style={styles.bankingDropdownTitle}>Financial Education</div>
+                            <div style={styles.bankingDropdownDesc}>Learning resources</div>
+                          </div>
+                        </Link>
+                        <Link href="/calculators" style={styles.bankingDropdownLink}>
+                          <span style={styles.bankingDropdownIcon}>🧮</span>
+                          <div>
+                            <div style={styles.bankingDropdownTitle}>Financial Calculators</div>
+                            <div style={styles.bankingDropdownDesc}>Planning tools</div>
+                          </div>
+                        </Link>
+                        <Link href="/market-news" style={styles.bankingDropdownLink}>
+                          <span style={styles.bankingDropdownIcon}>📰</span>
+                          <div>
+                            <div style={styles.bankingDropdownTitle}>Market News</div>
+                            <div style={styles.bankingDropdownDesc}>Financial updates</div>
+                          </div>
+                        </Link>
+                        <Link href="/current-rates" style={styles.bankingDropdownLink}>
+                          <span style={styles.bankingDropdownIcon}>📊</span>
+                          <div>
+                            <div style={styles.bankingDropdownTitle}>Current Rates</div>
+                            <div style={styles.bankingDropdownDesc}>Interest rates</div>
                           </div>
                         </Link>
                       </div>
                     </div>
                     <div style={styles.bankingDropdownCTA}>
-                      <Link href="/online-banking" style={styles.bankingDropdownButton}>
+                      <Link href={user ? "/dashboard" : "/login"} style={styles.bankingDropdownButton}>
                         <span style={styles.buttonIcon}>💻</span>
-                        Go to Online Banking
+                        {user ? "Go to Dashboard" : "Sign In"}
                       </Link>
                       <Link href="/support" style={styles.bankingDropdownSecondaryButton}>
                         <span style={styles.buttonIcon}>💬</span>
-                        Digital Support
+                        Get Help
                       </Link>
                     </div>
                   </div>

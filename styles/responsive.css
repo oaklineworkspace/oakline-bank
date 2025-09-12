@@ -86,6 +86,61 @@
     max-height: calc(100vh - 80px) !important;
     padding: 1rem !important;
     margin: 0 !important;
+    overflow-y: auto !important;
+  }
+
+  .topHeaderRow {
+    flex-wrap: wrap !important;
+    gap: 0.5rem !important;
+    justify-content: center !important;
+  }
+
+  .logoSection {
+    order: 1 !important;
+    flex: 1 !important;
+    min-width: 200px !important;
+  }
+
+  .navigationDropdown {
+    order: 2 !important;
+    flex: 1 !important;
+    min-width: 140px !important;
+    display: flex !important;
+    justify-content: center !important;
+  }
+
+  .modernMenuButton {
+    width: 100% !important;
+    max-width: 160px !important;
+    min-width: 140px !important;
+    padding: 0.6rem 0.8rem !important;
+    font-size: 0.8rem !important;
+  }
+
+  .menuText {
+    font-size: 0.8rem !important;
+  }
+
+  .authButtonsRow {
+    order: 3 !important;
+    width: 100% !important;
+    margin-top: 0.5rem !important;
+  }
+
+  .authButtons {
+    width: 100% !important;
+    justify-content: center !important;
+    flex-wrap: wrap !important;
+    gap: 0.5rem !important;
+  }
+
+  .authButtons > * {
+    flex: 1 !important;
+    min-width: 90px !important;
+    max-width: 120px !important;
+    padding: 0.6rem 0.8rem !important;
+    font-size: 0.8rem !important;
+    text-align: center !important;
   }
 
   .bankingDropdownGrid {

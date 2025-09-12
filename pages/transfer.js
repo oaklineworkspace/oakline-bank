@@ -47,21 +47,58 @@ export default function Transfer() {
 
   const fetchAccounts = async (user) => {
     try {
-      const { data: accountsData, error } = await supabase
+      console.log('Fetching accounts for user:', { id: user.id, email: user.email });
+      
+      // Try multiple approaches to find accounts
+      let accountsData = [];
+      
+      // First try by user_id
+      const { data: accountsByUserId, error: error1 } = await supabase
         .from('accounts')
         .select('*')
-        .or(`user_id.eq.${user.id},user_email.eq.${user.email},email.eq.${user.email}`)
+        .eq('user_id', user.id)
         .order('created_at', { ascending: true });
 
-      if (error) throw error;
+      if (accountsByUserId && accountsByUserId.length > 0) {
+        accountsData = accountsByUserId;
+      } else {
+        // Try by email if user_id doesn't work
+        const { data: accountsByEmail, error: error2 } = await supabase
+          .from('accounts')
+          .select('*')
+          .eq('user_email', user.email)
+          .order('created_at', { ascending: true });
+
+        if (accountsByEmail && accountsByEmail.length > 0) {
+          accountsData = accountsByEmail;
+        } else {
+          // Try by email field
+          const { data: accountsByEmailField, error: error3 } = await supabase
+            .from('accounts')
+            .select('*')
+            .eq('email', user.email)
+            .order('created_at', { ascending: true });
+
+          if (accountsByEmailField && accountsByEmailField.length > 0) {
+            accountsData = accountsByEmailField;
+          }
+        }
+      }
+
+      console.log('Found accounts:', accountsData);
       
       if (accountsData && accountsData.length > 0) {
         setAccounts(accountsData);
         setFromAccount(accountsData[0].id.toString());
+        setMessage(''); // Clear any error messages
+      } else {
+        setAccounts([]);
+        setMessage('No accounts found. Please contact support if you believe this is an error.');
       }
     } catch (error) {
       console.error('Error fetching accounts:', error);
-      setMessage('Unable to load accounts. Please try again.');
+      setMessage('Unable to load accounts. Please try again or contact support.');
+      setAccounts([]);
     }
   };
 
