@@ -32,10 +32,20 @@
       "static/chunks/main.js",
       "static/chunks/pages/account-details.js"
     ],
-    "/security": [
+    "/login": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/security.js"
+      "static/chunks/pages/login.js"
+    ],
+    "/main-menu": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/main-menu.js"
+    ],
+    "/reset-password": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/reset-password.js"
     ]
   },
   "ampFirstPages": []
