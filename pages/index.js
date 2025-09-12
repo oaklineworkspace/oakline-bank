@@ -322,7 +322,7 @@ export default function Home() {
           <div style={styles.topHeaderRow}>
             {/* Logo Section */}
             <Link href="/" style={styles.logoSection}>
-              <img src="/images/logo-primary.png.jpg" alt="Oakline Bank" style={styles.headerLogo} />
+              <img src="/images/logo-primary.png" alt="Oakline Bank" style={styles.headerLogo} />
               <div style={styles.brandSection}>
                 <span style={styles.bankName}>Oakline Bank</span>
                 <span style={styles.bankTagline}>Your Financial Partner</span>
@@ -1046,9 +1046,9 @@ export default function Home() {
 const styles = {
   // Main Header Styles
   mainHeader: {
-    backgroundColor: '#1a365d',
-    borderBottom: '3px solid #059669',
-    boxShadow: '0 4px 12px rgba(26, 54, 93, 0.2)',
+    background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
+    borderBottom: '3px solid #0ea5e9',
+    boxShadow: '0 4px 20px rgba(30, 41, 59, 0.3)',
     position: 'sticky',
     top: 0,
     zIndex: 1000,
@@ -1285,11 +1285,11 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+    background: 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)',
     color: 'white',
     borderRadius: '8px',
     flexShrink: 0,
-    boxShadow: '0 2px 8px rgba(5, 150, 105, 0.3)'
+    boxShadow: '0 2px 8px rgba(14, 165, 233, 0.3)'
   },
   bankingDropdownTitle: {
     fontSize: '0.95rem',
@@ -1314,13 +1314,13 @@ const styles = {
     alignItems: 'center',
     gap: '0.5rem',
     padding: '0.75rem 1.25rem',
-    background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+    background: 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)',
     color: 'white',
     textDecoration: 'none',
     borderRadius: '8px',
     fontSize: '0.9rem',
     fontWeight: '700',
-    boxShadow: '0 4px 12px rgba(5, 150, 105, 0.3)',
+    boxShadow: '0 4px 12px rgba(14, 165, 233, 0.3)',
     transition: 'all 0.3s ease',
     flex: 1,
     justifyContent: 'center'
@@ -1696,14 +1696,14 @@ const styles = {
     marginTop: '1rem'
   },
   heroButton: {
-    background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+    background: 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)',
     color: 'white',
     textDecoration: 'none',
     padding: 'clamp(1rem, 2vw, 1.3rem) clamp(1.5rem, 4vw, 2.5rem)',
     borderRadius: '12px',
     fontSize: 'clamp(0.9rem, 2vw, 1.1rem)',
     fontWeight: '700',
-    boxShadow: '0 8px 24px rgba(4, 120, 87, 0.4)',
+    boxShadow: '0 8px 24px rgba(14, 165, 233, 0.4)',
     transition: 'all 0.3s ease',
     display: 'inline-flex',
     alignItems: 'center',
@@ -1780,7 +1780,7 @@ const styles = {
     fontWeight: '900',
     color: '#1e293b',
     marginBottom: '1rem',
-    background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+    background: 'linear-gradient(135deg, #0ea5e9 0%, #1e40af 100%)',
     WebkitBackgroundClip: 'text',
     WebkitTextFillColor: 'transparent',
     backgroundClip: 'text',
@@ -1797,7 +1797,7 @@ const styles = {
   titleUnderline: {
     width: '80px',
     height: '4px',
-    background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+    background: 'linear-gradient(135deg, #0ea5e9 0%, #1e40af 100%)',
     margin: '1.5rem auto 0',
     borderRadius: '2px',
     animation: 'underlineExpand 1s ease-out 0.5s both'
@@ -1837,13 +1837,13 @@ const styles = {
     right: '20px'
   },
   featureBadge: {
-    background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+    background: 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)',
     color: 'white',
     padding: '10px 16px',
     borderRadius: '12px',
     fontSize: '0.85rem',
     fontWeight: '700',
-    boxShadow: '0 6px 16px rgba(4, 120, 87, 0.4)',
+    boxShadow: '0 6px 16px rgba(14, 165, 233, 0.4)',
     display: 'flex',
     alignItems: 'center',
     gap: '6px',
@@ -1953,13 +1953,13 @@ const styles = {
     width: '10px',
     height: '10px',
     borderRadius: '50%',
-    border: '2px solid #059669',
+    border: '2px solid #0ea5e9',
     background: 'transparent',
     cursor: 'pointer',
     transition: 'all 0.3s ease'
   },
   featureIndicatorActive: {
-    backgroundColor: '#059669',
+    backgroundColor: '#0ea5e9',
     transform: 'scale(1.4)'
   },
 
@@ -2018,7 +2018,7 @@ const styles = {
     backdropFilter: 'blur(20px)',
     transform: 'translateY(0)',
     animation: 'fadeInScale 0.8s ease-out forwards',
-    background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)'
+    background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)'
   },
   flipInY: {
     animation: 'flipInY 0.8s ease-out forwards'
@@ -2074,7 +2074,7 @@ const styles = {
     lineHeight: '1.4'
   },
   accountButton: {
-    backgroundColor: '#059669',
+    background: 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)',
     color: 'white',
     textDecoration: 'none',
     padding: '0.8rem 1.3rem',
@@ -2086,7 +2086,9 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     gap: '0.5rem',
-    transform: 'translateY(0)'
+    transform: 'translateY(0)',
+    border: 'none',
+    boxShadow: '0 4px 12px rgba(14, 165, 233, 0.3)'
   },
   accountButtonSecondary: {
     backgroundColor: '#e2e8f0',
@@ -2193,13 +2195,13 @@ const styles = {
     alignItems: 'center',
     gap: '0.8rem',
     padding: 'clamp(1rem, 2.5vw, 1.5rem) clamp(2rem, 4vw, 3rem)',
-    background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+    background: 'linear-gradient(135deg, #0ea5e9 0%, #1e40af 100%)',
     color: 'white',
     textDecoration: 'none',
     borderRadius: '16px',
     fontSize: 'clamp(1rem, 2.2vw, 1.2rem)',
     fontWeight: '800',
-    boxShadow: '0 10px 30px rgba(4, 120, 87, 0.4)',
+    boxShadow: '0 10px 30px rgba(14, 165, 233, 0.4)',
     transition: 'all 0.3s ease',
     marginBottom: '1rem',
     transform: 'translateY(0)'
@@ -2385,13 +2387,13 @@ const styles = {
     alignItems: 'center',
     gap: '0.8rem',
     padding: 'clamp(1rem, 2.5vw, 1.3rem) clamp(1.5rem, 4vw, 2.5rem)',
-    background: 'linear-gradient(135deg, #1a365d 0%, #059669 100%)',
+    background: 'linear-gradient(135deg, #1e40af 0%, #0ea5e9 100%)',
     color: 'white',
     textDecoration: 'none',
     borderRadius: '12px',
     fontSize: 'clamp(1rem, 2.2vw, 1.1rem)',
     fontWeight: '800',
-    boxShadow: '0 8px 25px rgba(26, 54, 93, 0.3)',
+    boxShadow: '0 8px 25px rgba(30, 64, 175, 0.3)',
     transition: 'all 0.3s ease',
     border: 'none',
     transform: 'translateY(0)'
@@ -2658,7 +2660,7 @@ if (typeof document !== 'undefined') {
       }
 
       .modernMenuButton:hover .hamburgerLine {
-        background-color: #059669 !important;
+        background-color: #0ea5e9 !important;
       }
     `;
     document.head.appendChild(dropdownStyles);
@@ -2715,12 +2717,12 @@ if (typeof document !== 'undefined') {
     }
     :root {
       /* Professional Banking Color Palette */
-      --navy-blue: #1a365d;
-      --navy-blue-light: #2d5a87;
-      --navy-blue-dark: #0f2a44;
-      --banking-green: #059669;
-      --banking-green-light: #10b981;
-      --banking-green-dark: #047857;
+      --navy-blue: #1e40af;
+      --navy-blue-light: #3b82f6;
+      --navy-blue-dark: #1e3a8a;
+      --banking-blue: #0ea5e9;
+      --banking-blue-light: #38bdf8;
+      --banking-blue-dark: #0284c7;
       --banking-gold: #d97706;
       --banking-gold-light: #f59e0b;
       --banking-gold-dark: #92400e;
