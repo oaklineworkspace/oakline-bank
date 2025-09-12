@@ -245,6 +245,8 @@ export default function Dashboard() {
                   <Link href="/account-details" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>View All Accounts</Link>
                   <Link href="/apply" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Open New Account</Link>
                   <Link href="/transactions" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Transaction History</Link>
+                  <Link href="/account-types" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Account Types</Link>
+                  <Link href="/statements" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Statements</Link>
                 </div>
               )}
             </div>
@@ -252,7 +254,7 @@ export default function Dashboard() {
             <div style={styles.navItem}>
               <button style={styles.navButton} onClick={(e) => { e.stopPropagation(); toggleDropdown('transfer'); }}>
                 <span style={styles.navIcon}>💸</span>
-                Transfer
+                Transfer & Pay
                 <span style={styles.navArrow}>▼</span>
               </button>
               {dropdownOpen.transfer && (
@@ -260,22 +262,55 @@ export default function Dashboard() {
                   <Link href="/transfer" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Transfer Money</Link>
                   <Link href="/bill-pay" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Pay Bills</Link>
                   <Link href="/deposit-real" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Mobile Deposit</Link>
+                  <Link href="/withdrawal" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Withdrawals</Link>
                 </div>
               )}
             </div>
 
             <div style={styles.navItem}>
               <button style={styles.navButton} onClick={(e) => { e.stopPropagation(); toggleDropdown('services'); }}>
-                <span style={styles.navIcon}>⚙️</span>
-                Services
+                <span style={styles.navIcon}>💳</span>
+                Cards & Loans
                 <span style={styles.navArrow}>▼</span>
               </button>
               {dropdownOpen.services && (
                 <div style={{ ...styles.dropdown, backgroundColor: '#1a365d' }}>
-                  <Link href="/loans" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Loans</Link>
-                  <Link href="/investments" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Investments</Link>
                   <Link href="/cards" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Manage Cards</Link>
+                  <Link href="/loans" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Loans</Link>
                   <Link href="/credit-report" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Credit Report</Link>
+                  <Link href="/rewards" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Card Rewards</Link>
+                </div>
+              )}
+            </div>
+
+            <div style={styles.navItem}>
+              <button style={styles.navButton} onClick={(e) => { e.stopPropagation(); toggleDropdown('investments'); }}>
+                <span style={styles.navIcon}>📈</span>
+                Investments
+                <span style={styles.navArrow}>▼</span>
+              </button>
+              {dropdownOpen.investments && (
+                <div style={{ ...styles.dropdown, backgroundColor: '#1a365d' }}>
+                  <Link href="/investments" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Investment Portfolio</Link>
+                  <Link href="/crypto" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Cryptocurrency</Link>
+                  <Link href="/financial-advisory" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Financial Advisory</Link>
+                  <Link href="/market-news" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Market News</Link>
+                </div>
+              )}
+            </div>
+
+            <div style={styles.navItem}>
+              <button style={styles.navButton} onClick={(e) => { e.stopPropagation(); toggleDropdown('support'); }}>
+                <span style={styles.navIcon}>🎧</span>
+                Support
+                <span style={styles.navArrow}>▼</span>
+              </button>
+              {dropdownOpen.support && (
+                <div style={{ ...styles.dropdown, backgroundColor: '#1a365d' }}>
+                  <Link href="/support" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Customer Support</Link>
+                  <Link href="/branch-locator" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Branch Locator</Link>
+                  <Link href="/faq" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Help & FAQ</Link>
+                  <Link href="/contact" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Contact Us</Link>
                 </div>
               )}
             </div>
@@ -300,21 +335,7 @@ export default function Dashboard() {
                         <Link href="/security" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Security Settings</Link>
                         <Link href="/notifications" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Notifications</Link>
                         <Link href="/privacy" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Privacy Settings</Link>
-                      </div>
-                    )}
-                </div>
-                <div style={styles.navItem}>
-                  <button style={styles.navButton} onClick={(e) => { e.stopPropagation(); toggleDropdown('quickAccess'); }}>
-                    <span style={styles.navIcon}>⚡</span>
-                    Quick Access
-                    <span style={styles.navArrow}>▼</span>
-                  </button>
-                  {dropdownOpen.quickAccess && (
-                      <div style={styles.dropdown}>
-                        <Link href="/" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Home</Link>
-                        <Link href="/main-menu" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Menu</Link>
-                        <Link href="/transfer" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Transfer Money</Link>
-                        <Link href="/bill-pay" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Pay Bills</Link>
+                        <Link href="/messages" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Messages</Link>
                       </div>
                     )}
                 </div>

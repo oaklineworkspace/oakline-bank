@@ -193,33 +193,66 @@ export default function MainMenu() {
 
           <nav style={styles.mainNav}>
             <div style={styles.navItem}>
-              <button style={styles.navButton} onClick={(e) => { e.stopPropagation(); toggleDropdown('quick'); }}>
-                <span style={styles.navIcon}>⚡</span>
-                Quick Access
+              <button style={styles.navButton} onClick={(e) => { e.stopPropagation(); toggleDropdown('accounts'); }}>
+                <span style={styles.navIcon}>🏦</span>
+                Accounts
                 <span style={styles.navArrow}>▼</span>
               </button>
-              {dropdownOpen.quick && (
+              {dropdownOpen.accounts && (
                 <div style={styles.dropdown}>
                   <Link href="/dashboard" style={styles.dropdownLink}>Dashboard Overview</Link>
+                  <Link href="/account-types" style={styles.dropdownLink}>All Account Types</Link>
+                  <Link href="/account-details" style={styles.dropdownLink}>Account Details</Link>
+                  <Link href="/apply" style={styles.dropdownLink}>Open New Account</Link>
+                  <Link href="/transactions" style={styles.dropdownLink}>Transaction History</Link>
+                </div>
+              )}
+            </div>
+
+            <div style={styles.navItem}>
+              <button style={styles.navButton} onClick={(e) => { e.stopPropagation(); toggleDropdown('transfer'); }}>
+                <span style={styles.navIcon}>💸</span>
+                Transfer & Pay
+                <span style={styles.navArrow}>▼</span>
+              </button>
+              {dropdownOpen.transfer && (
+                <div style={styles.dropdown}>
                   <Link href="/transfer" style={styles.dropdownLink}>Transfer Money</Link>
-                  <Link href="/deposit-real" style={styles.dropdownLink}>Mobile Deposit</Link>
                   <Link href="/bill-pay" style={styles.dropdownLink}>Pay Bills</Link>
+                  <Link href="/deposit-real" style={styles.dropdownLink}>Mobile Deposit</Link>
+                  <Link href="/withdrawal" style={styles.dropdownLink}>Withdrawals</Link>
                 </div>
               )}
             </div>
 
             <div style={styles.navItem}>
               <button style={styles.navButton} onClick={(e) => { e.stopPropagation(); toggleDropdown('services'); }}>
-                <span style={styles.navIcon}>🏦</span>
-                Services
+                <span style={styles.navIcon}>💳</span>
+                Cards & Loans
                 <span style={styles.navArrow}>▼</span>
               </button>
               {dropdownOpen.services && (
                 <div style={styles.dropdown}>
-                  <Link href="/account-types" style={styles.dropdownLink}>All Account Types</Link>
+                  <Link href="/cards" style={styles.dropdownLink}>Manage Cards</Link>
                   <Link href="/loans" style={styles.dropdownLink}>Loans & Credit</Link>
-                  <Link href="/investments" style={styles.dropdownLink}>Investments</Link>
+                  <Link href="/credit-report" style={styles.dropdownLink}>Credit Report</Link>
+                  <Link href="/rewards" style={styles.dropdownLink}>Card Rewards</Link>
+                </div>
+              )}
+            </div>
+
+            <div style={styles.navItem}>
+              <button style={styles.navButton} onClick={(e) => { e.stopPropagation(); toggleDropdown('investments'); }}>
+                <span style={styles.navIcon}>📈</span>
+                Investments
+                <span style={styles.navArrow}>▼</span>
+              </button>
+              {dropdownOpen.investments && (
+                <div style={styles.dropdown}>
+                  <Link href="/investments" style={styles.dropdownLink}>Investment Portfolio</Link>
                   <Link href="/crypto" style={styles.dropdownLink}>Cryptocurrency</Link>
+                  <Link href="/financial-advisory" style={styles.dropdownLink}>Financial Advisory</Link>
+                  <Link href="/market-news" style={styles.dropdownLink}>Market News</Link>
                 </div>
               )}
             </div>
@@ -260,21 +293,7 @@ export default function MainMenu() {
                       <Link href="/security" style={styles.dropdownLink}>Security Settings</Link>
                       <Link href="/notifications" style={styles.dropdownLink}>Notifications</Link>
                       <Link href="/privacy" style={styles.dropdownLink}>Privacy Settings</Link>
-                    </div>
-                  )}
-                </div>
-                <div style={styles.navItem}>
-                  <button style={styles.navButton} onClick={(e) => { e.stopPropagation(); toggleDropdown('navigation'); }}>
-                    <span style={styles.navIcon}>🧭</span>
-                    Navigate
-                    <span style={styles.navArrow}>▼</span>
-                  </button>
-                  {dropdownOpen.navigation && (
-                    <div style={styles.dropdown}>
-                      <Link href="/" style={styles.dropdownLink}>Home</Link>
-                      <Link href="/dashboard" style={styles.dropdownLink}>Dashboard</Link>
-                      <Link href="/account-types" style={styles.dropdownLink}>Account Types</Link>
-                      <Link href="/support" style={styles.dropdownLink}>Support</Link>
+                      <Link href="/messages" style={styles.dropdownLink}>Messages</Link>
                     </div>
                   )}
                 </div>
