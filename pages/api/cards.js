@@ -2,111 +2,140 @@
 import { supabase } from '../../lib/supabaseClient';
 
 export default async function handler(req, res) {
-  if (req.method === 'GET') {
-    try {
-      const { user_id } = req.query;
-      
-      if (!user_id) {
-        return res.status(400).json({ error: 'User ID is required' });
-      }
-
-      const { data: cards, error } = await supabase
-        .from('cards')
-        .select('*')
-        .eq('user_id', user_id)
-        .eq('status', 'active');
-
-      if (error) {
-        console.error('Error fetching cards:', error);
-        return res.status(500).json({ error: 'Failed to fetch cards' });
-      }
-
-      return res.status(200).json({ cards });
-
-    } catch (error) {
-      console.error('API error:', error);
-      return res.status(500).json({ error: 'Internal server error' });
+  const { method } = req;
+  
+  try {
+    // Get the authorization header
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: 'Missing or invalid authorization header' });
     }
-  }
 
-  if (req.method === 'POST') {
-    try {
-      const { user_id, account_id, cardholder_name } = req.body;
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
 
-      if (!user_id || !account_id || !cardholder_name) {
-        return res.status(400).json({ error: 'Missing required fields' });
-      }
-
-      // Generate card details
-      const cardNumber = generateCardNumber();
-      const expiryDate = generateExpiryDate();
-      const cvv = generateCVV();
-
-      // Create card application first
-      const { data: application, error: appError } = await supabase
-        .from('card_applications')
-        .insert([{
-          user_id,
-          account_id,
-          cardholder_name,
-          status: 'approved',
-          card_number: cardNumber,
-          expiry_date: expiryDate,
-          cvv: cvv,
-          approved_at: new Date().toISOString()
-        }])
-        .select()
-        .single();
-
-      if (appError) {
-        console.error('Error creating card application:', appError);
-        return res.status(500).json({ error: 'Failed to create card application' });
-      }
-
-      // Create the actual card
-      const { data: card, error: cardError } = await supabase
-        .from('cards')
-        .insert([{
-          user_id,
-          account_id,
-          application_id: application.id,
-          card_number: cardNumber,
-          cardholder_name,
-          expiry_date: expiryDate,
-          cvv: cvv,
-          status: 'active'
-        }])
-        .select()
-        .single();
-
-      if (cardError) {
-        console.error('Error creating card:', cardError);
-        return res.status(500).json({ error: 'Failed to create card' });
-      }
-
-      return res.status(201).json({ card, application });
-
-    } catch (error) {
-      console.error('API error:', error);
-      return res.status(500).json({ error: 'Internal server error' });
+    if (authError || !user) {
+      return res.status(401).json({ error: 'Invalid or expired token' });
     }
+
+    switch (method) {
+      case 'GET':
+        return await getUserCards(user.id, res);
+      case 'PUT':
+        return await updateCard(req, user.id, res);
+      default:
+        return res.status(405).json({ error: 'Method not allowed' });
+    }
+  } catch (error) {
+    console.error('Error in cards API:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
-
-  return res.status(405).json({ error: 'Method not allowed' });
 }
 
-function generateCardNumber() {
-  const prefix = '4000';
-  const randomDigits = Array.from({length: 12}, () => Math.floor(Math.random() * 10)).join('');
-  return `${prefix} ${randomDigits.substring(0,4)} ${randomDigits.substring(4,8)} ${randomDigits.substring(8,12)}`;
+async function getUserCards(userId, res) {
+  try {
+    const { data: cards, error } = await supabase
+      .from('cards')
+      .select(`
+        *,
+        accounts!inner(
+          id,
+          account_number,
+          account_type,
+          balance
+        )
+      `)
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching cards:', error);
+      return res.status(500).json({ error: 'Failed to fetch cards' });
+    }
+
+    // Hide sensitive card information
+    const safeCards = cards.map(card => ({
+      ...card,
+      card_number: `****-****-****-${card.card_number.slice(-4)}`,
+      cvv: undefined,
+      pin_hash: undefined
+    }));
+
+    res.status(200).json({
+      success: true,
+      cards: safeCards
+    });
+  } catch (error) {
+    console.error('Error in getUserCards:', error);
+    res.status(500).json({ error: 'Failed to fetch cards' });
+  }
 }
 
-function generateExpiryDate() {
-  const now = new Date();
-  const expiry = new Date(now.getFullYear() + 2, now.getMonth());
-  return `${String(expiry.getMonth() + 1).padStart(2, '0')}/${String(expiry.getFullYear()).substring(2)}`;
-}
+async function updateCard(req, userId, res) {
+  try {
+    const { cardId, action, dailyLimit, monthlyLimit } = req.body;
 
-function generateCVV() {
-  return String(Math.floor(Math.random() * 900) + 100);
+    if (!cardId || !action) {
+      return res.status(400).json({ error: 'Card ID and action are required' });
+    }
+
+    // Verify card belongs to user
+    const { data: card, error: cardError } = await supabase
+      .from('cards')
+      .select('*')
+      .eq('id', cardId)
+      .eq('user_id', userId)
+      .single();
+
+    if (cardError || !card) {
+      return res.status(404).json({ error: 'Card not found' });
+    }
+
+    let updateData = {};
+
+    switch (action) {
+      case 'lock':
+        updateData.is_locked = true;
+        break;
+      case 'unlock':
+        updateData.is_locked = false;
+        break;
+      case 'deactivate':
+        updateData.status = 'inactive';
+        break;
+      case 'update_limits':
+        if (dailyLimit !== undefined) updateData.daily_limit = dailyLimit;
+        if (monthlyLimit !== undefined) updateData.monthly_limit = monthlyLimit;
+        break;
+      default:
+        return res.status(400).json({ error: 'Invalid action' });
+    }
+
+    const { data: updatedCard, error: updateError } = await supabase
+      .from('cards')
+      .update(updateData)
+      .eq('id', cardId)
+      .eq('user_id', userId)
+      .select()
+      .single();
+
+    if (updateError) {
+      console.error('Error updating card:', updateError);
+      return res.status(500).json({ error: 'Failed to update card' });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: `Card ${action} successful`,
+      card: {
+        ...updatedCard,
+        card_number: `****-****-****-${updatedCard.card_number.slice(-4)}`,
+        cvv: undefined,
+        pin_hash: undefined
+      }
+    });
+  } catch (error) {
+    console.error('Error in updateCard:', error);
+    res.status(500).json({ error: 'Failed to update card' });
+  }
 }

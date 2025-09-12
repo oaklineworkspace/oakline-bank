@@ -1,64 +1,83 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import Link from 'next/link';
 import { supabase } from '../lib/supabaseClient';
 
 export default function ApplyCard() {
-  const router = useRouter();
   const [user, setUser] = useState(null);
   const [accounts, setAccounts] = useState([]);
   const [selectedAccount, setSelectedAccount] = useState('');
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const router = useRouter();
 
   useEffect(() => {
-    checkUser();
+    checkAuth();
   }, []);
 
-  const checkUser = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        router.push('/login');
-        return;
-      }
-      setUser(user);
-      await fetchUserAccounts(user);
-    } catch (error) {
-      console.error('Error checking user:', error);
-      router.push('/login');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchUserAccounts = async (user) => {
+  const checkAuth = async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         router.push('/login');
         return;
       }
+      setUser(session.user);
+      await fetchUserAccounts(session.user);
+    } catch (error) {
+      console.error('Auth check error:', error);
+      router.push('/login');
+    }
+  };
 
-      const response = await fetch('/api/get-user-accounts', {
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json'
-        }
-      });
+  const fetchUserAccounts = async (user) => {
+    try {
+      // Try multiple approaches to find user accounts
+      let accountsData = [];
+      
+      // Method 1: Direct user_id match
+      const { data: directAccounts, error: directError } = await supabase
+        .from('accounts')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .order('created_at', { ascending: true });
 
-      const data = await response.json();
-      if (data.success) {
-        setAccounts(data.accounts);
+      if (directAccounts && directAccounts.length > 0) {
+        accountsData = directAccounts;
       } else {
-        setError('Failed to load your accounts');
+        // Method 2: Through profile/application
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('application_id')
+          .eq('id', user.id)
+          .single();
+
+        if (profile?.application_id) {
+          const { data: applicationAccounts } = await supabase
+            .from('accounts')
+            .select('*')
+            .eq('application_id', profile.application_id)
+            .eq('status', 'active')
+            .order('created_at', { ascending: true });
+
+          if (applicationAccounts) {
+            accountsData = applicationAccounts;
+          }
+        }
+      }
+
+      setAccounts(accountsData || []);
+      if (accountsData.length > 0) {
+        setSelectedAccount(accountsData[0].id);
       }
     } catch (error) {
       console.error('Error fetching accounts:', error);
       setError('Error loading accounts');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -71,7 +90,7 @@ export default function ApplyCard() {
 
     setSubmitting(true);
     setError('');
-    setMessage('');
+    setSuccess('');
 
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -83,8 +102,8 @@ export default function ApplyCard() {
       const response = await fetch('/api/apply-card', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
         },
         body: JSON.stringify({
           accountId: selectedAccount
@@ -94,12 +113,10 @@ export default function ApplyCard() {
       const data = await response.json();
       
       if (data.success) {
-        setMessage('✅ Card application submitted successfully! You will receive confirmation once approved.');
-        setSelectedAccount('');
-        // Redirect to cards page after 3 seconds
+        setSuccess(data.message);
         setTimeout(() => {
           router.push('/cards');
-        }, 3000);
+        }, 2000);
       } else {
         setError(data.error || 'Failed to submit application');
       }
@@ -114,7 +131,7 @@ export default function ApplyCard() {
   if (loading) {
     return (
       <div style={styles.container}>
-        <div style={styles.loading}>Loading...</div>
+        <div style={styles.loading}>Loading accounts...</div>
       </div>
     );
   }
@@ -122,93 +139,123 @@ export default function ApplyCard() {
   return (
     <div style={styles.container}>
       <div style={styles.header}>
-        <h1 style={styles.title}>Apply for Debit Card</h1>
-        <Link href="/dashboard" style={styles.backButton}>
-          ← Back to Dashboard
-        </Link>
+        <h1 style={styles.title}>💳 Apply for Debit Card</h1>
+        <button 
+          onClick={() => router.push('/cards')}
+          style={styles.backButton}
+        >
+          ← Back to Cards
+        </button>
       </div>
 
-      <div style={styles.card}>
-        <div style={styles.cardHeader}>
-          <h2 style={styles.cardTitle}>💳 Debit Card Application</h2>
-          <p style={styles.subtitle}>
-            Apply for a debit card to access your funds instantly anywhere in the world.
-          </p>
-        </div>
-
-        {message && <div style={styles.success}>{message}</div>}
-        {error && <div style={styles.error}>{error}</div>}
-
-        {accounts.length === 0 ? (
-          <div style={styles.noAccounts}>
-            <h3>No Eligible Accounts Found</h3>
-            <p>You need to have an active account to apply for a debit card.</p>
-            <Link href="/apply" style={styles.openAccountButton}>
-              Open an Account First
-            </Link>
+      <div style={styles.formContainer}>
+        <div style={styles.formCard}>
+          <div style={styles.cardHeader}>
+            <h2>Debit Card Application</h2>
+            <p style={styles.subtitle}>
+              Apply for a debit card linked to one of your active accounts
+            </p>
           </div>
-        ) : (
-          <form onSubmit={handleSubmit} style={styles.form}>
-            <div style={styles.inputGroup}>
-              <label style={styles.label}>Select Account for Card</label>
-              <select
-                value={selectedAccount}
-                onChange={(e) => setSelectedAccount(e.target.value)}
-                style={styles.select}
-                required
+
+          {error && <div style={styles.error}>{error}</div>}
+          {success && <div style={styles.success}>{success}</div>}
+
+          {accounts.length === 0 ? (
+            <div style={styles.noAccounts}>
+              <h3>No Active Accounts Found</h3>
+              <p>You need an active account to apply for a debit card.</p>
+              <button 
+                onClick={() => router.push('/dashboard')}
+                style={styles.primaryButton}
               >
-                <option value="">Choose an account...</option>
-                {accounts.map(account => (
-                  <option key={account.id} value={account.id}>
-                    {account.account_type} - ****{account.account_number.slice(-4)} 
-                    (Balance: ${parseFloat(account.balance || 0).toFixed(2)})
-                  </option>
-                ))}
-              </select>
+                Go to Dashboard
+              </button>
             </div>
-
-            <div style={styles.features}>
-              <h3>Card Benefits & Features</h3>
-              <div style={styles.featuresList}>
-                <div style={styles.feature}>
-                  <span style={styles.featureIcon}>🔒</span>
-                  <span>Advanced security with EMV chip technology</span>
-                </div>
-                <div style={styles.feature}>
-                  <span style={styles.featureIcon}>🌍</span>
-                  <span>Accepted worldwide at millions of locations</span>
-                </div>
-                <div style={styles.feature}>
-                  <span style={styles.featureIcon}>📱</span>
-                  <span>Contactless payments for quick transactions</span>
-                </div>
-                <div style={styles.feature}>
-                  <span style={styles.featureIcon}>🚫</span>
-                  <span>Zero liability protection against fraud</span>
-                </div>
-                <div style={styles.feature}>
-                  <span style={styles.featureIcon}>🏧</span>
-                  <span>Free ATM access at network locations</span>
-                </div>
-                <div style={styles.feature}>
-                  <span style={styles.featureIcon}>📊</span>
-                  <span>Real-time transaction alerts and controls</span>
-                </div>
+          ) : (
+            <form onSubmit={handleSubmit} style={styles.form}>
+              <div style={styles.inputGroup}>
+                <label style={styles.label}>Select Account for Card</label>
+                <select
+                  value={selectedAccount}
+                  onChange={(e) => setSelectedAccount(e.target.value)}
+                  style={styles.select}
+                  required
+                >
+                  <option value="">Choose an account</option>
+                  {accounts.map((account) => (
+                    <option key={account.id} value={account.id}>
+                      {account.account_type.replace(/_/g, ' ').toUpperCase()} - 
+                      ****{account.account_number.slice(-4)} - 
+                      Balance: ${parseFloat(account.balance).toFixed(2)}
+                    </option>
+                  ))}
+                </select>
               </div>
-            </div>
 
-            <button
-              type="submit"
-              style={{
-                ...styles.submitButton,
-                ...(submitting ? styles.disabledButton : {})
-              }}
-              disabled={submitting}
-            >
-              {submitting ? '⏳ Submitting Application...' : '💳 Apply for Card'}
-            </button>
-          </form>
-        )}
+              {selectedAccount && (
+                <div style={styles.selectedAccountInfo}>
+                  <h4>Selected Account Details:</h4>
+                  {(() => {
+                    const account = accounts.find(acc => acc.id === selectedAccount);
+                    return account ? (
+                      <div style={styles.accountDetails}>
+                        <div style={styles.detailRow}>
+                          <span>Account Type:</span>
+                          <span>{account.account_type.replace(/_/g, ' ').toUpperCase()}</span>
+                        </div>
+                        <div style={styles.detailRow}>
+                          <span>Account Number:</span>
+                          <span>****{account.account_number.slice(-4)}</span>
+                        </div>
+                        <div style={styles.detailRow}>
+                          <span>Current Balance:</span>
+                          <span>${parseFloat(account.balance).toFixed(2)}</span>
+                        </div>
+                        <div style={styles.detailRow}>
+                          <span>Routing Number:</span>
+                          <span>{account.routing_number}</span>
+                        </div>
+                      </div>
+                    ) : null;
+                  })()}
+                </div>
+              )}
+
+              <div style={styles.cardFeatures}>
+                <h4>Your Debit Card Will Include:</h4>
+                <ul style={styles.featuresList}>
+                  <li>🛡️ Secure chip technology</li>
+                  <li>💰 Daily spending limit: $2,000</li>
+                  <li>📅 Monthly spending limit: $10,000</li>
+                  <li>🔒 Instant lock/unlock via app</li>
+                  <li>📱 Real-time transaction notifications</li>
+                  <li>🌍 Worldwide acceptance</li>
+                  <li>💳 EMV chip and PIN protection</li>
+                </ul>
+              </div>
+
+              <div style={styles.terms}>
+                <p style={styles.termsText}>
+                  By submitting this application, you agree to our debit card terms and conditions. 
+                  Your card will be linked to the selected account and transactions will be deducted 
+                  from the account balance.
+                </p>
+              </div>
+
+              <button
+                type="submit"
+                disabled={submitting || !selectedAccount}
+                style={{
+                  ...styles.submitButton,
+                  opacity: (submitting || !selectedAccount) ? 0.6 : 1,
+                  cursor: (submitting || !selectedAccount) ? 'not-allowed' : 'pointer'
+                }}
+              >
+                {submitting ? '⏳ Submitting Application...' : '📝 Submit Card Application'}
+              </button>
+            </form>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -217,97 +264,97 @@ export default function ApplyCard() {
 const styles = {
   container: {
     minHeight: '100vh',
-    backgroundColor: '#f8fafc',
+    background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
     padding: '20px'
   },
   header: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: '30px'
+    marginBottom: '30px',
+    background: 'white',
+    padding: '20px',
+    borderRadius: '12px',
+    boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
   },
   title: {
-    fontSize: '2rem',
+    fontSize: '28px',
     fontWeight: 'bold',
-    color: '#1e3a8a'
+    color: '#1e3c72',
+    margin: 0
   },
   backButton: {
-    padding: '10px 20px',
-    backgroundColor: '#6b7280',
+    background: '#6c757d',
     color: 'white',
-    textDecoration: 'none',
+    border: 'none',
+    padding: '10px 20px',
     borderRadius: '8px',
+    cursor: 'pointer',
     fontSize: '14px',
-    fontWeight: '500'
+    textDecoration: 'none'
   },
   loading: {
     textAlign: 'center',
-    fontSize: '1.2rem',
-    marginTop: '50px',
-    color: '#6b7280'
-  },
-  card: {
-    backgroundColor: 'white',
-    borderRadius: '16px',
     padding: '40px',
-    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.07)',
-    maxWidth: '800px',
-    margin: '0 auto'
+    fontSize: '18px',
+    color: '#666'
+  },
+  formContainer: {
+    display: 'flex',
+    justifyContent: 'center'
+  },
+  formCard: {
+    background: 'white',
+    borderRadius: '12px',
+    padding: '30px',
+    boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+    width: '100%',
+    maxWidth: '600px'
   },
   cardHeader: {
     textAlign: 'center',
-    marginBottom: '40px'
-  },
-  cardTitle: {
-    fontSize: '28px',
-    fontWeight: 'bold',
-    color: '#1e3a8a',
-    marginBottom: '10px'
+    marginBottom: '30px'
   },
   subtitle: {
+    color: '#666',
     fontSize: '16px',
-    color: '#6b7280',
-    lineHeight: '1.6'
-  },
-  success: {
-    color: '#065f46',
-    backgroundColor: '#d1fae5',
-    padding: '16px',
-    borderRadius: '8px',
-    marginBottom: '24px',
-    textAlign: 'center',
-    fontSize: '16px',
-    fontWeight: '500'
+    margin: '10px 0 0 0'
   },
   error: {
-    color: '#991b1b',
-    backgroundColor: '#fef2f2',
-    padding: '16px',
+    color: '#dc3545',
+    background: '#f8d7da',
+    padding: '15px',
     borderRadius: '8px',
-    marginBottom: '24px',
-    textAlign: 'center',
-    fontSize: '16px',
-    fontWeight: '500'
+    marginBottom: '20px',
+    textAlign: 'center'
+  },
+  success: {
+    color: '#155724',
+    background: '#d4edda',
+    padding: '15px',
+    borderRadius: '8px',
+    marginBottom: '20px',
+    textAlign: 'center'
   },
   noAccounts: {
     textAlign: 'center',
-    padding: '40px',
-    color: '#6b7280'
+    padding: '40px'
   },
-  openAccountButton: {
-    display: 'inline-block',
-    marginTop: '20px',
-    padding: '12px 24px',
-    backgroundColor: '#1e3a8a',
+  primaryButton: {
+    background: '#007bff',
     color: 'white',
-    textDecoration: 'none',
+    border: 'none',
+    padding: '12px 24px',
     borderRadius: '8px',
-    fontWeight: '600'
+    cursor: 'pointer',
+    fontSize: '16px',
+    fontWeight: '500',
+    marginTop: '15px'
   },
   form: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '30px'
+    gap: '20px'
   },
   inputGroup: {
     display: 'flex',
@@ -315,54 +362,65 @@ const styles = {
     gap: '8px'
   },
   label: {
-    fontSize: '16px',
-    fontWeight: '600',
-    color: '#374151'
+    fontSize: '14px',
+    fontWeight: '500',
+    color: '#333'
   },
   select: {
     padding: '12px',
-    border: '2px solid #e5e7eb',
+    border: '2px solid #e0e0e0',
     borderRadius: '8px',
     fontSize: '16px',
     outline: 'none',
-    backgroundColor: 'white',
-    cursor: 'pointer'
+    transition: 'border-color 0.3s'
   },
-  features: {
-    backgroundColor: '#f8fafc',
-    padding: '30px',
-    borderRadius: '12px',
-    border: '1px solid #e5e7eb'
+  selectedAccountInfo: {
+    background: '#f8f9fa',
+    padding: '20px',
+    borderRadius: '8px',
+    border: '1px solid #dee2e6'
+  },
+  accountDetails: {
+    marginTop: '10px'
+  },
+  detailRow: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    padding: '8px 0',
+    borderBottom: '1px solid #eee',
+    fontSize: '14px'
+  },
+  cardFeatures: {
+    background: '#e7f3ff',
+    padding: '20px',
+    borderRadius: '8px',
+    border: '1px solid #bee5eb'
   },
   featuresList: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-    gap: '16px',
-    marginTop: '20px'
+    margin: '10px 0',
+    paddingLeft: '20px'
   },
-  feature: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px',
+  terms: {
+    background: '#fff3cd',
+    padding: '15px',
+    borderRadius: '8px',
+    border: '1px solid #ffeaa7'
+  },
+  termsText: {
     fontSize: '14px',
-    color: '#374151'
-  },
-  featureIcon: {
-    fontSize: '20px'
+    color: '#856404',
+    margin: 0,
+    lineHeight: '1.5'
   },
   submitButton: {
-    backgroundColor: '#1e3a8a',
+    background: 'linear-gradient(135deg, #28a745 0%, #20c997 100%)',
     color: 'white',
     border: 'none',
-    padding: '16px 32px',
+    padding: '15px 30px',
     borderRadius: '8px',
-    fontSize: '18px',
-    fontWeight: '600',
+    fontSize: '16px',
+    fontWeight: '500',
     cursor: 'pointer',
-    transition: 'all 0.2s ease'
-  },
-  disabledButton: {
-    backgroundColor: '#9ca3af',
-    cursor: 'not-allowed'
+    transition: 'all 0.3s'
   }
 };
