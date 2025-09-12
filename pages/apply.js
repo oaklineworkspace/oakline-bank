@@ -648,7 +648,8 @@ export default function Apply() {
     bankTagline: {
       fontSize: '0.85rem',
       fontWeight: '500',
-      opacity: 0.8
+      opacity: 0.8,
+      color: '#bfdbfe'
     },
     headerInfo: {
       display: 'flex',
@@ -670,7 +671,7 @@ export default function Apply() {
     supportPhone: {
       fontSize: '1rem',
       fontWeight: '700',
-      color: '#fbbf24'
+      color: '#10b981'
     },
     headerActions: {
       display: 'flex',
@@ -699,7 +700,7 @@ export default function Apply() {
       gap: '0.5rem',
       padding: '0.8rem 1.5rem',
       background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
-      color: '#059669',
+      color: '#1e40af',
       textDecoration: 'none',
       borderRadius: '10px',
       fontSize: '0.9rem',
@@ -928,7 +929,7 @@ export default function Apply() {
     checkboxLabel: {
       fontSize: '15px',
       color: '#374151',
-      lineHeight: 1.6,
+      lineHeight: '1.6',
       cursor: 'pointer',
       fontWeight: '500',
       flex: 1,
@@ -1028,16 +1029,130 @@ export default function Apply() {
       fontSize: '14px',
       fontWeight: '500'
     },
-    footerLinks: {
-      textAlign: 'center',
+
+    // Footer Styles
+    footer: {
+      backgroundColor: '#1f2937',
+      color: 'white',
+      padding: '3rem 0 1rem',
       marginTop: '2rem'
     },
+    footerContainer: {
+      maxWidth: '1200px',
+      margin: '0 auto',
+      padding: '0 2rem'
+    },
+    footerGrid: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+      gap: '2rem',
+      marginBottom: '2rem'
+    },
+    footerColumn: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '1rem'
+    },
+    footerLogo: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '0.75rem',
+      marginBottom: '1rem'
+    },
+    footerLogoImg: {
+      height: '40px',
+      width: 'auto'
+    },
+    footerBankName: {
+      fontSize: '1.2rem',
+      fontWeight: '700',
+      color: 'white'
+    },
+    footerTagline: {
+      fontSize: '0.8rem',
+      color: '#9ca3af'
+    },
+    footerDescription: {
+      fontSize: '0.9rem',
+      color: '#d1d5db',
+      lineHeight: '1.5'
+    },
+    footerColumnTitle: {
+      fontSize: '1.1rem',
+      fontWeight: '600',
+      color: '#f9fafb',
+      marginBottom: '0.5rem'
+    },
+    footerLinks: {
+      listStyle: 'none',
+      padding: 0,
+      margin: 0,
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '0.5rem'
+    },
     footerLink: {
-      color: '#1a365d',
+      color: '#d1d5db',
       textDecoration: 'none',
-      fontSize: '16px',
-      fontWeight: '500',
+      fontSize: '0.9rem',
       transition: 'color 0.3s ease'
+    },
+    securityBadges: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '0.5rem'
+    },
+    securityBadge: {
+      backgroundColor: '#374151',
+      padding: '0.5rem 0.75rem',
+      borderRadius: '6px',
+      fontSize: '0.8rem',
+      fontWeight: '500',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '0.5rem'
+    },
+    footerBottom: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      flexWrap: 'wrap',
+      gap: '1rem',
+      paddingTop: '2rem',
+      borderTop: '1px solid #374151'
+    },
+    footerBottomLeft: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '0.25rem'
+    },
+    routingText: {
+      fontSize: '0.9rem',
+      fontWeight: '600',
+      color: '#fbbf24',
+      fontFamily: 'monospace'
+    },
+    memberText: {
+      fontSize: '0.8rem',
+      color: '#10b981',
+      fontWeight: '500'
+    },
+    footerBottomRight: {
+      display: 'flex',
+      gap: '1.5rem',
+      flexWrap: 'wrap'
+    },
+    footerBottomLink: {
+      color: '#9ca3af',
+      textDecoration: 'none',
+      fontSize: '0.8rem',
+      transition: 'color 0.3s ease'
+    },
+    copyright: {
+      textAlign: 'center',
+      paddingTop: '1rem',
+      borderTop: '1px solid #374151',
+      marginTop: '1rem'
     }
   };
 
@@ -1694,6 +1809,68 @@ export default function Apply() {
           </Link>
         </div>
       </div>
+
+      {/* Footer */}
+      <footer style={styles.footer}>
+        <div style={styles.footerContainer}>
+          <div style={styles.footerGrid}>
+            <div style={styles.footerColumn}>
+              <div style={styles.footerLogo}>
+                <img src="/images/logo-primary.png" alt="Oakline Bank" style={styles.footerLogoImg} />
+                <div style={styles.footerBankName}>Oakline Bank</div>
+              </div>
+              <div style={styles.footerTagline}>Your trusted partner in financial growth.</div>
+              <div style={styles.footerDescription}>
+                We are committed to providing exceptional banking services tailored to your needs. From everyday accounts to strategic investments, we're here to help you achieve your financial goals.
+              </div>
+            </div>
+            <div style={styles.footerColumn}>
+              <div style={styles.footerColumnTitle}>Quick Links</div>
+              <ul style={styles.footerLinks}>
+                <li><Link href="/about" style={styles.footerLink}>About Us</Link></li>
+                <li><Link href="/services" style={styles.footerLink}>Services</Link></li>
+                <li><Link href="/contact" style={styles.footerLink}>Contact Us</Link></li>
+                <li><Link href="/faq" style={styles.footerLink}>FAQ</Link></li>
+              </ul>
+            </div>
+            <div style={styles.footerColumn}>
+              <div style={styles.footerColumnTitle}>Support</div>
+              <ul style={styles.footerLinks}>
+                <li><Link href="/support/account-help" style={styles.footerLink}>Account Help</Link></li>
+                <li><Link href="/support/security" style={styles.footerLink}>Security Center</Link></li>
+                <li><Link href="/support/fees" style={styles.footerLink}>Fee Schedule</Link></li>
+                <li><Link href="/support/privacy" style={styles.footerLink}>Privacy Policy</Link></li>
+              </ul>
+            </div>
+            <div style={styles.footerColumn}>
+              <div style={styles.footerColumnTitle}>Connect With Us</div>
+              <div style={styles.footerDescription}>Follow us on social media for the latest updates and financial tips.</div>
+              <div style={styles.footerBottomRight}>
+                <Link href="#" style={styles.footerBottomLink}>Facebook</Link>
+                <Link href="#" style={styles.footerBottomLink}>Twitter</Link>
+                <Link href="#" style={styles.footerBottomLink}>LinkedIn</Link>
+              </div>
+              <div style={styles.securityBadges}>
+                <div style={styles.securityBadge}>🔒 Secure Connection</div>
+                <div style={styles.securityBadge}>🛡️ FDIC Insured</div>
+              </div>
+            </div>
+          </div>
+          <div style={styles.footerBottom}>
+            <div style={styles.footerBottomLeft}>
+              <div style={styles.routingText}>Routing Number: 075915826</div>
+              <div style={styles.memberText}>Member FDIC | Equal Housing Lender</div>
+            </div>
+            <div style={styles.footerBottomRight}>
+              <Link href="/terms" style={styles.footerBottomLink}>Terms of Service</Link>
+              <Link href="/privacy" style={styles.footerBottomLink}>Privacy Policy</Link>
+            </div>
+          </div>
+          <div style={styles.copyright}>
+            © 2024 Oakline Bank. All rights reserved.
+          </div>
+        </div>
+      </footer>
 
       <style jsx>{`
         @keyframes fadeInUp {

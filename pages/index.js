@@ -994,6 +994,150 @@ export default function Home() {
       {/* Enhanced Services Section */}
       <ServicesSection />
 
+      {/* Banking Success Stories Section */}
+      <section style={styles.bankingSuccessSection} id="banking-success" data-animate>
+        <div style={styles.container}>
+          <div style={{
+            ...styles.sectionHeader,
+            ...(isVisible['banking-success'] ? styles.fadeInUp : {})
+          }}>
+            <h2 style={styles.sectionTitle}>Real Success Stories</h2>
+            <p style={styles.sectionSubtitle}>
+              See how Oakline Bank has helped thousands achieve their financial goals
+            </p>
+            <div style={styles.titleUnderline}></div>
+          </div>
+
+          <div style={styles.successStoriesGrid}>
+            <div style={styles.successStoryCard}>
+              <div style={styles.successImageContainer}>
+                <img
+                  src="/images/loan-approval-celebration-1.svg"
+                  alt="Loan Approval Celebration"
+                  style={styles.successImage}
+                />
+                <div style={styles.successBadge}>
+                  <span style={styles.badgeIcon}>🎉</span>
+                  <span>Loan Approved</span>
+                </div>
+              </div>
+              <div style={styles.successContent}>
+                <h3 style={styles.successTitle}>Home Loan Success</h3>
+                <p style={styles.successDescription}>
+                  "Thanks to Oakline Bank's competitive rates and expert guidance, we secured our dream home loan in just 5 days!"
+                </p>
+                <div style={styles.successDetails}>
+                  <span style={styles.successAmount}>$350,000 Approved</span>
+                  <span style={styles.successRate}>2.75% APR</span>
+                </div>
+              </div>
+            </div>
+
+            <div style={styles.successStoryCard}>
+              <div style={styles.successImageContainer}>
+                <img
+                  src="/images/business-loan-approved.svg"
+                  alt="Business Loan Approved"
+                  style={styles.successImage}
+                />
+                <div style={styles.successBadge}>
+                  <span style={styles.badgeIcon}>🏢</span>
+                  <span>Business Growth</span>
+                </div>
+              </div>
+              <div style={styles.successContent}>
+                <h3 style={styles.successTitle}>Business Expansion</h3>
+                <p style={styles.successDescription}>
+                  "Oakline Bank believed in our vision and provided the capital we needed to expand our operations nationwide."
+                </p>
+                <div style={styles.successDetails}>
+                  <span style={styles.successAmount}>$500,000 Approved</span>
+                  <span style={styles.successRate}>3.25% APR</span>
+                </div>
+              </div>
+            </div>
+
+            <div style={styles.successStoryCard}>
+              <div style={styles.successImageContainer}>
+                <img
+                  src="/images/investment-success-banner.svg"
+                  alt="Investment Success"
+                  style={styles.successImage}
+                />
+                <div style={styles.successBadge}>
+                  <span style={styles.badgeIcon}>📈</span>
+                  <span>Investment Win</span>
+                </div>
+              </div>
+              <div style={styles.successContent}>
+                <h3 style={styles.successTitle}>Investment Portfolio Growth</h3>
+                <p style={styles.successDescription}>
+                  "Their investment advisory team helped me achieve a 15% annual return on my portfolio."
+                </p>
+                <div style={styles.successDetails}>
+                  <span style={styles.successAmount}>15% Annual Return</span>
+                  <span style={styles.successRate}>Diversified Portfolio</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Professional Banking Consultation Section */}
+      <section style={styles.consultationSection} id="consultation" data-animate>
+        <div style={styles.container}>
+          <div style={styles.consultationGrid}>
+            <div style={styles.consultationImageSide}>
+              <img
+                src="/images/woman-laptop-banking.svg"
+                alt="Professional Banking Consultation"
+                style={styles.consultationImage}
+              />
+            </div>
+            <div style={styles.consultationContent}>
+              <h2 style={styles.consultationTitle}>Personal Banking Solutions</h2>
+              <p style={styles.consultationSubtitle}>
+                Experience personalized banking with dedicated relationship managers who understand your unique financial needs.
+              </p>
+              <div style={styles.consultationFeatures}>
+                <div style={styles.consultationFeature}>
+                  <span style={styles.consultationFeatureIcon}>👨‍💼</span>
+                  <div>
+                    <h4 style={styles.consultationFeatureTitle}>Dedicated Relationship Manager</h4>
+                    <p style={styles.consultationFeatureDesc}>Your personal banking expert available 24/7</p>
+                  </div>
+                </div>
+                <div style={styles.consultationFeature}>
+                  <span style={styles.consultationFeatureIcon}>📊</span>
+                  <div>
+                    <h4 style={styles.consultationFeatureTitle}>Financial Planning</h4>
+                    <p style={styles.consultationFeatureDesc}>Comprehensive financial strategies tailored to your goals</p>
+                  </div>
+                </div>
+                <div style={styles.consultationFeature}>
+                  <span style={styles.consultationFeatureIcon}>🔒</span>
+                  <div>
+                    <h4 style={styles.consultationFeatureTitle}>Premium Security</h4>
+                    <p style={styles.consultationFeatureDesc}>Advanced protection for your financial information</p>
+                  </div>
+                </div>
+              </div>
+              <div style={styles.consultationActions}>
+                <Link href="/apply" style={styles.consultationButtonPrimary}>
+                  <span style={styles.buttonIcon}>🚀</span>
+                  Schedule Consultation
+                </Link>
+                <Link href="/support" style={styles.consultationButtonSecondary}>
+                  <span style={styles.buttonIcon}>💬</span>
+                  Contact Expert
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Enhanced Loan Section with Better Imagery */}
       <LoanApprovalSection />
 
@@ -2868,6 +3012,214 @@ const styles = {
     fontSize: 'clamp(1rem, 2.2vw, 1.1rem)',
     fontWeight: '700',
     border: '2px solid #1e293b',
+    transition: 'all 0.3s ease'
+  },
+
+  // Banking Success Stories Section
+  bankingSuccessSection: {
+    padding: 'clamp(4rem, 8vw, 6rem) 0',
+    backgroundColor: '#f8fafc',
+    width: '100%',
+    position: 'relative'
+  },
+  successStoriesGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 350px), 1fr))',
+    gap: '2rem',
+    marginBottom: '2rem'
+  },
+  successStoryCard: {
+    backgroundColor: 'white',
+    borderRadius: '20px',
+    overflow: 'hidden',
+    boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
+    border: '2px solid #e2e8f0',
+    transition: 'all 0.4s ease',
+    position: 'relative',
+    transform: 'translateY(0)'
+  },
+  successImageContainer: {
+    position: 'relative',
+    height: '240px',
+    background: 'linear-gradient(135deg, #059669 0%, #0891b2 100%)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden'
+  },
+  successImage: {
+    width: '85%',
+    height: 'auto',
+    maxHeight: '200px',
+    objectFit: 'contain',
+    filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.2))'
+  },
+  successBadge: {
+    position: 'absolute',
+    top: '15px',
+    right: '15px',
+    background: 'rgba(255,255,255,0.95)',
+    color: '#059669',
+    padding: '6px 12px',
+    borderRadius: '15px',
+    fontSize: '0.8rem',
+    fontWeight: '700',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '4px',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+  },
+  successContent: {
+    padding: '2rem'
+  },
+  successTitle: {
+    fontSize: '1.3rem',
+    fontWeight: '800',
+    color: '#1e293b',
+    marginBottom: '1rem'
+  },
+  successDescription: {
+    fontSize: '1rem',
+    color: '#64748b',
+    lineHeight: '1.6',
+    marginBottom: '1.5rem',
+    fontStyle: 'italic'
+  },
+  successDetails: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: '0.5rem'
+  },
+  successAmount: {
+    fontSize: '1.1rem',
+    fontWeight: '700',
+    color: '#059669',
+    backgroundColor: '#ecfdf5',
+    padding: '6px 12px',
+    borderRadius: '20px'
+  },
+  successRate: {
+    fontSize: '0.9rem',
+    fontWeight: '600',
+    color: '#1e40af',
+    backgroundColor: '#dbeafe',
+    padding: '6px 12px',
+    borderRadius: '20px'
+  },
+
+  // Professional Banking Consultation Section
+  consultationSection: {
+    padding: 'clamp(4rem, 8vw, 6rem) 0',
+    backgroundColor: 'white',
+    width: '100%'
+  },
+  consultationGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 400px), 1fr))',
+    gap: '3rem',
+    alignItems: 'center'
+  },
+  consultationImageSide: {
+    position: 'relative',
+    borderRadius: '20px',
+    overflow: 'hidden',
+    background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
+    padding: '2rem',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  consultationImage: {
+    width: '90%',
+    height: 'auto',
+    maxHeight: '350px',
+    objectFit: 'contain',
+    filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.2))'
+  },
+  consultationContent: {
+    padding: '1rem'
+  },
+  consultationTitle: {
+    fontSize: 'clamp(2rem, 4vw, 2.5rem)',
+    fontWeight: '900',
+    color: '#1e293b',
+    marginBottom: '1rem',
+    letterSpacing: '-0.01em'
+  },
+  consultationSubtitle: {
+    fontSize: '1.1rem',
+    color: '#64748b',
+    marginBottom: '2rem',
+    lineHeight: '1.6'
+  },
+  consultationFeatures: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1.5rem',
+    marginBottom: '2.5rem'
+  },
+  consultationFeature: {
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: '1rem'
+  },
+  consultationFeatureIcon: {
+    fontSize: '1.5rem',
+    width: '50px',
+    height: '50px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: 'linear-gradient(135deg, #059669 0%, #0891b2 100%)',
+    color: 'white',
+    borderRadius: '50%',
+    flexShrink: 0,
+    boxShadow: '0 4px 12px rgba(5, 150, 105, 0.3)'
+  },
+  consultationFeatureTitle: {
+    fontSize: '1.1rem',
+    fontWeight: '700',
+    color: '#1e293b',
+    marginBottom: '0.5rem'
+  },
+  consultationFeatureDesc: {
+    fontSize: '0.95rem',
+    color: '#64748b',
+    lineHeight: '1.5'
+  },
+  consultationActions: {
+    display: 'flex',
+    gap: '1rem',
+    flexWrap: 'wrap'
+  },
+  consultationButtonPrimary: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.8rem',
+    padding: '1rem 2rem',
+    background: 'linear-gradient(135deg, #059669 0%, #0891b2 100%)',
+    color: 'white',
+    textDecoration: 'none',
+    borderRadius: '12px',
+    fontSize: '1rem',
+    fontWeight: '700',
+    transition: 'all 0.3s ease',
+    boxShadow: '0 6px 20px rgba(5, 150, 105, 0.4)'
+  },
+  consultationButtonSecondary: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.8rem',
+    padding: '1rem 2rem',
+    backgroundColor: 'transparent',
+    color: '#059669',
+    textDecoration: 'none',
+    borderRadius: '12px',
+    fontSize: '1rem',
+    fontWeight: '700',
+    border: '2px solid #059669',
     transition: 'all 0.3s ease'
   },
 

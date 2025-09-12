@@ -43,20 +43,45 @@ export default function LoginPage() {
 
   return (
     <div style={styles.container}>
-      {/* Oakline Bank Header */}
+      {/* Enhanced Oakline Bank Header */}
       <header style={styles.header}>
-        <div style={styles.headerContent}>
-          <Link href="/" style={styles.logoContainer}>
-            <img src="/images/logo-primary.png" alt="Oakline Bank" style={styles.logo} />
-            <div style={styles.brandInfo}>
-              <span style={styles.bankName}>Oakline Bank</span>
-              <span style={styles.tagline}>Your Financial Partner</span>
+        <div style={styles.headerContainer}>
+          <div style={styles.headerMainRow}>
+            <Link href="/" style={styles.logoContainer}>
+              <img src="/images/logo-primary.png" alt="Oakline Bank" style={styles.logo} />
+              <div style={styles.brandInfo}>
+                <span style={styles.bankName}>Oakline Bank</span>
+                <span style={styles.tagline}>Secure Banking Access</span>
+              </div>
+            </Link>
+            
+            <div style={styles.headerInfo}>
+              <div style={styles.routingInfo}>
+                <span style={styles.routingLabel}>Routing Number:</span>
+                <span style={styles.routingNumber}>075915826</span>
+              </div>
+              <div style={styles.supportInfo}>
+                <span style={styles.supportLabel}>24/7 Support:</span>
+                <span style={styles.supportPhone}>1-800-OAKLINE</span>
+              </div>
             </div>
-          </Link>
+          </div>
           
-          <div style={styles.headerActions}>
-            <Link href="/apply" style={styles.headerButton}>Open Account</Link>
-            <Link href="/support" style={styles.headerButton}>Support</Link>
+          <div style={styles.headerActionsRow}>
+            <div style={styles.headerActions}>
+              <Link href="/apply" style={styles.headerButton}>
+                <span style={styles.buttonIcon}>🚀</span>
+                Open New Account
+              </Link>
+              <Link href="/support" style={styles.headerButton}>
+                <span style={styles.buttonIcon}>💬</span>
+                Get Support
+              </Link>
+              <Link href="/faq" style={styles.headerButton}>
+                <span style={styles.buttonIcon}>❓</span>
+                FAQ
+              </Link>
+            </div>
           </div>
         </div>
       </header>
@@ -257,19 +282,34 @@ const styles = {
     overflowX: 'hidden'
   },
   header: {
-    backgroundColor: '#1e40af',
+    background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
     color: 'white',
     padding: '1rem 1.5rem',
-    boxShadow: '0 4px 12px rgba(30, 64, 175, 0.2)'
+    boxShadow: '0 8px 32px rgba(30, 64, 175, 0.25)',
+    position: 'sticky',
+    top: 0,
+    zIndex: 100
   },
-  headerContent: {
+  headerContainer: {
     maxWidth: '1400px',
     margin: '0 auto',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1rem'
+  },
+  headerMainRow: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
     flexWrap: 'wrap',
     gap: '1rem'
+  },
+  headerActionsRow: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderTop: '1px solid rgba(255,255,255,0.2)',
+    paddingTop: '1rem'
   },
   logoContainer: {
     display: 'flex',
@@ -296,19 +336,67 @@ const styles = {
     fontSize: '0.9rem',
     color: '#bfdbfe'
   },
+  headerInfo: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-end',
+    gap: '0.5rem'
+  },
+  routingInfo: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    fontSize: '0.85rem'
+  },
+  routingLabel: {
+    color: '#cbd5e1',
+    fontWeight: '500'
+  },
+  routingNumber: {
+    color: '#fbbf24',
+    fontWeight: '700',
+    fontFamily: 'monospace',
+    backgroundColor: 'rgba(251, 191, 36, 0.2)',
+    padding: '2px 8px',
+    borderRadius: '4px'
+  },
+  supportInfo: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    fontSize: '0.9rem'
+  },
+  supportLabel: {
+    color: '#cbd5e1',
+    fontWeight: '500'
+  },
+  supportPhone: {
+    color: '#10b981',
+    fontWeight: '700'
+  },
   headerActions: {
     display: 'flex',
-    gap: '1rem'
+    gap: '1rem',
+    flexWrap: 'wrap',
+    justifyContent: 'center'
   },
   headerButton: {
-    padding: '0.5rem 1rem',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    padding: '0.75rem 1.25rem',
     backgroundColor: 'rgba(255,255,255,0.15)',
     color: 'white',
     textDecoration: 'none',
-    borderRadius: '6px',
+    borderRadius: '8px',
     fontSize: '0.9rem',
-    fontWeight: '500',
-    transition: 'all 0.3s ease'
+    fontWeight: '600',
+    transition: 'all 0.3s ease',
+    border: '1px solid rgba(255,255,255,0.3)',
+    backdropFilter: 'blur(10px)'
+  },
+  buttonIcon: {
+    fontSize: '1rem'
   },
   main: {
     flex: 1,
