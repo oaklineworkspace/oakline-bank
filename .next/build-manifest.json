@@ -27,25 +27,15 @@
       "static/chunks/main.js",
       "static/chunks/pages/_error.js"
     ],
-    "/compliance": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/compliance.js"
-    ],
-    "/disclosures": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/disclosures.js"
-    ],
     "/privacy": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
       "static/chunks/pages/privacy.js"
     ],
-    "/terms": [
+    "/sitemap": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/terms.js"
+      "static/chunks/pages/sitemap.js"
     ]
   },
   "ampFirstPages": []
