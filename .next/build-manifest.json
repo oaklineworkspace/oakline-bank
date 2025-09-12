@@ -32,6 +32,16 @@
       "static/chunks/main.js",
       "static/chunks/pages/dashboard.js"
     ],
+    "/login": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/login.js"
+    ],
+    "/main-menu": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/main-menu.js"
+    ],
     "/reset-password": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
