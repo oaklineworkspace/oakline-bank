@@ -171,6 +171,53 @@ export default function Dashboard() {
     );
   }
 
+  // Add hover effects for dropdown items
+  if (typeof document !== 'undefined') {
+    const existingStyle = document.querySelector('#dropdown-styles');
+    if (!existingStyle) {
+      const dropdownStyles = document.createElement('style');
+      dropdownStyles.id = 'dropdown-styles';
+      dropdownStyles.textContent = `
+      .dashboard-dropdown-link:hover {
+        background-color: #f3f4f6 !important;
+        color: #1a365d !important;
+        transform: translateX(4px);
+      }
+
+      .featureDropdownItem:hover {
+        background-color: #e0f2fe !important;
+        border-color: #059669 !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(5, 150, 105, 0.2);
+      }
+
+      .featuresDropdownButton:hover {
+        background-color: #f0f9ff !important;
+        border-color: #059669 !important;
+        color: #059669 !important;
+        transform: translateY(-2px);
+      }
+
+      .dropdownButton:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(5, 150, 105, 0.4);
+      }
+
+      .modernMenuButton:hover {
+        background-color: rgba(255, 255, 255, 0.1) !important;
+        border-color: rgba(255, 255, 255, 0.5) !important;
+        transform: translateY(-2px);
+      }
+
+      .modernMenuButton:hover .hamburgerLine {
+        background-color: #059669 !important;
+      }
+    `;
+      document.head.appendChild(dropdownStyles);
+    }
+  }
+
+
   return (
     <div style={styles.container} onClick={closeAllDropdowns}>
       {/* Professional Banking Header */}
@@ -195,9 +242,9 @@ export default function Dashboard() {
               </button>
               {dropdownOpen.accounts && (
                 <div style={{ ...styles.dropdown, backgroundColor: '#1a365d' }}>
-                  <Link href="/account-details" style={styles.dropdownLink}>View All Accounts</Link>
-                  <Link href="/apply" style={styles.dropdownLink}>Open New Account</Link>
-                  <Link href="/transactions" style={styles.dropdownLink}>Transaction History</Link>
+                  <Link href="/account-details" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>View All Accounts</Link>
+                  <Link href="/apply" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Open New Account</Link>
+                  <Link href="/transactions" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Transaction History</Link>
                 </div>
               )}
             </div>
@@ -210,9 +257,9 @@ export default function Dashboard() {
               </button>
               {dropdownOpen.transfer && (
                 <div style={{ ...styles.dropdown, backgroundColor: '#1a365d' }}>
-                  <Link href="/transfer" style={styles.dropdownLink}>Transfer Money</Link>
-                  <Link href="/bill-pay" style={styles.dropdownLink}>Pay Bills</Link>
-                  <Link href="/deposit-real" style={styles.dropdownLink}>Mobile Deposit</Link>
+                  <Link href="/transfer" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Transfer Money</Link>
+                  <Link href="/bill-pay" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Pay Bills</Link>
+                  <Link href="/deposit-real" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Mobile Deposit</Link>
                 </div>
               )}
             </div>
@@ -225,10 +272,10 @@ export default function Dashboard() {
               </button>
               {dropdownOpen.services && (
                 <div style={{ ...styles.dropdown, backgroundColor: '#1a365d' }}>
-                  <Link href="/loans" style={styles.dropdownLink}>Loans</Link>
-                  <Link href="/investments" style={styles.dropdownLink}>Investments</Link>
-                  <Link href="/cards" style={styles.dropdownLink}>Manage Cards</Link>
-                  <Link href="/credit-report" style={styles.dropdownLink}>Credit Report</Link>
+                  <Link href="/loans" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Loans</Link>
+                  <Link href="/investments" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Investments</Link>
+                  <Link href="/cards" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Manage Cards</Link>
+                  <Link href="/credit-report" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Credit Report</Link>
                 </div>
               )}
             </div>
@@ -249,10 +296,10 @@ export default function Dashboard() {
                   </button>
                   {dropdownOpen.profile && (
                     <div style={{ ...styles.dropdown, backgroundColor: '#1a365d' }}>
-                      <Link href="/profile" style={styles.dropdownLink}>View Profile</Link>
-                      <Link href="/security" style={styles.dropdownLink}>Security Settings</Link>
-                      <Link href="/notifications" style={styles.dropdownLink}>Notifications</Link>
-                      <Link href="/privacy" style={styles.dropdownLink}>Privacy Settings</Link>
+                      <Link href="/profile" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>View Profile</Link>
+                      <Link href="/security" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Security Settings</Link>
+                      <Link href="/notifications" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Notifications</Link>
+                      <Link href="/privacy" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Privacy Settings</Link>
                     </div>
                   )}
                 </div>
@@ -264,10 +311,10 @@ export default function Dashboard() {
                   </button>
                   {dropdownOpen.quickAccess && (
                     <div style={{ ...styles.dropdown, backgroundColor: '#1a365d' }}>
-                      <Link href="/" style={styles.dropdownLink}>Home</Link>
-                      <Link href="/main-menu" style={styles.dropdownLink}>Menu</Link>
-                      <Link href="/transfer" style={styles.dropdownLink}>Transfer Money</Link>
-                      <Link href="/bill-pay" style={styles.dropdownLink}>Pay Bills</Link>
+                      <Link href="/" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Home</Link>
+                      <Link href="/main-menu" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Menu</Link>
+                      <Link href="/transfer" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Transfer Money</Link>
+                      <Link href="/bill-pay" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Pay Bills</Link>
                     </div>
                   )}
                 </div>
@@ -324,19 +371,19 @@ export default function Dashboard() {
         <section style={styles.quickActionsSection}>
           <h3 style={styles.sectionTitle}>Quick Actions</h3>
           <div style={styles.quickActions}>
-            <Link href="/transfer" style={styles.quickAction}>
+            <Link href="/transfer" style={{ ...styles.quickAction, ...styles.dashboardDropdownLink }}>
               <span style={styles.quickActionIcon}>💸</span>
               <span style={styles.quickActionText}>Transfer Money</span>
             </Link>
-            <Link href="/deposit-real" style={styles.quickAction}>
+            <Link href="/deposit-real" style={{ ...styles.quickAction, ...styles.dashboardDropdownLink }}>
               <span style={styles.quickActionIcon}>📥</span>
               <span style={styles.quickActionText}>Mobile Deposit</span>
             </Link>
-            <Link href="/bill-pay" style={styles.quickAction}>
+            <Link href="/bill-pay" style={{ ...styles.quickAction, ...styles.dashboardDropdownLink }}>
               <span style={styles.quickActionIcon}>🧾</span>
               <span style={styles.quickActionText}>Pay Bills</span>
             </Link>
-            <button onClick={applyForCard} style={styles.quickAction}>
+            <button onClick={applyForCard} style={{ ...styles.quickAction, ...styles.dashboardDropdownLink }}>
               <span style={styles.quickActionIcon}>💳</span>
               <span style={styles.quickActionText}>Apply for Card</span>
             </button>
