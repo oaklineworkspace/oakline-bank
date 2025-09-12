@@ -329,7 +329,7 @@ export default function Home() {
           </div>
 
           <div style={styles.headerActions}>
-            {/* Modern Hamburger Features Dropdown */}
+            {/* Modern Hamburger Features Dropdown - Moved to Left */}
             <div style={styles.navigationDropdown}>
               <button 
                 style={styles.modernMenuButton}
@@ -413,13 +413,13 @@ export default function Home() {
               )}
             </div>
 
-            {/* Enrollment Button */}
+            {/* Enrollment Button - Moved to Center */}
             <Link href="/enroll" style={styles.enrollButton}>
               <span style={styles.buttonIcon}>🌐</span>
               Enroll for Online
             </Link>
 
-            {/* Auth Buttons */}
+            {/* Auth Buttons - Moved to Right */}
             <div style={styles.authButtons}>
               {user ? (
                 <>
@@ -1039,7 +1039,7 @@ const styles = {
     alignItems: 'center',
     gap: '1.5rem',
     flex: 1,
-    justifyContent: 'flex-end'
+    justifyContent: 'space-between'
   },
   modernMenuButton: {
     display: 'flex',
@@ -1137,7 +1137,7 @@ const styles = {
   featuresDropdownMenu: {
     position: 'absolute',
     top: 'calc(100% + 0.5rem)',
-    right: 0,
+    left: 0,
     backgroundColor: 'white',
     borderRadius: '16px',
     boxShadow: '0 20px 40px rgba(26, 54, 93, 0.2)',
