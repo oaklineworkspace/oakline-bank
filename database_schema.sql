@@ -283,6 +283,8 @@ CREATE TABLE IF NOT EXISTS cards (
     status VARCHAR(20) DEFAULT 'active',
     daily_limit DECIMAL(10,2) DEFAULT 1000.00,
     monthly_limit DECIMAL(10,2) DEFAULT 10000.00,
+    daily_spent DECIMAL(10,2) DEFAULT 0.00,
+    monthly_spent DECIMAL(10,2) DEFAULT 0.00,
     is_locked BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
