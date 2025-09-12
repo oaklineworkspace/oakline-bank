@@ -314,8 +314,6 @@ export default function Apply() {
           city: effectiveCity,
           state: effectiveState,
           zip_code: formData.zipCode.trim(),
-          employment_status: formData.employmentStatus,
-          annual_income: formData.annualIncome,
           account_types: formData.accountTypes.map(id => {
             const accountType = ACCOUNT_TYPES.find(at => at.id === id);
             // Convert account type names to enum values expected by database
@@ -609,138 +607,147 @@ export default function Apply() {
   const styles = {
     container: {
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif',
-      padding: '2rem 1rem',
-      position: 'relative',
-      overflow: 'hidden'
-    },
-    backgroundPattern: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      opacity: 0.05,
-      backgroundImage: 'radial-gradient(circle at 25% 25%, #1a365d 0%, transparent 50%), radial-gradient(circle at 75% 75%, #059669 0%, transparent 50%)',
-      zIndex: 0
-    },
-    content: {
-      maxWidth: '1000px',
-      margin: '0 auto',
-      position: 'relative',
-      zIndex: 1
+      background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
     },
     header: {
-      textAlign: 'center',
-      marginBottom: '3rem',
-      animation: 'fadeInUp 0.8s ease'
+      background: 'linear-gradient(135deg, #059669 0%, #0891b2 100%)',
+      color: 'white',
+      padding: '1.5rem 0 0.5rem',
+      boxShadow: '0 8px 32px rgba(5, 150, 105, 0.25)',
+      position: 'sticky',
+      top: 0,
+      zIndex: 100
     },
-    logoContainer: {
+    headerContent: {
+      maxWidth: '1200px',
+      margin: '0 auto',
+      padding: '0 2rem',
       display: 'flex',
       alignItems: 'center',
-      justifyContent: 'center',
-      marginBottom: '2rem',
+      justifyContent: 'space-between',
+      flexWrap: 'wrap',
       gap: '1rem'
     },
     logo: {
-      height: '70px',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '0.75rem',
+      color: 'white',
+      textDecoration: 'none'
+    },
+    logoImage: {
+      height: '45px',
       width: 'auto'
     },
-    brandSection: {
+    bankName: {
+      fontSize: '1.5rem',
+      fontWeight: '700',
+      letterSpacing: '0.5px'
+    },
+    bankTagline: {
+      fontSize: '0.85rem',
+      fontWeight: '500',
+      opacity: 0.8
+    },
+    headerInfo: {
       display: 'flex',
       flexDirection: 'column',
-      alignItems: 'flex-start'
+      alignItems: 'center',
+      gap: '0.25rem'
     },
-    brandText: {
-      fontSize: '2.2rem',
-      fontWeight: '800',
-      color: '#1a365d',
-      lineHeight: '1'
-    },
-    brandTagline: {
-      fontSize: '1rem',
-      color: '#64748b',
-      fontWeight: '500',
-      marginTop: '0.25rem'
-    },
-    bankCredentials: {
+    supportInfo: {
       display: 'flex',
-      flexWrap: 'wrap',
-      justifyContent: 'center',
-      gap: '1rem',
-      marginTop: '1.5rem',
-      padding: '1rem',
-      backgroundColor: 'rgba(26, 54, 93, 0.05)',
-      borderRadius: '12px',
-      border: '1px solid rgba(26, 54, 93, 0.1)'
+      flexDirection: 'column',
+      alignItems: 'center',
+      gap: '0.25rem'
     },
-    credential: {
+    supportLabel: {
       fontSize: '0.85rem',
-      fontWeight: '600',
-      color: '#1a365d',
-      padding: '0.25rem 0.75rem',
-      backgroundColor: 'white',
-      borderRadius: '6px',
-      border: '1px solid #1a365d'
+      opacity: 0.9,
+      fontWeight: '500'
     },
-    title: {
-      fontSize: 'clamp(28px, 5vw, 42px)',
+    supportPhone: {
+      fontSize: '1rem',
       fontWeight: '700',
-      color: '#1e293b',
-      marginBottom: '1rem',
-      lineHeight: 1.2
+      color: '#fbbf24'
     },
-    subtitle: {
-      fontSize: '18px',
-      color: '#64748b',
-      fontWeight: '500',
-      maxWidth: '600px',
-      margin: '0 auto'
+    headerActions: {
+      display: 'flex',
+      gap: '1rem',
+      alignItems: 'center'
+    },
+    loginButton: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '0.5rem',
+      padding: '0.8rem 1.5rem',
+      backgroundColor: 'rgba(255,255,255,0.15)',
+      border: '2px solid rgba(255,255,255,0.3)',
+      color: 'white',
+      textDecoration: 'none',
+      borderRadius: '10px',
+      fontSize: '0.9rem',
+      fontWeight: '700',
+      transition: 'all 0.3s ease',
+      backdropFilter: 'blur(10px)',
+      boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+    },
+    homeButton: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '0.5rem',
+      padding: '0.8rem 1.5rem',
+      background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+      color: '#059669',
+      textDecoration: 'none',
+      borderRadius: '10px',
+      fontSize: '0.9rem',
+      fontWeight: '700',
+      transition: 'all 0.3s ease',
+      boxShadow: '0 6px 20px rgba(255,255,255,0.4)',
+      border: '1px solid rgba(255,255,255,0.5)'
+    },
+    buttonIcon: {
+      fontSize: '1.1rem'
     },
     progressContainer: {
+      maxWidth: '1200px',
+      margin: '0 auto',
+      padding: '1rem 2rem 0'
+    },
+    progressBar: {
+      width: '100%',
+      height: '4px',
+      backgroundColor: 'rgba(255,255,255,0.2)',
+      borderRadius: '2px',
+      marginBottom: '1rem',
+      overflow: 'hidden'
+    },
+    progressFill: {
+      height: '100%',
+      background: 'linear-gradient(90deg, #fbbf24 0%, #f59e0b 100%)',
+      borderRadius: '2px',
+      transition: 'width 0.5s ease'
+    },
+    progressSteps: {
       display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginBottom: '3rem',
-      gap: '1rem'
+      justifyContent: 'space-between',
+      alignItems: 'center'
     },
     progressStep: {
       display: 'flex',
+      flexDirection: 'column',
       alignItems: 'center',
-      justifyContent: 'center',
-      width: '50px',
-      height: '50px',
-      borderRadius: '50%',
-      fontSize: '16px',
-      fontWeight: '600',
-      transition: 'all 0.3s ease',
-      boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+      gap: '0.25rem',
+      opacity: 0.6,
+      transition: 'opacity 0.3s ease',
+      fontSize: '0.8rem'
     },
     progressStepActive: {
-      background: 'linear-gradient(135deg, #1a365d 0%, #2d5a87 100%)',
-      color: 'white',
-      transform: 'scale(1.1)'
-    },
-    progressStepCompleted: {
-      background: 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
-      color: 'white'
-    },
-    progressStepPending: {
-      background: '#e2e8f0',
-      color: '#64748b'
-    },
-    progressLine: {
-      height: '3px',
-      width: '60px',
-      borderRadius: '2px',
-      transition: 'all 0.3s ease'
-    },
-    progressLineCompleted: {
-      background: 'linear-gradient(135deg, #059669 0%, #10b981 100%)'
-    },
-    progressLinePending: {
-      background: '#e2e8f0'
+      opacity: 1,
+      color: '#fbbf24',
+      fontWeight: '700'
     },
     formCard: {
       background: 'white',
@@ -954,14 +961,31 @@ export default function Apply() {
       minHeight: '52px'
     },
     primaryButton: {
-      background: 'linear-gradient(135deg, #1a365d 0%, #2d5a87 100%)',
+      background: 'linear-gradient(135deg, #059669 0%, #0891b2 100%)',
       color: 'white',
-      boxShadow: '0 4px 14px rgba(26, 54, 93, 0.3)'
+      border: 'none',
+      padding: '1rem 2rem',
+      borderRadius: '10px',
+      fontSize: '1rem',
+      fontWeight: '700',
+      cursor: 'pointer',
+      transition: 'all 0.3s ease',
+      boxShadow: '0 6px 20px rgba(5, 150, 105, 0.4)',
+      position: 'relative',
+      overflow: 'hidden'
     },
     secondaryButton: {
-      background: 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
-      color: 'white',
-      boxShadow: '0 4px 14px rgba(5, 150, 105, 0.3)'
+      backgroundColor: 'transparent',
+      color: '#059669',
+      border: '2px solid #059669',
+      padding: '1rem 2rem',
+      borderRadius: '10px',
+      fontSize: '1rem',
+      fontWeight: '700',
+      cursor: 'pointer',
+      transition: 'all 0.3s ease',
+      position: 'relative',
+      overflow: 'hidden'
     },
     outlineButton: {
       background: 'transparent',
@@ -1022,55 +1046,64 @@ export default function Apply() {
       <div style={styles.backgroundPattern}></div>
 
       <div style={styles.content}>
-        {/* Header */}
-        <div style={styles.header}>
-          <div style={styles.logoContainer}>
-            <img
-              src="/images/logo-primary.png"
-              alt="Oakline Bank"
-              style={styles.logo}
-              onError={(e) => {
-                e.target.style.display = 'none';
-                e.target.nextSibling.style.marginLeft = '0';
-              }}
-            />
-            <div style={styles.brandSection}>
-              <div style={styles.brandText}>Oakline Bank</div>
-              <div style={styles.brandTagline}>Your Trusted Financial Partner</div>
-            </div>
-          </div>
-          <div style={styles.bankCredentials}>
-            <div style={styles.credential}>FDIC Insured</div>
-            <div style={styles.credential}>Member FDIC</div>
-            <div style={styles.credential}>Equal Housing Lender</div>
-            <div style={styles.credential}>Routing: 075915826</div>
-          </div>
-          <h1 style={styles.title}>Open Your Account Today</h1>
-          <p style={styles.subtitle}>
-            Join thousands of satisfied customers and experience modern banking at its finest
-          </p>
-        </div>
-
-        {/* Progress Steps */}
-        <div style={styles.progressContainer}>
-          {[1, 2, 3].map((step, index) => (
-            <div key={step} style={{display: 'flex', alignItems: 'center'}}>
-              <div style={{
-                ...styles.progressStep,
-                ...(step === currentStep ? styles.progressStepActive :
-                   step < currentStep ? styles.progressStepCompleted : styles.progressStepPending)
-              }}>
-                {step < currentStep ? '✓' : step}
+        {/* Enhanced Header */}
+        <header style={styles.header}>
+          <div style={styles.headerContent}>
+            <Link href="/" style={styles.logo}>
+              <img src="/images/logo-primary.png" alt="Oakline Bank" style={styles.logoImage} />
+              <div>
+                <div style={styles.bankName}>Oakline Bank</div>
+                <div style={styles.bankTagline}>Open Your Account Today</div>
               </div>
-              {index < 2 && (
-                <div style={{
-                  ...styles.progressLine,
-                  ...(step < currentStep ? styles.progressLineCompleted : styles.progressLinePending)
-                }} />
-              )}
+            </Link>
+
+            <div style={styles.headerInfo}>
+              <div style={styles.supportInfo}>
+                <span style={styles.supportLabel}>Need Help?</span>
+                <span style={styles.supportPhone}>📞 1-800-OAKLINE</span>
+              </div>
             </div>
-          ))}
-        </div>
+
+            <div style={styles.headerActions}>
+              <Link href="/login" style={styles.loginButton}>
+                <span style={styles.buttonIcon}>👤</span>
+                Existing Customer
+              </Link>
+              <Link href="/" style={styles.homeButton}>
+                <span style={styles.buttonIcon}>🏠</span>
+                Back to Home
+              </Link>
+            </div>
+          </div>
+
+          {/* Progress Indicator */}
+          <div style={styles.progressContainer}>
+            <div style={styles.progressBar}>
+              <div style={{
+                ...styles.progressFill,
+                width: currentStep === 1 ? '25%' : currentStep === 2 ? '50%' : currentStep === 3 ? '75%' : '100%'
+              }}></div>
+            </div>
+            <div style={styles.progressSteps}>
+              <div style={{...styles.progressStep, ...(currentStep >= 1 ? styles.progressStepActive : {})}}>
+                <span>1</span>
+                <span>Personal Info</span>
+              </div>
+              <div style={{...styles.progressStep, ...(currentStep >= 2 ? styles.progressStepActive : {})}}>
+                <span>2</span>
+                <span>Account Details</span>
+              </div>
+              <div style={{...styles.progressStep, ...(currentStep >= 3 ? styles.progressStepActive : {})}}>
+                <span>3</span>
+                <span>Verification</span>
+              </div>
+              <div style={{...styles.progressStep, ...(currentStep >= 4 ? styles.progressStepActive : {})}}>
+                <span>4</span>
+                <span>Complete</span>
+              </div>
+            </div>
+          </div>
+        </header>
 
         {/* Form Card */}
         <div style={styles.formCard}>

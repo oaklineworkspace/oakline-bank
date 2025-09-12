@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Head from 'next/head';
@@ -8,9 +7,9 @@ export default function CurrentRates() {
 
   useEffect(() => {
     const now = new Date();
-    setLastUpdated(now.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'long', 
+    setLastUpdated(now.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit'
@@ -113,21 +112,21 @@ export default function CurrentRates() {
                 <div style={styles.highlightRate}>5.00% APY</div>
                 <p style={styles.highlightDesc}>Earn more on your savings with our premium account</p>
               </div>
-              
+
               <div style={styles.highlightCard}>
                 <div style={styles.highlightIcon}>🏠</div>
                 <h3 style={styles.highlightTitle}>30-Year Mortgage</h3>
                 <div style={styles.highlightRate}>6.75% APR</div>
                 <p style={styles.highlightDesc}>Competitive rates for your dream home</p>
               </div>
-              
+
               <div style={styles.highlightCard}>
                 <div style={styles.highlightIcon}>🔒</div>
                 <h3 style={styles.highlightTitle}>5-Year CD</h3>
                 <div style={styles.highlightRate}>5.25% APY</div>
                 <p style={styles.highlightDesc}>Lock in guaranteed returns</p>
               </div>
-              
+
               <div style={styles.highlightCard}>
                 <div style={styles.highlightIcon}>💳</div>
                 <h3 style={styles.highlightTitle}>Rewards Credit Card</h3>
@@ -140,7 +139,7 @@ export default function CurrentRates() {
           {/* Savings & Checking Rates */}
           <section style={styles.ratesSection}>
             <h2 style={styles.sectionTitle}>Savings & Checking Account Rates</h2>
-            
+
             <div style={styles.ratesTabs}>
               <h3 style={styles.tabTitle}>Savings Accounts</h3>
               <div style={styles.ratesTable}>
@@ -427,7 +426,8 @@ const styles = {
   },
   ratesSection: {
     padding: '2rem 0',
-    marginBottom: '2rem'
+    marginBottom: '2rem',
+    marginTop: '4rem'
   },
   ratesTabs: {
     display: 'flex',
@@ -560,5 +560,94 @@ const styles = {
   footerText: {
     color: '#cbd5e0',
     fontSize: '0.9rem'
+  },
+  ratesGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))',
+    gap: '2rem',
+    marginBottom: '3rem'
+  },
+  ratesSectionTitle: {
+    fontSize: 'clamp(2rem, 4vw, 2.5rem)',
+    fontWeight: '800',
+    color: '#1e293b',
+    textAlign: 'center',
+    marginBottom: '3rem',
+    background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
+    backgroundClip: 'text'
+  },
+  rateTable: {
+    backgroundColor: '#ffffff',
+    borderRadius: '16px',
+    padding: '2rem',
+    marginBottom: '3rem',
+    boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
+    border: '2px solid #e2e8f0'
+  },
+  tableTitle: {
+    fontSize: '1.5rem',
+    fontWeight: '800',
+    color: '#1e293b',
+    marginBottom: '1.5rem',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem'
+  },
+  tableGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(4, 1fr)',
+    gap: '1px',
+    backgroundColor: '#e2e8f0',
+    borderRadius: '8px',
+    overflow: 'hidden'
+  },
+  tableHeader: {
+    backgroundColor: '#1e40af',
+    color: 'white',
+    padding: '1rem',
+    fontSize: '0.9rem',
+    fontWeight: '700',
+    textAlign: 'center'
+  },
+  tableCell: {
+    backgroundColor: '#ffffff',
+    padding: '1rem',
+    fontSize: '0.9rem',
+    color: '#374151',
+    textAlign: 'center'
+  },
+  rateCell: {
+    fontWeight: '800',
+    color: '#059669',
+    fontSize: '1rem'
+  },
+  loanRateCell: {
+    fontWeight: '800',
+    color: '#dc2626',
+    fontSize: '1rem'
+  },
+  disclosure: {
+    backgroundColor: '#f8fafc',
+    borderRadius: '16px',
+    padding: '2.5rem',
+    marginTop: '4rem',
+    border: '2px solid #e2e8f0'
+  },
+  disclosureTitle: {
+    fontSize: '1.3rem',
+    fontWeight: '800',
+    color: '#1e293b',
+    marginBottom: '1.5rem'
+  },
+  disclosureContent: {
+    lineHeight: '1.6'
+  },
+  disclosureText: {
+    fontSize: '0.95rem',
+    color: '#64748b',
+    marginBottom: '1rem',
+    textAlign: 'left'
   }
 };

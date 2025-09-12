@@ -100,20 +100,6 @@ export default function Home() {
 
   const bankingImages = [
     {
-      src: '/images/realistic-debit-card-1.svg',
-      title: 'Premium Debit Cards',
-      subtitle: 'Get instant access to your funds with our premium debit cards featuring contactless payments',
-      icon: '💳',
-      gradient: 'linear-gradient(135deg, rgba(26, 54, 93, 0.3) 0%, rgba(26, 54, 93, 0.4) 100%)'
-    },
-    {
-      src: '/images/realistic-debit-card-2.svg',
-      title: 'Secure Card Technology',
-      subtitle: 'Advanced chip technology and fraud protection keep your money safe',
-      icon: '🔒',
-      gradient: 'linear-gradient(135deg, rgba(26, 54, 93, 0.3) 0%, rgba(26, 54, 93, 0.4) 100%)'
-    },
-    {
       src: '/images/Mobile_banking_user_experience_576bb7a3.png',
       fallback: '/images/professional-mobile-banking-1.png',
       title: 'Mobile Banking Excellence',
@@ -159,22 +145,6 @@ export default function Home() {
   ];
 
   const bankingFeatures = [
-    {
-      image: '/images/realistic-debit-card-1.svg',
-      title: 'Premium Debit Cards',
-      description: 'Get instant access to your funds with our premium debit cards featuring advanced security and contactless payment technology.',
-      features: ['Contactless Payments', 'Real-time Fraud Protection', 'Global Acceptance', 'Mobile Card Controls'],
-      icon: '💳',
-      color: '#3b82f6'
-    },
-    {
-      image: '/images/realistic-debit-card-2.svg',
-      title: 'Secure Card Technology',
-      description: 'Advanced chip technology and multi-layer security features protect your money and personal information.',
-      features: ['EMV Chip Technology', '24/7 Fraud Monitoring', 'Instant Card Lock/Unlock', 'Zero Liability Protection'],
-      icon: '🔒',
-      color: '#10b981'
-    },
     {
       image: '/images/atm_machine_people.png',
       title: 'Nationwide ATM Access',
@@ -907,6 +877,115 @@ export default function Home() {
                   Contact Us
                 </Link>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Debit Card Showcase Section */}
+      <section style={styles.debitCardShowcase} id="debit-cards" data-animate>
+        <div style={styles.container}>
+          <div style={{
+            ...styles.sectionHeader,
+            ...(isVisible['debit-cards'] ? styles.fadeInUp : {})
+          }}>
+            <h2 style={styles.sectionTitle}>Premium Debit Cards</h2>
+            <p style={styles.sectionSubtitle}>
+              Experience modern banking with our premium debit card collection featuring advanced security and contactless technology
+            </p>
+            <div style={styles.titleUnderline}></div>
+          </div>
+
+          <div style={styles.debitCardsGrid}>
+            <div style={styles.debitCardItem}>
+              <div style={styles.debitCardImageContainer}>
+                <img
+                  src="/images/realistic-debit-card-1.svg"
+                  alt="Premium Debit Card"
+                  style={styles.debitCardImage}
+                />
+                <div style={styles.debitCardBadge}>
+                  <span style={styles.badgeIcon}>💳</span>
+                  <span>Premium</span>
+                </div>
+              </div>
+              <div style={styles.debitCardContent}>
+                <h3 style={styles.debitCardTitle}>Premium Debit Card</h3>
+                <p style={styles.debitCardDescription}>
+                  Get instant access to your funds with our premium debit card featuring contactless payments and global acceptance.
+                </p>
+                <div style={styles.debitCardFeatures}>
+                  <div style={styles.featureTag}>Contactless Payments</div>
+                  <div style={styles.featureTag}>Real-time Fraud Protection</div>
+                  <div style={styles.featureTag}>Global Acceptance</div>
+                  <div style={styles.featureTag}>Mobile Card Controls</div>
+                </div>
+                {user ? (
+                  <Link href="/cards" style={styles.debitCardButton}>
+                    <span style={styles.buttonIcon}>⚡</span>
+                    Apply for Card
+                  </Link>
+                ) : (
+                  <Link href="/apply" style={styles.debitCardButton}>
+                    <span style={styles.buttonIcon}>🚀</span>
+                    Open Account First
+                  </Link>
+                )}
+              </div>
+            </div>
+
+            <div style={styles.debitCardItem}>
+              <div style={styles.debitCardImageContainer}>
+                <img
+                  src="/images/realistic-debit-card-2.svg"
+                  alt="Secure Debit Card"
+                  style={styles.debitCardImage}
+                />
+                <div style={styles.debitCardBadge}>
+                  <span style={styles.badgeIcon}>🔒</span>
+                  <span>Secure</span>
+                </div>
+              </div>
+              <div style={styles.debitCardContent}>
+                <h3 style={styles.debitCardTitle}>Secure Card Technology</h3>
+                <p style={styles.debitCardDescription}>
+                  Advanced chip technology and multi-layer security features protect your money and personal information.
+                </p>
+                <div style={styles.debitCardFeatures}>
+                  <div style={styles.featureTag}>EMV Chip Technology</div>
+                  <div style={styles.featureTag}>24/7 Fraud Monitoring</div>
+                  <div style={styles.featureTag}>Instant Lock/Unlock</div>
+                  <div style={styles.featureTag}>Zero Liability Protection</div>
+                </div>
+                {user ? (
+                  <Link href="/cards" style={styles.debitCardButton}>
+                    <span style={styles.buttonIcon}>⚡</span>
+                    Apply for Card
+                  </Link>
+                ) : (
+                  <Link href="/apply" style={styles.debitCardButton}>
+                    <span style={styles.buttonIcon}>🚀</span>
+                    Open Account First
+                  </Link>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div style={styles.debitCardCTA}>
+            <h3 style={styles.debitCardCTATitle}>Ready to Get Your Premium Debit Card?</h3>
+            <p style={styles.debitCardCTASubtitle}>
+              Join thousands of customers who enjoy the convenience and security of our premium debit cards
+            </p>
+            <div style={styles.debitCardCTAButtons}>
+              <Link href={user ? "/cards" : "/apply"} style={styles.debitCardCTAPrimary}>
+                <span style={styles.buttonIcon}>💳</span>
+                {user ? "View My Cards" : "Open Account Today"}
+              </Link>
+              <Link href="/account-types" style={styles.debitCardCTASecondary}>
+                <span style={styles.buttonIcon}>ℹ️</span>
+                Learn More
+              </Link>
             </div>
           </div>
         </div>
@@ -2638,7 +2717,161 @@ const styles = {
     padding: '0.75rem',
     gap: '1rem'
   },
-    // Mobile styles moved to responsive.css for proper media query support
+    // Debit Card Showcase Section
+  debitCardShowcase: {
+    padding: 'clamp(4rem, 8vw, 6rem) 0',
+    backgroundColor: '#ffffff',
+    width: '100%',
+    position: 'relative'
+  },
+  debitCardsGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 500px), 1fr))',
+    gap: '3rem',
+    marginBottom: '4rem'
+  },
+  debitCardItem: {
+    backgroundColor: '#f8fafc',
+    borderRadius: '20px',
+    overflow: 'hidden',
+    boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
+    border: '2px solid #e2e8f0',
+    transition: 'all 0.4s ease',
+    position: 'relative'
+  },
+  debitCardImageContainer: {
+    position: 'relative',
+    height: '280px',
+    background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden'
+  },
+  debitCardImage: {
+    width: '90%',
+    height: 'auto',
+    maxHeight: '240px',
+    objectFit: 'contain',
+    filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.3))',
+    transition: 'transform 0.3s ease'
+  },
+  debitCardBadge: {
+    position: 'absolute',
+    top: '20px',
+    right: '20px',
+    background: 'rgba(255,255,255,0.95)',
+    color: '#1e40af',
+    padding: '8px 16px',
+    borderRadius: '20px',
+    fontSize: '0.85rem',
+    fontWeight: '700',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+  },
+  debitCardContent: {
+    padding: '2.5rem'
+  },
+  debitCardTitle: {
+    fontSize: 'clamp(1.5rem, 3vw, 1.8rem)',
+    fontWeight: '800',
+    color: '#1e293b',
+    marginBottom: '1rem',
+    letterSpacing: '-0.01em'
+  },
+  debitCardDescription: {
+    fontSize: '1.1rem',
+    color: '#64748b',
+    lineHeight: '1.6',
+    marginBottom: '2rem'
+  },
+  debitCardFeatures: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '0.75rem',
+    marginBottom: '2rem'
+  },
+  featureTag: {
+    backgroundColor: '#e0f2fe',
+    color: '#0369a1',
+    padding: '6px 12px',
+    borderRadius: '20px',
+    fontSize: '0.85rem',
+    fontWeight: '600',
+    border: '1px solid #bae6fd'
+  },
+  debitCardButton: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.8rem',
+    padding: '1rem 2rem',
+    background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
+    color: 'white',
+    textDecoration: 'none',
+    borderRadius: '12px',
+    fontSize: '1rem',
+    fontWeight: '700',
+    transition: 'all 0.3s ease',
+    boxShadow: '0 6px 20px rgba(30, 64, 175, 0.3)'
+  },
+  debitCardCTA: {
+    textAlign: 'center',
+    backgroundColor: '#f1f5f9',
+    padding: 'clamp(3rem, 6vw, 4rem)',
+    borderRadius: '20px',
+    border: '2px solid #e2e8f0'
+  },
+  debitCardCTATitle: {
+    fontSize: 'clamp(1.8rem, 4vw, 2.2rem)',
+    fontWeight: '800',
+    color: '#1e293b',
+    marginBottom: '1rem'
+  },
+  debitCardCTASubtitle: {
+    fontSize: '1.1rem',
+    color: '#64748b',
+    marginBottom: '2.5rem',
+    maxWidth: '600px',
+    margin: '0 auto 2.5rem'
+  },
+  debitCardCTAButtons: {
+    display: 'flex',
+    gap: '1.5rem',
+    justifyContent: 'center',
+    flexWrap: 'wrap'
+  },
+  debitCardCTAPrimary: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.8rem',
+    padding: 'clamp(1rem, 2.5vw, 1.3rem) clamp(1.5rem, 4vw, 2.5rem)',
+    background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+    color: 'white',
+    textDecoration: 'none',
+    borderRadius: '12px',
+    fontSize: 'clamp(1rem, 2.2vw, 1.1rem)',
+    fontWeight: '700',
+    boxShadow: '0 8px 25px rgba(5, 150, 105, 0.4)',
+    transition: 'all 0.3s ease'
+  },
+  debitCardCTASecondary: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.8rem',
+    padding: 'clamp(1rem, 2.5vw, 1.3rem) clamp(1.5rem, 4vw, 2.5rem)',
+    backgroundColor: 'transparent',
+    color: '#1e293b',
+    textDecoration: 'none',
+    borderRadius: '12px',
+    fontSize: 'clamp(1rem, 2.2vw, 1.1rem)',
+    fontWeight: '700',
+    border: '2px solid #1e293b',
+    transition: 'all 0.3s ease'
+  },
+
+  // Mobile styles moved to responsive.css for proper media query support
 };
 
 // Add hover effects for dropdown items
