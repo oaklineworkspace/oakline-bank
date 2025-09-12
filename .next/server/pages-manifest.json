@@ -2,9 +2,10 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/": "pages/index.js",
+  "/investments": "pages/investments.js",
+  "/profile": "pages/profile.js",
+  "/main-menu": "pages/main-menu.js",
   "/dashboard": "pages/dashboard.js",
-  "/cards": "pages/cards.js",
-  "/api/get-user-cards": "pages/api/get-user-cards.js",
-  "/apply-card": "pages/apply-card.js"
+  "/deposit-real": "pages/deposit-real.js",
+  "/": "pages/index.js"
 }
