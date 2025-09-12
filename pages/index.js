@@ -101,6 +101,7 @@ export default function Home() {
   const bankingImages = [
     {
       src: '/images/Mobile_banking_user_experience_576bb7a3.png',
+      fallback: '/images/professional-mobile-banking-1.png',
       title: 'Mobile Banking Excellence',
       subtitle: 'Complete banking control right in your pocket with our award-winning app',
       icon: '📱',
@@ -393,7 +394,7 @@ export default function Home() {
                       right: 0,
                       bottom: 0,
                       backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                      zIndex: 999
+                      zIndex: 9998
                     }}
                     onClick={() => setActiveDropdown(null)}
                   ></div>
@@ -511,6 +512,22 @@ export default function Home() {
                   src={image.src}
                   alt={image.title}
                   style={styles.heroImage}
+                  onError={(e) => {
+                    console.warn('Hero image failed to load:', image.src);
+                    if (image.fallback) {
+                      e.target.src = image.fallback;
+                    } else {
+                      e.target.style.display = 'none';
+                      const container = e.target.parentNode;
+                      if (container && !container.querySelector('.hero-fallback')) {
+                        const fallback = document.createElement('div');
+                        fallback.className = 'hero-fallback';
+                        fallback.style.cssText = 'position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, #1e293b 0%, #334155 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 4rem;';
+                        fallback.textContent = image.icon;
+                        container.appendChild(fallback);
+                      }
+                    }
+                  }}
                 />
                 <div style={{
                   ...styles.heroOverlay,
@@ -600,16 +617,19 @@ export default function Home() {
                   alt={bankingFeatures[currentFeatureSlide].title}
                   style={styles.featureImage}
                   onError={(e) => {
+                    console.warn('Image failed to load:', bankingFeatures[currentFeatureSlide].image);
                     try {
-                      if (e.target && e.target.parentNode && e.target.parentNode.replaceChild) {
-                        e.target.style.display = 'none';
+                      e.target.style.display = 'none';
+                      const container = e.target.parentNode;
+                      if (container && !container.querySelector('.image-fallback')) {
                         const fallback = document.createElement('div');
-                        fallback.style.cssText = 'height: 300px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; border-radius: 12px; color: #666; font-size: 2rem;';
-                        fallback.textContent = '📷';
-                        e.target.parentNode.replaceChild(fallback, e.target);
+                        fallback.className = 'image-fallback';
+                        fallback.style.cssText = 'height: 300px; background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%); display: flex; align-items: center; justify-content: center; border-radius: 12px; color: #666; font-size: 2rem; border: 2px dashed #ccc;';
+                        fallback.innerHTML = '<div style="text-align: center;"><div style="font-size: 3rem; margin-bottom: 0.5rem;">📷</div><div style="font-size: 0.9rem; color: #888;">Image not available</div></div>';
+                        container.appendChild(fallback);
                       }
                     } catch (error) {
-                      console.warn('Image fallback error:', error);
+                      console.error('Image fallback error:', error);
                     }
                   }}
                 />
@@ -1080,7 +1100,7 @@ const styles = {
     alignItems: 'center',
     gap: '0.8rem',
     padding: '0.8rem 1.2rem',
-    background: 'transparent',
+    backgroundColor: 'transparent',
     border: '2px solid rgba(255, 255, 255, 0.3)',
     borderRadius: '12px',
     cursor: 'pointer',
@@ -1199,19 +1219,19 @@ const styles = {
     animation: 'dropdownSlideIn 0.3s ease-out'
   },
   bankingDropdownMenu: {
-    position: 'absolute',
-    top: 'calc(100% + 0.5rem)',
-    right: 0,
+    position: 'fixed',
+    top: '80px',
+    right: '1rem',
     backgroundColor: 'white',
     borderRadius: '16px',
-    boxShadow: '0 20px 40px rgba(26, 54, 93, 0.2)',
+    boxShadow: '0 20px 40px rgba(26, 54, 93, 0.3)',
     border: '2px solid #e2e8f0',
     padding: '1.5rem',
     width: '420px',
-    maxWidth: '95vw',
-    maxHeight: '80vh',
+    maxWidth: 'calc(100vw - 2rem)',
+    maxHeight: 'calc(100vh - 100px)',
     overflowY: 'auto',
-    zIndex: 1000,
+    zIndex: 9999,
     animation: 'dropdownSlideIn 0.3s ease-out'
   },
   bankingDropdownGrid: {
@@ -2637,6 +2657,50 @@ if (typeof document !== 'undefined') {
 if (typeof document !== 'undefined') {
   const styleSheet = document.createElement('style');
   styleSheet.textContent = `
+    /* Dropdown positioning fix */
+    .dropdown-container {
+      position: relative;
+      z-index: 9999;
+    }
+    
+    .dropdown-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 9998;
+    }
+    
+    .dropdown-menu {
+      position: fixed;
+      top: 80px;
+      right: 1rem;
+      z-index: 9999;
+      animation: dropdownSlideIn 0.3s ease-out;
+    }
+    
+    @keyframes dropdownSlideIn {
+      0% { 
+        opacity: 0; 
+        transform: translateY(-10px) scale(0.95); 
+      }
+      100% { 
+        opacity: 1; 
+        transform: translateY(0) scale(1); 
+      }
+    }
+    
+    /* Image fallback styles */
+    .image-fallback {
+      animation: fadeIn 0.3s ease-in;
+    }
+    
+    @keyframes fadeIn {
+      0% { opacity: 0; }
+      100% { opacity: 1; }
+    }
     :root {
       /* Professional Banking Color Palette */
       --navy-blue: #1a365d;
