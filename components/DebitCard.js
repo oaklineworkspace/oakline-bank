@@ -9,7 +9,7 @@ export default function DebitCard({
   cardData = null,
   showDetails = true,
   showControls = true,
-  onApplyCard = null
+  isSelected = false
 }) {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
@@ -45,112 +45,83 @@ export default function DebitCard({
 
   const getCardNumber = () => {
     if (cardData?.card_number) {
-      return cardData.card_number.replace(/(\d{4})(?=\d)/g, '$1 ');
+      return cardData.card_number;
     }
     return '**** **** **** ****';
   };
 
   const getExpiryDate = () => {
-    if (cardData?.expiry_date) return cardData.expiry_date;
-    const future = new Date();
-    future.setFullYear(future.getFullYear() + 4);
-    return `${(future.getMonth() + 1).toString().padStart(2, '0')}/${future.getFullYear().toString().slice(2)}`;
+    if (cardData?.expiry_date) {
+      return cardData.expiry_date;
+    }
+    const futureDate = new Date();
+    futureDate.setFullYear(futureDate.getFullYear() + 2);
+    return `${String(futureDate.getMonth() + 1).padStart(2, '0')}/${String(futureDate.getFullYear()).slice(-2)}`;
   };
 
-  const handleCardToggle = async (setting) => {
+  const getAccountBalance = () => {
+    if (account?.balance !== undefined) {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD'
+      }).format(account.balance);
+    }
+    return '$0.00';
+  };
+
+  const getAccountNumber = () => {
+    if (account?.account_number) {
+      return `****${account.account_number.slice(-4)}`;
+    }
+    return '****0000';
+  };
+
+  const updateCardSettings = async (newSettings) => {
     if (!cardData) return;
-    
+
     setLoading(true);
     try {
-      const updates = { [setting]: !cardSettings[setting] };
-      
       const { error } = await supabase
         .from('cards')
-        .update(updates)
-        .eq('id', cardData.id);
-
-      if (error) throw error;
-
-      setCardSettings(prev => ({
-        ...prev,
-        [setting]: !prev[setting]
-      }));
-      
-      setMessage(`Card ${setting.replace(/([A-Z])/g, ' $1').toLowerCase()} ${!cardSettings[setting] ? 'enabled' : 'disabled'}`);
-      setTimeout(() => setMessage(''), 3000);
-    } catch (error) {
-      console.error('Error updating card settings:', error);
-      setMessage('Failed to update card settings');
-      setTimeout(() => setMessage(''), 3000);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleLimitUpdate = async (limitType, value) => {
-    if (!cardData) return;
-    
-    setLoading(true);
-    try {
-      const updates = { [limitType]: parseFloat(value) };
-      
-      const { error } = await supabase
-        .from('cards')
-        .update(updates)
-        .eq('id', cardData.id);
-
-      if (error) throw error;
-
-      setCardSettings(prev => ({
-        ...prev,
-        [limitType]: parseFloat(value)
-      }));
-      
-      setMessage(`${limitType.replace(/([A-Z])/g, ' $1')} updated successfully`);
-      setTimeout(() => setMessage(''), 3000);
-    } catch (error) {
-      console.error('Error updating limits:', error);
-      setMessage('Failed to update limits');
-      setTimeout(() => setMessage(''), 3000);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleApplyForCard = async () => {
-    if (!account || !user) return;
-    
-    setLoading(true);
-    try {
-      const response = await fetch('/api/apply-card', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          accountId: account.id,
-          cardholderName: getCardholderName()
+        .update({
+          is_locked: newSettings.isLocked,
+          daily_limit: newSettings.dailyLimit,
+          monthly_limit: newSettings.monthlyLimit,
+          contactless_enabled: newSettings.contactlessEnabled,
+          international_enabled: newSettings.internationalEnabled,
+          online_enabled: newSettings.onlineEnabled
         })
-      });
+        .eq('id', cardData.id);
 
-      const data = await response.json();
-      
-      if (data.success) {
-        setMessage('Card application submitted successfully! We will review your application and notify you once approved.');
-        if (onApplyCard) onApplyCard();
+      if (error) {
+        setMessage('Error updating card settings');
       } else {
-        setMessage(data.error || 'Failed to submit card application');
+        setCardSettings(newSettings);
+        setMessage('Card settings updated successfully');
       }
-      setTimeout(() => setMessage(''), 5000);
     } catch (error) {
-      console.error('Error applying for card:', error);
-      setMessage('Failed to submit card application');
-      setTimeout(() => setMessage(''), 3000);
+      setMessage('Error updating card settings');
     } finally {
       setLoading(false);
     }
+  };
+
+  const toggleCardLock = () => {
+    const newSettings = { ...cardSettings, isLocked: !cardSettings.isLocked };
+    updateCardSettings(newSettings);
   };
 
   return (
-    <div style={styles.container}>
+    <div style={{
+      ...styles.container,
+      border: isSelected ? '3px solid #1e40af' : '1px solid #e2e8f0'
+    }}>
+      {isSelected && (
+        <div style={styles.selectedIndicator}>
+          ✓ Selected
+        </div>
+      )}
+
       {/* Virtual Debit Card */}
       <div style={styles.cardContainer}>
         <div style={styles.card}>
@@ -174,155 +145,101 @@ export default function DebitCard({
             {getCardNumber()}
           </div>
 
-          <div style={styles.cardDetails}>
-            <div style={styles.cardHolder}>
-              <div style={styles.label}>CARD HOLDER</div>
-              <div style={styles.name}>{getCardholderName()}</div>
-            </div>
-            <div style={styles.expiry}>
-              <div style={styles.label}>VALID THRU</div>
-              <div style={styles.date}>{getExpiryDate()}</div>
-            </div>
-          </div>
-
           <div style={styles.cardFooter}>
-            <div style={styles.visa}>VISA</div>
-            {cardData && (
-              <div style={styles.statusBadge}>
-                <span style={{
-                  ...styles.status,
-                  backgroundColor: cardSettings.isLocked ? '#ef4444' : '#10b981'
-                }}>
-                  {cardSettings.isLocked ? 'LOCKED' : 'ACTIVE'}
-                </span>
-              </div>
-            )}
+            <div style={styles.cardholderSection}>
+              <div style={styles.cardLabel}>CARDHOLDER NAME</div>
+              <div style={styles.cardholderName}>{getCardholderName()}</div>
+            </div>
+            <div style={styles.expirySection}>
+              <div style={styles.cardLabel}>EXPIRES</div>
+              <div style={styles.expiryDate}>{getExpiryDate()}</div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Message Display */}
-      {message && (
-        <div style={{
-          ...styles.message,
-          backgroundColor: message.includes('success') || message.includes('enabled') || message.includes('disabled') || message.includes('updated') ? '#d1fae5' : '#fee2e2',
-          color: message.includes('success') || message.includes('enabled') || message.includes('disabled') || message.includes('updated') ? '#065f46' : '#991b1b'
-        }}>
-          {message}
+      {showDetails && account && (
+        <div style={styles.accountDetails}>
+          <h4 style={styles.accountTitle}>Linked Account</h4>
+          <div style={styles.accountInfo}>
+            <div style={styles.accountRow}>
+              <span style={styles.accountLabel}>Account Type:</span>
+              <span style={styles.accountValue}>{account.account_type || 'Checking'}</span>
+            </div>
+            <div style={styles.accountRow}>
+              <span style={styles.accountLabel}>Account Number:</span>
+              <span style={styles.accountValue}>{getAccountNumber()}</span>
+            </div>
+            <div style={styles.accountRow}>
+              <span style={styles.accountLabel}>Available Balance:</span>
+              <span style={styles.accountValue}>{getAccountBalance()}</span>
+            </div>
+          </div>
         </div>
       )}
 
-      {/* Card Controls */}
-      {showControls && (
-        <div style={styles.controlsContainer}>
-          {!cardData ? (
-            // Apply for Card Button
-            <div style={styles.applySection}>
-              <h3 style={styles.sectionTitle}>Get Your Debit Card</h3>
-              <p style={styles.sectionDesc}>Apply for a debit card linked to your account for easy access to your funds.</p>
-              <button 
-                onClick={handleApplyForCard}
+      {showControls && cardData && (
+        <div style={styles.cardControls}>
+          <h4 style={styles.controlsTitle}>Card Controls</h4>
+          
+          <div style={styles.controlSection}>
+            <div style={styles.controlRow}>
+              <span style={styles.controlLabel}>Card Status:</span>
+              <button
+                onClick={toggleCardLock}
+                style={{
+                  ...styles.toggleButton,
+                  backgroundColor: cardSettings.isLocked ? '#ef4444' : '#10b981'
+                }}
                 disabled={loading}
-                style={styles.applyButton}
               >
-                {loading ? 'Applying...' : '💳 Apply for Debit Card'}
+                {cardSettings.isLocked ? '🔒 Locked' : '🔓 Active'}
               </button>
             </div>
-          ) : (
-            // Card Management Controls
-            <>
-              <div style={styles.controlSection}>
-                <h3 style={styles.sectionTitle}>Card Controls</h3>
-                <div style={styles.toggleGrid}>
-                  <div style={styles.toggleItem}>
-                    <label style={styles.toggleLabel}>
-                      <input
-                        type="checkbox"
-                        checked={!cardSettings.isLocked}
-                        onChange={() => handleCardToggle('isLocked')}
-                        disabled={loading}
-                        style={styles.checkbox}
-                      />
-                      <span style={styles.toggleText}>Card Active</span>
-                    </label>
-                  </div>
-                  <div style={styles.toggleItem}>
-                    <label style={styles.toggleLabel}>
-                      <input
-                        type="checkbox"
-                        checked={cardSettings.contactlessEnabled}
-                        onChange={() => handleCardToggle('contactlessEnabled')}
-                        disabled={loading}
-                        style={styles.checkbox}
-                      />
-                      <span style={styles.toggleText}>Contactless Payments</span>
-                    </label>
-                  </div>
-                  <div style={styles.toggleItem}>
-                    <label style={styles.toggleLabel}>
-                      <input
-                        type="checkbox"
-                        checked={cardSettings.onlineEnabled}
-                        onChange={() => handleCardToggle('onlineEnabled')}
-                        disabled={loading}
-                        style={styles.checkbox}
-                      />
-                      <span style={styles.toggleText}>Online Purchases</span>
-                    </label>
-                  </div>
-                  <div style={styles.toggleItem}>
-                    <label style={styles.toggleLabel}>
-                      <input
-                        type="checkbox"
-                        checked={cardSettings.internationalEnabled}
-                        onChange={() => handleCardToggle('internationalEnabled')}
-                        disabled={loading}
-                        style={styles.checkbox}
-                      />
-                      <span style={styles.toggleText}>International Use</span>
-                    </label>
-                  </div>
-                </div>
-              </div>
 
-              <div style={styles.controlSection}>
-                <h3 style={styles.sectionTitle}>Spending Limits</h3>
-                <div style={styles.limitsGrid}>
-                  <div style={styles.limitItem}>
-                    <label style={styles.limitLabel}>Daily Limit</label>
-                    <div style={styles.limitInput}>
-                      <span style={styles.currency}>$</span>
-                      <input
-                        type="number"
-                        value={cardSettings.dailyLimit}
-                        onChange={(e) => setCardSettings(prev => ({ ...prev, dailyLimit: e.target.value }))}
-                        onBlur={(e) => handleLimitUpdate('daily_limit', e.target.value)}
-                        disabled={loading}
-                        style={styles.input}
-                        min="0"
-                        max="5000"
-                      />
-                    </div>
-                  </div>
-                  <div style={styles.limitItem}>
-                    <label style={styles.limitLabel}>Monthly Limit</label>
-                    <div style={styles.limitInput}>
-                      <span style={styles.currency}>$</span>
-                      <input
-                        type="number"
-                        value={cardSettings.monthlyLimit}
-                        onChange={(e) => setCardSettings(prev => ({ ...prev, monthlyLimit: e.target.value }))}
-                        onBlur={(e) => handleLimitUpdate('monthly_limit', e.target.value)}
-                        disabled={loading}
-                        style={styles.input}
-                        min="0"
-                        max="50000"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </>
+            <div style={styles.controlRow}>
+              <span style={styles.controlLabel}>Daily Limit:</span>
+              <span style={styles.controlValue}>
+                ${cardSettings.dailyLimit.toLocaleString()}
+              </span>
+            </div>
+
+            <div style={styles.controlRow}>
+              <span style={styles.controlLabel}>Monthly Limit:</span>
+              <span style={styles.controlValue}>
+                ${cardSettings.monthlyLimit.toLocaleString()}
+              </span>
+            </div>
+
+            <div style={styles.controlRow}>
+              <span style={styles.controlLabel}>Contactless:</span>
+              <span style={styles.controlValue}>
+                {cardSettings.contactlessEnabled ? '✅ Enabled' : '❌ Disabled'}
+              </span>
+            </div>
+
+            <div style={styles.controlRow}>
+              <span style={styles.controlLabel}>International:</span>
+              <span style={styles.controlValue}>
+                {cardSettings.internationalEnabled ? '✅ Enabled' : '❌ Disabled'}
+              </span>
+            </div>
+
+            <div style={styles.controlRow}>
+              <span style={styles.controlLabel}>Online Payments:</span>
+              <span style={styles.controlValue}>
+                {cardSettings.onlineEnabled ? '✅ Enabled' : '❌ Disabled'}
+              </span>
+            </div>
+          </div>
+
+          {message && (
+            <div style={{
+              ...styles.message,
+              color: message.includes('Error') ? '#ef4444' : '#10b981'
+            }}>
+              {message}
+            </div>
           )}
         </div>
       )}
@@ -332,62 +249,69 @@ export default function DebitCard({
 
 const styles = {
   container: {
-    maxWidth: '100%',
-    margin: '0 auto',
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+    backgroundColor: 'white',
+    borderRadius: '16px',
+    padding: '2rem',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+    position: 'relative'
+  },
+  selectedIndicator: {
+    position: 'absolute',
+    top: '10px',
+    right: '10px',
+    backgroundColor: '#1e40af',
+    color: 'white',
+    padding: '4px 8px',
+    borderRadius: '6px',
+    fontSize: '0.75rem',
+    fontWeight: 'bold'
   },
   cardContainer: {
-    perspective: '1000px',
     marginBottom: '2rem'
   },
   card: {
     width: '100%',
-    maxWidth: '380px',
-    height: '240px',
-    margin: '0 auto',
-    background: 'linear-gradient(135deg, #1e40af 0%, #3730a3 50%, #1e1b4b 100%)',
+    maxWidth: '400px',
+    height: '250px',
+    background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
     borderRadius: '16px',
-    padding: '24px',
+    padding: '2rem',
     color: 'white',
-    boxShadow: '0 25px 50px rgba(30, 64, 175, 0.3), 0 0 0 1px rgba(255,255,255,0.1) inset',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    boxShadow: '0 8px 24px rgba(30, 64, 175, 0.3)',
     position: 'relative',
-    overflow: 'hidden',
-    '@media (max-width: 480px)': {
-      maxWidth: '340px',
-      height: '215px',
-      padding: '20px'
-    }
+    overflow: 'hidden'
   },
   cardHeader: {
     display: 'flex',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '1.5rem'
+    alignItems: 'flex-start'
   },
   bankName: {
-    fontSize: '0.9rem',
-    fontWeight: '700',
+    fontSize: '1rem',
+    fontWeight: 'bold',
     letterSpacing: '1px'
   },
   cardType: {
-    fontSize: '0.8rem',
-    fontWeight: '600',
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    padding: '4px 8px',
-    borderRadius: '4px'
+    fontSize: '0.875rem',
+    fontWeight: 'bold',
+    opacity: 0.9
   },
   chipSection: {
     display: 'flex',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: '1.5rem'
+    gap: '1rem',
+    margin: '1rem 0'
   },
   chip: {
-    width: '40px',
-    height: '32px',
-    background: 'linear-gradient(45deg, #ffd700, #ffa500)',
+    width: '50px',
+    height: '40px',
+    backgroundColor: '#ffd700',
     borderRadius: '6px',
-    border: '1px solid rgba(255,255,255,0.3)'
+    position: 'relative',
+    overflow: 'hidden'
   },
   contactless: {
     opacity: 0.8
@@ -398,176 +322,116 @@ const styles = {
     color: 'white'
   },
   cardNumber: {
-    fontSize: '1.1rem',
-    fontWeight: '600',
+    fontSize: '1.3rem',
+    fontWeight: 'bold',
     letterSpacing: '2px',
     fontFamily: 'monospace',
-    marginBottom: '1.5rem',
-    '@media (max-width: 480px)': {
-      fontSize: '1rem'
-    }
-  },
-  cardDetails: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    marginBottom: '1rem'
-  },
-  cardHolder: {
-    flex: 1
-  },
-  expiry: {
-    textAlign: 'right'
-  },
-  label: {
-    fontSize: '0.65rem',
-    fontWeight: '500',
-    opacity: 0.8,
-    marginBottom: '4px',
-    letterSpacing: '0.5px'
-  },
-  name: {
-    fontSize: '0.8rem',
-    fontWeight: '600',
-    letterSpacing: '1px'
-  },
-  date: {
-    fontSize: '0.8rem',
-    fontWeight: '600',
-    fontFamily: 'monospace'
+    margin: '1rem 0'
   },
   cardFooter: {
     display: 'flex',
     justifyContent: 'space-between',
-    alignItems: 'center'
+    alignItems: 'flex-end'
   },
-  visa: {
-    fontSize: '1.2rem',
-    fontWeight: '700',
-    fontStyle: 'italic',
-    letterSpacing: '1px'
+  cardholderSection: {
+    flex: 1
   },
-  statusBadge: {
-    display: 'flex',
-    alignItems: 'center'
+  expirySection: {
+    textAlign: 'right'
   },
-  status: {
+  cardLabel: {
     fontSize: '0.7rem',
-    fontWeight: '700',
-    padding: '3px 8px',
-    borderRadius: '10px',
-    letterSpacing: '0.5px'
+    opacity: 0.8,
+    fontWeight: 'bold',
+    marginBottom: '4px'
   },
-  message: {
-    padding: '0.75rem 1rem',
-    borderRadius: '8px',
+  cardholderName: {
     fontSize: '0.9rem',
-    fontWeight: '500',
-    marginBottom: '1rem',
-    textAlign: 'center'
+    fontWeight: 'bold'
   },
-  controlsContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '1.5rem'
+  expiryDate: {
+    fontSize: '0.9rem',
+    fontWeight: 'bold'
   },
-  applySection: {
+  accountDetails: {
     backgroundColor: '#f8fafc',
-    padding: '2rem',
-    borderRadius: '12px',
-    textAlign: 'center',
-    border: '1px solid #e2e8f0'
-  },
-  controlSection: {
-    backgroundColor: 'white',
     padding: '1.5rem',
     borderRadius: '12px',
-    border: '1px solid #e2e8f0'
+    marginBottom: '1.5rem'
   },
-  sectionTitle: {
+  accountTitle: {
     fontSize: '1.1rem',
-    fontWeight: '700',
+    fontWeight: 'bold',
     color: '#1e293b',
     marginBottom: '1rem'
   },
-  sectionDesc: {
-    fontSize: '0.9rem',
-    color: '#64748b',
-    lineHeight: '1.5',
-    marginBottom: '1.5rem'
-  },
-  applyButton: {
-    width: '100%',
-    padding: '1rem 2rem',
-    backgroundColor: '#1e40af',
-    color: 'white',
-    border: 'none',
-    borderRadius: '10px',
-    fontSize: '1rem',
-    fontWeight: '600',
-    cursor: 'pointer',
-    transition: 'all 0.2s',
-    boxShadow: '0 4px 12px rgba(30, 64, 175, 0.3)'
-  },
-  toggleGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-    gap: '1rem'
-  },
-  toggleItem: {
-    display: 'flex',
-    alignItems: 'center'
-  },
-  toggleLabel: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.75rem',
-    cursor: 'pointer',
-    fontSize: '0.9rem'
-  },
-  checkbox: {
-    width: '20px',
-    height: '20px',
-    accentColor: '#1e40af'
-  },
-  toggleText: {
-    fontWeight: '500',
-    color: '#374151'
-  },
-  limitsGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-    gap: '1rem'
-  },
-  limitItem: {
+  accountInfo: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '0.5rem'
+    gap: '0.75rem'
   },
-  limitLabel: {
-    fontSize: '0.9rem',
-    fontWeight: '600',
-    color: '#374151'
-  },
-  limitInput: {
-    position: 'relative',
+  accountRow: {
     display: 'flex',
+    justifyContent: 'space-between',
     alignItems: 'center'
   },
-  currency: {
-    position: 'absolute',
-    left: '12px',
-    fontSize: '1rem',
-    fontWeight: '600',
+  accountLabel: {
+    fontSize: '0.9rem',
     color: '#64748b',
-    zIndex: 1
+    fontWeight: '500'
   },
-  input: {
-    width: '100%',
-    padding: '0.75rem 0.75rem 0.75rem 2rem',
-    border: '2px solid #e2e8f0',
+  accountValue: {
+    fontSize: '0.9rem',
+    color: '#1e293b',
+    fontWeight: 'bold'
+  },
+  cardControls: {
+    backgroundColor: '#f8fafc',
+    padding: '1.5rem',
+    borderRadius: '12px'
+  },
+  controlsTitle: {
+    fontSize: '1.1rem',
+    fontWeight: 'bold',
+    color: '#1e293b',
+    marginBottom: '1rem'
+  },
+  controlSection: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1rem'
+  },
+  controlRow: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  },
+  controlLabel: {
+    fontSize: '0.9rem',
+    color: '#64748b',
+    fontWeight: '500'
+  },
+  controlValue: {
+    fontSize: '0.9rem',
+    color: '#1e293b',
+    fontWeight: 'bold'
+  },
+  toggleButton: {
+    padding: '0.5rem 1rem',
     borderRadius: '8px',
-    fontSize: '1rem',
-    outline: 'none',
-    transition: 'border-color 0.2s'
+    border: 'none',
+    color: 'white',
+    fontSize: '0.875rem',
+    fontWeight: 'bold',
+    cursor: 'pointer',
+    transition: 'all 0.2s'
+  },
+  message: {
+    marginTop: '1rem',
+    padding: '0.75rem',
+    borderRadius: '8px',
+    backgroundColor: '#f1f5f9',
+    fontSize: '0.875rem',
+    fontWeight: '500'
   }
 };
