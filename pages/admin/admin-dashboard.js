@@ -403,6 +403,15 @@ export default function AdminDashboard() {
             </Link>
           </div>
         </div>
+        {/* New section for Cards Management */}
+        <div style={styles.section}>
+          <h2 style={styles.sectionTitle}>💳 Card Management</h2>
+          <div style={styles.buttonGrid}>
+            <Link href="/admin/admin-cards-dashboard" style={styles.adminButton}>
+              💳 All Cards Dashboard
+            </Link>
+          </div>
+        </div>
       </div>
     </div>
   );
