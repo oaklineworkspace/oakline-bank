@@ -56,47 +56,42 @@ function DepositForm() {
     try {
       setError('');
 
-      // First try to get user's application to find linked accounts
-      const { data: userApplication, error: appError } = await supabase
-        .from('applications')
-        .select('id')
-        .eq('email', user.email)
-        .single();
-
+      // First try direct user_id match (most reliable)
       let accountsData = [];
+      
+      const { data: accountsByUserId, error: userIdError } = await supabase
+        .from('accounts')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .order('created_at', { ascending: true });
 
-      if (userApplication) {
-        // Try to find accounts linked to the application
-        const { data: accountsByAppId, error: error1 } = await supabase
-          .from('accounts')
-          .select('*')
-          .eq('application_id', userApplication.id)
-          .order('created_at', { ascending: true });
+      if (accountsByUserId && accountsByUserId.length > 0) {
+        accountsData = accountsByUserId;
+      } else {
+        // Try to get user's application to find linked accounts
+        const { data: userApplication, error: appError } = await supabase
+          .from('applications')
+          .select('id')
+          .eq('email', user.email)
+          .single();
 
-        if (accountsByAppId && accountsByAppId.length > 0) {
-          accountsData = accountsByAppId;
-        }
-      }
-
-      // If no accounts found by application, try other methods
-      if (accountsData.length === 0) {
-        const { data: accountsByUserId, error: error2 } = await supabase
-          .from('accounts')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: true });
-
-        if (accountsByUserId && accountsByUserId.length > 0) {
-          accountsData = accountsByUserId;
-        } else {
-          // Try by email
-          const { data: accountsByEmail, error: error3 } = await supabase
+        if (userApplication && !appError) {
+          // Try to find accounts linked to the application
+          const { data: accountsByAppId, error: error1 } = await supabase
             .from('accounts')
             .select('*')
-            .or(`user_email.eq.${user.email},email.eq.${user.email}`)
+            .eq('application_id', userApplication.id)
+            .eq('status', 'active')
             .order('created_at', { ascending: true });
 
-          accountsData = accountsByEmail || [];
+          if (accountsByAppId && accountsByAppId.length > 0) {
+            // Validate these accounts belong to current user
+            const validAccounts = accountsByAppId.filter(account => {
+              return account.email === user.email || account.user_email === user.email;
+            });
+            accountsData = validAccounts;
+          }
         }
       }
 

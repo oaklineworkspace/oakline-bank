@@ -376,8 +376,8 @@ export default function Home() {
                       <div style={styles.bankingDropdownSection}>
                         <h4 style={styles.bankingDropdownSectionTitle}>💳 All 23 Account Types</h4>
                         <div style={styles.accountTypesList}>
-                          {accountTypes.slice(0, 8).map((account, index) => (
-                            <Link key={index} href="/account-types" style={styles.bankingDropdownLink}>
+                          {accountTypes.map((account, index) => (
+                            <Link key={index} href="/account-types" style={styles.bankingDropdownLink} onClick={() => setActiveDropdown(null)}>
                               <span style={styles.bankingDropdownIcon}>{account.icon}</span>
                               <div>
                                 <div style={styles.bankingDropdownTitle}>{account.name}</div>
@@ -386,39 +386,32 @@ export default function Home() {
                             </Link>
                           ))}
                         </div>
-                        <Link href="/account-types" style={styles.viewAllAccountsLink}>
-                          <span style={styles.bankingDropdownIcon}>👀</span>
-                          <div>
-                            <div style={styles.bankingDropdownTitle}>View All 23 Account Types</div>
-                            <div style={styles.bankingDropdownDesc}>Complete list with details</div>
-                          </div>
-                        </Link>
                       </div>
 
                       <div style={styles.bankingDropdownSection}>
                         <h4 style={styles.bankingDropdownSectionTitle}>🏠 Loans & Credit</h4>
-                        <Link href="/loans" style={styles.bankingDropdownLink}>
+                        <Link href="/loans" style={styles.bankingDropdownLink} onClick={() => setActiveDropdown(null)}>
                           <span style={styles.bankingDropdownIcon}>🏡</span>
                           <div>
                             <div style={styles.bankingDropdownTitle}>Home Mortgages</div>
                             <div style={styles.bankingDropdownDesc}>Fixed & variable rates</div>
                           </div>
                         </Link>
-                        <Link href="/loans" style={styles.bankingDropdownLink}>
+                        <Link href="/loans" style={styles.bankingDropdownLink} onClick={() => setActiveDropdown(null)}>
                           <span style={styles.bankingDropdownIcon}>🚗</span>
                           <div>
                             <div style={styles.bankingDropdownTitle}>Auto Loans</div>
                             <div style={styles.bankingDropdownDesc}>Fast approval process</div>
                           </div>
                         </Link>
-                        <Link href="/loans" style={styles.bankingDropdownLink}>
+                        <Link href="/loans" style={styles.bankingDropdownLink} onClick={() => setActiveDropdown(null)}>
                           <span style={styles.bankingDropdownIcon}>💼</span>
                           <div>
                             <div style={styles.bankingDropdownTitle}>Personal Loans</div>
                             <div style={styles.bankingDropdownDesc}>Up to $50K available</div>
                           </div>
                         </Link>
-                        <Link href="/loans" style={styles.bankingDropdownLink}>
+                        <Link href="/loans" style={styles.bankingDropdownLink} onClick={() => setActiveDropdown(null)}>
                           <span style={styles.bankingDropdownIcon}>🎓</span>
                           <div>
                             <div style={styles.bankingDropdownTitle}>Student Loans</div>
@@ -429,21 +422,21 @@ export default function Home() {
 
                       <div style={styles.bankingDropdownSection}>
                         <h4 style={styles.bankingDropdownSectionTitle}>📈 Investment Services</h4>
-                        <Link href="/investments" style={styles.bankingDropdownLink}>
+                        <Link href="/investments" style={styles.bankingDropdownLink} onClick={() => setActiveDropdown(null)}>
                           <span style={styles.bankingDropdownIcon}>📊</span>
                           <div>
                             <div style={styles.bankingDropdownTitle}>Investment Accounts</div>
                             <div style={styles.bankingDropdownDesc}>Portfolio management</div>
                           </div>
                         </Link>
-                        <Link href="/investments" style={styles.bankingDropdownLink}>
+                        <Link href="/investments" style={styles.bankingDropdownLink} onClick={() => setActiveDropdown(null)}>
                           <span style={styles.bankingDropdownIcon}>🏖️</span>
                           <div>
                             <div style={styles.bankingDropdownTitle}>Retirement Planning</div>
                             <div style={styles.bankingDropdownDesc}>IRA & 401k options</div>
                           </div>
                         </Link>
-                        <Link href="/crypto" style={styles.bankingDropdownLink}>
+                        <Link href="/crypto" style={styles.bankingDropdownLink} onClick={() => setActiveDropdown(null)}>
                           <span style={styles.bankingDropdownIcon}>₿</span>
                           <div>
                             <div style={styles.bankingDropdownTitle}>Cryptocurrency</div>
@@ -1534,12 +1527,12 @@ const styles = {
   hamburgerLines: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '2px',
-    width: '16px'
+    gap: '1.5px',
+    width: '12px'
   },
   hamburgerLine: {
     width: '100%',
-    height: '2px',
+    height: '1.5px',
     backgroundColor: 'white',
     borderRadius: '1px',
     transition: 'all 0.3s ease'
@@ -1748,10 +1741,11 @@ const styles = {
   accountTypesList: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '0.5rem',
-    maxHeight: '300px',
+    gap: '0.4rem',
+    maxHeight: '400px',
     overflowY: 'auto',
-    marginBottom: '1rem'
+    marginBottom: '0.5rem',
+    paddingRight: '0.5rem'
   },
   viewAllAccountsLink: {
     display: 'flex',
