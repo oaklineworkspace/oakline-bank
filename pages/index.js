@@ -314,9 +314,15 @@ export default function Home() {
   }
 
   return (
-    <div style={styles.pageContainer}>
+    <div 
+      style={styles.pageContainer}
+      onClick={() => setActiveDropdown(null)}
+    >
       {/* Single Clean Header */}
-      <header style={styles.mainHeader}>
+      <header 
+        style={styles.mainHeader}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div style={styles.headerContainer}>
           <div style={styles.topHeaderRow}>
             {/* Logo Section */}
@@ -332,7 +338,10 @@ export default function Home() {
             <div style={styles.navigationDropdown}>
               <button
                 style={styles.modernMenuButton}
-                onClick={() => setActiveDropdown(activeDropdown === 'banking' ? null : 'banking')}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setActiveDropdown(activeDropdown === 'banking' ? null : 'banking');
+                }}
               >
                 <div style={styles.hamburgerLines}>
                   <span style={styles.hamburgerLine}></span>
@@ -344,7 +353,11 @@ export default function Home() {
 
               {activeDropdown === 'banking' && (
                 <>
-                  <div style={styles.bankingDropdownMenu}>
+                  <div 
+                    style={styles.dropdownBackdrop}
+                    onClick={() => setActiveDropdown(null)}
+                  ></div>
+                  <div style={styles.bankingDropdownMenuCentered}>
                     <div style={styles.bankingDropdownGrid}>
                       <div style={styles.bankingDropdownSection}>
                         <h4 style={styles.bankingDropdownSectionTitle}>💳 Account Types</h4>
@@ -454,7 +467,10 @@ export default function Home() {
             <div style={styles.navigationDropdown}>
               <button
                 style={styles.modernMenuButton}
-                onClick={() => setActiveDropdown(activeDropdown === 'digital' ? null : 'digital')}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setActiveDropdown(activeDropdown === 'digital' ? null : 'digital');
+                }}
               >
                 <div style={styles.hamburgerLines}>
                   <span style={styles.hamburgerLine}></span>
@@ -466,7 +482,11 @@ export default function Home() {
 
               {activeDropdown === 'digital' && (
                 <>
-                  <div style={styles.bankingDropdownMenu}>
+                  <div 
+                    style={styles.dropdownBackdrop}
+                    onClick={() => setActiveDropdown(null)}
+                  ></div>
+                  <div style={styles.bankingDropdownMenuCentered}>
                     <div style={styles.bankingDropdownGrid}>
                       <div style={styles.bankingDropdownSection}>
                         <h4 style={styles.bankingDropdownSectionTitle}>💻 Online Banking</h4>
@@ -1635,6 +1655,34 @@ const styles = {
     overflowY: 'auto',
     zIndex: 9999,
     animation: 'dropdownSlideIn 0.3s ease-out'
+  },
+  bankingDropdownMenuCentered: {
+    position: 'fixed',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    backgroundColor: 'white',
+    borderRadius: '20px',
+    boxShadow: '0 25px 50px rgba(26, 54, 93, 0.25)',
+    border: '2px solid #059669',
+    padding: '2.5rem',
+    minWidth: '520px',
+    maxWidth: '90vw',
+    maxHeight: '80vh',
+    overflowY: 'auto',
+    zIndex: 10000,
+    animation: 'dropdownSlideIn 0.4s ease-out',
+    backdropFilter: 'blur(20px)',
+    background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.95) 100%)'
+  },
+  dropdownBackdrop: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: 'rgba(0, 0, 0, 0.5)',
+    zIndex: 9999
   },
   bankingDropdownGrid: {
     display: 'flex',
