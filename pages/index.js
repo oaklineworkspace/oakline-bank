@@ -730,7 +730,7 @@ export default function Home() {
                         key={index}
                         style={{
                           ...styles.accountCard,
-                          backgroundImage: user ? 'linear-gradient(135deg, #1e293b 0%, #334155 100%)' : 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+                          backgroundImage: user ? 'linear-gradient(135deg, #1e293b 0%, #334155 100%)' : 'linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%)',
                           ...(isVisible['account-types'] ? {
                             ...styles.flipInY,
                             animationDelay: `${index * 0.1}s`

@@ -295,13 +295,13 @@ export default function Dashboard() {
                     <span style={styles.navArrow}>▼</span>
                   </button>
                   {dropdownOpen.profile && (
-                    <div style={{ ...styles.dropdown, backgroundColor: '#1a365d' }}>
-                      <Link href="/profile" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>View Profile</Link>
-                      <Link href="/security" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Security Settings</Link>
-                      <Link href="/notifications" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Notifications</Link>
-                      <Link href="/privacy" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Privacy Settings</Link>
-                    </div>
-                  )}
+                      <div style={styles.dropdown}>
+                        <Link href="/profile" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>View Profile</Link>
+                        <Link href="/security" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Security Settings</Link>
+                        <Link href="/notifications" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Notifications</Link>
+                        <Link href="/privacy" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Privacy Settings</Link>
+                      </div>
+                    )}
                 </div>
                 <div style={styles.navItem}>
                   <button style={styles.navButton} onClick={(e) => { e.stopPropagation(); toggleDropdown('quickAccess'); }}>
@@ -310,13 +310,13 @@ export default function Dashboard() {
                     <span style={styles.navArrow}>▼</span>
                   </button>
                   {dropdownOpen.quickAccess && (
-                    <div style={{ ...styles.dropdown, backgroundColor: '#1a365d' }}>
-                      <Link href="/" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Home</Link>
-                      <Link href="/main-menu" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Menu</Link>
-                      <Link href="/transfer" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Transfer Money</Link>
-                      <Link href="/bill-pay" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Pay Bills</Link>
-                    </div>
-                  )}
+                      <div style={styles.dropdown}>
+                        <Link href="/" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Home</Link>
+                        <Link href="/main-menu" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Menu</Link>
+                        <Link href="/transfer" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Transfer Money</Link>
+                        <Link href="/bill-pay" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Pay Bills</Link>
+                      </div>
+                    )}
                 </div>
                 <button onClick={handleLogout} style={styles.logoutButton}>
                   <span style={styles.actionIcon}>🚪</span>

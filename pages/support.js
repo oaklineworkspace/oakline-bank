@@ -361,12 +361,13 @@ const styles = {
     margin: '0 auto'
   },
   actionCard: {
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#ffffff',
     padding: '2rem',
     borderRadius: '12px',
     textAlign: 'center',
     border: '2px solid #e2e8f0',
-    transition: 'all 0.3s ease'
+    transition: 'all 0.3s ease',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
   },
   actionIcon: {
     fontSize: '3rem',
@@ -391,15 +392,17 @@ const styles = {
   },
   contactDetails: {
     color: '#1a365d',
-    fontSize: '1.1rem'
+    fontSize: '1.1rem',
+    fontWeight: '700'
   },
   hours: {
-    color: '#64748b',
-    fontSize: '0.9rem'
+    color: '#475569',
+    fontSize: '0.9rem',
+    fontWeight: '500'
   },
   faqSection: {
     padding: '4rem 2rem',
-    backgroundColor: '#f8fafc'
+    backgroundColor: '#ffffff'
   },
   categoryFilter: {
     display: 'flex',
@@ -410,13 +413,13 @@ const styles = {
   },
   categoryButton: {
     padding: '0.75rem 1.5rem',
-    backgroundColor: '#white',
-    color: '#64748b',
+    backgroundColor: '#ffffff',
+    color: '#1a365d',
     border: '2px solid #e2e8f0',
     borderRadius: '25px',
     cursor: 'pointer',
     fontSize: '0.9rem',
-    fontWeight: '500',
+    fontWeight: '600',
     transition: 'all 0.2s'
   },
   activeCategoryButton: {
