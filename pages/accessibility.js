@@ -1,4 +1,3 @@
-
 export default function Accessibility() {
   const styles = {
     container: {
@@ -167,7 +166,7 @@ export default function Accessibility() {
             <li style={styles.listItem}>Video relay service support</li>
             <li style={styles.listItem}>Extended call times for customers who need them</li>
             <li style={styles.listItem}>Alternative communication methods</li>
-            <li style={styles.listItem">Specialist assistance for complex needs</li>
+            <li style={styles.listItem}>Specialist assistance for complex needs</li>
           </ul>
         </div>
 
