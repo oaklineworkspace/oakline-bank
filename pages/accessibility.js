@@ -163,9 +163,9 @@ export default function Accessibility() {
             Our customer service team is trained to assist customers with disabilities:
           </p>
           <ul style={styles.list}>
-            <li style={styles.listItem">TTY/TDD service: 1-800-855-2880</li>
-            <li style={styles.listItem">Video relay service support</li>
-            <li style={styles.listItem">Extended call times for customers who need them</li>
+            <li style={styles.listItem}>TTY/TDD service: 1-800-855-2880</li>
+            <li style={styles.listItem}>Video relay service support</li>
+            <li style={styles.listItem}>Extended call times for customers who need them</li>
             <li style={styles.listItem}>Alternative communication methods</li>
             <li style={styles.listItem">Specialist assistance for complex needs</li>
           </ul>
@@ -179,9 +179,9 @@ export default function Accessibility() {
           <ul style={styles.list}>
             <li style={styles.listItem}>Regular accessibility audits and testing</li>
             <li style={styles.listItem}>User feedback integration</li>
-            <li style={styles.listItem">Staff training on accessibility best practices</li>
+            <li style={styles.listItem}>Staff training on accessibility best practices</li>
             <li style={styles.listItem}>Technology updates and improvements</li>
-            <li style={styles.listItem">Partnership with disability advocacy groups</li>
+            <li style={styles.listItem}>Partnership with disability advocacy groups</li>
           </ul>
         </div>
 
