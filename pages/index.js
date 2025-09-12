@@ -101,7 +101,6 @@ export default function Home() {
   const bankingImages = [
     {
       src: '/images/Mobile_banking_user_experience_576bb7a3.png',
-      fallback: '/images/professional-mobile-banking-1.png',
       title: 'Mobile Banking Excellence',
       subtitle: 'Complete banking control right in your pocket with our award-winning app',
       icon: '📱',
@@ -122,67 +121,67 @@ export default function Home() {
       gradient: 'linear-gradient(135deg, rgba(26, 54, 93, 0.3) 0%, rgba(26, 54, 93, 0.4) 100%)'
     },
     {
-      src: '/images/professional-mobile-banking-1.png',
-      title: 'Professional Mobile Banking',
-      subtitle: 'Secure and intuitive banking designed for busy professionals',
-      icon: '💼',
+      src: '/images/realistic-banking-professionals.svg',
+      title: 'Professional Banking Team',
+      subtitle: 'Experienced professionals ready to help you achieve your financial goals',
+      icon: '👥',
       gradient: 'linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%)'
     },
     {
-      src: '/images/professional-mobile-banking-2.png',
-      title: 'Instant Money Transfers',
-      subtitle: 'Send and receive money instantly with our advanced transfer system',
-      icon: '⚡',
+      src: '/images/real-mobile-banking-users.svg',
+      title: 'Real Customer Experience',
+      subtitle: 'Join thousands of satisfied customers who trust our banking services',
+      icon: '⭐',
       gradient: 'linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%)'
     },
     {
-      src: '/images/professional-mobile-banking-3.png',
-      title: 'Complete Financial Control',
+      src: '/images/woman-laptop-banking.svg',
+      title: 'Digital Banking Excellence',
       subtitle: 'Manage your entire financial portfolio from one powerful dashboard',
-      icon: '📊',
+      icon: '💻',
       gradient: 'linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%)'
     }
   ];
 
   const bankingFeatures = [
     {
-      image: '/images/atm_machine_people.png',
-      title: 'Nationwide ATM Access',
-      description: 'Access your money at over 55,000 ATMs across the country with no fees. Our extensive network ensures you\'re never far from your money.',
-      features: ['55,000+ Fee-Free ATMs', 'International ATM Access', 'Mobile ATM Locator', '24/7 Cash Availability'],
-      icon: '🏧',
+      image: '/images/realistic-banking-professionals.svg',
+      title: 'Professional Banking Team',
+      description: 'Work with our experienced banking professionals who provide personalized financial guidance and support.',
+      features: ['Dedicated Relationship Managers', 'Expert Financial Advice', 'Personalized Service', '24/7 Professional Support'],
+      icon: '👥',
       color: '#3b82f6'
     },
     {
-      image: '/images/mobile_banking_app.png',
+      image: '/images/real-mobile-banking-users.svg',
       title: 'Award-Winning Mobile App',
-      description: 'Experience banking reimagined with our state-of-the-art mobile application. Manage all your finances with ease.',
+      description: 'Experience banking reimagined with our state-of-the-art mobile application used by thousands of satisfied customers.',
       features: ['Mobile Check Deposit', 'Instant Transfers', 'Bill Pay & Scheduling', 'Real-time Notifications'],
       icon: '📱',
       color: '#10b981'
     },
     {
-      image: '/images/handshake_business_deal.png',
-      title: 'Personal Banking Relationships',
-      description: 'Build lasting financial partnerships with dedicated relationship managers who understand your unique needs.',
-      features: ['Dedicated Relationship Manager', 'Personalized Financial Planning', 'Priority Customer Support', 'Exclusive Banking Benefits'],
-      icon: '🤝',
+      image: '/images/realistic-debit-card-1.svg',
+      title: 'Premium Debit Cards',
+      description: 'Access your money instantly with our premium debit cards featuring advanced security and contactless technology.',
+      features: ['Contactless Payments', 'Real-time Fraud Protection', 'Global Acceptance', 'Mobile Card Controls'],
+      icon: '💳',
       color: '#f59e0b'
     },
     {
-      image: '/images/professional-mobile-banking-1.png',
-      title: 'Investment & Wealth Management',
-      description: 'Grow your wealth with professional investment management and comprehensive financial planning services.',
-      features: ['Professional Portfolio Management', 'Market Research & Analytics', 'Retirement Planning', 'Tax-Advantaged Accounts'],
-      icon: '📈',
+      image: '/images/realistic-debit-card-2.svg',
+      title: 'Secure Card Technology',
+      description: 'Bank with confidence using our advanced chip technology and multi-layer security features.',
+      features: ['EMV Chip Technology', '24/7 Fraud Monitoring', 'Instant Lock/Unlock', 'Zero Liability Protection'],
+      icon: '🔒',
       color: '#8b5cf6'
     },
     {
-      image: '/images/atm_withdrawal_transaction.png',
-      title: 'Secure Transactions',
-      description: 'Bank with confidence using our advanced security protocols and fraud protection measures.',
-      features: ['End-to-End Encryption', 'Real-time Fraud Alerts', 'Biometric Authentication', 'Secure Online Portal'],
-      icon: '🔒',
+      image: '/images/woman-laptop-banking.svg',
+      title: 'Digital Banking Excellence',
+      description: 'Experience seamless online banking with our comprehensive digital platform designed for modern life.',
+      features: ['Easy Account Management', 'Seamless Fund Transfers', 'Personalized Dashboard', '24/7 Online Access'],
+      icon: '💻',
       color: '#64748b'
     },
     {
@@ -194,27 +193,27 @@ export default function Home() {
       color: '#1d4ed8'
     },
     {
-      image: '/images/professional-mobile-banking-2.png',
-      title: 'State-of-the-Art Branches',
-      description: 'Experience premium banking services in our modern, technologically advanced branch locations.',
-      features: ['Advanced Self-Service Kiosks', 'Comfortable Meeting Spaces', 'High-Speed Wi-Fi', 'On-site Financial Advisors'],
-      icon: '🏦',
-      color: '#059669'
-    },
-    {
-      image: '/images/professional-mobile-banking-3.png',
-      title: 'User-Friendly Digital Platform',
-      description: 'Navigate your finances with ease through our intuitive and comprehensive online banking platform.',
-      features: ['Easy Account Management', 'Seamless Fund Transfers', 'Personalized Financial Dashboard', '24/7 Online Access'],
-      icon: '💻',
-      color: '#f59e0b'
-    },
-    {
-      image: '/images/modern-digital-banking-1.png',
+      image: '/images/loan-approval-celebration-1.svg',
       title: 'Instant Loan Approvals',
       description: 'Get quick access to funds with our streamlined and efficient loan application and approval process.',
       features: ['Fast Online Applications', 'Competitive Interest Rates', 'Flexible Repayment Options', 'Pre-qualification Tools'],
       icon: '🚀',
+      color: '#059669'
+    },
+    {
+      image: '/images/Mobile_banking_user_experience_576bb7a3.png',
+      title: 'Superior User Experience',
+      description: 'Navigate your finances with ease through our intuitive and award-winning banking platform.',
+      features: ['Intuitive Interface', 'Quick Navigation', 'Smart Features', 'User-Friendly Design'],
+      icon: '⭐',
+      color: '#f59e0b'
+    },
+    {
+      image: '/images/business-loan-approved.svg',
+      title: 'Business Banking Solutions',
+      description: 'Comprehensive banking solutions designed specifically for small businesses and entrepreneurs.',
+      features: ['Business Checking Accounts', 'Merchant Services', 'Small Business Loans', 'Payroll Solutions'],
+      icon: '🏢',
       color: '#dc2626'
     },
     {
@@ -1213,7 +1212,7 @@ export default function Home() {
           <div style={styles.professionalsGrid}>
             <div style={styles.professionalCard}>
               <img
-                src="/images/professional-banking-hero-1.png"
+                src="/images/real-mobile-banking-users.svg"
                 alt="Professional using Oakline Bank mobile app"
                 style={styles.professionalImage}
               />
