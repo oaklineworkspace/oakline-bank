@@ -27,10 +27,15 @@
       "static/chunks/main.js",
       "static/chunks/pages/_error.js"
     ],
-    "/support": [
+    "/market-news": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/support.js"
+      "static/chunks/pages/market-news.js"
+    ],
+    "/privacy": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/privacy.js"
     ]
   },
   "ampFirstPages": []
