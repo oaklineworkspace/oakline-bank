@@ -343,7 +343,8 @@ export default function Home() {
               </button>
 
               {activeDropdown === 'banking' && (
-                <div style={styles.bankingDropdownMenu}>
+                <>
+                  <div style={styles.bankingDropdownMenu}>
                     <div style={styles.bankingDropdownGrid}>
                       <div style={styles.bankingDropdownSection}>
                         <h4 style={styles.bankingDropdownSectionTitle}>💳 Account Types</h4>
@@ -445,6 +446,7 @@ export default function Home() {
                       </Link>
                     </div>
                   </div>
+                </>
               )}
             </div>
 
@@ -463,7 +465,8 @@ export default function Home() {
               </button>
 
               {activeDropdown === 'digital' && (
-                <div style={styles.bankingDropdownMenu}>
+                <>
+                  <div style={styles.bankingDropdownMenu}>
                     <div style={styles.bankingDropdownGrid}>
                       <div style={styles.bankingDropdownSection}>
                         <h4 style={styles.bankingDropdownSectionTitle}>💻 Online Banking</h4>
@@ -572,6 +575,7 @@ export default function Home() {
                       </Link>
                     </div>
                   </div>
+                </>
               )}
             </div>
           </div>

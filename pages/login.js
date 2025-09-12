@@ -68,6 +68,10 @@ export default function LoginPage() {
 
           <div style={styles.headerActionsRow}>
             <div style={styles.headerActions}>
+              <Link href="/" style={styles.headerButton}>
+                <span style={styles.buttonIcon}>🏠</span>
+                Home
+              </Link>
               <Link href="/apply" style={styles.headerButton}>
                 <span style={styles.buttonIcon}>🚀</span>
                 Open New Account
