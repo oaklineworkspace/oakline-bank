@@ -331,7 +331,7 @@ export default function Home() {
 
             {/* Banking Features Dropdown - Same level as logo */}
             <div style={styles.navigationDropdown}>
-              <button 
+              <button
                 style={styles.modernMenuButton}
                 onClick={() => setActiveDropdown(activeDropdown === 'banking' ? null : 'banking')}
               >
@@ -443,7 +443,7 @@ export default function Home() {
                     Menu
                   </Link>
                   {/* Logout Button */}
-                  <button 
+                  <button
                     style={styles.logoutButtonWhite}
                     onClick={async () => {
                       try {
@@ -780,7 +780,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Professional Features Section */}
+      {/* Professional Banking Section */}
       <section style={styles.professionalFeaturesSection} id="professional-features" data-animate>
         <div style={styles.container}>
           <div style={{
@@ -1003,80 +1003,82 @@ export default function Home() {
           }}>
             <h2 style={styles.sectionTitle}>Real Success Stories</h2>
             <p style={styles.sectionSubtitle}>
-              See how Oakline Bank has helped thousands achieve their financial goals
+              See how Oakline Bank has helped thousands of customers achieve their financial dreams
             </p>
-            <div style={styles.titleUnderline}></div>
           </div>
 
-          <div style={styles.successStoriesGrid}>
-            <div style={styles.successStoryCard}>
-              <div style={styles.successImageContainer}>
-                <img
-                  src="/images/loan-approval-celebration-1.svg"
-                  alt="Loan Approval Celebration"
-                  style={styles.successImage}
-                />
-                <div style={styles.successBadge}>
-                  <span style={styles.badgeIcon}>🎉</span>
-                  <span>Loan Approved</span>
-                </div>
+          <div style={styles.successGrid}>
+            <div style={styles.successStory}>
+              <img
+                src="/images/realistic-loan-approval-people.svg"
+                alt="Real people celebrating loan approval with documents and phones"
+                style={styles.successImage}
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  e.target.nextSibling.style.display = 'flex';
+                }}
+              />
+              <div style={{...styles.successImageFallback, display: 'none'}}>
+                <span style={styles.successImageIcon}>🎉</span>
               </div>
               <div style={styles.successContent}>
-                <h3 style={styles.successTitle}>Home Loan Success</h3>
+                <h3 style={styles.successTitle}>Personal Loan Approved</h3>
                 <p style={styles.successDescription}>
-                  "Thanks to Oakline Bank's competitive rates and expert guidance, we secured our dream home loan in just 5 days!"
+                  "Got approved for $25,000 in just 24 hours! The process was incredibly smooth and the team helped every step of the way."
                 </p>
-                <div style={styles.successDetails}>
-                  <span style={styles.successAmount}>$350,000 Approved</span>
-                  <span style={styles.successRate}>2.75% APR</span>
+                <div style={styles.successMeta}>
+                  <span style={styles.successAmount}>$25,000</span>
+                  <span style={styles.successRate}>3.5% APR</span>
                 </div>
               </div>
             </div>
 
-            <div style={styles.successStoryCard}>
-              <div style={styles.successImageContainer}>
-                <img
-                  src="/images/business-loan-approved.svg"
-                  alt="Business Loan Approved"
-                  style={styles.successImage}
-                />
-                <div style={styles.successBadge}>
-                  <span style={styles.badgeIcon}>🏢</span>
-                  <span>Business Growth</span>
-                </div>
+            <div style={styles.successStory}>
+              <img
+                src="/images/mobile-banking-real-people.svg"
+                alt="Diverse people using mobile banking on their phones"
+                style={styles.successImage}
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  e.target.nextSibling.style.display = 'flex';
+                }}
+              />
+              <div style={{...styles.successImageFallback, display: 'none'}}>
+                <span style={styles.successImageIcon}>💻</span>
               </div>
               <div style={styles.successContent}>
-                <h3 style={styles.successTitle}>Business Expansion</h3>
+                <h3 style={styles.successTitle}>Digital Banking Excellence</h3>
                 <p style={styles.successDescription}>
-                  "Oakline Bank believed in our vision and provided the capital we needed to expand our operations nationwide."
+                  "The mobile app makes managing my finances so easy. I can transfer money, pay bills, and check my balance anywhere!"
                 </p>
-                <div style={styles.successDetails}>
-                  <span style={styles.successAmount}>$500,000 Approved</span>
-                  <span style={styles.successRate}>3.25% APR</span>
+                <div style={styles.successMeta}>
+                  <span style={styles.successFeature}>Mobile Banking</span>
+                  <span style={styles.successFeature}>Real-time Alerts</span>
                 </div>
               </div>
             </div>
 
-            <div style={styles.successStoryCard}>
-              <div style={styles.successImageContainer}>
-                <img
-                  src="/images/investment-success-banner.svg"
-                  alt="Investment Success"
-                  style={styles.successImage}
-                />
-                <div style={styles.successBadge}>
-                  <span style={styles.badgeIcon}>📈</span>
-                  <span>Investment Win</span>
-                </div>
+            <div style={styles.successStory}>
+              <img
+                src="/images/family-banking-success.svg"
+                alt="Happy family celebrating home loan approval with phones and documents"
+                style={styles.successImage}
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  e.target.nextSibling.style.display = 'flex';
+                }}
+              />
+              <div style={{...styles.successImageFallback, display: 'none'}}>
+                <span style={styles.successImageIcon}>🏢</span>
               </div>
               <div style={styles.successContent}>
-                <h3 style={styles.successTitle}>Investment Portfolio Growth</h3>
+                <h3 style={styles.successTitle}>Dream Home Achieved</h3>
                 <p style={styles.successDescription}>
-                  "Their investment advisory team helped me achieve a 15% annual return on my portfolio."
+                  "Oakline Bank made our dream of homeownership a reality. The whole family is excited about our new home!"
                 </p>
-                <div style={styles.successDetails}>
-                  <span style={styles.successAmount}>15% Annual Return</span>
-                  <span style={styles.successRate}>Diversified Portfolio</span>
+                <div style={styles.successMeta}>
+                  <span style={styles.successAmount}>$250,000</span>
+                  <span style={styles.successRate}>3.2% APR</span>
                 </div>
               </div>
             </div>
@@ -3022,13 +3024,13 @@ const styles = {
     width: '100%',
     position: 'relative'
   },
-  successStoriesGrid: {
+  successGrid: {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 350px), 1fr))',
     gap: '2rem',
     marginBottom: '2rem'
   },
-  successStoryCard: {
+  successStory: {
     backgroundColor: 'white',
     borderRadius: '20px',
     overflow: 'hidden',
@@ -3054,7 +3056,7 @@ const styles = {
     objectFit: 'contain',
     filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.2))'
   },
-  successBadge: {
+  successImageFallback: {
     position: 'absolute',
     top: '15px',
     right: '15px',
@@ -3068,6 +3070,9 @@ const styles = {
     alignItems: 'center',
     gap: '4px',
     boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+  },
+  successImageIcon: {
+    fontSize: '1.2rem'
   },
   successContent: {
     padding: '2rem'
@@ -3085,7 +3090,7 @@ const styles = {
     marginBottom: '1.5rem',
     fontStyle: 'italic'
   },
-  successDetails: {
+  successMeta: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -3105,6 +3110,14 @@ const styles = {
     fontWeight: '600',
     color: '#1e40af',
     backgroundColor: '#dbeafe',
+    padding: '6px 12px',
+    borderRadius: '20px'
+  },
+  successFeature: {
+    fontSize: '0.9rem',
+    fontWeight: '600',
+    color: '#059669',
+    backgroundColor: '#ecfdf5',
     padding: '6px 12px',
     borderRadius: '20px'
   },
@@ -3234,8 +3247,8 @@ if (typeof document !== 'undefined') {
     dropdownStyles.id = 'dropdown-styles';
     dropdownStyles.textContent = `
       .featureDropdownItem:hover {
-        background-color: #e0f2fe !important;
-        border-color: #059669 !important;
+        background-color: #f8fafc !important;
+        color: #1e40af !important;
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(5, 150, 105, 0.2);
       }
