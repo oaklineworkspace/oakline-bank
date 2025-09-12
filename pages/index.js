@@ -126,21 +126,21 @@ export default function Home() {
       title: 'Professional Mobile Banking',
       subtitle: 'Secure and intuitive banking designed for busy professionals',
       icon: '💼',
-      gradient: 'linear-gradient(135deg, rgba(5, 150, 105, 0.3) 0%, rgba(5, 150, 105, 0.4) 100%)'
+      gradient: 'linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%)'
     },
     {
       src: '/images/professional-mobile-banking-2.png',
       title: 'Instant Money Transfers',
       subtitle: 'Send and receive money instantly with our advanced transfer system',
       icon: '⚡',
-      gradient: 'linear-gradient(135deg, rgba(5, 150, 105, 0.3) 0%, rgba(4, 120, 87, 0.4) 100%)'
+      gradient: 'linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%)'
     },
     {
       src: '/images/professional-mobile-banking-3.png',
       title: 'Complete Financial Control',
       subtitle: 'Manage your entire financial portfolio from one powerful dashboard',
       icon: '📊',
-      gradient: 'linear-gradient(135deg, rgba(26, 54, 93, 0.3) 0%, rgba(45, 90, 135, 0.4) 100%)'
+      gradient: 'linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%)'
     }
   ];
 
@@ -370,7 +370,7 @@ export default function Home() {
                           </div>
                         </Link>
                       </div>
-                      
+
                       <div style={styles.bankingDropdownSection}>
                         <h4 style={styles.bankingDropdownSectionTitle}>🏠 Lending Solutions</h4>
                         <Link href="/loans" style={styles.bankingDropdownLink}>
@@ -395,7 +395,7 @@ export default function Home() {
                           </div>
                         </Link>
                       </div>
-                      
+
                       <div style={styles.bankingDropdownSection}>
                         <h4 style={styles.bankingDropdownSectionTitle}>📈 Investment Services</h4>
                         <Link href="/investments" style={styles.bankingDropdownLink}>
@@ -1155,7 +1155,7 @@ const styles = {
     gap: '0.5rem',
     padding: '0.7rem 1.2rem',
     backgroundColor: 'white',
-    color: '#1a365d',
+    color: '#1e3a8a',
     textDecoration: 'none',
     borderRadius: '8px',
     fontSize: '0.9rem',
@@ -1163,7 +1163,9 @@ const styles = {
     boxShadow: '0 4px 12px rgba(255, 255, 255, 0.2)',
     border: '1px solid rgba(255, 255, 255, 0.3)',
     transition: 'all 0.3s ease',
-    backdropFilter: 'blur(10px)'
+    backdropFilter: 'blur(10px)',
+    minWidth: '120px',
+    justifyContent: 'center'
   },
   navigationDropdown: {
     position: 'relative',
@@ -2506,7 +2508,7 @@ const styles = {
     gap: '0.5rem',
     padding: '0.7rem 1.2rem',
     backgroundColor: 'white',
-    color: '#1a365d',
+    color: '#1e3a8a',
     textDecoration: 'none',
     borderRadius: '8px',
     fontSize: '0.9rem',
@@ -2514,7 +2516,9 @@ const styles = {
     boxShadow: '0 4px 12px rgba(255, 255, 255, 0.2)',
     border: '1px solid rgba(255, 255, 255, 0.3)',
     transition: 'all 0.3s ease',
-    backdropFilter: 'blur(10px)'
+    backdropFilter: 'blur(10px)',
+    minWidth: '120px',
+    justifyContent: 'center'
   },
   loginButtonWhite: {
     display: 'flex',
@@ -2656,7 +2660,7 @@ if (typeof document !== 'undefined') {
       position: relative;
       z-index: 9999;
     }
-    
+
     .dropdown-backdrop {
       position: fixed;
       top: 0;
@@ -2666,7 +2670,7 @@ if (typeof document !== 'undefined') {
       background-color: rgba(0, 0, 0, 0.5);
       z-index: 9998;
     }
-    
+
     .dropdown-menu {
       position: fixed;
       top: 80px;
@@ -2674,7 +2678,7 @@ if (typeof document !== 'undefined') {
       z-index: 9999;
       animation: dropdownSlideIn 0.3s ease-out;
     }
-    
+
     @keyframes dropdownSlideIn {
       0% { 
         opacity: 0; 
@@ -2685,12 +2689,12 @@ if (typeof document !== 'undefined') {
         transform: translateY(0) scale(1); 
       }
     }
-    
+
     /* Image fallback styles */
     .image-fallback {
       animation: fadeIn 0.3s ease-in;
     }
-    
+
     @keyframes fadeIn {
       0% { opacity: 0; }
       100% { opacity: 1; }
