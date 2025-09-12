@@ -100,6 +100,20 @@ export default function Home() {
 
   const bankingImages = [
     {
+      src: '/images/realistic-debit-card-1.svg',
+      title: 'Premium Debit Cards',
+      subtitle: 'Get instant access to your funds with our premium debit cards featuring contactless payments',
+      icon: '💳',
+      gradient: 'linear-gradient(135deg, rgba(26, 54, 93, 0.3) 0%, rgba(26, 54, 93, 0.4) 100%)'
+    },
+    {
+      src: '/images/realistic-debit-card-2.svg',
+      title: 'Secure Card Technology',
+      subtitle: 'Advanced chip technology and fraud protection keep your money safe',
+      icon: '🔒',
+      gradient: 'linear-gradient(135deg, rgba(26, 54, 93, 0.3) 0%, rgba(26, 54, 93, 0.4) 100%)'
+    },
+    {
       src: '/images/Mobile_banking_user_experience_576bb7a3.png',
       fallback: '/images/professional-mobile-banking-1.png',
       title: 'Mobile Banking Excellence',
@@ -145,6 +159,22 @@ export default function Home() {
   ];
 
   const bankingFeatures = [
+    {
+      image: '/images/realistic-debit-card-1.svg',
+      title: 'Premium Debit Cards',
+      description: 'Get instant access to your funds with our premium debit cards featuring advanced security and contactless payment technology.',
+      features: ['Contactless Payments', 'Real-time Fraud Protection', 'Global Acceptance', 'Mobile Card Controls'],
+      icon: '💳',
+      color: '#3b82f6'
+    },
+    {
+      image: '/images/realistic-debit-card-2.svg',
+      title: 'Secure Card Technology',
+      description: 'Advanced chip technology and multi-layer security features protect your money and personal information.',
+      features: ['EMV Chip Technology', '24/7 Fraud Monitoring', 'Instant Card Lock/Unlock', 'Zero Liability Protection'],
+      icon: '🔒',
+      color: '#10b981'
+    },
     {
       image: '/images/atm_machine_people.png',
       title: 'Nationwide ATM Access',
