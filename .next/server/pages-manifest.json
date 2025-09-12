@@ -2,10 +2,7 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/login": "pages/login.js",
+  "/security": "pages/security.js",
   "/": "pages/index.js",
-  "/dashboard": "pages/dashboard.js",
-  "/main-menu": "pages/main-menu.js",
-  "/reset-password": "pages/reset-password.js",
-  "/security": "pages/security.js"
+  "/account-details": "pages/account-details.js"
 }
