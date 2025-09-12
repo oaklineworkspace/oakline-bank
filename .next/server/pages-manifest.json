@@ -2,6 +2,9 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/": "pages/index.js",
-  "/dashboard": "pages/dashboard.js"
+  "/main-menu": "pages/main-menu.js",
+  "/cards": "pages/cards.js",
+  "/dashboard": "pages/dashboard.js",
+  "/apply": "pages/apply.js",
+  "/": "pages/index.js"
 }
