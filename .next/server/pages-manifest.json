@@ -2,8 +2,9 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/login": "pages/login.js",
+  "/": "pages/index.js",
   "/dashboard": "pages/dashboard.js",
   "/cards": "pages/cards.js",
-  "/": "pages/index.js"
+  "/api/get-user-cards": "pages/api/get-user-cards.js",
+  "/apply-card": "pages/apply-card.js"
 }
