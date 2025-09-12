@@ -329,97 +329,7 @@ export default function Home() {
           </div>
 
           <div style={styles.headerActions}>
-            {/* Modern Hamburger Features Dropdown - Moved to Left */}
-            <div style={styles.navigationDropdown}>
-              <button 
-                style={styles.modernMenuButton}
-                onClick={() => setActiveDropdown(activeDropdown === 'features' ? null : 'features')}
-              >
-                <div style={styles.hamburgerLines}>
-                  <span style={styles.hamburgerLine}></span>
-                  <span style={styles.hamburgerLine}></span>
-                  <span style={styles.hamburgerLine}></span>
-                </div>
-                <span style={styles.menuText}>Menu</span>
-              </button>
-
-              {activeDropdown === 'features' && (
-                <>
-                  <div 
-                    style={{
-                      position: 'fixed',
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                      zIndex: 999
-                    }}
-                    onClick={() => setActiveDropdown(null)}
-                  ></div>
-                  <div style={styles.featuresDropdownMenu}>
-                  <div style={styles.featuresGrid}>
-                    <div style={styles.featureDropdownItem}>
-                      <span style={styles.featureDropdownIcon}>🔒</span>
-                      <div>
-                        <h4 style={styles.featureDropdownTitle}>Bank-Level Security</h4>
-                        <p style={styles.featureDropdownDesc}>256-bit SSL encryption</p>
-                      </div>
-                    </div>
-                    <div style={styles.featureDropdownItem}>
-                      <span style={styles.featureDropdownIcon}>⚡</span>
-                      <div>
-                        <h4 style={styles.featureDropdownTitle}>Instant Transfers</h4>
-                        <p style={styles.featureDropdownDesc}>&lt; 1 second processing</p>
-                      </div>
-                    </div>
-                    <div style={styles.featureDropdownItem}>
-                      <span style={styles.featureDropdownIcon}>📱</span>
-                      <div>
-                        <h4 style={styles.featureDropdownTitle}>Mobile Banking</h4>
-                        <p style={styles.featureDropdownDesc}>4.9★ rated app</p>
-                      </div>
-                    </div>
-                    <div style={styles.featureDropdownItem}>
-                      <span style={styles.featureDropdownIcon}>💼</span>
-                      <div>
-                        <h4 style={styles.featureDropdownTitle}>Business Solutions</h4>
-                        <p style={styles.featureDropdownDesc}>50K+ businesses</p>
-                      </div>
-                    </div>
-                    <div style={styles.featureDropdownItem}>
-                      <span style={styles.featureDropdownIcon}>🌍</span>
-                      <div>
-                        <h4 style={styles.featureDropdownTitle}>Global Reach</h4>
-                        <p style={styles.featureDropdownDesc}>190+ countries</p>
-                      </div>
-                    </div>
-                    <div style={styles.featureDropdownItem}>
-                      <span style={styles.featureDropdownIcon}>📊</span>
-                      <div>
-                        <h4 style={styles.featureDropdownTitle}>Smart Analytics</h4>
-                        <p style={styles.featureDropdownDesc}>Real-time insights</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div style={styles.dropdownCTA}>
-                    <Link href="/apply" style={styles.dropdownButton}>
-                      <span style={styles.buttonIcon}>🚀</span>
-                      Open Account Today
-                    </Link>
-                  </div>
-                  </div>
-                </>
-              )}
-            </div>
-
-            {/* Enrollment Button - Moved to Center */}
-            <Link href="/enroll" style={styles.enrollButton}>
-              <span style={styles.buttonIcon}>🌐</span>
-              Enroll for Online
-            </Link>
-
-            {/* Auth Buttons - Moved to Right */}
+            {/* Auth Buttons - Moved to Left */}
             <div style={styles.authButtons}>
               {user ? (
                 <>
@@ -449,8 +359,132 @@ export default function Home() {
                 </>
               ) : (
                 <>
+                  <Link href="/enroll" style={styles.enrollButtonWhite}>
+                    <span style={styles.buttonIcon}>🌐</span>
+                    Enroll Online
+                  </Link>
                   <Link href="/login" style={styles.loginButtonWhite}>Sign In</Link>
                   <Link href="/apply" style={styles.applyButtonWhite}>Open Account</Link>
+                </>
+              )}
+            </div>
+
+            {/* Banking Features Dropdown - Moved to Right */}
+            <div style={styles.navigationDropdown}>
+              <button 
+                style={styles.modernMenuButton}
+                onClick={() => setActiveDropdown(activeDropdown === 'banking' ? null : 'banking')}
+              >
+                <div style={styles.hamburgerLines}>
+                  <span style={styles.hamburgerLine}></span>
+                  <span style={styles.hamburgerLine}></span>
+                  <span style={styles.hamburgerLine}></span>
+                </div>
+                <span style={styles.menuText}>Banking</span>
+              </button>
+
+              {activeDropdown === 'banking' && (
+                <>
+                  <div 
+                    style={{
+                      position: 'fixed',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                      zIndex: 999
+                    }}
+                    onClick={() => setActiveDropdown(null)}
+                  ></div>
+                  <div style={styles.bankingDropdownMenu}>
+                    <div style={styles.bankingDropdownGrid}>
+                      <div style={styles.bankingDropdownSection}>
+                        <h4 style={styles.bankingDropdownSectionTitle}>💳 Personal Banking</h4>
+                        <Link href="/account-types" style={styles.bankingDropdownLink}>
+                          <span style={styles.bankingDropdownIcon}>💰</span>
+                          <div>
+                            <div style={styles.bankingDropdownTitle}>Checking & Savings</div>
+                            <div style={styles.bankingDropdownDesc}>High-yield accounts</div>
+                          </div>
+                        </Link>
+                        <Link href="/cards" style={styles.bankingDropdownLink}>
+                          <span style={styles.bankingDropdownIcon}>💳</span>
+                          <div>
+                            <div style={styles.bankingDropdownTitle}>Debit & Credit Cards</div>
+                            <div style={styles.bankingDropdownDesc}>Rewards & benefits</div>
+                          </div>
+                        </Link>
+                        <Link href="/loans" style={styles.bankingDropdownLink}>
+                          <span style={styles.bankingDropdownIcon}>🏠</span>
+                          <div>
+                            <div style={styles.bankingDropdownTitle}>Loans & Mortgages</div>
+                            <div style={styles.bankingDropdownDesc}>Competitive rates</div>
+                          </div>
+                        </Link>
+                      </div>
+                      
+                      <div style={styles.bankingDropdownSection}>
+                        <h4 style={styles.bankingDropdownSectionTitle}>📱 Digital Banking</h4>
+                        <Link href="/dashboard" style={styles.bankingDropdownLink}>
+                          <span style={styles.bankingDropdownIcon}>📊</span>
+                          <div>
+                            <div style={styles.bankingDropdownTitle}>Online Banking</div>
+                            <div style={styles.bankingDropdownDesc}>24/7 access</div>
+                          </div>
+                        </Link>
+                        <Link href="/transfer" style={styles.bankingDropdownLink}>
+                          <span style={styles.bankingDropdownIcon}>⚡</span>
+                          <div>
+                            <div style={styles.bankingDropdownTitle}>Money Transfers</div>
+                            <div style={styles.bankingDropdownDesc}>Instant & secure</div>
+                          </div>
+                        </Link>
+                        <Link href="/bill-pay" style={styles.bankingDropdownLink}>
+                          <span style={styles.bankingDropdownIcon}>📋</span>
+                          <div>
+                            <div style={styles.bankingDropdownTitle}>Bill Pay</div>
+                            <div style={styles.bankingDropdownDesc}>Automatic payments</div>
+                          </div>
+                        </Link>
+                      </div>
+                      
+                      <div style={styles.bankingDropdownSection}>
+                        <h4 style={styles.bankingDropdownSectionTitle}>🏢 Business Banking</h4>
+                        <Link href="/account-types" style={styles.bankingDropdownLink}>
+                          <span style={styles.bankingDropdownIcon}>🏪</span>
+                          <div>
+                            <div style={styles.bankingDropdownTitle}>Business Accounts</div>
+                            <div style={styles.bankingDropdownDesc}>No monthly fees</div>
+                          </div>
+                        </Link>
+                        <Link href="/loans" style={styles.bankingDropdownLink}>
+                          <span style={styles.bankingDropdownIcon}>💼</span>
+                          <div>
+                            <div style={styles.bankingDropdownTitle}>Business Loans</div>
+                            <div style={styles.bankingDropdownDesc}>Quick approval</div>
+                          </div>
+                        </Link>
+                        <Link href="/investments" style={styles.bankingDropdownLink}>
+                          <span style={styles.bankingDropdownIcon}>📈</span>
+                          <div>
+                            <div style={styles.bankingDropdownTitle}>Investment Services</div>
+                            <div style={styles.bankingDropdownDesc}>Wealth management</div>
+                          </div>
+                        </Link>
+                      </div>
+                    </div>
+                    <div style={styles.bankingDropdownCTA}>
+                      <Link href="/apply" style={styles.bankingDropdownButton}>
+                        <span style={styles.buttonIcon}>🚀</span>
+                        Open Account Today
+                      </Link>
+                      <Link href="/support" style={styles.bankingDropdownSecondaryButton}>
+                        <span style={styles.buttonIcon}>💬</span>
+                        Contact Support
+                      </Link>
+                    </div>
+                  </div>
                 </>
               )}
             </div>
@@ -1105,6 +1139,22 @@ const styles = {
     cursor: 'pointer',
     backdropFilter: 'blur(10px)'
   },
+  enrollButtonWhite: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    padding: '0.7rem 1.2rem',
+    backgroundColor: 'white',
+    color: '#1a365d',
+    textDecoration: 'none',
+    borderRadius: '8px',
+    fontSize: '0.9rem',
+    fontWeight: '600',
+    boxShadow: '0 4px 12px rgba(255, 255, 255, 0.2)',
+    border: '1px solid rgba(255, 255, 255, 0.3)',
+    transition: 'all 0.3s ease',
+    backdropFilter: 'blur(10px)'
+  },
   navigationDropdown: {
     position: 'relative'
   },
@@ -1147,6 +1197,118 @@ const styles = {
     maxWidth: '90vw',
     zIndex: 1000,
     animation: 'dropdownSlideIn 0.3s ease-out'
+  },
+  bankingDropdownMenu: {
+    position: 'absolute',
+    top: 'calc(100% + 0.5rem)',
+    right: 0,
+    backgroundColor: 'white',
+    borderRadius: '16px',
+    boxShadow: '0 20px 40px rgba(26, 54, 93, 0.2)',
+    border: '2px solid #e2e8f0',
+    padding: '1.5rem',
+    width: '420px',
+    maxWidth: '95vw',
+    maxHeight: '80vh',
+    overflowY: 'auto',
+    zIndex: 1000,
+    animation: 'dropdownSlideIn 0.3s ease-out'
+  },
+  bankingDropdownGrid: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1.5rem',
+    marginBottom: '1.5rem'
+  },
+  bankingDropdownSection: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.75rem'
+  },
+  bankingDropdownSectionTitle: {
+    fontSize: '0.9rem',
+    fontWeight: '800',
+    color: '#1a365d',
+    marginBottom: '0.5rem',
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px',
+    borderBottom: '2px solid #e2e8f0',
+    paddingBottom: '0.5rem'
+  },
+  bankingDropdownLink: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '1rem',
+    padding: '0.875rem',
+    borderRadius: '10px',
+    backgroundColor: '#f8fafc',
+    border: '1px solid #e2e8f0',
+    textDecoration: 'none',
+    transition: 'all 0.3s ease',
+    cursor: 'pointer'
+  },
+  bankingDropdownIcon: {
+    fontSize: '1.3rem',
+    width: '40px',
+    height: '40px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+    color: 'white',
+    borderRadius: '8px',
+    flexShrink: 0,
+    boxShadow: '0 2px 8px rgba(5, 150, 105, 0.3)'
+  },
+  bankingDropdownTitle: {
+    fontSize: '0.95rem',
+    fontWeight: '700',
+    color: '#1a365d',
+    marginBottom: '0.25rem'
+  },
+  bankingDropdownDesc: {
+    fontSize: '0.8rem',
+    color: '#64748b',
+    fontWeight: '500'
+  },
+  bankingDropdownCTA: {
+    display: 'flex',
+    gap: '0.75rem',
+    paddingTop: '1rem',
+    borderTop: '1px solid #e2e8f0',
+    flexWrap: 'wrap'
+  },
+  bankingDropdownButton: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    padding: '0.75rem 1.25rem',
+    background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+    color: 'white',
+    textDecoration: 'none',
+    borderRadius: '8px',
+    fontSize: '0.9rem',
+    fontWeight: '700',
+    boxShadow: '0 4px 12px rgba(5, 150, 105, 0.3)',
+    transition: 'all 0.3s ease',
+    flex: 1,
+    justifyContent: 'center'
+  },
+  bankingDropdownSecondaryButton: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    padding: '0.75rem 1.25rem',
+    backgroundColor: 'transparent',
+    color: '#1a365d',
+    textDecoration: 'none',
+    borderRadius: '8px',
+    fontSize: '0.9rem',
+    fontWeight: '700',
+    border: '2px solid #1a365d',
+    transition: 'all 0.3s ease',
+    flex: 1,
+    justifyContent: 'center'
   },
   featuresGrid: {
     display: 'grid',

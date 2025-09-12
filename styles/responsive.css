@@ -18,13 +18,35 @@
   .headerActions {
     order: 2 !important;
     width: 100% !important;
-    justify-content: center !important;
+    justify-content: space-between !important;
+    flex-wrap: wrap !important;
   }
 
   .authButtons {
-    flex-direction: column !important;
+    flex-direction: row !important;
     gap: 0.5rem !important;
-    width: 100% !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    flex: 1 !important;
+  }
+
+  .authButtons > * {
+    flex: 1 !important;
+    min-width: 120px !important;
+    max-width: 150px !important;
+    text-align: center !important;
+    justify-content: center !important;
+    padding: 0.6rem 0.8rem !important;
+    font-size: 0.85rem !important;
+  }
+
+  .navigationDropdown {
+    flex-shrink: 0 !important;
+  }
+
+  .modernMenuButton {
+    padding: 0.6rem 1rem !important;
+    font-size: 0.85rem !important;
   }
 
   .featuresGrid {
@@ -51,6 +73,66 @@
     top: 50% !important;
     transform: translate(-50%, -50%) !important;
     position: fixed !important;
+  }
+
+  .bankingDropdownMenu {
+    width: 95vw !important;
+    max-width: 95vw !important;
+    right: 1rem !important;
+    left: 1rem !important;
+    max-height: 70vh !important;
+    padding: 1rem !important;
+  }
+
+  .bankingDropdownGrid {
+    gap: 1rem !important;
+  }
+
+  .bankingDropdownCTA {
+    flex-direction: column !important;
+  }
+
+  .bankingDropdownButton,
+  .bankingDropdownSecondaryButton {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .headerActions {
+    flex-direction: column !important;
+    gap: 0.75rem !important;
+  }
+
+  .authButtons {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  .authButtons > * {
+    min-width: 100px !important;
+    max-width: none !important;
+    flex: 1 !important;
+  }
+
+  .navigationDropdown {
+    width: 100% !important;
+    display: flex !important;
+    justify-content: center !important;
+  }
+
+  .modernMenuButton {
+    width: 100% !important;
+    max-width: 200px !important;
+    justify-content: center !important;
+  }
+
+  .bankingDropdownMenu {
+    right: 0.5rem !important;
+    left: 0.5rem !important;
+    width: calc(100vw - 1rem) !important;
+    padding: 0.75rem !important;
   }
 }
 
