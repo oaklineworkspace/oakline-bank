@@ -26,7 +26,12 @@ export default function Cards() {
 
   const checkUser = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if (error) {
+        console.error('Auth error:', error);
+        router.push('/login');
+        return;
+      }
       if (!user) {
         router.push('/login');
         return;
@@ -39,6 +44,7 @@ export default function Cards() {
       ]);
     } catch (error) {
       console.error('Error checking user:', error);
+      // Don't redirect on error, just log it
     } finally {
       setLoading(false);
     }
@@ -46,13 +52,42 @@ export default function Cards() {
 
   const fetchUserCards = async (userId) => {
     try {
-      const { data, error } = await supabase
+      // First try to get cards directly by user_id
+      let { data, error } = await supabase
         .from('cards')
         .select('*')
         .eq('user_id', userId)
         .eq('status', 'active');
 
-      if (error) throw error;
+      // If that fails, try getting through profiles/applications
+      if (error || !data || data.length === 0) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('application_id')
+          .eq('id', userId)
+          .single();
+
+        if (profile?.application_id) {
+          const { data: accounts } = await supabase
+            .from('accounts')
+            .select('id')
+            .eq('application_id', profile.application_id);
+
+          if (accounts && accounts.length > 0) {
+            const accountIds = accounts.map(acc => acc.id);
+            const { data: cardsData, error: cardsError } = await supabase
+              .from('cards')
+              .select('*')
+              .in('account_id', accountIds)
+              .eq('status', 'active');
+
+            if (!cardsError) {
+              data = cardsData;
+            }
+          }
+        }
+      }
+
       setCards(data || []);
       if (data && data.length > 0) {
         setActiveCard(data[0]);
@@ -106,12 +141,22 @@ export default function Cards() {
   };
 
   const applyForCard = async () => {
-    if (!user) return;
+    if (!user) {
+      alert('Please log in to apply for a card');
+      return;
+    }
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError) {
+        console.error('Session error:', sessionError);
+        alert('Session error. Please try logging in again.');
+        return;
+      }
+      
       if (!session) {
         alert('Please log in to apply for a card');
+        router.push('/login');
         return;
       }
 
