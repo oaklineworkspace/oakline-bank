@@ -13,6 +13,19 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
+    // Check if user already has a card for this account
+    const { data: existingCard } = await supabase
+      .from('cards')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('account_id', accountId)
+      .eq('status', 'active')
+      .single();
+
+    if (existingCard) {
+      return res.status(400).json({ error: 'User already has an active card for this account' });
+    }
+
     // Generate card details
     const generateCardNumber = () => {
       const prefix = '4532';
@@ -37,7 +50,7 @@ export default async function handler(req, res) {
     // Get account details
     const { data: accountData, error: accountError } = await supabase
       .from('accounts')
-      .select('account_number')
+      .select('account_number, account_type')
       .eq('id', accountId)
       .single();
 
@@ -49,13 +62,12 @@ export default async function handler(req, res) {
     const expiryDate = generateExpiryDate();
     const cvv = generateCVV();
 
-    // Insert card
+    // Insert card directly (admin assignment)
     const { data: cardData, error: cardError } = await supabase
       .from('cards')
       .insert({
         user_id: userId,
         account_id: accountId,
-        account_number: accountData.account_number,
         card_number: cardNumber,
         cardholder_name: cardholderName.toUpperCase(),
         expiry_date: expiryDate,
@@ -70,11 +82,13 @@ export default async function handler(req, res) {
       .single();
 
     if (cardError) {
-      throw cardError;
+      console.error('Error creating card:', cardError);
+      return res.status(500).json({ error: 'Failed to create card' });
     }
 
     res.status(200).json({
       success: true,
+      message: 'Card assigned successfully',
       card: cardData,
       cardDetails: {
         cardNumber,

@@ -64,10 +64,23 @@ export default function Cards() {
 
   const fetchUserAccounts = async (userId) => {
     try {
+      // Get user's accounts through profile/application connection
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('application_id')
+        .eq('id', userId)
+        .single();
+
+      if (!profile?.application_id) {
+        console.log('No application found for user');
+        return;
+      }
+
       const { data, error } = await supabase
         .from('accounts')
         .select('*')
-        .eq('application_id', userId);
+        .eq('application_id', profile.application_id)
+        .eq('status', 'active');
 
       if (error) throw error;
       setAccounts(data || []);
@@ -93,39 +106,45 @@ export default function Cards() {
   };
 
   const applyForCard = async () => {
-    if (!user || accounts.length === 0) return;
+    if (!user) return;
 
     try {
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('first_name, last_name')
-        .eq('id', user.id)
-        .single();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        alert('Please log in to apply for a card');
+        return;
+      }
 
-      const cardholderName = profileData 
-        ? `${profileData.first_name} ${profileData.last_name}`
-        : 'Card Holder';
+      // If user has no accounts, redirect to account application
+      if (accounts.length === 0) {
+        if (confirm('You need to have an account first. Would you like to apply for one?')) {
+          router.push('/apply');
+        }
+        return;
+      }
 
-      const { data, error } = await supabase
-        .from('card_applications')
-        .insert([{
-          user_id: user.id,
-          account_id: accounts[0].id,
-          cardholder_name: cardholderName,
-          status: 'pending'
-        }])
-        .select()
-        .single();
+      const response = await fetch('/api/apply-card', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          accountId: accounts[0].id
+        })
+      });
 
-      if (error) throw error;
-
-      // Auto-approve and create card for demo purposes
-      await approveCardApplication(data.id);
-      alert('Card application submitted and approved!');
-      await fetchUserCards(user.id);
+      const data = await response.json();
+      
+      if (data.success) {
+        alert('✅ Card application submitted successfully! You will receive confirmation once approved.');
+        await fetchUserCards(user.id);
+      } else {
+        alert('❌ ' + (data.error || 'Failed to submit application'));
+      }
     } catch (error) {
       console.error('Error applying for card:', error);
-      alert('Error applying for card. Please try again.');
+      alert('❌ Error applying for card. Please try again.');
     }
   };
 

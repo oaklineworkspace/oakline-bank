@@ -82,35 +82,41 @@ export default function Dashboard() {
   };
 
   const applyForCard = async () => {
-    if (!accounts.length) {
-      setCardApplicationStatus('error: No accounts found');
+    setCardApplicationStatus('');
+
+    if (accounts.length === 0) {
+      setCardApplicationStatus('error: You need to have an account first to apply for a card.');
       return;
     }
 
     try {
       const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        setCardApplicationStatus('error: Please log in to apply for a card');
+        return;
+      }
 
       const response = await fetch('/api/apply-card', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session?.access_token}`
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          accountId: accounts[0].id,
-          cardholderName: getUserDisplayName()
+          accountId: accounts[0].id // Apply for card linked to first account
         })
       });
 
-      const result = await response.json();
+      const data = await response.json();
 
-      if (result.success) {
-        setCardApplicationStatus('success');
+      if (data.success) {
+        setCardApplicationStatus('Card application submitted successfully! You will receive confirmation once approved.');
       } else {
-        setCardApplicationStatus(`error: ${result.error}`);
+        setCardApplicationStatus('error: ' + (data.error || 'Failed to submit application'));
       }
     } catch (error) {
-      setCardApplicationStatus(`error: ${error.message}`);
+      console.error('Error applying for card:', error);
+      setCardApplicationStatus('error: Error submitting application');
     }
   };
 

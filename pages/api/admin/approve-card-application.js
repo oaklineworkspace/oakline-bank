@@ -1,5 +1,25 @@
-
 import { supabase } from '../../../lib/supabaseClient';
+
+// Helper functions
+const generateCardNumber = () => {
+  const prefix = '4532';
+  let cardNumber = prefix;
+  for (let i = 0; i < 12; i++) {
+    cardNumber += Math.floor(Math.random() * 10);
+  }
+  return cardNumber.match(/.{1,4}/g).join(' ');
+};
+
+const generateExpiryDate = () => {
+  const now = new Date();
+  const expiryYear = now.getFullYear() + 3;
+  const expiryMonth = String(now.getMonth() + 1).padStart(2, '0');
+  return `${expiryMonth}/${expiryYear.toString().slice(-2)}`;
+};
+
+const generateCVV = () => {
+  return Math.floor(100 + Math.random() * 900).toString();
+};
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -25,50 +45,67 @@ export default async function handler(req, res) {
     }
 
     if (action === 'approve') {
-      // Update application status
-      await supabase
-        .from('card_applications')
-        .update({ 
-          status: 'approved',
-          approved_at: new Date().toISOString(),
-          approved_by: 'admin'
-        })
-        .eq('id', applicationId);
-
-      // Create the debit card
+      // Generate card details
       const cardNumber = generateCardNumber();
       const expiryDate = generateExpiryDate();
       const cvv = generateCVV();
 
-      const { error: cardError } = await supabase
-        .from('debit_cards')
+      // Update application status
+      const { error: updateError } = await supabase
+        .from('card_applications')
+        .update({ 
+          status: 'approved',
+          card_number: cardNumber,
+          expiry_date: expiryDate,
+          cvv: cvv,
+          approved_at: new Date().toISOString()
+        })
+        .eq('id', applicationId);
+
+      if (updateError) {
+        console.error('Error updating application:', updateError);
+        return res.status(500).json({ error: 'Failed to update application' });
+      }
+
+      // Create the card record
+      const { data: cardData, error: cardError } = await supabase
+        .from('cards')
         .insert([{
           user_id: application.user_id,
           account_id: application.account_id,
+          application_id: applicationId,
           card_number: cardNumber,
           cardholder_name: application.cardholder_name || 'Card Holder',
           expiry_date: expiryDate,
           cvv: cvv,
-          card_type: application.card_type || 'Visa',
+          card_type: application.card_type || 'debit',
           status: 'active',
+          daily_limit: 2000.00,
+          monthly_limit: 10000.00,
           created_at: new Date().toISOString()
-        }]);
+        }])
+        .select()
+        .single();
 
       if (cardError) {
-        console.error('Error creating debit card:', cardError);
-        return res.status(500).json({ error: 'Failed to create debit card' });
+        console.error('Error creating card:', cardError);
+        return res.status(500).json({ error: 'Failed to create card' });
       }
 
     } else if (action === 'reject') {
       // Update application status
-      await supabase
+      const { error: rejectError } = await supabase
         .from('card_applications')
         .update({ 
           status: 'rejected',
-          rejected_at: new Date().toISOString(),
-          rejected_by: 'admin'
+          rejected_at: new Date().toISOString()
         })
         .eq('id', applicationId);
+
+      if (rejectError) {
+        console.error('Error rejecting application:', rejectError);
+        return res.status(500).json({ error: 'Failed to reject application' });
+      }
     }
 
     res.status(200).json({ 
@@ -80,100 +117,4 @@ export default async function handler(req, res) {
     console.error('Error processing card application:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
-}
-
-function generateCardNumber() {
-  const prefix = '4532';
-  let cardNumber = prefix;
-  for (let i = 0; i < 12; i++) {
-    cardNumber += Math.floor(Math.random() * 10);
-  }
-  return cardNumber;
-}
-
-function generateExpiryDate() {
-  const currentDate = new Date();
-  const expiryYear = currentDate.getFullYear() + 3;
-  const expiryMonth = String(Math.floor(Math.random() * 12) + 1).padStart(2, '0');
-  return `${expiryMonth}/${expiryYear.toString().substr(-2)}`;
-}
-
-function generateCVV() {
-  return Math.floor(Math.random() * 900) + 100;
-}
-import { supabase } from '../../../lib/supabaseClient';
-
-export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ message: 'Method not allowed' });
-  }
-
-  const { applicationId, action } = req.body;
-
-  if (!applicationId || !action) {
-    return res.status(400).json({ 
-      success: false,
-      error: 'Missing applicationId or action' 
-    });
-  }
-
-  try {
-    const updateData = {
-      status: action === 'approve' ? 'approved' : 'rejected',
-    };
-
-    if (action === 'approve') {
-      updateData.approved_at = new Date().toISOString();
-      // Generate card details
-      updateData.card_number = generateCardNumber();
-      updateData.cvv = generateCVV();
-      updateData.expiry_date = generateExpiryDate();
-    } else {
-      updateData.rejected_at = new Date().toISOString();
-    }
-
-    const { data, error } = await supabase
-      .from('card_applications')
-      .update(updateData)
-      .eq('id', applicationId)
-      .select();
-
-    if (error) {
-      console.error('Error updating application:', error);
-      return res.status(500).json({ 
-        success: false,
-        error: 'Failed to update application' 
-      });
-    }
-
-    return res.status(200).json({
-      success: true,
-      message: `Application ${action}d successfully`,
-      application: data[0]
-    });
-  } catch (error) {
-    console.error('Server error:', error);
-    return res.status(500).json({
-      success: false,
-      error: 'Internal server error'
-    });
-  }
-}
-
-// Helper functions
-function generateCardNumber() {
-  // Generate a fake card number starting with 4 (Visa)
-  const prefix = '4532';
-  const suffix = Array.from({length: 12}, () => Math.floor(Math.random() * 10)).join('');
-  return prefix + suffix;
-}
-
-function generateCVV() {
-  return Array.from({length: 3}, () => Math.floor(Math.random() * 10)).join('');
-}
-
-function generateExpiryDate() {
-  const currentDate = new Date();
-  const futureDate = new Date(currentDate.getFullYear() + 4, currentDate.getMonth());
-  return `${(futureDate.getMonth() + 1).toString().padStart(2, '0')}/${futureDate.getFullYear().toString().slice(2)}`;
 }
