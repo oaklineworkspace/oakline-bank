@@ -1557,19 +1557,19 @@ const styles = {
   enrollButtonWhite: {
     display: 'flex',
     alignItems: 'center',
-    gap: '0.5rem',
-    padding: '0.7rem 1.2rem',
+    gap: '0.4rem',
+    padding: '0.6rem 1rem',
     backgroundColor: 'white',
     color: '#1a365d',
     textDecoration: 'none',
-    borderRadius: '8px',
-    fontSize: '0.9rem',
+    borderRadius: '6px',
+    fontSize: '0.8rem',
     fontWeight: '600',
-    boxShadow: '0 4px 12px rgba(255, 255, 255, 0.2)',
+    boxShadow: '0 3px 8px rgba(255, 255, 255, 0.2)',
     border: '1px solid rgba(255, 255, 255, 0.3)',
     transition: 'all 0.3s ease',
     backdropFilter: 'blur(10px)',
-    minWidth: '120px',
+    minWidth: '100px',
     justifyContent: 'center'
   },
   navigationDropdown: {
@@ -2910,19 +2910,19 @@ const styles = {
   enrollButtonWhite: {
     display: 'flex',
     alignItems: 'center',
-    gap: '0.5rem',
-    padding: '0.7rem 1.2rem',
+    gap: '0.4rem',
+    padding: '0.6rem 1rem',
     backgroundColor: 'white',
     color: '#1a365d',
     textDecoration: 'none',
-    borderRadius: '8px',
-    fontSize: '0.9rem',
+    borderRadius: '6px',
+    fontSize: '0.8rem',
     fontWeight: '600',
-    boxShadow: '0 4px 12px rgba(255, 255, 255, 0.2)',
+    boxShadow: '0 3px 8px rgba(255, 255, 255, 0.2)',
     border: '1px solid rgba(255, 255, 255, 0.3)',
     transition: 'all 0.3s ease',
     backdropFilter: 'blur(10px)',
-    minWidth: '120px',
+    minWidth: '100px',
     justifyContent: 'center'
   },
   loginButtonWhite: {
@@ -3598,11 +3598,11 @@ if (typeof document !== 'undefined') {
     }
 
     /* Hover Effects */
-    .dropdownItem:hover {
+    .featureDropdownItem:hover {
       background-color: #f8fafc !important;
       color: #1e40af !important;
-      transform: translateX(5px);
-      border-color: #3b82f6 !important;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(5, 150, 105, 0.2);
     }
 
     /* Mobile dropdown positioning */

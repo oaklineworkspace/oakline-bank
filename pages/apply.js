@@ -695,19 +695,34 @@ export default function Apply() {
       boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
     },
     homeButton: {
-      display: 'flex',
+      display: 'inline-flex',
       alignItems: 'center',
       gap: '0.5rem',
-      padding: '0.8rem 1.5rem',
-      background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
-      color: '#1e40af',
+      padding: '0.6rem 1.2rem',
+      backgroundColor: 'rgba(255,255,255,0.15)',
+      color: 'white',
       textDecoration: 'none',
-      borderRadius: '10px',
+      borderRadius: '8px',
       fontSize: '0.9rem',
-      fontWeight: '700',
+      fontWeight: '600',
+      border: '2px solid rgba(255, 255, 255, 0.3)',
       transition: 'all 0.3s ease',
-      boxShadow: '0 6px 20px rgba(255,255,255,0.4)',
-      border: '1px solid rgba(255,255,255,0.5)'
+      backdropFilter: 'blur(10px)'
+    },
+    goBackButton: {
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: '0.5rem',
+      padding: '0.6rem 1.2rem',
+      backgroundColor: 'rgba(255,255,255,0.25)',
+      color: 'white',
+      border: '2px solid rgba(255,255,255,0.4)',
+      borderRadius: '8px',
+      fontSize: '0.9rem',
+      fontWeight: '600',
+      cursor: 'pointer',
+      transition: 'all 0.3s ease',
+      backdropFilter: 'blur(10px)'
     },
     buttonIcon: {
       fontSize: '1.1rem'
@@ -909,7 +924,6 @@ export default function Apply() {
       alignItems: 'flex-start',
       gap: '12px',
       padding: '1.5rem',
-      backgroundColor: '#f8fafc',
       borderRadius: '12px',
       border: '2px solid #e2e8f0',
       marginTop: '1.5rem',
@@ -1184,10 +1198,18 @@ export default function Apply() {
                 <span style={styles.buttonIcon}>👤</span>
                 Existing Customer
               </Link>
-              <Link href="/" style={styles.homeButton}>
-                <span style={styles.buttonIcon}>🏠</span>
-                Back to Home
-              </Link>
+              <div style={styles.headerButtons}>
+                <Link href="/" style={styles.homeButton}>
+                  <span style={styles.homeButtonIcon}>🏠</span>
+                  Back to Home
+                </Link>
+                <button
+                  onClick={() => window.history.back()}
+                  style={styles.goBackButton}
+                >
+                  ← Go Back
+                </button>
+              </div>
             </div>
           </div>
 

@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useRouter } from 'next/router';
@@ -54,7 +53,7 @@ export default function LoginPage() {
                 <span style={styles.tagline}>Secure Banking Access</span>
               </div>
             </Link>
-            
+
             <div style={styles.headerInfo}>
               <div style={styles.routingInfo}>
                 <span style={styles.routingLabel}>Routing Number:</span>
@@ -66,7 +65,7 @@ export default function LoginPage() {
               </div>
             </div>
           </div>
-          
+
           <div style={styles.headerActionsRow}>
             <div style={styles.headerActions}>
               <Link href="/apply" style={styles.headerButton}>
@@ -97,7 +96,7 @@ export default function LoginPage() {
                 Access your accounts securely with our state-of-the-art banking platform. 
                 Your financial security is our priority.
               </p>
-              
+
               <div style={styles.bankingInfo}>
                 <div style={styles.infoCard}>
                   <span style={styles.infoIcon}>🏦</span>
@@ -106,7 +105,7 @@ export default function LoginPage() {
                     <p style={styles.infoText}>075915826</p>
                   </div>
                 </div>
-                
+
                 <div style={styles.infoCard}>
                   <span style={styles.infoIcon}>📞</span>
                   <div>
@@ -678,6 +677,89 @@ const styles = {
     fontSize: '0.8rem',
     color: '#9ca3af',
     margin: 0
+  },
+  // Dropdown styles to be adjusted for better positioning and size
+  dropdownButton: {
+    padding: '10px 15px',
+    fontSize: '0.9rem',
+    fontWeight: '500',
+    backgroundColor: '#3b82f6',
+    color: 'white',
+    border: 'none',
+    borderRadius: '6px',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    transition: 'all 0.3s ease',
+    position: 'relative', // Needed for dropdown content positioning
+    zIndex: 10,
+    minWidth: '120px', // Example: reduce width to not block logo
+  },
+  dropdownContent: {
+    position: 'absolute',
+    top: '100%',
+    left: 0,
+    backgroundColor: 'white',
+    border: '1px solid #e2e8f0',
+    borderRadius: '8px',
+    boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+    padding: '0.5rem 0',
+    marginTop: '5px',
+    minWidth: '180px',
+    zIndex: 20,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.5rem',
+    maxHeight: '200px', // Example: limit height and add scroll
+    overflowY: 'auto',
+    // Positioning adjusted to prevent overflow
+    transformOrigin: 'top left',
+    transform: 'translateX(-0%) translateY(0%)',
+  },
+  dropdownItem: {
+    padding: '8px 15px',
+    fontSize: '0.9rem',
+    fontWeight: '500',
+    color: '#374151',
+    textDecoration: 'none',
+    display: 'block',
+    transition: 'background-color 0.2s ease',
+    whiteSpace: 'nowrap'
+  },
+  // Updated styles for header actions to accommodate new button
+  headerActions: {
+    display: 'flex',
+    gap: '1rem',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    alignItems: 'center' // Ensure buttons align vertically
+  },
+  // Styles for the new Go Back button
+  backButton: {
+    padding: '10px 20px',
+    backgroundColor: '#f8fafc',
+    color: '#1a365d',
+    textDecoration: 'none',
+    borderRadius: '8px',
+    fontSize: '14px',
+    fontWeight: '600',
+    border: '2px solid #e2e8f0',
+    transition: 'all 0.3s ease'
+  },
+  goBackButton: {
+    padding: '10px 20px',
+    backgroundColor: '#1e40af',
+    color: 'white',
+    border: 'none',
+    borderRadius: '8px',
+    fontSize: '14px',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem'
   },
 
   // Mobile Responsive Styles
