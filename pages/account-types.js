@@ -795,7 +795,7 @@ const styles = {
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
   },
   header: {
-    backgroundColor: '#1e40af',
+    backgroundColor: '#1a365d',
     padding: '1rem 0',
     boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
   },
@@ -831,7 +831,7 @@ const styles = {
     transition: 'all 0.2s'
   },
   heroSection: {
-    background: 'linear-gradient(135deg, #1e40af 0%, #3730a3 100%)',
+    background: 'linear-gradient(135deg, #1a365d 0%, #2c5282 100%)',
     padding: '4rem 2rem',
     textAlign: 'center',
     color: 'white'
@@ -1041,7 +1041,7 @@ const styles = {
     width: '100%',
     textAlign: 'center',
     padding: '1rem',
-    backgroundColor: '#1e40af',
+    backgroundColor: '#1a365d',
     color: 'white',
     textDecoration: 'none',
     borderRadius: '8px',
@@ -1049,7 +1049,7 @@ const styles = {
     transition: 'all 0.2s'
   },
   ctaSection: {
-    backgroundColor: '#1e40af',
+    backgroundColor: '#1a365d',
     padding: '4rem 2rem',
     textAlign: 'center',
     color: 'white'

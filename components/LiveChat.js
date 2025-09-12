@@ -148,15 +148,14 @@ export default function LiveChat() {
           animation: !isOpen ? 'pulse 2s infinite' : 'none'
         }}
       >
-        {isOpen ? '✕' : '💬'}
-        {!isOpen && (
-          <div style={styles.chatButtonContent}>
-            <span style={styles.chatBadge}>Live Banking Support</span>
-            <div style={styles.onlineIndicator}>
-              <span style={styles.onlineDot}></span>
-              Available Now
-            </div>
-          </div>
+        {isOpen ? (
+          '✕'
+        ) : (
+          <>
+            <span style={styles.chatIcon}>💬</span>
+            <span style={styles.chatText}>Chat</span>
+            <span style={styles.onlineDot}></span>
+          </>
         )}
       </button>
 
@@ -301,47 +300,37 @@ const styles = {
     position: 'fixed',
     bottom: '24px',
     right: '24px',
-    backgroundColor: '#1e3a8a',
+    backgroundColor: '#1a365d',
     color: 'white',
     border: 'none',
-    borderRadius: '16px',
-    padding: '16px 20px',
-    fontSize: '20px',
+    borderRadius: '50px',
+    padding: '12px 16px',
+    fontSize: '14px',
     cursor: 'pointer',
-    boxShadow: '0 8px 32px rgba(30, 58, 138, 0.4)',
+    boxShadow: '0 4px 16px rgba(26, 54, 93, 0.3)',
     zIndex: 1000,
     display: 'flex',
-    flexDirection: 'column',
     alignItems: 'center',
     gap: '8px',
     transition: 'all 0.3s ease',
     fontWeight: '600',
-    minWidth: '180px'
+    maxWidth: '140px',
+    minWidth: 'auto'
   },
-  chatButtonContent: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: '4px'
+  chatIcon: {
+    fontSize: '16px'
   },
-  chatBadge: {
-    fontSize: '12px',
-    fontWeight: '600',
-    textAlign: 'center'
-  },
-  onlineIndicator: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '4px',
-    fontSize: '10px',
-    opacity: 0.9
+  chatText: {
+    fontSize: '14px',
+    fontWeight: '600'
   },
   onlineDot: {
     width: '6px',
     height: '6px',
     borderRadius: '50%',
     backgroundColor: '#10b981',
-    animation: 'pulse 2s infinite'
+    animation: 'pulse 2s infinite',
+    marginLeft: '4px'
   },
   chatWindow: {
     position: 'fixed',
@@ -356,10 +345,10 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     overflow: 'hidden',
-    border: '2px solid #1e3a8a'
+    border: '2px solid #1a365d'
   },
   chatHeader: {
-    backgroundColor: '#1e3a8a',
+    backgroundColor: '#1a365d',
     color: 'white',
     padding: '20px',
     display: 'flex',
@@ -553,7 +542,7 @@ const styles = {
     backgroundColor: '#f8fafc'
   },
   sendButton: {
-    backgroundColor: '#1e3a8a',
+    backgroundColor: '#1a365d',
     color: 'white',
     border: 'none',
     borderRadius: '12px',
