@@ -344,92 +344,72 @@ export default function Home() {
               </button>
 
               {activeDropdown === 'banking' && (
-                <>
-                  <div 
-                    style={{
-                      position: 'fixed',
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                      zIndex: 9998
-                    }}
-                    onClick={() => setActiveDropdown(null)}
-                  ></div>
-                  <div style={styles.bankingDropdownMenu}>
+                <div style={styles.bankingDropdownMenu}>
                     <div style={styles.bankingDropdownGrid}>
                       <div style={styles.bankingDropdownSection}>
                         <h4 style={styles.bankingDropdownSectionTitle}>💳 Personal Banking</h4>
                         <Link href="/account-types" style={styles.bankingDropdownLink}>
                           <span style={styles.bankingDropdownIcon}>💰</span>
                           <div>
-                            <div style={styles.bankingDropdownTitle}>Checking & Savings</div>
-                            <div style={styles.bankingDropdownDesc}>High-yield accounts</div>
+                            <div style={styles.bankingDropdownTitle}>Premium Checking</div>
+                            <div style={styles.bankingDropdownDesc}>0.25% APY, no fees</div>
+                          </div>
+                        </Link>
+                        <Link href="/account-types" style={styles.bankingDropdownLink}>
+                          <span style={styles.bankingDropdownIcon}>⭐</span>
+                          <div>
+                            <div style={styles.bankingDropdownTitle}>High-Yield Savings</div>
+                            <div style={styles.bankingDropdownDesc}>5.00% APY guaranteed</div>
                           </div>
                         </Link>
                         <Link href="/cards" style={styles.bankingDropdownLink}>
                           <span style={styles.bankingDropdownIcon}>💳</span>
                           <div>
-                            <div style={styles.bankingDropdownTitle}>Debit & Credit Cards</div>
-                            <div style={styles.bankingDropdownDesc}>Rewards & benefits</div>
+                            <div style={styles.bankingDropdownTitle}>Rewards Debit Card</div>
+                            <div style={styles.bankingDropdownDesc}>Cashback on purchases</div>
+                          </div>
+                        </Link>
+                      </div>
+                      
+                      <div style={styles.bankingDropdownSection}>
+                        <h4 style={styles.bankingDropdownSectionTitle}>🏠 Lending Solutions</h4>
+                        <Link href="/loans" style={styles.bankingDropdownLink}>
+                          <span style={styles.bankingDropdownIcon}>🏡</span>
+                          <div>
+                            <div style={styles.bankingDropdownTitle}>Home Mortgages</div>
+                            <div style={styles.bankingDropdownDesc}>Fixed rates from 6.5%</div>
                           </div>
                         </Link>
                         <Link href="/loans" style={styles.bankingDropdownLink}>
-                          <span style={styles.bankingDropdownIcon}>🏠</span>
+                          <span style={styles.bankingDropdownIcon}>🚗</span>
                           <div>
-                            <div style={styles.bankingDropdownTitle}>Loans & Mortgages</div>
-                            <div style={styles.bankingDropdownDesc}>Competitive rates</div>
-                          </div>
-                        </Link>
-                      </div>
-                      
-                      <div style={styles.bankingDropdownSection}>
-                        <h4 style={styles.bankingDropdownSectionTitle}>📱 Digital Banking</h4>
-                        <Link href="/dashboard" style={styles.bankingDropdownLink}>
-                          <span style={styles.bankingDropdownIcon}>📊</span>
-                          <div>
-                            <div style={styles.bankingDropdownTitle}>Online Banking</div>
-                            <div style={styles.bankingDropdownDesc}>24/7 access</div>
-                          </div>
-                        </Link>
-                        <Link href="/transfer" style={styles.bankingDropdownLink}>
-                          <span style={styles.bankingDropdownIcon}>⚡</span>
-                          <div>
-                            <div style={styles.bankingDropdownTitle}>Money Transfers</div>
-                            <div style={styles.bankingDropdownDesc}>Instant & secure</div>
-                          </div>
-                        </Link>
-                        <Link href="/bill-pay" style={styles.bankingDropdownLink}>
-                          <span style={styles.bankingDropdownIcon}>📋</span>
-                          <div>
-                            <div style={styles.bankingDropdownTitle}>Bill Pay</div>
-                            <div style={styles.bankingDropdownDesc}>Automatic payments</div>
-                          </div>
-                        </Link>
-                      </div>
-                      
-                      <div style={styles.bankingDropdownSection}>
-                        <h4 style={styles.bankingDropdownSectionTitle}>🏢 Business Banking</h4>
-                        <Link href="/account-types" style={styles.bankingDropdownLink}>
-                          <span style={styles.bankingDropdownIcon}>🏪</span>
-                          <div>
-                            <div style={styles.bankingDropdownTitle}>Business Accounts</div>
-                            <div style={styles.bankingDropdownDesc}>No monthly fees</div>
+                            <div style={styles.bankingDropdownTitle}>Auto Loans</div>
+                            <div style={styles.bankingDropdownDesc}>Fast approval, low rates</div>
                           </div>
                         </Link>
                         <Link href="/loans" style={styles.bankingDropdownLink}>
                           <span style={styles.bankingDropdownIcon}>💼</span>
                           <div>
-                            <div style={styles.bankingDropdownTitle}>Business Loans</div>
-                            <div style={styles.bankingDropdownDesc}>Quick approval</div>
+                            <div style={styles.bankingDropdownTitle}>Personal Loans</div>
+                            <div style={styles.bankingDropdownDesc}>Up to $50K, same day</div>
                           </div>
                         </Link>
+                      </div>
+                      
+                      <div style={styles.bankingDropdownSection}>
+                        <h4 style={styles.bankingDropdownSectionTitle}>📈 Investment Services</h4>
                         <Link href="/investments" style={styles.bankingDropdownLink}>
-                          <span style={styles.bankingDropdownIcon}>📈</span>
+                          <span style={styles.bankingDropdownIcon}>📊</span>
                           <div>
-                            <div style={styles.bankingDropdownTitle}>Investment Services</div>
-                            <div style={styles.bankingDropdownDesc}>Wealth management</div>
+                            <div style={styles.bankingDropdownTitle}>Portfolio Management</div>
+                            <div style={styles.bankingDropdownDesc}>Professional advisors</div>
+                          </div>
+                        </Link>
+                        <Link href="/account-types" style={styles.bankingDropdownLink}>
+                          <span style={styles.bankingDropdownIcon}>🏖️</span>
+                          <div>
+                            <div style={styles.bankingDropdownTitle}>Retirement Planning</div>
+                            <div style={styles.bankingDropdownDesc}>IRA & 401k options</div>
                           </div>
                         </Link>
                       </div>
@@ -445,7 +425,6 @@ export default function Home() {
                       </Link>
                     </div>
                   </div>
-                </>
               )}
             </div>
           </div>
@@ -1046,9 +1025,9 @@ export default function Home() {
 const styles = {
   // Main Header Styles
   mainHeader: {
-    background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
-    borderBottom: '3px solid #0ea5e9',
-    boxShadow: '0 4px 20px rgba(30, 41, 59, 0.3)',
+    background: 'linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%)',
+    borderBottom: '3px solid #3b82f6',
+    boxShadow: '0 4px 20px rgba(30, 58, 138, 0.3)',
     position: 'sticky',
     top: 0,
     zIndex: 1000,
@@ -1187,7 +1166,8 @@ const styles = {
     backdropFilter: 'blur(10px)'
   },
   navigationDropdown: {
-    position: 'relative'
+    position: 'relative',
+    zIndex: 10
   },
   dropdownButton: {
     display: 'flex',
@@ -1230,17 +1210,17 @@ const styles = {
     animation: 'dropdownSlideIn 0.3s ease-out'
   },
   bankingDropdownMenu: {
-    position: 'fixed',
-    top: '80px',
-    right: '1rem',
+    position: 'absolute',
+    top: 'calc(100% + 0.5rem)',
+    right: '0',
     backgroundColor: 'white',
-    borderRadius: '16px',
-    boxShadow: '0 20px 40px rgba(26, 54, 93, 0.3)',
+    borderRadius: '12px',
+    boxShadow: '0 15px 35px rgba(30, 58, 138, 0.2)',
     border: '2px solid #e2e8f0',
-    padding: '1.5rem',
-    width: '420px',
-    maxWidth: 'calc(100vw - 2rem)',
-    maxHeight: 'calc(100vh - 100px)',
+    padding: '1.25rem',
+    width: '380px',
+    maxWidth: '90vw',
+    maxHeight: '80vh',
     overflowY: 'auto',
     zIndex: 9999,
     animation: 'dropdownSlideIn 0.3s ease-out'
@@ -1757,7 +1737,7 @@ const styles = {
   // Enhanced Features Showcase
   featuresShowcase: {
     padding: 'clamp(4rem, 8vw, 6rem) 0',
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#f1f5f9',
     width: '100%',
     position: 'relative'
   },
@@ -1966,7 +1946,7 @@ const styles = {
   // Enhanced Account Types Section with User-Specific Content
   accountTypesSection: {
     padding: 'clamp(4rem, 8vw, 6rem) 0',
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#ffffff',
     width: '100%',
     position: 'relative'
   },
@@ -2018,7 +1998,7 @@ const styles = {
     backdropFilter: 'blur(20px)',
     transform: 'translateY(0)',
     animation: 'fadeInScale 0.8s ease-out forwards',
-    background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)'
+    background: 'linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%)'
   },
   flipInY: {
     animation: 'flipInY 0.8s ease-out forwards'
@@ -2285,7 +2265,7 @@ const styles = {
   // Professional Features Section
   professionalFeaturesSection: {
     padding: 'clamp(4rem, 8vw, 6rem) 0',
-    backgroundColor: 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)',
+    background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
     width: '100%',
     position: 'relative'
   },
