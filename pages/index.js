@@ -1003,15 +1003,15 @@ export default function Home() {
           }}>
             <h2 style={styles.sectionTitle}>Real Success Stories</h2>
             <p style={styles.sectionSubtitle}>
-              See how Oakline Bank has helped thousands of customers achieve their financial dreams
+              See how Oakline Bank helps customers achieve their financial goals
             </p>
           </div>
 
           <div style={styles.successGrid}>
-            <div style={styles.successStory}>
+            <div style={styles.successCard}>
               <img
-                src="/images/realistic-loan-approval-people.svg"
-                alt="Real people celebrating loan approval with documents and phones"
+                src="/images/realistic-banking-professionals.svg"
+                alt="Professional Banking Team"
                 style={styles.successImage}
                 onError={(e) => {
                   e.target.style.display = 'none';
@@ -1019,24 +1019,25 @@ export default function Home() {
                 }}
               />
               <div style={{...styles.successImageFallback, display: 'none'}}>
-                <span style={styles.successImageIcon}>🎉</span>
+                <span style={styles.successImageIcon}>📷</span>
               </div>
               <div style={styles.successContent}>
-                <h3 style={styles.successTitle}>Personal Loan Approved</h3>
+                <h3 style={styles.successTitle}>Expert Financial Guidance</h3>
                 <p style={styles.successDescription}>
-                  "Got approved for $25,000 in just 24 hours! The process was incredibly smooth and the team helped every step of the way."
+                  "Our dedicated team of banking professionals provides personalized
+                  financial advice to help you make informed decisions about your money."
                 </p>
-                <div style={styles.successMeta}>
-                  <span style={styles.successAmount}>$25,000</span>
-                  <span style={styles.successRate}>3.5% APR</span>
+                <div style={styles.successDetails}>
+                  <span style={styles.successAmount}>Professional Advisors</span>
+                  <span style={styles.successRate}>Personalized Service</span>
                 </div>
               </div>
             </div>
 
-            <div style={styles.successStory}>
+            <div style={styles.successCard}>
               <img
-                src="/images/mobile-banking-real-people.svg"
-                alt="Diverse people using mobile banking on their phones"
+                src="/images/real-mobile-banking-users.svg"
+                alt="Real Mobile Banking Users"
                 style={styles.successImage}
                 onError={(e) => {
                   e.target.style.display = 'none';
@@ -1047,21 +1048,22 @@ export default function Home() {
                 <span style={styles.successImageIcon}>💻</span>
               </div>
               <div style={styles.successContent}>
-                <h3 style={styles.successTitle}>Digital Banking Excellence</h3>
+                <h3 style={styles.successTitle}>Modern Banking Experience</h3>
                 <p style={styles.successDescription}>
-                  "The mobile app makes managing my finances so easy. I can transfer money, pay bills, and check my balance anywhere!"
+                  "Our customers love the convenience of managing their finances
+                  on-the-go with our award-winning mobile banking platform."
                 </p>
-                <div style={styles.successMeta}>
+                <div style={styles.successDetails}>
                   <span style={styles.successFeature}>Mobile Banking</span>
-                  <span style={styles.successFeature}>Real-time Alerts</span>
+                  <span style={styles.successFeature}>24/7 Access</span>
                 </div>
               </div>
             </div>
 
-            <div style={styles.successStory}>
+            <div style={styles.successCard}>
               <img
-                src="/images/family-banking-success.svg"
-                alt="Happy family celebrating home loan approval with phones and documents"
+                src="/images/realistic-debit-card-1.svg"
+                alt="Premium Banking Cards"
                 style={styles.successImage}
                 onError={(e) => {
                   e.target.style.display = 'none';
@@ -1069,16 +1071,17 @@ export default function Home() {
                 }}
               />
               <div style={{...styles.successImageFallback, display: 'none'}}>
-                <span style={styles.successImageIcon}>🏢</span>
+                <span style={styles.successImageIcon}>💳</span>
               </div>
               <div style={styles.successContent}>
-                <h3 style={styles.successTitle}>Dream Home Achieved</h3>
+                <h3 style={styles.successTitle}>Premium Banking Products</h3>
                 <p style={styles.successDescription}>
-                  "Oakline Bank made our dream of homeownership a reality. The whole family is excited about our new home!"
+                  "Access your money anywhere with our premium debit cards featuring
+                  contactless payments and advanced security technology."
                 </p>
-                <div style={styles.successMeta}>
-                  <span style={styles.successAmount}>$250,000</span>
-                  <span style={styles.successRate}>3.2% APR</span>
+                <div style={styles.successDetails}>
+                  <span style={styles.successSavings}>Contactless Pay</span>
+                  <span style={styles.successGoal}>Secure Technology</span>
                 </div>
               </div>
             </div>
@@ -2366,7 +2369,7 @@ const styles = {
   // Account Types Discovery
   accountTypesDiscovery: {
     padding: 'clamp(4rem, 8vw, 6rem) 0',
-    background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
+    backgroundColor: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
     width: '100%'
   },
   accountTypesPreview: {
@@ -3030,7 +3033,7 @@ const styles = {
     gap: '2rem',
     marginBottom: '2rem'
   },
-  successStory: {
+  successCard: {
     backgroundColor: 'white',
     borderRadius: '20px',
     overflow: 'hidden',
@@ -3090,7 +3093,7 @@ const styles = {
     marginBottom: '1.5rem',
     fontStyle: 'italic'
   },
-  successMeta: {
+  successDetails: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -3118,6 +3121,22 @@ const styles = {
     fontWeight: '600',
     color: '#059669',
     backgroundColor: '#ecfdf5',
+    padding: '6px 12px',
+    borderRadius: '20px'
+  },
+  successSavings: {
+    fontSize: '0.9rem',
+    fontWeight: '600',
+    color: '#059669',
+    backgroundColor: '#ecfdf5',
+    padding: '6px 12px',
+    borderRadius: '20px'
+  },
+  successGoal: {
+    fontSize: '0.9rem',
+    fontWeight: '600',
+    color: '#1e40af',
+    backgroundColor: '#dbeafe',
     padding: '6px 12px',
     borderRadius: '20px'
   },
