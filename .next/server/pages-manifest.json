@@ -3,5 +3,7 @@
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
   "/": "pages/index.js",
-  "/apply": "pages/apply.js"
+  "/terms": "pages/terms.js",
+  "/apply": "pages/apply.js",
+  "/privacy": "pages/privacy.js"
 }
