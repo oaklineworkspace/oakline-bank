@@ -27,15 +27,25 @@
       "static/chunks/main.js",
       "static/chunks/pages/_error.js"
     ],
-    "/market-news": [
+    "/compliance": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/market-news.js"
+      "static/chunks/pages/compliance.js"
+    ],
+    "/disclosures": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/disclosures.js"
     ],
     "/privacy": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
       "static/chunks/pages/privacy.js"
+    ],
+    "/terms": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/terms.js"
     ]
   },
   "ampFirstPages": []

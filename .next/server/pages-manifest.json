@@ -3,6 +3,8 @@
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
   "/": "pages/index.js",
-  "/market-news": "pages/market-news.js",
+  "/compliance": "pages/compliance.js",
+  "/disclosures": "pages/disclosures.js",
+  "/terms": "pages/terms.js",
   "/privacy": "pages/privacy.js"
 }
