@@ -1,16 +1,4 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  // Configure development server for Replit
-  devIndicators: {
-    buildActivity: false
-  },
-  // Additional settings for Replit environment
-  images: {
-    unoptimized: true
-  }
-};
 
-module.exports = nextConfig;
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -21,8 +9,14 @@ const nextConfig = {
     removeConsole: process.env.NODE_ENV === 'production',
   },
   
+  // Configure development server for Replit
+  devIndicators: {
+    buildActivity: false
+  },
+  
   // Image optimization
   images: {
+    unoptimized: true,
     domains: ['localhost'],
     formats: ['image/webp', 'image/avif'],
   },
