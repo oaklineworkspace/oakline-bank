@@ -863,8 +863,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Enhanced Account Types Section with User-Specific Content */}
-      <section style={styles.accountTypesSection} id="account-types" data-animate>
+      {/* Account Types Banner Section */}
+      <section style={styles.accountTypesBanner} id="account-types" data-animate>
         <div style={styles.container}>
           <div style={{
             ...styles.sectionHeader,
@@ -887,67 +887,76 @@ export default function Home() {
             <div style={styles.titleUnderline}></div>
           </div>
 
-          <div style={styles.accountCarousel}>
-            <div
-              style={{
-                ...styles.accountSlideContainer,
-                transform: `translateX(-${currentAccountSlide * 100}%)`
-              }}
-            >
-              {Array.from({ length: Math.ceil(visibleAccountTypes.length / 6) }).map((_, slideIndex) => (
-                <div key={slideIndex} style={styles.accountSlide}>
-                  <div style={styles.accountGrid}>
-                    {visibleAccountTypes.slice(slideIndex * 6, (slideIndex + 1) * 6).map((account, index) => (
-                      <div
-                        key={index}
-                        style={{
-                          ...styles.accountCard,
-                          backgroundImage: user ? 'linear-gradient(135deg, #1e293b 0%, #334155 100%)' : 'linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%)',
-                          ...(isVisible['account-types'] ? {
-                            ...styles.flipInY,
-                            animationDelay: `${index * 0.1}s`
-                          } : {})
-                        }}
-                      >
-                        <div style={styles.accountCardInner}>
-                          <div style={styles.accountIcon}>{account.icon}</div>
-                          <h3 style={styles.accountName}>{account.name}</h3>
-                          <p style={styles.accountRate}>{account.rate}</p>
-                          <p style={styles.accountDesc}>{account.desc}</p>
-                          <div style={styles.accountBenefits}>
-                            <small style={styles.benefitsText}>{account.benefits}</small>
-                          </div>
-                          {user ? (
-                            <Link href="/apply" style={styles.accountButton}>
-                              <span style={styles.buttonIcon}>⚡</span>
-                              Apply Now
-                            </Link>
-                          ) : (
-                            <Link href="/login" style={styles.accountButtonSecondary}>
-                              <span style={styles.buttonIcon}>🔒</span>
-                              Sign In to Apply
-                            </Link>
-                          )}
-                        </div>
-                      </div>
-                    ))}
+          <div style={styles.accountBannerContainer}>
+            <div style={styles.accountBannerImage}>
+              <img
+                src="/images/realistic-banking-professionals.svg"
+                alt="Professional Banking Team - Account Types Available"
+                style={styles.bannerImage}
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  e.target.nextSibling.style.display = 'flex';
+                }}
+              />
+              <div style={{...styles.bannerImageFallback, display: 'none'}}>
+                <div style={styles.fallbackContent}>
+                  <span style={styles.fallbackIcon}>🏦</span>
+                  <h3 style={styles.fallbackTitle}>23 Account Types Available</h3>
+                  <p style={styles.fallbackText}>From basic checking to premium investment accounts</p>
+                </div>
+              </div>
+            </div>
+
+            <div style={styles.accountBannerContent}>
+              <div style={styles.accountHighlights}>
+                <div style={styles.highlightItem}>
+                  <span style={styles.highlightIcon}>💳</span>
+                  <div>
+                    <h4 style={styles.highlightTitle}>Personal Banking</h4>
+                    <p style={styles.highlightDesc}>Checking, Savings, Student accounts</p>
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
+                <div style={styles.highlightItem}>
+                  <span style={styles.highlightIcon}>🏢</span>
+                  <div>
+                    <h4 style={styles.highlightTitle}>Business Banking</h4>
+                    <p style={styles.highlightDesc}>Professional solutions for businesses</p>
+                  </div>
+                </div>
+                <div style={styles.highlightItem}>
+                  <span style={styles.highlightIcon}>📈</span>
+                  <div>
+                    <h4 style={styles.highlightTitle}>Investment Accounts</h4>
+                    <p style={styles.highlightDesc}>Grow your wealth with premium options</p>
+                  </div>
+                </div>
+                <div style={styles.highlightItem}>
+                  <span style={styles.highlightIcon}>🎯</span>
+                  <div>
+                    <h4 style={styles.highlightTitle}>Specialized Accounts</h4>
+                    <p style={styles.highlightDesc}>HSA, Trust, International options</p>
+                  </div>
+                </div>
+              </div>
 
-          <div style={styles.accountIndicators}>
-            {Array.from({ length: Math.ceil(visibleAccountTypes.length / 6) }).map((_, index) => (
-              <button
-                key={index}
-                style={{
-                  ...styles.accountIndicator,
-                  ...(currentAccountSlide === index ? styles.accountIndicatorActive : {})
-                }}
-                onClick={() => setCurrentAccountSlide(index)}
-              />
-            ))}
+              <div style={styles.accountBannerActions}>
+                <Link href="/account-types" style={styles.viewAllAccountsButton}>
+                  <span style={styles.buttonIcon}>🔍</span>
+                  View All 23 Account Types
+                </Link>
+                {user ? (
+                  <Link href="/apply" style={styles.applyNowButton}>
+                    <span style={styles.buttonIcon}>⚡</span>
+                    Apply Now
+                  </Link>
+                ) : (
+                  <Link href="/login" style={styles.signInButton}>
+                    <span style={styles.buttonIcon}>👤</span>
+                    Sign In to Apply
+                  </Link>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -2388,8 +2397,8 @@ const styles = {
     transform: 'scale(1.4)'
   },
 
-  // Enhanced Account Types Section with User-Specific Content
-  accountTypesSection: {
+  // Account Types Banner Section
+  accountTypesBanner: {
     padding: 'clamp(4rem, 8vw, 6rem) 0',
     backgroundColor: '#ffffff',
     width: '100%',
@@ -2411,303 +2420,154 @@ const styles = {
     marginTop: '0.5rem'
   },
 
-  // Account Carousel
-  accountCarousel: {
-    position: 'relative',
-    overflow: 'hidden',
-    borderRadius: '16px'
-  },
-  accountSlideContainer: {
-    display: 'flex',
-    transition: 'transform 1s ease-in-out',
-    width: '100%'
-  },
-  accountSlide: {
-    minWidth: '100%',
-    padding: '1.5rem 0'
-  },
-  accountGrid: {
+  // Account Banner Container
+  accountBannerContainer: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))',
-    gap: '1.5rem'
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 450px), 1fr))',
+    gap: '3rem',
+    alignItems: 'center',
+    marginTop: '3rem'
   },
-  accountCard: {
-    borderRadius: '20px',
-    padding: '2rem',
-    textAlign: 'center',
-    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
-    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-    border: '1px solid rgba(226, 232, 240, 0.2)',
+  accountBannerImage: {
     position: 'relative',
+    borderRadius: '24px',
     overflow: 'hidden',
-    backdropFilter: 'blur(20px)',
-    transform: 'translateY(0)',
-    animation: 'fadeInScale 0.8s ease-out forwards',
-    background: 'linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%)'
-  },
-  flipInY: {
-    animation: 'flipInY 0.8s ease-out forwards'
-  },
-  accountCardInner: {
-    padding: '1.8rem',
-    textAlign: 'center',
-    height: '100%',
-    display: 'flex',
-    flexDirection: 'column'
-  },
-  accountIcon: {
-    fontSize: '2.5rem',
-    marginBottom: '1rem',
-    display: 'block',
-    filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))'
-  },
-  accountName: {
-    fontSize: 'clamp(1.3rem, 3vw, 1.6rem)',
-    fontWeight: '800',
-    marginBottom: '0.5rem',
-    color: '#ffffff',
+    background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
+    padding: '2.5rem',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: '0.5rem'
+    boxShadow: '0 15px 40px rgba(30, 64, 175, 0.2)'
   },
-  accountRate: {
-    fontSize: 'clamp(0.9rem, 2vw, 1.1rem)',
-    color: '#60a5fa',
+  bannerImage: {
+    width: '90%',
+    height: 'auto',
+    maxHeight: '300px',
+    objectFit: 'contain',
+    filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.3))',
+    transition: 'transform 0.3s ease'
+  },
+  bannerImageFallback: {
+    position: 'absolute',
+    top: '25px',
+    right: '25px',
+    bottom: '25px',
+    left: '25px',
+    background: 'rgba(255,255,255,0.95)',
+    borderRadius: '16px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'column',
+    border: '2px dashed #0ea5e9'
+  },
+  fallbackContent: {
+    textAlign: 'center'
+  },
+  fallbackIcon: {
+    fontSize: '3rem',
+    color: '#0ea5e9',
+    marginBottom: '1rem'
+  },
+  fallbackTitle: {
+    fontSize: '1.5rem',
     fontWeight: '700',
-    marginBottom: '1rem',
-    background: 'linear-gradient(135deg, #60a5fa 0%, #93c5fd 100%)',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
-    backgroundClip: 'text'
+    color: '#1e40af',
+    marginBottom: '0.5rem'
   },
-  accountDesc: {
-    fontSize: 'clamp(0.9rem, 2vw, 1rem)',
-    color: '#cbd5e1',
-    marginBottom: '1.5rem',
-    lineHeight: '1.6'
-  },
-  accountBenefits: {
-    backgroundColor: '#f8fafc',
-    padding: '0.8rem',
-    borderRadius: '8px',
-    marginBottom: '1.5rem'
-  },
-  benefitsText: {
-    fontSize: '0.8rem',
+  fallbackText: {
+    fontSize: '1rem',
     color: '#64748b',
     lineHeight: '1.4'
   },
-  accountButton: {
-    background: 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)',
+  accountBannerContent: {
+    padding: '1rem'
+  },
+  accountHighlights: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1.5rem',
+    marginBottom: '2.5rem'
+  },
+  highlightItem: {
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: '1rem'
+  },
+  highlightIcon: {
+    fontSize: '1.8rem',
+    width: '50px',
+    height: '50px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: 'linear-gradient(135deg, #059669 0%, #0891b2 100%)',
     color: 'white',
-    textDecoration: 'none',
-    padding: '0.8rem 1.3rem',
-    borderRadius: '8px',
-    fontSize: '0.9rem',
-    fontWeight: '700',
-    transition: 'all 0.3s ease',
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: '0.5rem',
-    transform: 'translateY(0)',
-    border: 'none',
-    boxShadow: '0 4px 12px rgba(14, 165, 233, 0.3)'
-  },
-  accountButtonSecondary: {
-    backgroundColor: '#e2e8f0',
-    color: '#64748b',
-    textDecoration: 'none',
-    padding: '0.8rem 1.3rem',
-    borderRadius: '8px',
-    fontSize: '0.9rem',
-    fontWeight: '700',
-    transition: 'all 0.3s ease',
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: '0.5rem'
-  },
-
-  // Account Indicators
-  accountIndicators: {
-    display: 'flex',
-    justifyContent: 'center',
-    gap: '10px',
-    marginTop: '2rem'
-  },
-  accountIndicator: {
-    width: '10px',
-    height: '10px',
     borderRadius: '50%',
-    border: '2px solid #059669',
-    background: 'transparent',
-    cursor: 'pointer',
-    transition: 'all 0.3s ease'
+    flexShrink: 0,
+    boxShadow: '0 4px 12px rgba(5, 150, 105, 0.3)'
   },
-  accountIndicatorActive: {
-    backgroundColor: '#059669',
-    transform: 'scale(1.3)'
-  },
-
-  // Account Types Discovery
-  accountTypesDiscovery: {
-    padding: 'clamp(4rem, 8vw, 6rem) 0',
-    backgroundColor: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
-    width: '100%'
-  },
-  accountTypesPreview: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))',
-    gap: '2rem',
-    marginBottom: '3rem'
-  },
-  previewCard: {
-    backgroundColor: 'white',
-    padding: '2.5rem',
-    borderRadius: '20px',
-    textAlign: 'center',
-    boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
-    border: '2px solid #e2e8f0',
-    transition: 'all 0.4s ease',
-    position: 'relative',
-    overflow: 'hidden',
-    transform: 'translateY(50px)',
-    opacity: 0
-  },
-  slideInFromBottom: {
-    animation: 'slideInFromBottom 0.8s ease-out forwards'
-  },
-  previewIconContainer: {
-    width: '80px',
-    height: '80px',
-    borderRadius: '50%',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    margin: '0 auto 1.5rem',
-    position: 'relative'
-  },
-  previewIcon: {
-    fontSize: '2rem',
-    color: 'white'
-  },
-  previewTitle: {
-    fontSize: '1.3rem',
-    fontWeight: '800',
+  highlightTitle: {
+    fontSize: '1.1rem',
+    fontWeight: '700',
     color: '#1e293b',
-    marginBottom: '1rem',
-    letterSpacing: '-0.01em'
+    marginBottom: '0.5rem'
   },
-  previewDesc: {
+  highlightDesc: {
     fontSize: '0.95rem',
     color: '#64748b',
-    lineHeight: '1.6'
+    lineHeight: '1.5'
   },
-  previewAccent: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: '4px'
+  accountBannerActions: {
+    display: 'flex',
+    gap: '1rem',
+    flexWrap: 'wrap'
   },
-  accountTypesAction: {
-    textAlign: 'center'
-  },
-  exploreButton: {
+  viewAllAccountsButton: {
     display: 'inline-flex',
     alignItems: 'center',
     gap: '0.8rem',
-    padding: 'clamp(1rem, 2.5vw, 1.5rem) clamp(2rem, 4vw, 3rem)',
+    padding: '1rem 2rem',
     background: 'linear-gradient(135deg, #0ea5e9 0%, #1e40af 100%)',
     color: 'white',
     textDecoration: 'none',
-    borderRadius: '16px',
-    fontSize: 'clamp(1rem, 2.2vw, 1.2rem)',
-    fontWeight: '800',
-    boxShadow: '0 10px 30px rgba(14, 165, 233, 0.4)',
-    transition: 'all 0.3s ease',
-    marginBottom: '1rem',
-    transform: 'translateY(0)'
-  },
-  actionNote: {
-    fontSize: '0.95rem',
-    color: '#64748b',
-    fontStyle: 'italic'
-  },
-
-  // Professionals Section
-  professionalsSection: {
-    padding: '80px 20px',
-    backgroundColor: '#f8fafc',
-    borderTop: '1px solid #e2e8f0'
-  },
-  professionalsContainer: {
-    maxWidth: '1200px',
-    margin: '0 auto',
-    textAlign: 'center'
-  },
-  professionalsTitle: {
-    fontSize: 'clamp(2rem, 4vw, 2.5rem)',
-    fontWeight: '700',
-    color: '#1e293b',
-    marginBottom: '1rem'
-  },
-  professionalsSubtitle: {
-    fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
-    color: '#64748b',
-    marginBottom: 'clamp(2rem, 4vw, 3rem)',
-    maxWidth: '600px',
-    margin: '0 auto clamp(2rem, 4vw, 3rem)'
-  },
-  professionalsGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 350px), 1fr))',
-    gap: 'clamp(1.5rem, 3vw, 2rem)'
-  },
-  professionalCard: {
-    backgroundColor: 'white',
-    borderRadius: '16px',
-    padding: '2rem',
-    boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-    border: '1px solid #e2e8f0'
-  },
-  professionalImage: {
-    width: '100%',
-    height: '200px',
-    objectFit: 'cover',
     borderRadius: '12px',
-    marginBottom: '1.5rem'
-  },
-  professionalContent: {
-    textAlign: 'center'
-  },
-  professionalTitle: {
-    fontSize: '1.5rem',
-    fontWeight: '600',
-    color: '#1e40af',
-    marginBottom: '1rem'
-  },
-  professionalDescription: {
     fontSize: '1rem',
-    color: '#64748b',
-    lineHeight: '1.6'
+    fontWeight: '700',
+    transition: 'all 0.3s ease',
+    boxShadow: '0 6px 20px rgba(14, 165, 233, 0.4)',
+    border: 'none'
+  },
+  applyNowButton: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.8rem',
+    padding: '1rem 2rem',
+    backgroundColor: '#059669',
+    color: 'white',
+    textDecoration: 'none',
+    borderRadius: '12px',
+    fontSize: '1rem',
+    fontWeight: '700',
+    transition: 'all 0.3s ease',
+    boxShadow: '0 6px 20px rgba(5, 150, 105, 0.4)'
+  },
+  signInButton: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.8rem',
+    padding: '1rem 2rem',
+    backgroundColor: 'transparent',
+    color: '#1e293b',
+    textDecoration: 'none',
+    borderRadius: '12px',
+    fontSize: '1rem',
+    fontWeight: '700',
+    border: '2px solid #1e293b',
+    transition: 'all 0.3s ease'
   },
 
-  // Animation Classes
-  fadeInUp: {
-    animation: 'fadeInUp 1s ease-out forwards'
-  },
-  zoomIn: {
-    animation: 'zoomIn 0.8s ease-out forwards'
-  },
-  pulseGlow: {
-    animation: 'pulseGlow 2s ease-in-out infinite'
-  },
-
-  // Professional Features Section
+  // Professional Banking Section
   professionalFeaturesSection: {
     padding: 'clamp(4rem, 8vw, 6rem) 0',
     background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
