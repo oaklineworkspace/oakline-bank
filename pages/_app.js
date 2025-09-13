@@ -32,7 +32,7 @@ export default function MyApp({ Component, pageProps }) {
   return (
     <QueryClientProvider client={queryClient}>
       <PathnameContextProviderAdapter router={router}>
-        <div style={{ paddingBottom: shouldShowFooter ? '140px' : '0' }}>
+        <div style={{ paddingBottom: shouldShowFooter ? '80px' : '0' }}>
           <Component {...pageProps} />
         </div>
         {shouldShowFooter && <StickyFooter />}

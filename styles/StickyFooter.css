@@ -1,4 +1,9 @@
 
+/* Professional Banking Footer Styles */
+.sticky-footer {
+  animation: slideUpFooter 0.5s ease-out;
+}
+
 @keyframes slideUpFooter {
   from {
     transform: translateY(100%);
@@ -10,64 +15,149 @@
   }
 }
 
-/* Hover effects for footer buttons */
-.sticky-footer-button {
-  transition: all 0.3s ease;
-}
-
-.sticky-footer-button:hover {
+/* Feature button hover effects */
+.sticky-footer a[style*="featureButton"]:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
 }
 
-.enroll-button:hover {
-  background-color: #047857;
-  box-shadow: 0 8px 20px rgba(5, 150, 105, 0.5);
+/* Dashboard button hover */
+.sticky-footer a[style*="dashboardButton"]:hover {
+  background-color: #047857 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(5, 150, 105, 0.4) !important;
 }
 
-.sign-in-button:hover {
-  background-color: rgba(255, 255, 255, 0.25);
-  border-color: rgba(255, 255, 255, 0.5);
+/* Sign out button hover */
+.sticky-footer button[style*="signOutButton"]:hover {
+  background-color: rgba(255, 255, 255, 0.25) !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+  transform: translateY(-1px);
 }
 
-.open-account-button:hover {
-  background-color: #f59e0b;
-  box-shadow: 0 8px 20px rgba(255, 200, 87, 0.6);
+/* Enroll button hover */
+.sticky-footer a[style*="enrollButton"]:hover {
+  background-color: #f59e0b !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(255, 200, 87, 0.5) !important;
+}
+
+/* Sign in button hover */
+.sticky-footer a[style*="signInButton"]:hover {
+  background-color: rgba(255, 255, 255, 0.25) !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+  transform: translateY(-1px);
 }
 
 /* Mobile responsive styles */
-@media (max-width: 768px) {
-  .sticky-footer-content {
+@media (max-width: 968px) {
+  .sticky-footer div[style*="footerContent"] {
     flex-direction: column !important;
-    text-align: center !important;
-    gap: 1rem !important;
-    padding: 1rem 0 !important;
+    gap: 0.75rem !important;
+    padding: 0.75rem 0 !important;
   }
-
-  .sticky-footer-info {
-    margin-bottom: 0.5rem !important;
-  }
-
-  .sticky-footer-buttons {
+  
+  .sticky-footer div[style*="featuresSection"] {
+    gap: 0.5rem !important;
     justify-content: center !important;
-    width: 100% !important;
   }
+  
+  .sticky-footer a[style*="featureButton"] {
+    min-width: 50px !important;
+    padding: 0.4rem 0.5rem !important;
+  }
+  
+  .sticky-footer span[style*="featureText"] {
+    font-size: 0.65rem !important;
+  }
+  
+  .sticky-footer {
+    height: auto !important;
+    min-height: 80px !important;
+  }
+}
 
-  .sticky-footer-button {
-    flex: 1 !important;
-    min-width: 100px !important;
-    max-width: 120px !important;
-    padding: 0.8rem 1rem !important;
-    font-size: 0.85rem !important;
+@media (max-width: 640px) {
+  .sticky-footer div[style*="featuresSection"] {
+    gap: 0.25rem !important;
+  }
+  
+  .sticky-footer a[style*="featureButton"] {
+    min-width: 45px !important;
+    padding: 0.3rem 0.4rem !important;
+  }
+  
+  .sticky-footer span[style*="featureIcon"] {
+    font-size: 1rem !important;
+  }
+  
+  .sticky-footer span[style*="featureText"] {
+    font-size: 0.6rem !important;
+  }
+  
+  .sticky-footer div[style*="authButtons"] {
+    gap: 0.5rem !important;
+  }
+  
+  .sticky-footer a[style*="Button"], 
+  .sticky-footer button[style*="Button"] {
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.8rem !important;
+  }
+  
+  .sticky-footer span[style*="welcomeText"] {
+    font-size: 0.75rem !important;
+  }
+  
+  .sticky-footer span[style*="userStatus"] {
+    font-size: 0.65rem !important;
   }
 }
 
 @media (max-width: 480px) {
-  .sticky-footer-buttons {
-    flex-direction: column !important;
-    gap: 0.5rem !important;
-    width: 100% !important;
+  .sticky-footer div[style*="featuresSection"] {
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    max-width: 280px !important;
   }
+  
+  .sticky-footer div[style*="userInfo"] {
+    display: none !important;
+  }
+  
+  .sticky-footer {
+    min-height: 90px !important;
+  }
+}
+
+/* Ensure footer doesn't overlap content */
+body {
+  padding-bottom: 80px;
+}
+
+/* Animation for feature buttons */
+.sticky-footer a[style*="featureButton"] {
+  animation: fadeInScale 0.6s ease-out;
+  animation-fill-mode: both;
+}
+
+.sticky-footer a[style*="featureButton"]:nth-child(1) { animation-delay: 0.1s; }
+.sticky-footer a[style*="featureButton"]:nth-child(2) { animation-delay: 0.2s; }
+.sticky-footer a[style*="featureButton"]:nth-child(3) { animation-delay: 0.3s; }
+.sticky-footer a[style*="featureButton"]:nth-child(4) { animation-delay: 0.4s; }
+.sticky-footer a[style*="featureButton"]:nth-child(5) { animation-delay: 0.5s; }
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
 
   .sticky-footer-button {
     width: 100% !important;
