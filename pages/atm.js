@@ -31,23 +31,43 @@ export default function ATM() {
   const fetchUserAccounts = async (userId) => {
     try {
       // Get user profile first
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .single();
 
+      if (profileError) {
+        console.error('Profile error:', profileError);
+        setMessage('Unable to load account information');
+        return;
+      }
+
       if (profile?.application_id) {
         // Get accounts for this user
-        const { data: accountsData } = await supabase
+        const { data: accountsData, error: accountsError } = await supabase
           .from('accounts')
           .select('*')
-          .eq('application_id', profile.application_id);
+          .eq('application_id', profile.application_id)
+          .eq('status', 'active');
+
+        if (accountsError) {
+          console.error('Accounts error:', accountsError);
+          setMessage('Unable to load accounts');
+          return;
+        }
 
         setAccounts(accountsData || []);
+        
+        if (!accountsData || accountsData.length === 0) {
+          setMessage('No active accounts found. Please contact customer service.');
+        }
+      } else {
+        setMessage('Account profile not found. Please contact customer service.');
       }
     } catch (error) {
       console.error('Error fetching accounts:', error);
+      setMessage('System error. Please try again later.');
     }
   };
 
@@ -256,64 +276,91 @@ export default function ATM() {
     <div style={styles.screenContent}>
       <div style={styles.menuContainer}>
         <h2 style={styles.menuTitle}>Select Transaction</h2>
-        <div style={styles.menuGrid}>
-          <button 
-            onClick={() => {
-              if (accounts.length > 0) {
-                setSelectedAccount(accounts[0]);
-                setCurrentStep('operation');
-                setOperationType('balance');
-              }
-            }}
-            style={styles.menuButton}
-          >
-            <div style={styles.menuButtonIcon}>💰</div>
-            <div>Balance Inquiry</div>
-          </button>
+        {accounts.length > 0 ? (
+          <>
+            {accounts.length > 1 && (
+              <div style={styles.accountSelector}>
+                <label>Select Account:</label>
+                <select 
+                  value={selectedAccount?.id || accounts[0]?.id || ''}
+                  onChange={(e) => {
+                    const account = accounts.find(acc => acc.id === e.target.value);
+                    setSelectedAccount(account);
+                  }}
+                  style={styles.accountSelect}
+                >
+                  {accounts.map(account => (
+                    <option key={account.id} value={account.id}>
+                      {account.account_type?.replace(/_/g, ' ').toUpperCase()} - ****{account.account_number?.slice(-4)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+            <div style={styles.menuGrid}>
+              <button 
+                onClick={() => {
+                  const account = selectedAccount || accounts[0];
+                  setSelectedAccount(account);
+                  setCurrentStep('operation');
+                  setOperationType('balance');
+                }}
+                style={styles.menuButton}
+              >
+                <div style={styles.menuButtonIcon}>💰</div>
+                <div>Balance Inquiry</div>
+              </button>
           
           <button 
-            onClick={() => {
-              if (accounts.length > 0) {
-                setSelectedAccount(accounts[0]);
-                setCurrentStep('operation');
-                setOperationType('withdrawal');
-              }
-            }}
-            style={styles.menuButton}
-          >
-            <div style={styles.menuButtonIcon}>💸</div>
-            <div>Cash Withdrawal</div>
-          </button>
-          
-          <button 
-            onClick={() => {
-              if (accounts.length > 0) {
-                setSelectedAccount(accounts[0]);
-                setCurrentStep('operation');
-                setOperationType('deposit');
-              }
-            }}
-            style={styles.menuButton}
-          >
-            <div style={styles.menuButtonIcon}>💳</div>
-            <div>Cash Deposit</div>
-          </button>
-          
-          <button 
-            onClick={() => {
-              if (accounts.length > 0) {
-                setSelectedAccount(accounts[0]);
-                setCurrentStep('operation');
-                setOperationType('history');
-                fetchTransactionHistory(accounts[0].id);
-              }
-            }}
-            style={styles.menuButton}
-          >
-            <div style={styles.menuButtonIcon}>📋</div>
-            <div>Transaction History</div>
-          </button>
-        </div>
+                onClick={() => {
+                  const account = selectedAccount || accounts[0];
+                  setSelectedAccount(account);
+                  setCurrentStep('operation');
+                  setOperationType('withdrawal');
+                }}
+                style={styles.menuButton}
+              >
+                <div style={styles.menuButtonIcon}>💸</div>
+                <div>Cash Withdrawal</div>
+              </button>
+              
+              <button 
+                onClick={() => {
+                  const account = selectedAccount || accounts[0];
+                  setSelectedAccount(account);
+                  setCurrentStep('operation');
+                  setOperationType('deposit');
+                }}
+                style={styles.menuButton}
+              >
+                <div style={styles.menuButtonIcon}>💳</div>
+                <div>Cash Deposit</div>
+              </button>
+              
+              <button 
+                onClick={() => {
+                  const account = selectedAccount || accounts[0];
+                  setSelectedAccount(account);
+                  setCurrentStep('operation');
+                  setOperationType('history');
+                  fetchTransactionHistory(account.id);
+                }}
+                style={styles.menuButton}
+              >
+                <div style={styles.menuButtonIcon}>📋</div>
+                <div>Transaction History</div>
+              </button>
+            </div>
+          </>
+        ) : (
+          <div style={styles.noAccountsMessage}>
+            <h3>No accounts available</h3>
+            <p>Please contact customer service for assistance.</p>
+            <button onClick={() => setCurrentStep('welcome')} style={styles.backButton}>
+              Back to Start
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -841,5 +888,23 @@ const styles = {
     fontSize: '0.9rem',
     marginBottom: '1rem',
     opacity: 0.8
+  },
+  accountSelector: {
+    marginBottom: '1.5rem',
+    textAlign: 'center'
+  },
+  accountSelect: {
+    padding: '0.5rem',
+    borderRadius: '6px',
+    border: '1px solid #4a5568',
+    backgroundColor: '#2d3748',
+    color: 'white',
+    fontSize: '0.9rem',
+    marginLeft: '0.5rem'
+  },
+  noAccountsMessage: {
+    textAlign: 'center',
+    padding: '2rem',
+    color: '#FFC857'
   }
 };
