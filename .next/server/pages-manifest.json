@@ -2,11 +2,5 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/": "pages/index.js",
-  "/dashboard": "pages/dashboard.js",
-  "/login": "pages/login.js",
-  "/cards": "pages/cards.js",
-  "/api/get-user-cards": "pages/api/get-user-cards.js",
-  "/apply-card": "pages/apply-card.js",
-  "/api/apply-card": "pages/api/apply-card.js"
+  "/": "pages/index.js"
 }
