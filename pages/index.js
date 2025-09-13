@@ -1371,58 +1371,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Mobile Banking Professionals Section */}
-      <section style={styles.professionalsSection}>
-        <div style={styles.professionalsContainer}>
-          <h2 style={styles.professionalsTitle}>Banking Made Personal</h2>
-          <p style={styles.professionalsSubtitle}>
-            Real people, real solutions. Experience banking that puts you first.
-          </p>
-          <div style={styles.professionalsGrid}>
-            <div style={styles.professionalCard}>
-              <img
-                src="/images/real-mobile-banking-users.svg"
-                alt="Professional using Oakline Bank mobile app"
-                style={styles.professionalImage}
-              />
-              <div style={styles.professionalContent}>
-                <h3 style={styles.professionalTitle}>Mobile Banking</h3>
-                <p style={styles.professionalDescription}>
-                  Access your accounts anywhere, anytime with our secure mobile banking platform.
-                </p>
-              </div>
-            </div>
-
-            <div style={styles.professionalCard}>
-              <img
-                src="/images/Small_business_loan_approval_6e0d9c2c.png"
-                alt="Business professionals discussing banking solutions"
-                style={styles.professionalImage}
-              />
-              <div style={styles.professionalContent}>
-                <h3 style={styles.professionalTitle}>Instant Transfers</h3>
-                <p style={styles.professionalDescription}>
-                  Send money instantly to friends and family with just a few taps.
-                </p>
-              </div>
-            </div>
-
-            <div style={styles.professionalCard}>
-              <img
-                src="/images/Global_currency_exchange_7f8b1e6c.png"
-                alt="Global currency exchange interface"
-                style={styles.professionalImage}
-              />
-              <div style={styles.professionalContent}>
-                <h3 style={styles.professionalTitle}>Full Control</h3>
-                <p style={styles.professionalDescription}>
-                  Manage all your accounts and investments from one comprehensive dashboard.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      
 
       {/* Enhanced Final CTA */}
       <div id="final-cta" data-animate style={{
