@@ -64,62 +64,47 @@ export default function StickyFooter() {
     <div style={styles.stickyFooter} className="sticky-footer">
       <div style={styles.footerContainer}>
         <div style={styles.footerContent}>
-          {/* Banking Features Section */}
-          <div style={styles.featuresSection}>
-            <Link href="/dashboard" style={styles.featureButton}>
-              <span style={styles.featureIcon}>🏦</span>
-              <span style={styles.featureText}>Banking</span>
+          {/* Single Row Navigation Buttons */}
+          <div style={styles.navigationSection}>
+            <Link href="/" style={styles.navButton}>
+              <span style={styles.navIcon}>🏠</span>
+              <span style={styles.navText}>Home</span>
             </Link>
-            <Link href="/cards" style={styles.featureButton}>
-              <span style={styles.featureIcon}>💳</span>
-              <span style={styles.featureText}>Cards</span>
+            
+            <Link href="/main-menu" style={styles.navButton}>
+              <span style={styles.navIcon}>☰</span>
+              <span style={styles.navText}>Menu</span>
             </Link>
-            <Link href="/loans" style={styles.featureButton}>
-              <span style={styles.featureIcon}>💰</span>
-              <span style={styles.featureText}>Loans</span>
-            </Link>
-            <Link href="/investments" style={styles.featureButton}>
-              <span style={styles.featureIcon}>📈</span>
-              <span style={styles.featureText}>Invest</span>
-            </Link>
-            <Link href="/support" style={styles.featureButton}>
-              <span style={styles.featureIcon}>💬</span>
-              <span style={styles.featureText}>Support</span>
-            </Link>
-          </div>
-
-          {/* Authentication Section */}
-          <div style={styles.authSection}>
+            
             {user ? (
               <>
-                <div style={styles.userInfo}>
-                  <span style={styles.welcomeText}>
-                    Welcome, {user.user_metadata?.full_name || user.email?.split('@')[0] || 'User'}
-                  </span>
-                  <span style={styles.userStatus}>● Online</span>
-                </div>
-                <div style={styles.authButtons}>
-                  <Link href="/dashboard" style={styles.dashboardButton}>
-                    <span style={styles.buttonIcon}>📊</span>
-                    Dashboard
-                  </Link>
-                  <button onClick={handleSignOut} style={styles.signOutButton}>
-                    <span style={styles.buttonIcon}>🚪</span>
-                    Sign Out
-                  </button>
-                </div>
+                <Link href="/dashboard" style={styles.navButton}>
+                  <span style={styles.navIcon}>📊</span>
+                  <span style={styles.navText}>Dashboard</span>
+                </Link>
+                
+                <Link href="/profile" style={styles.navButton}>
+                  <span style={styles.navIcon}>👤</span>
+                  <span style={styles.navText}>Profile</span>
+                </Link>
+                
+                <button onClick={handleSignOut} style={styles.navButton}>
+                  <span style={styles.navIcon}>🚪</span>
+                  <span style={styles.navText}>Sign Out</span>
+                </button>
               </>
             ) : (
-              <div style={styles.authButtons}>
-                <Link href="/enroll" style={styles.enrollButton}>
-                  <span style={styles.buttonIcon}>✨</span>
-                  Open Account
+              <>
+                <Link href="/login" style={styles.navButton}>
+                  <span style={styles.navIcon}>🔐</span>
+                  <span style={styles.navText}>Sign In</span>
                 </Link>
-                <Link href="/login" style={styles.signInButton}>
-                  <span style={styles.buttonIcon}>🔐</span>
-                  Sign In
+                
+                <Link href="/apply" style={styles.navButton}>
+                  <span style={styles.navIcon}>✨</span>
+                  <span style={styles.navText}>Open Account</span>
                 </Link>
-              </div>
+              </>
             )}
           </div>
         </div>
@@ -160,123 +145,43 @@ const styles = {
     gap: '1.5rem',
     flexWrap: 'wrap'
   },
-  featuresSection: {
+  navigationSection: {
     display: 'flex',
     alignItems: 'center',
-    gap: '1rem',
-    flex: 1
+    justifyContent: 'space-between',
+    width: '100%',
+    gap: '0.5rem'
   },
-  featureButton: {
+  navButton: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    padding: '0.75rem 1rem',
-    borderRadius: '16px',
+    justifyContent: 'center',
+    padding: '0.75rem 0.5rem',
+    backgroundColor: 'white',
+    color: '#1A3E6F',
     textDecoration: 'none',
-    color: 'white',
-    background: 'rgba(255, 255, 255, 0.08)',
-    border: '1px solid rgba(255, 255, 255, 0.12)',
-    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-    minWidth: '70px',
+    borderRadius: '12px',
+    fontSize: '0.75rem',
+    fontWeight: '600',
+    transition: 'all 0.3s ease',
     cursor: 'pointer',
-    backdropFilter: 'blur(10px)',
-    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
+    border: '2px solid rgba(26, 62, 111, 0.1)',
+    boxShadow: '0 2px 8px rgba(26, 62, 111, 0.15)',
+    minHeight: '60px',
+    flex: 1,
+    backdropFilter: 'blur(10px)'
   },
-  featureIcon: {
+  navIcon: {
     fontSize: '1.2rem',
-    filter: 'brightness(1.2)'
+    marginBottom: '0.25rem',
+    filter: 'brightness(0.8)'
   },
-  featureText: {
+  navText: {
     fontSize: '0.7rem',
     fontWeight: '600',
     textAlign: 'center',
-    lineHeight: '1'
-  },
-  authSection: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '1rem'
-  },
-  userInfo: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'flex-end',
-    gap: '0.25rem'
-  },
-  welcomeText: {
-    color: 'white',
-    fontSize: '0.85rem',
-    fontWeight: '600'
-  },
-  userStatus: {
-    color: '#10b981',
-    fontSize: '0.7rem',
-    fontWeight: '500'
-  },
-  authButtons: {
-    display: 'flex',
-    gap: '0.75rem',
-    alignItems: 'center'
-  },
-  dashboardButton: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.5rem',
-    padding: '0.6rem 1rem',
-    backgroundColor: '#059669',
-    color: 'white',
-    textDecoration: 'none',
-    borderRadius: '6px',
-    fontSize: '0.85rem',
-    fontWeight: '600',
-    transition: 'all 0.3s ease',
-    boxShadow: '0 2px 8px rgba(5, 150, 105, 0.3)',
-    border: 'none'
-  },
-  signOutButton: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.5rem',
-    padding: '0.6rem 1rem',
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    color: 'white',
-    border: '1px solid rgba(255, 255, 255, 0.3)',
-    borderRadius: '6px',
-    fontSize: '0.85rem',
-    fontWeight: '600',
-    transition: 'all 0.3s ease',
-    cursor: 'pointer'
-  },
-  enrollButton: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.5rem',
-    padding: '0.6rem 1rem',
-    backgroundColor: '#FFC857',
-    color: '#1e293b',
-    textDecoration: 'none',
-    borderRadius: '6px',
-    fontSize: '0.85rem',
-    fontWeight: '700',
-    transition: 'all 0.3s ease',
-    boxShadow: '0 2px 8px rgba(255, 200, 87, 0.4)',
-    border: 'none'
-  },
-  signInButton: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.5rem',
-    padding: '0.6rem 1rem',
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    color: 'white',
-    textDecoration: 'none',
-    borderRadius: '6px',
-    fontSize: '0.85rem',
-    fontWeight: '600',
-    transition: 'all 0.3s ease',
-    border: '1px solid rgba(255, 255, 255, 0.3)'
-  },
-  buttonIcon: {
-    fontSize: '0.9rem'
+    lineHeight: '1',
+    color: '#1A3E6F'
   }
 };

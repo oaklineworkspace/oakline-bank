@@ -14,103 +14,62 @@
   }
 }
 
-/* Feature button hover effects */
-.sticky-footer a[style*="featureButton"]:hover {
-  background: rgba(255, 255, 255, 0.2) !important;
+/* Navigation button hover effects */
+.sticky-footer a[style*="navButton"]:hover,
+.sticky-footer button[style*="navButton"]:hover {
+  background-color: #f8fafc !important;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 12px rgba(26, 62, 111, 0.25) !important;
+  border-color: rgba(26, 62, 111, 0.2) !important;
 }
 
-/* Dashboard button hover */
-.sticky-footer a[style*="dashboardButton"]:hover {
-  background-color: #047857 !important;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 15px rgba(5, 150, 105, 0.4) !important;
-}
-
-/* Sign out button hover */
-.sticky-footer button[style*="signOutButton"]:hover {
-  background-color: rgba(255, 255, 255, 0.25) !important;
-  border-color: rgba(255, 255, 255, 0.5) !important;
-  transform: translateY(-1px);
-}
-
-/* Enroll button hover */
-.sticky-footer a[style*="enrollButton"]:hover {
-  background-color: #f59e0b !important;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 15px rgba(255, 200, 87, 0.5) !important;
-}
-
-/* Sign in button hover */
-.sticky-footer a[style*="signInButton"]:hover {
-  background-color: rgba(255, 255, 255, 0.25) !important;
-  border-color: rgba(255, 255, 255, 0.5) !important;
-  transform: translateY(-1px);
+.sticky-footer a[style*="navButton"]:active,
+.sticky-footer button[style*="navButton"]:active {
+  transform: translateY(0px);
+  box-shadow: 0 2px 6px rgba(26, 62, 111, 0.2) !important;
 }
 
 /* Mobile responsive styles */
 @media (max-width: 968px) {
-  .sticky-footer div[style*="footerContent"] {
-    flex-direction: column !important;
-    gap: 0.75rem !important;
-    padding: 0.75rem 0 !important;
+  .sticky-footer div[style*="navigationSection"] {
+    gap: 0.25rem !important;
   }
 
-  .sticky-footer div[style*="featuresSection"] {
-    gap: 0.5rem !important;
-    justify-content: center !important;
+  .sticky-footer a[style*="navButton"],
+  .sticky-footer button[style*="navButton"] {
+    padding: 0.5rem 0.25rem !important;
+    min-height: 55px !important;
   }
 
-  .sticky-footer a[style*="featureButton"] {
-    min-width: 50px !important;
-    padding: 0.4rem 0.5rem !important;
-  }
-
-  .sticky-footer span[style*="featureText"] {
+  .sticky-footer span[style*="navText"] {
     font-size: 0.65rem !important;
   }
 
-  .sticky-footer {
-    height: auto !important;
-    min-height: 80px !important;
+  .sticky-footer span[style*="navIcon"] {
+    font-size: 1rem !important;
+    margin-bottom: 0.15rem !important;
   }
 }
 
 @media (max-width: 640px) {
-  .sticky-footer div[style*="featuresSection"] {
-    gap: 0.25rem !important;
+  .sticky-footer div[style*="navigationSection"] {
+    gap: 0.125rem !important;
   }
 
-  .sticky-footer a[style*="featureButton"] {
-    min-width: 45px !important;
-    padding: 0.3rem 0.4rem !important;
+  .sticky-footer a[style*="navButton"],
+  .sticky-footer button[style*="navButton"] {
+    padding: 0.4rem 0.125rem !important;
+    min-height: 50px !important;
+    border-radius: 8px !important;
   }
 
-  .sticky-footer span[style*="featureIcon"] {
-    font-size: 1rem !important;
-  }
-
-  .sticky-footer span[style*="featureText"] {
+  .sticky-footer span[style*="navText"] {
     font-size: 0.6rem !important;
   }
 
-  .sticky-footer div[style*="authButtons"] {
-    gap: 0.5rem !important;
-  }
-
-  .sticky-footer a[style*="Button"],
-  .sticky-footer button[style*="Button"] {
-    padding: 0.5rem 0.75rem !important;
-    font-size: 0.8rem !important;
-  }
-
-  .sticky-footer span[style*="welcomeText"] {
-    font-size: 0.75rem !important;
-  }
-
-  .sticky-footer span[style*="userStatus"] {
-    font-size: 0.65rem !important;
+  .sticky-footer span[style*="navIcon"] {
+    font-size: 0.9rem !important;
+    margin-bottom: 0.1rem !important;
   }
 }
 
