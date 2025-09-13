@@ -65,7 +65,7 @@ export default function StickyFooter() {
     { name: 'Home', href: '/', icon: '🏠' },
     { name: 'Menu', href: '/main-menu', icon: '☰' },
     { name: 'Zelle', href: '/zelle', icon: 'Z' },
-    { name: 'Settings', href: '/zelle-settings', icon: '⚙️' },
+    { name: 'Settings', href: '/settings', icon: '⚙️' },
     { name: 'Sign Out', href: '#', icon: '🚪', onClick: handleSignOut }
   ] : [
     { name: 'Home', href: '/', icon: '🏠' },

@@ -1,5 +1,6 @@
 // pages/_app.js
-import '../styles/globals.css';
+import '../styles/globals.css'
+import '../styles/button-fixes.css';
 import '../styles/responsive.css';
 import '../styles/StickyFooter.css';
 import Head from 'next/head';

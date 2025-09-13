@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabaseClient';
@@ -36,7 +35,7 @@ export default function Zelle() {
   const checkUserAndFetchData = async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      
+
       if (!session?.user) {
         router.push('/login');
         return;
@@ -61,7 +60,7 @@ export default function Zelle() {
         .eq('status', 'active');
 
       setAccounts(userAccounts || []);
-      
+
       if (userAccounts?.length > 0) {
         setSendForm(prev => ({ ...prev, account_id: userAccounts[0].id.toString() }));
         setRequestForm(prev => ({ ...prev, account_id: userAccounts[0].id.toString() }));
@@ -98,7 +97,7 @@ export default function Zelle() {
       // Validate recipient (email or phone)
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       const phoneRegex = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
-      
+
       if (!emailRegex.test(sendForm.recipient) && !phoneRegex.test(sendForm.recipient)) {
         setMessage('Please enter a valid email address or phone number');
         setLoading(false);
@@ -145,7 +144,7 @@ export default function Zelle() {
 
       setMessage('✅ Zelle payment sent successfully!');
       setSendForm({ recipient: '', amount: '', memo: '', account_id: sendForm.account_id });
-      
+
       setTimeout(() => {
         checkUserAndFetchData();
       }, 2000);
@@ -174,7 +173,7 @@ export default function Zelle() {
       // Validate recipient
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       const phoneRegex = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
-      
+
       if (!emailRegex.test(requestForm.recipient) && !phoneRegex.test(requestForm.recipient)) {
         setMessage('Please enter a valid email address or phone number');
         setLoading(false);
@@ -265,6 +264,18 @@ export default function Zelle() {
             </div>
           </div>
 
+          {/* Email Verification Alert */}
+          <div style={styles.verificationAlert}>
+            <div style={styles.alertIcon}>⚠️</div>
+            <div style={styles.alertContent}>
+              <h3 style={styles.alertTitle}>Verify Your Email</h3>
+              <p style={styles.alertText}>
+                Please verify your email address to complete your Zelle profile and ensure secure transactions.
+              </p>
+              <button style={styles.resendButton}>Resend Verification Email</button>
+            </div>
+          </div>
+
           {message && (
             <div style={{
               ...styles.message,
@@ -323,8 +334,8 @@ export default function Zelle() {
                     <option value="">Select account</option>
                     {accounts.map(account => (
                       <option key={account.id} value={account.id}>
-                        {account.account_type?.replace('_', ' ')?.toUpperCase()} - 
-                        ****{account.account_number?.slice(-4)} - 
+                        {account.account_type?.replace('_', ' ')?.toUpperCase()} -
+                        ****{account.account_number?.slice(-4)} -
                         {formatCurrency(account.balance || 0)}
                       </option>
                     ))}
@@ -401,7 +412,7 @@ export default function Zelle() {
                     <option value="">Select account</option>
                     {accounts.map(account => (
                       <option key={account.id} value={account.id}>
-                        {account.account_type?.replace('_', ' ')?.toUpperCase()} - 
+                        {account.account_type?.replace('_', ' ')?.toUpperCase()} -
                         ****{account.account_number?.slice(-4)}
                       </option>
                     ))}
@@ -469,6 +480,30 @@ export default function Zelle() {
               <ZelleActivity userId={user.id} />
             </div>
           )}
+
+          <div style={styles.servicesGrid}>
+            <Link href="/zelle/send" className="serviceCard">
+              <div style={styles.serviceIcon}>➡️</div>
+              <h3 style={styles.serviceTitle}>Send Money</h3>
+              <p style={styles.serviceDesc}>Quickly send money to friends and family.</p>
+            </Link>
+            <Link href="/zelle/request" className="serviceCard">
+              <div style={styles.serviceIcon}>📥</div>
+              <h3 style={styles.serviceTitle}>Request Money</h3>
+              <p style={styles.serviceDesc}>Easily request money from anyone.</p>
+            </Link>
+            <Link href="/zelle/history" className="serviceCard">
+              <div style={styles.serviceIcon}>⏱️</div>
+              <h3 style={styles.serviceTitle}>Transaction History</h3>
+              <p style={styles.serviceDesc}>View your past Zelle transactions.</p>
+            </Link>
+            <Link href="/settings/user" className="serviceCard">
+              <div style={styles.serviceIcon}>⚙️</div>
+              <h3 style={styles.serviceTitle}>General Settings</h3>
+              <p style={styles.serviceDesc}>Manage your account and banking preferences.</p>
+            </Link>
+          </div>
+
 
           <div style={styles.infoSection}>
             <h4 style={styles.infoTitle}>🔒 Zelle Safety</h4>
@@ -870,5 +905,112 @@ const styles = {
     textDecoration: 'none',
     borderRadius: '8px',
     fontWeight: '500'
-  }
+  },
+
+  // Email Verification Alert
+  verificationAlert: {
+    backgroundColor: '#fff3cd',
+    border: '1px solid #ffeaa7',
+    borderRadius: '12px',
+    padding: '1.5rem',
+    marginBottom: '2rem',
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: '1rem'
+  },
+  alertIcon: {
+    fontSize: '1.5rem'
+  },
+  alertContent: {
+    flex: 1
+  },
+  alertTitle: {
+    fontSize: '1.1rem',
+    fontWeight: '600',
+    color: '#856404',
+    marginBottom: '0.5rem'
+  },
+  alertText: {
+    color: '#856404',
+    marginBottom: '1rem',
+    lineHeight: '1.5'
+  },
+  resendButton: {
+    padding: '0.5rem 1rem',
+    backgroundColor: '#856404',
+    color: 'white',
+    border: 'none',
+    borderRadius: '6px',
+    cursor: 'pointer',
+    fontSize: '0.9rem'
+  },
+
+  // Zelle Services Grid
+  servicesGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+    gap: '1rem',
+    marginBottom: '2rem'
+  },
+  serviceCard: {
+    backgroundColor: 'white',
+    padding: '1.5rem',
+    borderRadius: '12px',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+    textAlign: 'center',
+    textDecoration: 'none',
+    color: 'inherit',
+    transition: 'all 0.3s ease',
+    border: '1px solid #e2e8f0'
+  },
+  serviceIcon: {
+    fontSize: '2rem',
+    marginBottom: '1rem'
+  },
+  serviceTitle: {
+    fontSize: '1.1rem',
+    fontWeight: '600',
+    color: '#1e293b',
+    marginBottom: '0.5rem'
+  },
+  serviceDesc: {
+    fontSize: '0.9rem',
+    color: '#64748b',
+    lineHeight: '1.4'
+  },
+
+  // Zelle Activity Component
 };
+
+if (typeof document !== 'undefined') {
+  const existingStyle = document.querySelector('#zelle-styles');
+  if (!existingStyle) {
+    const zelleStyles = document.createElement('style');
+    zelleStyles.id = 'zelle-styles';
+    zelleStyles.textContent = `
+      .serviceCard:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+        border-color: #6B46C1 !important;
+      }
+
+      .resendButton:hover {
+        background-color: #6c5ce7 !important;
+        transform: translateY(-2px);
+      }
+
+      input:focus {
+        outline: none !important;
+        border-color: #6B46C1 !important;
+        box-shadow: 0 0 0 3px rgba(107, 70, 193, 0.1) !important;
+      }
+
+      select:focus {
+        outline: none !important;
+        border-color: #6B46C1 !important;
+        box-shadow: 0 0 0 3px rgba(107, 70, 193, 0.1) !important;
+      }
+`;
+    document.head.appendChild(zelleStyles);
+  }
+}
