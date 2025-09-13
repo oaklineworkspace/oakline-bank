@@ -1178,38 +1178,29 @@ export default function Home() {
       {/* Services Section */}
       <ServicesSection />
 
-      {/* Banking Success Stories Section */}
+      {/* Banking Success Stories Section - Simplified without problematic images */}
       <section style={styles.bankingSuccessSection} id="banking-success" data-animate>
         <div style={styles.container}>
           <div style={{
             ...styles.sectionHeader,
             ...(isVisible['banking-success'] ? styles.fadeInUp : {})
           }}>
-            <h2 style={styles.sectionTitle}>Real Success Stories</h2>
+            <h2 style={styles.sectionTitle}>Why Customers Choose Oakline Bank</h2>
             <p style={styles.sectionSubtitle}>
-              See how Oakline Bank helps customers achieve their financial goals
+              Experience the difference with our professional banking services
             </p>
           </div>
 
           <div style={styles.successGrid}>
             <div style={styles.successCard}>
-              <img
-                src="/images/realistic-banking-professionals.svg"
-                alt="Professional Banking Team"
-                style={styles.successImage}
-                onError={(e) => {
-                  e.target.style.display = 'none';
-                  e.target.nextSibling.style.display = 'flex';
-                }}
-              />
-              <div style={{...styles.successImageFallback, display: 'none'}}>
-                <span style={styles.successImageIcon}>📷</span>
+              <div style={styles.successIconContainer}>
+                <span style={styles.successIcon}>👨‍💼</span>
               </div>
               <div style={styles.successContent}>
                 <h3 style={styles.successTitle}>Expert Financial Guidance</h3>
                 <p style={styles.successDescription}>
-                  "Our dedicated team of banking professionals provides personalized
-                  financial advice to help you make informed decisions about your money."
+                  Our dedicated team of banking professionals provides personalized
+                  financial advice to help you make informed decisions about your money.
                 </p>
                 <div style={styles.successDetails}>
                   <span style={styles.successAmount}>Professional Advisors</span>
@@ -1219,23 +1210,14 @@ export default function Home() {
             </div>
 
             <div style={styles.successCard}>
-              <img
-                src="/images/real-mobile-banking-users.svg"
-                alt="Real Mobile Banking Users"
-                style={styles.successImage}
-                onError={(e) => {
-                  e.target.style.display = 'none';
-                  e.target.nextSibling.style.display = 'flex';
-                }}
-              />
-              <div style={{...styles.successImageFallback, display: 'none'}}>
-                <span style={styles.successImageIcon}>💻</span>
+              <div style={styles.successIconContainer}>
+                <span style={styles.successIcon}>📱</span>
               </div>
               <div style={styles.successContent}>
-                <h3 style={styles.successTitle}>Modern Banking Experience</h3>
+                <h3 style={styles.successTitle}>Award-Winning Mobile Banking</h3>
                 <p style={styles.successDescription}>
-                  "Our customers love the convenience of managing their finances
-                  on-the-go with our award-winning mobile banking platform."
+                  Our customers love the convenience of managing their finances
+                  on-the-go with our award-winning mobile banking platform.
                 </p>
                 <div style={styles.successDetails}>
                   <span style={styles.successFeature}>Mobile Banking</span>
@@ -1245,23 +1227,14 @@ export default function Home() {
             </div>
 
             <div style={styles.successCard}>
-              <img
-                src="/images/realistic-debit-card-1.svg"
-                alt="Premium Banking Cards"
-                style={styles.successImage}
-                onError={(e) => {
-                  e.target.style.display = 'none';
-                  e.target.nextSibling.style.display = 'flex';
-                }}
-              />
-              <div style={{...styles.successImageFallback, display: 'none'}}>
-                <span style={styles.successImageIcon}>💳</span>
+              <div style={styles.successIconContainer}>
+                <span style={styles.successIcon}>💳</span>
               </div>
               <div style={styles.successContent}>
                 <h3 style={styles.successTitle}>Premium Banking Products</h3>
                 <p style={styles.successDescription}>
-                  "Access your money anywhere with our premium debit cards featuring
-                  contactless payments and advanced security technology."
+                  Access your money anywhere with our premium debit cards featuring
+                  contactless payments and advanced security technology.
                 </p>
                 <div style={styles.successDetails}>
                   <span style={styles.successSavings}>Contactless Pay</span>
@@ -3093,38 +3066,22 @@ const styles = {
     transform: 'translateY(0)'
   },
   successImageContainer: {
-    position: 'relative',
-    height: '192px',
-    background: 'linear-gradient(135deg, #059669 0%, #0891b2 100%)',
+    width: '70px',
+    height: '70px',
+    borderRadius: '50%',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    overflow: 'hidden'
+    marginBottom: '1rem',
+    background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+    color: 'white',
+    fontSize: '2rem',
+    boxShadow: '0 6px 20px rgba(5, 150, 105, 0.3)',
+    margin: '0 auto 1.5rem'
   },
-  successImage: {
-    width: '85%',
-    height: 'auto',
-    maxHeight: '160px',
-    objectFit: 'contain',
-    filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.2))'
-  },
-  successImageFallback: {
-    position: 'absolute',
-    top: '15px',
-    right: '15px',
-    background: 'rgba(255,255,255,0.95)',
-    color: '#059669',
-    padding: '6px 12px',
-    borderRadius: '15px',
-    fontSize: '0.8rem',
-    fontWeight: '700',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '4px',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
-  },
-  successImageIcon: {
-    fontSize: '1.2rem'
+  successIcon: {
+    position: 'relative',
+    top: '3px'
   },
   successContent: {
     padding: '2rem'

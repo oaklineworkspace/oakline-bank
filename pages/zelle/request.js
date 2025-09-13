@@ -349,7 +349,7 @@ const styles = {
     justifyContent: 'space-between',
     alignItems: 'center',
     boxShadow: '0 4px 20px rgba(26, 62, 111, 0.25)',
-    borderBottom: '3px solid #FFC857'
+    borderBottom: '3px solid #059669'
   },
   logoContainer: {
     display: 'flex',
@@ -398,14 +398,15 @@ const styles = {
   zelleLogo: {
     width: '60px',
     height: '60px',
-    backgroundColor: '#6B46C1',
+    background: 'linear-gradient(135deg, #1A3E6F 0%, #059669 100%)',
     color: 'white',
     borderRadius: '12px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     fontSize: '2rem',
-    fontWeight: 'bold'
+    fontWeight: 'bold',
+    boxShadow: '0 6px 20px rgba(26, 62, 111, 0.3)'
   },
   title: {
     fontSize: '1.5rem',
@@ -450,14 +451,15 @@ const styles = {
     width: '40px',
     height: '40px',
     borderRadius: '50%',
-    backgroundColor: '#10b981',
+    background: 'linear-gradient(135deg, #1A3E6F 0%, #059669 100%)',
     color: 'white',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     margin: '0 auto 0.5rem',
     fontSize: '1rem',
-    fontWeight: 'bold'
+    fontWeight: 'bold',
+    boxShadow: '0 4px 12px rgba(26, 62, 111, 0.3)'
   },
   contactName: {
     fontSize: '0.8rem',
@@ -568,9 +570,10 @@ const styles = {
     boxShadow: '0 4px 12px rgba(0,0,0,0.08)'
   },
   infoTitle: {
-    color: '#10b981',
+    color: '#1A3E6F',
     marginBottom: '0.75rem',
-    fontSize: '1rem'
+    fontSize: '1rem',
+    fontWeight: '600'
   },
   infoList: {
     margin: 0,
@@ -591,7 +594,7 @@ const styles = {
     width: '32px',
     height: '32px',
     border: '3px solid #e2e8f0',
-    borderTop: '3px solid #10b981',
+    borderTop: '3px solid #1A3E6F',
     borderRadius: '50%',
     animation: 'spin 1s linear infinite'
   },
@@ -623,7 +626,7 @@ const styles = {
   loginButton: {
     display: 'inline-block',
     padding: '0.75rem 1.5rem',
-    backgroundColor: '#10b981',
+    backgroundColor: '#1A3E6F',
     color: 'white',
     textDecoration: 'none',
     borderRadius: '8px',

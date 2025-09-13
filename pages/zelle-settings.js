@@ -504,7 +504,7 @@ const styles = {
     justifyContent: 'space-between',
     alignItems: 'center',
     boxShadow: '0 4px 20px rgba(26, 62, 111, 0.25)',
-    borderBottom: '3px solid #FFC857'
+    borderBottom: '3px solid #059669'
   },
   logoContainer: {
     display: 'flex',
@@ -553,14 +553,15 @@ const styles = {
   zelleLogo: {
     width: '60px',
     height: '60px',
-    backgroundColor: '#6B46C1',
+    background: 'linear-gradient(135deg, #1A3E6F 0%, #059669 100%)',
     color: 'white',
     borderRadius: '12px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     fontSize: '2rem',
-    fontWeight: 'bold'
+    fontWeight: 'bold',
+    boxShadow: '0 6px 20px rgba(26, 62, 111, 0.3)'
   },
   title: {
     fontSize: '1.5rem',
@@ -597,7 +598,7 @@ const styles = {
     color: '#64748b'
   },
   activeTab: {
-    backgroundColor: '#6B46C1',
+    backgroundColor: '#1A3E6F',
     color: 'white'
   },
   tabContent: {
@@ -640,7 +641,7 @@ const styles = {
   submitButton: {
     width: '100%',
     padding: '1rem',
-    backgroundColor: '#6B46C1',
+    backgroundColor: '#1A3E6F',
     color: 'white',
     border: 'none',
     borderRadius: '12px',
@@ -718,7 +719,7 @@ const styles = {
   },
   progressFill: {
     height: '100%',
-    backgroundColor: '#6B46C1',
+    backgroundColor: '#1A3E6F',
     transition: 'width 0.3s ease'
   },
   limitText: {
@@ -798,7 +799,7 @@ const styles = {
     width: '32px',
     height: '32px',
     border: '3px solid #e2e8f0',
-    borderTop: '3px solid #6B46C1',
+    borderTop: '3px solid #1A3E6F',
     borderRadius: '50%',
     animation: 'spin 1s linear infinite'
   },
@@ -830,7 +831,7 @@ const styles = {
   loginButton: {
     display: 'inline-block',
     padding: '0.75rem 1.5rem',
-    backgroundColor: '#6B46C1',
+    backgroundColor: '#1A3E6F',
     color: 'white',
     textDecoration: 'none',
     borderRadius: '8px',
