@@ -492,18 +492,19 @@ export default function ZelleSettings() {
 const styles = {
   container: {
     minHeight: '100vh',
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#f1f5f9',
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
     paddingBottom: '100px'
   },
   header: {
-    backgroundColor: '#1e40af',
+    backgroundColor: '#1A3E6F',
     color: 'white',
-    padding: '1rem',
+    padding: '1.25rem',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+    boxShadow: '0 4px 20px rgba(26, 62, 111, 0.25)',
+    borderBottom: '3px solid #FFC857'
   },
   logoContainer: {
     display: 'flex',
@@ -791,7 +792,7 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     minHeight: '100vh',
-    backgroundColor: '#f8fafc'
+    backgroundColor: '#f1f5f9'
   },
   spinner: {
     width: '32px',

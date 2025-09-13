@@ -484,7 +484,10 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     gap: '0.5rem',
-    marginTop: '0.5rem'
+    marginTop: '0.5rem',
+    position: 'relative',
+    zIndex: 10,
+    boxShadow: '0 4px 12px rgba(26, 62, 111, 0.3)'
   },
   loadingContent: {
     display: 'flex',

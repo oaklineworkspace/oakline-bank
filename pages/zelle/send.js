@@ -364,18 +364,19 @@ export default function ZelleSend() {
 const styles = {
   container: {
     minHeight: '100vh',
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#f1f5f9',
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
     paddingBottom: '100px'
   },
   header: {
-    backgroundColor: '#1e40af',
+    backgroundColor: '#1A3E6F',
     color: 'white',
-    padding: '1rem',
+    padding: '1.25rem',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+    boxShadow: '0 4px 20px rgba(26, 62, 111, 0.25)',
+    borderBottom: '3px solid #FFC857'
   },
   logoContainer: {
     display: 'flex',
@@ -515,11 +516,15 @@ const styles = {
   },
   input: {
     width: '100%',
-    padding: '0.75rem',
+    padding: '0.875rem 1rem',
     border: '2px solid #e2e8f0',
-    borderRadius: '8px',
-    fontSize: '0.9rem',
-    boxSizing: 'border-box'
+    borderRadius: '12px',
+    fontSize: '1rem',
+    boxSizing: 'border-box',
+    backgroundColor: '#ffffff',
+    color: '#1e293b',
+    transition: 'all 0.2s ease',
+    boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
   },
   select: {
     width: '100%',
@@ -537,16 +542,19 @@ const styles = {
   },
   submitButton: {
     width: '100%',
-    padding: '1rem',
-    backgroundColor: '#6B46C1',
+    padding: '1.125rem',
+    backgroundColor: '#1A3E6F',
     color: 'white',
     border: 'none',
     borderRadius: '12px',
-    fontSize: '1rem',
-    fontWeight: '600',
+    fontSize: '1.1rem',
+    fontWeight: '700',
     cursor: 'pointer',
-    transition: 'all 0.2s',
-    marginTop: '0.5rem'
+    transition: 'all 0.3s ease',
+    marginTop: '1rem',
+    boxShadow: '0 6px 20px rgba(26, 62, 111, 0.3)',
+    position: 'relative',
+    zIndex: 10
   },
   quickActions: {
     display: 'grid',

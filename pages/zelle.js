@@ -605,7 +605,7 @@ function ZelleActivity({ userId }) {
 const styles = {
   container: {
     minHeight: '100vh',
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#f1f5f9',
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
     paddingBottom: '100px'
   },
@@ -862,7 +862,7 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     minHeight: '100vh',
-    backgroundColor: '#f8fafc'
+    backgroundColor: '#f1f5f9'
   },
   spinner: {
     width: '32px',
