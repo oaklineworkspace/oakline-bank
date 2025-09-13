@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useRouter } from 'next/router';
@@ -9,6 +8,7 @@ export default function LoginPage() {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -43,7 +43,7 @@ export default function LoginPage() {
 
   return (
     <div style={styles.container}>
-      {/* Single Clean Header */}
+      {/* Clean Header with Hamburger Menu */}
       <header style={styles.header}>
         <div style={styles.headerContainer}>
           <div style={styles.headerContent}>
@@ -56,18 +56,57 @@ export default function LoginPage() {
             </Link>
 
             <div style={styles.headerActions}>
-              <Link href="/" style={styles.headerButton}>
-                <span style={styles.buttonIcon}>🏠</span>
-                Home
-              </Link>
-              <Link href="/apply" style={styles.headerButton}>
-                <span style={styles.buttonIcon}>🚀</span>
-                Open Account
-              </Link>
-              <Link href="/support" style={styles.headerButton}>
-                <span style={styles.buttonIcon}>💬</span>
-                Support
-              </Link>
+              {/* Hamburger Menu */}
+              <div style={styles.hamburgerContainer}>
+                <button
+                  style={styles.hamburgerButton}
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                >
+                  <div style={styles.hamburgerLines}>
+                    <div style={styles.hamburgerLine}></div>
+                    <div style={styles.hamburgerLine}></div>
+                    <div style={styles.hamburgerLine}></div>
+                  </div>
+                  <span style={styles.menuText}>Menu</span>
+                </button>
+
+                {dropdownOpen && (
+                  <div style={styles.dropdownMenu}>
+                    <Link href="/" style={styles.dropdownItem} onClick={() => setDropdownOpen(false)}>
+                      <span style={styles.itemIcon}>🏠</span>
+                      Home
+                    </Link>
+                    <Link href="/apply" style={styles.dropdownItem} onClick={() => setDropdownOpen(false)}>
+                      <span style={styles.itemIcon}>🚀</span>
+                      Open Account
+                    </Link>
+                    <Link href="/support" style={styles.dropdownItem} onClick={() => setDropdownOpen(false)}>
+                      <span style={styles.itemIcon}>💬</span>
+                      Support
+                    </Link>
+                    <Link href="/main-menu" style={styles.dropdownItem} onClick={() => setDropdownOpen(false)}>
+                      <span style={styles.itemIcon}>☰</span>
+                      Banking Menu
+                    </Link>
+                    <Link href="/about" style={styles.dropdownItem} onClick={() => setDropdownOpen(false)}>
+                      <span style={styles.itemIcon}>ℹ️</span>
+                      About Us
+                    </Link>
+                    <Link href="/account-types" style={styles.dropdownItem} onClick={() => setDropdownOpen(false)}>
+                      <span style={styles.itemIcon}>📋</span>
+                      Account Types
+                    </Link>
+                    <Link href="/current-rates" style={styles.dropdownItem} onClick={() => setDropdownOpen(false)}>
+                      <span style={styles.itemIcon}>📊</span>
+                      Current Rates
+                    </Link>
+                    <Link href="/atm" style={styles.dropdownItem} onClick={() => setDropdownOpen(false)}>
+                      <span style={styles.itemIcon}>🏧</span>
+                      ATM Locator
+                    </Link>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
@@ -128,8 +167,8 @@ export default function LoginPage() {
                   </Link>
                 </div>
 
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   disabled={loading}
                   style={{
                     ...styles.loginButton,
@@ -245,7 +284,7 @@ export default function LoginPage() {
 const styles = {
   container: {
     minHeight: '100vh',
-    backgroundColor: '#ffffff',
+    backgroundColor: '#f8fafc',
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
     width: '100%',
     overflowX: 'hidden'
@@ -254,10 +293,10 @@ const styles = {
     backgroundColor: '#1A3E6F',
     color: 'white',
     padding: '1rem 1.5rem',
-    boxShadow: '0 4px 12px rgba(26, 62, 111, 0.15)',
+    boxShadow: '0 2px 8px rgba(26, 62, 111, 0.1)',
     position: 'sticky',
     top: 0,
-    zIndex: 100
+    zIndex: 1000
   },
   headerContainer: {
     maxWidth: '1400px',
@@ -349,11 +388,12 @@ const styles = {
   },
   main: {
     flex: 1,
-    minHeight: 'calc(100vh - 120px)',
+    minHeight: 'calc(100vh - 140px)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: '2rem 1rem'
+    padding: '2rem 1rem',
+    backgroundColor: '#f8fafc'
   },
   contentWrapper: {
     width: '100%',
@@ -368,9 +408,9 @@ const styles = {
     width: '100%',
     backgroundColor: 'white',
     borderRadius: '16px',
-    boxShadow: '0 12px 32px rgba(26, 62, 111, 0.08)',
+    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.1)',
     padding: '2.5rem',
-    border: '1px solid #e2e8f0'
+    border: '1px solid #e5e7eb'
   },
   loginHeader: {
     textAlign: 'center',
@@ -413,12 +453,14 @@ const styles = {
   input: {
     width: '100%',
     padding: '0.75rem 1rem',
-    border: '2px solid #e2e8f0',
+    border: '2px solid #d1d5db',
     borderRadius: '8px',
     fontSize: '1rem',
     transition: 'all 0.3s ease',
     boxSizing: 'border-box',
-    outline: 'none'
+    outline: 'none',
+    backgroundColor: '#ffffff',
+    color: '#1f2937'
   },
   forgotPassword: {
     color: '#1A3E6F',
@@ -586,23 +628,93 @@ const styles = {
     margin: 0
   },
 
+  // Hamburger Menu Styles
+  hamburgerContainer: {
+    position: 'relative'
+  },
+  hamburgerButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    padding: '0.6rem 1rem',
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    color: 'white',
+    border: '2px solid rgba(255, 255, 255, 0.3)',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    backdropFilter: 'blur(10px)',
+    fontSize: '0.9rem',
+    fontWeight: '600'
+  },
+  hamburgerLines: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '2px',
+    width: '14px'
+  },
+  hamburgerLine: {
+    width: '100%',
+    height: '2px',
+    backgroundColor: 'white',
+    borderRadius: '1px',
+    transition: 'all 0.3s ease'
+  },
+  menuText: {
+    fontSize: '0.9rem',
+    fontWeight: '600',
+    color: 'white'
+  },
+  dropdownMenu: {
+    position: 'absolute',
+    top: '100%',
+    right: 0,
+    backgroundColor: 'white',
+    borderRadius: '12px',
+    boxShadow: '0 10px 25px rgba(0,0,0,0.15)',
+    border: '1px solid #e5e7eb',
+    zIndex: 200,
+    minWidth: '220px',
+    padding: '0.5rem',
+    marginTop: '0.5rem'
+  },
+  dropdownItem: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.75rem',
+    padding: '0.75rem 1rem',
+    color: '#374151',
+    textDecoration: 'none',
+    borderRadius: '8px',
+    fontSize: '0.9rem',
+    fontWeight: '500',
+    transition: 'all 0.2s ease',
+    width: '100%',
+    boxSizing: 'border-box'
+  },
+  itemIcon: {
+    fontSize: '1rem',
+    width: '20px',
+    textAlign: 'center'
+  },
+
   // Mobile Responsive Styles
   '@media (max-width: 768px)': {
     headerContent: {
-      flexDirection: 'column',
+      flexDirection: 'row',
       alignItems: 'center',
+      justifyContent: 'space-between',
       gap: '1rem'
     },
     headerActions: {
       flexDirection: 'row',
-      justifyContent: 'center',
-      gap: '0.75rem',
-      width: '100%'
+      justifyContent: 'flex-end',
+      gap: '0.75rem'
     },
-    headerButton: {
-      flex: 1,
-      justifyContent: 'center',
-      maxWidth: '120px'
+    dropdownMenu: {
+      right: '0',
+      left: 'auto',
+      minWidth: '200px'
     },
     headerInfo: {
       flexDirection: 'column',

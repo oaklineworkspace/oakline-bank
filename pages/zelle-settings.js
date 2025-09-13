@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabaseClient';
@@ -34,7 +33,7 @@ export default function ZelleSettings() {
   const checkUserAndFetchData = async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      
+
       if (!session?.user) {
         router.push('/login');
         return;
@@ -53,7 +52,7 @@ export default function ZelleSettings() {
 
       // Fetch Zelle contacts
       await fetchContacts(session.user.id);
-      
+
       // Fetch spending limits
       await fetchSpendingLimits(session.user.id);
 
@@ -385,7 +384,7 @@ export default function ZelleSettings() {
           {activeTab === 'limits' && (
             <div style={styles.tabContent}>
               <div style={styles.sectionTitle}>Spending Limits</div>
-              
+
               <div style={styles.limitCard}>
                 <div style={styles.limitHeader}>
                   <div style={styles.limitTitle}>Daily Limit</div>
@@ -438,7 +437,7 @@ export default function ZelleSettings() {
           {activeTab === 'security' && (
             <div style={styles.tabContent}>
               <div style={styles.sectionTitle}>Security Settings</div>
-              
+
               <div style={styles.securityCard}>
                 <div style={styles.securityHeader}>
                   <div style={styles.securityIcon}>🔐</div>
