@@ -133,27 +133,6 @@ export default function Home() {
       subtitle: 'Experience premium banking in our state-of-the-art branch locations',
       icon: '🏦',
       gradient: 'linear-gradient(135deg, rgba(26, 54, 93, 0.3) 0%, rgba(26, 54, 93, 0.4) 100%)'
-    },
-    {
-      src: '/images/realistic-banking-professionals.svg',
-      title: 'Professional Banking Team',
-      subtitle: 'Experienced professionals ready to help you achieve your financial goals',
-      icon: '👥',
-      gradient: 'linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%)'
-    },
-    {
-      src: '/images/real-mobile-banking-users.svg',
-      title: 'Real Customer Experience',
-      subtitle: 'Join thousands of satisfied customers who trust our banking services',
-      icon: '⭐',
-      gradient: 'linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%)'
-    },
-    {
-      src: '/images/woman-laptop-banking.svg',
-      title: 'Digital Banking Excellence',
-      subtitle: 'Manage your entire financial portfolio from one powerful dashboard',
-      icon: '💻',
-      gradient: 'linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%)'
     }
   ];
 
@@ -597,47 +576,7 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Auth Buttons Row */}
-          <div style={styles.authButtonsRow}>
-            <div style={styles.authButtons}>
-              {user ? (
-                <>
-                  <Link href="/dashboard" style={styles.dashboardButtonWhite}>
-                    <span style={styles.buttonIcon}>📊</span>
-                    Dashboard
-                  </Link>
-                  <Link href="/main-menu" style={styles.menuButtonWhite}>
-                    <span style={styles.buttonIcon}>☰</span>
-                    Menu
-                  </Link>
-                  {/* Logout Button */}
-                  <button
-                    style={styles.logoutButtonWhite}
-                    onClick={async () => {
-                      try {
-                        await supabase.auth.signOut();
-                        // Redirect to public home page
-                        window.location.href = '/';
-                      } catch (error) {
-                        console.error('Error signing out:', error);
-                      }
-                    }}
-                  >
-                    Logout
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link href="/enroll" style={styles.enrollButtonWhite}>
-                    <span style={styles.buttonIcon}>🌐</span>
-                    Enroll Online
-                  </Link>
-                  <Link href="/login" style={styles.loginButtonWhite}>Sign In</Link>
-                  <Link href="/apply" style={styles.applyButtonWhite}>Open Account</Link>
-                </>
-              )}
-            </div>
-          </div>
+          
         </div>
       </header>
 
