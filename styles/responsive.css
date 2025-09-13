@@ -10,6 +10,36 @@
     text-align: center !important;
   }
 
+  .mobileNavigationRow {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+    padding: 0.5rem 0.75rem !important;
+    margin: 0 0.5rem !important;
+    flex-wrap: wrap !important;
+  }
+
+  .mobileMenuButton {
+    padding: 0.5rem 0.7rem !important;
+    font-size: 0.75rem !important;
+    min-width: 70px !important;
+    border-radius: 6px !important;
+  }
+
+  .mobileMenuText {
+    font-size: 0.75rem !important;
+  }
+
+  .mobileHamburgerLines {
+    width: 8px !important;
+    gap: 1px !important;
+  }
+
+  .mobileHamburgerLine {
+    height: 1px !important;
+  }
+
   .logoSection {
     order: 0 !important;
   }
@@ -223,6 +253,62 @@
     left: 0.5rem !important;
     width: calc(100vw - 1rem) !important;
     padding: 0.75rem !important;
+  }
+
+  .mobileNavigationRow {
+    gap: 0.5rem !important;
+    padding: 0.4rem 0.5rem !important;
+    margin: 0 0.25rem !important;
+  }
+
+  .mobileMenuButton {
+    padding: 0.4rem 0.6rem !important;
+    font-size: 0.7rem !important;
+    min-width: 65px !important;
+    border-radius: 5px !important;
+  }
+
+  .mobileMenuText {
+    font-size: 0.7rem !important;
+  }
+
+  .mobileHamburgerLines {
+    width: 7px !important;
+  }
+}
+
+/* iPhone portrait specific styles */
+@media (max-width: 414px) and (orientation: portrait) {
+  .mobileNavigationRow {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    gap: 0.4rem !important;
+    padding: 0.3rem 0.4rem !important;
+    margin: 0 0.2rem !important;
+  }
+
+  .mobileMenuButton {
+    padding: 0.35rem 0.5rem !important;
+    font-size: 0.65rem !important;
+    min-width: 60px !important;
+    max-width: 70px !important;
+    border-radius: 4px !important;
+  }
+
+  .mobileMenuText {
+    font-size: 0.65rem !important;
+  }
+
+  .scrollingWelcomeContainer {
+    min-width: 200px !important;
+    max-width: 90% !important;
+    margin: 0 0.5rem !important;
+    padding: 0.4rem 0.8rem !important;
+  }
+
+  .scrollingWelcomeText {
+    font-size: 0.8rem !important;
   }
 }
 

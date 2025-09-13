@@ -333,22 +333,25 @@ export default function Home() {
                 🎉 Welcome to Oakline Bank - Your trusted financial partner since 1995 • 💳 Explore all 23 account types with detailed benefits • 🏦 Join over 500,000+ satisfied customers • 📱 Award-winning mobile app • 🔒 FDIC Insured up to $250,000 • 🌟 Rated #1 Customer Service
               </div>
             </div>
+          </div>
 
+          {/* Mobile-Responsive Navigation Dropdowns Row */}
+          <div style={styles.mobileNavigationRow}>
             {/* Banking Services Dropdown */}
-            <div style={styles.navigationDropdown}>
+            <div style={styles.mobileNavigationDropdown}>
               <button
-                style={styles.modernMenuButton}
+                style={styles.mobileMenuButton}
                 onClick={(e) => {
                   e.stopPropagation();
                   setActiveDropdown(activeDropdown === 'banking' ? null : 'banking');
                 }}
               >
-                <div style={styles.hamburgerLines}>
-                  <span style={styles.hamburgerLine}></span>
-                  <span style={styles.hamburgerLine}></span>
-                  <span style={styles.hamburgerLine}></span>
+                <div style={styles.mobileHamburgerLines}>
+                  <span style={styles.mobileHamburgerLine}></span>
+                  <span style={styles.mobileHamburgerLine}></span>
+                  <span style={styles.mobileHamburgerLine}></span>
                 </div>
-                <span style={styles.menuText}>Banking Services</span>
+                <span style={styles.mobileMenuText}>Banking</span>
               </button>
 
               {activeDropdown === 'banking' && (
@@ -492,20 +495,20 @@ export default function Home() {
             </div>
 
             {/* Digital Services Dropdown */}
-            <div style={styles.navigationDropdown}>
+            <div style={styles.mobileNavigationDropdown}>
               <button
-                style={styles.modernMenuButton}
+                style={styles.mobileMenuButton}
                 onClick={(e) => {
                   e.stopPropagation();
                   setActiveDropdown(activeDropdown === 'digital' ? null : 'digital');
                 }}
               >
-                <div style={styles.hamburgerLines}>
-                  <span style={styles.hamburgerLine}></span>
-                  <span style={styles.hamburgerLine}></span>
-                  <span style={styles.hamburgerLine}></span>
+                <div style={styles.mobileHamburgerLines}>
+                  <span style={styles.mobileHamburgerLine}></span>
+                  <span style={styles.mobileHamburgerLine}></span>
+                  <span style={styles.mobileHamburgerLine}></span>
                 </div>
-                <span style={styles.menuText}>Digital Services</span>
+                <span style={styles.mobileMenuText}>Digital</span>
               </button>
 
               {activeDropdown === 'digital' && (
@@ -3465,6 +3468,58 @@ const styles = {
     fontSize: '0.9rem',
     fontWeight: '500',
     letterSpacing: '0.5px'
+  },
+
+  // Mobile Navigation Row Styles
+  mobileNavigationRow: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: '1rem',
+    padding: '0.75rem 1rem',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: '15px',
+    margin: '0 1rem',
+    flexWrap: 'wrap'
+  },
+  mobileNavigationDropdown: {
+    position: 'relative',
+    zIndex: 10
+  },
+  mobileMenuButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.4rem',
+    padding: '0.5rem 0.8rem',
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    border: '1px solid rgba(255, 255, 255, 0.3)',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    backdropFilter: 'blur(10px)',
+    color: 'white',
+    fontSize: '0.8rem',
+    fontWeight: '600',
+    minWidth: '80px',
+    justifyContent: 'center'
+  },
+  mobileHamburgerLines: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1px',
+    width: '10px'
+  },
+  mobileHamburgerLine: {
+    width: '100%',
+    height: '1.5px',
+    backgroundColor: 'white',
+    borderRadius: '1px',
+    transition: 'all 0.3s ease'
+  },
+  mobileMenuText: {
+    fontSize: '0.8rem',
+    fontWeight: '600',
+    color: 'white'
   },
 
   // Professional Dropdown Styles
