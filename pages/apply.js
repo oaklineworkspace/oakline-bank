@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
@@ -1169,6 +1168,24 @@ export default function Apply() {
       paddingTop: '1rem',
       borderTop: '1px solid rgba(255,200,87,0.3)',
       marginTop: '1rem'
+    },
+    scrollingAccountContainer: {
+      maxWidth: '1200px',
+      margin: '1rem auto 0',
+      padding: '0 2rem',
+      overflow: 'hidden',
+      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+      borderRadius: '20px',
+      padding: '0.75rem 1.5rem',
+      position: 'relative'
+    },
+    scrollingAccountText: {
+      whiteSpace: 'nowrap',
+      animation: 'scrollAccountOpening 25s linear infinite',
+      color: '#FFD687',
+      fontSize: '0.95rem',
+      fontWeight: '600',
+      letterSpacing: '0.5px'
     }
   };
 
@@ -1213,6 +1230,13 @@ export default function Apply() {
                 </button>
               </div>
             </div>
+          </div>
+
+          {/* Scrolling Text for Account Opening */}
+          <div style={styles.scrollingAccountContainer}>
+            <span style={styles.scrollingAccountText}>
+              Open your Oakline Bank account online in minutes! Enjoy seamless banking, competitive rates, and personalized service. Start your financial journey today.
+            </span>
           </div>
 
           {/* Progress Indicator */}
@@ -1916,6 +1940,23 @@ export default function Apply() {
             transform: rotate(360deg);
           }
         }
+
+        @keyframes scrollAccountOpening {
+          from {
+            transform: translateX(100%);
+          }
+          to {
+            transform: translateX(-100%);
+          }
+        }
+
+        .grid-cols-2 {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .grid-cols-3 {
+          grid-template-columns: repeat(3, 1fr);
+        }
+
 
         @media (max-width: 768px) {
           .grid-cols-2 {

@@ -1988,11 +1988,11 @@ const styles = {
   // Professional Banking Hero Section
   heroSection: {
     position: 'relative',
-    height: 'clamp(500px, 70vh, 700px)',
+    height: 'clamp(400px, 56vh, 560px)',
     overflow: 'hidden',
     width: '100%',
     background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
-    padding: '2.5rem 1rem',
+    padding: '2rem 1rem',
   },
   heroParallax: {
     position: 'relative',
@@ -2267,7 +2267,7 @@ const styles = {
   },
   featureImage: {
     width: '100%',
-    height: '300px',
+    height: '240px',
     objectFit: 'cover',
     transition: 'transform 0.5s ease'
   },
@@ -3084,7 +3084,7 @@ const styles = {
   },
   debitCardImageContainer: {
     position: 'relative',
-    height: '280px',
+    height: '224px',
     background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
     display: 'flex',
     alignItems: 'center',
@@ -3094,7 +3094,7 @@ const styles = {
   debitCardImage: {
     width: '90%',
     height: 'auto',
-    maxHeight: '240px',
+    maxHeight: '192px',
     objectFit: 'contain',
     filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.3))',
     transition: 'transform 0.3s ease'
@@ -3239,7 +3239,7 @@ const styles = {
   },
   successImageContainer: {
     position: 'relative',
-    height: '240px',
+    height: '192px',
     background: 'linear-gradient(135deg, #059669 0%, #0891b2 100%)',
     display: 'flex',
     alignItems: 'center',
@@ -3249,7 +3249,7 @@ const styles = {
   successImage: {
     width: '85%',
     height: 'auto',
-    maxHeight: '200px',
+    maxHeight: '160px',
     objectFit: 'contain',
     filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.2))'
   },
