@@ -157,9 +157,11 @@ export default function ApproveAccounts() {
   return (
     <div style={styles.container}>
       <div style={styles.header}>
-        <div style={styles.headerContent}>
-          <h1 style={styles.title}>✅ Account Approval</h1>
-          <p style={styles.subtitle}>Approve or reject pending account applications</p>
+        <div style={styles.headerTop}>
+          <div style={styles.headerContent}>
+            <h1 style={styles.title}>✅ Account Approval</h1>
+            <p style={styles.subtitle}>Approve or reject pending account applications</p>
+          </div>
         </div>
         <div style={styles.headerActions}>
           <button onClick={fetchPendingAccounts} style={styles.refreshButton}>
@@ -207,26 +209,32 @@ export default function ApproveAccounts() {
                 <div style={styles.accountDetails}>
                   {account.applications && (
                     <>
-                      <p style={styles.detail}>
-                        <strong>Name:</strong> {account.applications.first_name} {account.applications.last_name}
-                      </p>
-                      <p style={styles.detail}>
-                        <strong>Email:</strong> {account.applications.email}
-                      </p>
-                      <p style={styles.detail}>
-                        <strong>Phone:</strong> {account.applications.phone || 'Not provided'}
-                      </p>
-                      <p style={styles.detail}>
-                        <strong>Address:</strong> {account.applications.address || 'Not provided'}
-                      </p>
+                      <div style={styles.detail}>
+                        <span style={styles.detailLabel}>Name:</span>
+                        <span style={styles.detailValue}>{account.applications.first_name} {account.applications.last_name}</span>
+                      </div>
+                      <div style={styles.detail}>
+                        <span style={styles.detailLabel}>Email:</span>
+                        <span style={styles.detailValue}>{account.applications.email}</span>
+                      </div>
+                      <div style={styles.detail}>
+                        <span style={styles.detailLabel}>Phone:</span>
+                        <span style={styles.detailValue}>{account.applications.phone || 'Not provided'}</span>
+                      </div>
+                      <div style={styles.detail}>
+                        <span style={styles.detailLabel}>Address:</span>
+                        <span style={styles.detailValue}>{account.applications.address || 'Not provided'}</span>
+                      </div>
                     </>
                   )}
-                  <p style={styles.detail}>
-                    <strong>Initial Balance:</strong> ${parseFloat(account.balance || 0).toFixed(2)}
-                  </p>
-                  <p style={styles.detail}>
-                    <strong>Applied:</strong> {new Date(account.created_at).toLocaleDateString()}
-                  </p>
+                  <div style={styles.detail}>
+                    <span style={styles.detailLabel}>Initial Balance:</span>
+                    <span style={styles.detailValue}>${parseFloat(account.balance || 0).toFixed(2)}</span>
+                  </div>
+                  <div style={styles.detail}>
+                    <span style={styles.detailLabel}>Applied:</span>
+                    <span style={styles.detailValue}>{new Date(account.created_at).toLocaleDateString()}</span>
+                  </div>
                 </div>
                 
                 <div style={styles.actionButtons}>
@@ -261,11 +269,11 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     background: 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)',
-    padding: '20px'
+    padding: '1rem'
   },
   loginCard: {
     background: 'white',
-    padding: '40px',
+    padding: 'clamp(1.5rem, 5vw, 2.5rem)',
     borderRadius: '16px',
     boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
     width: '100%',
@@ -274,217 +282,291 @@ const styles = {
   container: {
     minHeight: '100vh',
     background: 'linear-gradient(135deg, #1e3a5f 0%, #2c5282 100%)',
-    padding: '20px'
+    padding: 'clamp(1rem, 3vw, 1.5rem)'
   },
   header: {
     display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '30px',
+    flexDirection: 'column',
+    gap: '1rem',
+    marginBottom: '2rem',
     background: 'white',
-    padding: '25px',
-    borderRadius: '12px',
-    boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+    padding: 'clamp(1rem, 4vw, 1.5rem)',
+    borderRadius: '16px',
+    boxShadow: '0 8px 24px rgba(0,0,0,0.12)'
+  },
+  headerTop: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
     flexWrap: 'wrap',
-    gap: '15px'
+    gap: '1rem'
   },
   headerContent: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '5px'
+    gap: '0.5rem'
   },
   title: {
-    fontSize: '28px',
-    fontWeight: 'bold',
+    fontSize: 'clamp(1.5rem, 5vw, 2rem)',
+    fontWeight: '700',
     color: '#1e3c72',
-    margin: 0
+    margin: 0,
+    lineHeight: '1.2'
   },
   subtitle: {
-    fontSize: '16px',
-    color: '#555',
-    margin: 0
+    fontSize: 'clamp(0.875rem, 3vw, 1rem)',
+    color: '#64748b',
+    margin: 0,
+    lineHeight: '1.4'
   },
   headerActions: {
     display: 'flex',
-    gap: '10px',
-    flexWrap: 'wrap'
+    gap: '0.75rem',
+    flexWrap: 'wrap',
+    alignItems: 'center'
   },
   refreshButton: {
-    background: '#3b82f6',
+    background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
     color: 'white',
     border: 'none',
-    padding: '10px 20px',
-    borderRadius: '8px',
+    padding: 'clamp(0.5rem, 2vw, 0.75rem) clamp(1rem, 3vw, 1.25rem)',
+    borderRadius: '12px',
     cursor: 'pointer',
-    fontSize: '14px',
-    fontWeight: '500'
+    fontSize: 'clamp(0.75rem, 2.5vw, 0.875rem)',
+    fontWeight: '600',
+    transition: 'all 0.2s ease',
+    boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)'
   },
   backButton: {
-    background: '#6b7280',
+    background: 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)',
     color: 'white',
     border: 'none',
-    padding: '10px 20px',
-    borderRadius: '8px',
+    padding: 'clamp(0.5rem, 2vw, 0.75rem) clamp(1rem, 3vw, 1.25rem)',
+    borderRadius: '12px',
     cursor: 'pointer',
-    fontSize: '14px',
-    fontWeight: '500',
+    fontSize: 'clamp(0.75rem, 2.5vw, 0.875rem)',
+    fontWeight: '600',
     textDecoration: 'none',
-    display: 'inline-block'
+    display: 'inline-block',
+    transition: 'all 0.2s ease',
+    boxShadow: '0 4px 12px rgba(107, 114, 128, 0.3)'
   },
   logoutButton: {
-    background: '#dc3545',
+    background: 'linear-gradient(135deg, #dc3545 0%, #b91c1c 100%)',
     color: 'white',
     border: 'none',
-    padding: '10px 20px',
-    borderRadius: '8px',
+    padding: 'clamp(0.5rem, 2vw, 0.75rem) clamp(1rem, 3vw, 1.25rem)',
+    borderRadius: '12px',
     cursor: 'pointer',
-    fontSize: '14px',
-    fontWeight: '500'
+    fontSize: 'clamp(0.75rem, 2.5vw, 0.875rem)',
+    fontWeight: '600',
+    transition: 'all 0.2s ease',
+    boxShadow: '0 4px 12px rgba(220, 53, 69, 0.3)'
   },
   form: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '20px'
+    gap: '1.5rem'
   },
   inputGroup: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '8px'
+    gap: '0.5rem'
   },
   label: {
-    fontSize: '14px',
-    fontWeight: '500',
-    color: '#333'
+    fontSize: 'clamp(0.875rem, 2.5vw, 1rem)',
+    fontWeight: '600',
+    color: '#374151'
   },
   input: {
-    padding: '12px',
-    border: '2px solid #e0e0e0',
-    borderRadius: '8px',
-    fontSize: '16px',
-    outline: 'none'
+    padding: 'clamp(0.75rem, 3vw, 1rem)',
+    border: '2px solid #e5e7eb',
+    borderRadius: '12px',
+    fontSize: 'clamp(1rem, 3vw, 1.125rem)',
+    outline: 'none',
+    transition: 'border-color 0.2s ease',
+    fontFamily: 'inherit'
   },
   loginButton: {
     background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
     color: 'white',
     border: 'none',
-    padding: '12px 24px',
-    borderRadius: '8px',
-    fontSize: '16px',
-    fontWeight: '500',
-    cursor: 'pointer'
+    padding: 'clamp(0.75rem, 3vw, 1rem) clamp(1.5rem, 4vw, 2rem)',
+    borderRadius: '12px',
+    fontSize: 'clamp(1rem, 3vw, 1.125rem)',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+    boxShadow: '0 8px 20px rgba(102, 126, 234, 0.4)'
   },
   error: {
-    color: '#dc3545',
-    fontSize: '14px',
-    textAlign: 'center'
+    color: '#dc2626',
+    fontSize: 'clamp(0.875rem, 2.5vw, 1rem)',
+    textAlign: 'center',
+    fontWeight: '500'
   },
   errorMessage: {
-    background: '#fee2e2',
+    background: '#fef2f2',
     color: '#dc2626',
-    padding: '15px',
-    borderRadius: '8px',
-    margin: '0 0 20px 0',
-    border: '1px solid #fecaca'
+    padding: 'clamp(1rem, 3vw, 1.25rem)',
+    borderRadius: '12px',
+    margin: '0 0 1.5rem 0',
+    border: '1px solid #fecaca',
+    fontSize: 'clamp(0.875rem, 2.5vw, 1rem)',
+    fontWeight: '500'
   },
   accountsSection: {
     background: 'white',
-    padding: '25px',
-    borderRadius: '12px',
-    boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+    padding: 'clamp(1rem, 4vw, 1.5rem)',
+    borderRadius: '16px',
+    boxShadow: '0 8px 24px rgba(0,0,0,0.12)'
   },
   sectionTitle: {
-    fontSize: '20px',
-    fontWeight: 'bold',
+    fontSize: 'clamp(1.25rem, 4vw, 1.5rem)',
+    fontWeight: '700',
     color: '#1e3c72',
-    marginBottom: '20px'
+    marginBottom: '1.5rem',
+    lineHeight: '1.2'
   },
   loading: {
     textAlign: 'center',
-    padding: '40px',
-    color: '#666'
+    padding: 'clamp(2rem, 6vw, 3rem)',
+    color: '#6b7280',
+    fontSize: 'clamp(1rem, 3vw, 1.125rem)'
   },
   emptyState: {
     textAlign: 'center',
-    padding: '40px',
-    color: '#666'
+    padding: 'clamp(2rem, 6vw, 3rem)',
+    color: '#6b7280'
   },
   accountsGrid: {
     display: 'grid',
-    gap: '20px'
+    gap: 'clamp(1rem, 3vw, 1.5rem)',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 350px), 1fr))'
   },
   accountCard: {
     border: '2px solid #e2e8f0',
-    borderRadius: '12px',
-    padding: '20px',
-    backgroundColor: '#fafafa'
+    borderRadius: '16px',
+    padding: 'clamp(1rem, 4vw, 1.5rem)',
+    backgroundColor: '#fafbfc',
+    transition: 'all 0.2s ease',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
   },
   accountHeader: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: '15px',
+    marginBottom: '1rem',
     flexWrap: 'wrap',
-    gap: '10px'
+    gap: '0.75rem'
   },
   accountInfo: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '5px'
+    gap: '0.5rem',
+    flex: '1'
   },
   accountNumber: {
-    fontSize: '18px',
-    fontWeight: 'bold',
+    fontSize: 'clamp(1rem, 3.5vw, 1.25rem)',
+    fontWeight: '700',
     color: '#1e293b',
-    margin: 0
+    margin: 0,
+    lineHeight: '1.2'
   },
   accountType: {
     backgroundColor: '#dbeafe',
     color: '#1d4ed8',
-    padding: '4px 12px',
+    padding: '0.375rem 0.75rem',
     borderRadius: '12px',
-    fontSize: '12px',
-    fontWeight: '500',
-    alignSelf: 'flex-start'
+    fontSize: 'clamp(0.75rem, 2vw, 0.875rem)',
+    fontWeight: '600',
+    alignSelf: 'flex-start',
+    textTransform: 'uppercase',
+    letterSpacing: '0.025em'
   },
   statusBadge: {
-    backgroundColor: '#fbbf24',
+    backgroundColor: '#f59e0b',
     color: 'white',
-    padding: '4px 12px',
+    padding: '0.375rem 0.75rem',
     borderRadius: '12px',
-    fontSize: '12px',
-    fontWeight: '500'
+    fontSize: 'clamp(0.75rem, 2vw, 0.875rem)',
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: '0.025em',
+    boxShadow: '0 2px 8px rgba(245, 158, 11, 0.3)'
   },
   accountDetails: {
-    marginBottom: '20px'
+    marginBottom: '1.5rem',
+    display: 'grid',
+    gap: '0.5rem'
   },
   detail: {
-    margin: '5px 0',
-    fontSize: '14px',
-    color: '#64748b'
+    margin: 0,
+    fontSize: 'clamp(0.875rem, 2.5vw, 1rem)',
+    color: '#64748b',
+    lineHeight: '1.4',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '0.25rem 0',
+    borderBottom: '1px solid #f1f5f9'
+  },
+  detailLabel: {
+    fontWeight: '600',
+    color: '#374151'
+  },
+  detailValue: {
+    fontWeight: '500',
+    textAlign: 'right'
   },
   actionButtons: {
-    display: 'flex',
-    gap: '10px',
-    flexWrap: 'wrap'
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap: '0.75rem'
   },
   approveButton: {
-    background: '#10b981',
+    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
     color: 'white',
     border: 'none',
-    padding: '10px 20px',
-    borderRadius: '8px',
-    fontSize: '14px',
-    fontWeight: '500',
-    cursor: 'pointer'
+    padding: 'clamp(0.75rem, 3vw, 1rem)',
+    borderRadius: '12px',
+    fontSize: 'clamp(0.875rem, 2.5vw, 1rem)',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '0.5rem'
   },
   rejectButton: {
-    background: '#ef4444',
+    background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
     color: 'white',
     border: 'none',
-    padding: '10px 20px',
-    borderRadius: '8px',
-    fontSize: '14px',
-    fontWeight: '500',
-    cursor: 'pointer'
+    padding: 'clamp(0.75rem, 3vw, 1rem)',
+    borderRadius: '12px',
+    fontSize: 'clamp(0.875rem, 2.5vw, 1rem)',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+    boxShadow: '0 4px 12px rgba(239, 68, 68, 0.3)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '0.5rem'
+  },
+  '@media (max-width: 768px)': {
+    headerActions: {
+      width: '100%',
+      justifyContent: 'space-between'
+    },
+    accountsGrid: {
+      gridTemplateColumns: '1fr'
+    },
+    actionButtons: {
+      gridTemplateColumns: '1fr',
+      gap: '0.5rem'
+    }
   }
 };
