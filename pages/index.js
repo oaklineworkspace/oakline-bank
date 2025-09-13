@@ -6,9 +6,6 @@ import WelcomeBanner from '../components/WelcomeBanner';
 import HeroSection from '../components/HeroSection';
 import ServicesSection from '../components/ServicesSection';
 import FeaturesSection from '../components/FeaturesSection';
-import LoanApprovalSection from '../components/LoanApprovalSection';
-import TestimonialsSection from '../components/TestimonialsSection';
-import CTA from '../components/CTA';
 import Footer from '../components/Footer';
 import LiveChat from '../components/LiveChat';
 
