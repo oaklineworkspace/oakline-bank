@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import { supabase } from '../utils/supabaseClient'; // Assuming supabase client is set up here
 
 export default function AdminUsers() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [users, setUsers] = useState([]);
+  const [filteredUsers, setFilteredUsers] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const router = useRouter();
 
   useEffect(() => {
@@ -19,18 +22,88 @@ export default function AdminUsers() {
   }, []);
 
   const fetchUsers = async () => {
-    setLoading(true);
     try {
-      // Mock user data - replace with actual API call
-      setUsers([
-        { id: 1, name: 'John Doe', email: 'john@example.com', accounts: 2, balance: 15000, status: 'Active' },
-        { id: 2, name: 'Jane Smith', email: 'jane@example.com', accounts: 3, balance: 25000, status: 'Active' },
-        { id: 3, name: 'Bob Johnson', email: 'bob@example.com', accounts: 1, balance: 5000, status: 'Suspended' }
-      ]);
+      setLoading(true);
+      setError('');
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .select(`
+          id,
+          email,
+          full_name,
+          role,
+          created_at,
+          updated_at,
+          phone,
+          address,
+          date_of_birth
+        `)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Supabase error:', error);
+        throw new Error(`Database error: ${error.message}`);
+      }
+
+      const usersData = data || [];
+      setUsers(usersData);
+      setFilteredUsers(usersData);
+
+      // Also fetch accounts for each user
+      if (usersData.length > 0) {
+        const userIds = usersData.map(user => user.id);
+        const { data: accountsData } = await supabase
+          .from('accounts')
+          .select('user_id, account_number, account_type, balance, status')
+          .in('user_id', userIds);
+
+        // Map accounts to users
+        const usersWithAccounts = usersData.map(user => ({
+          ...user,
+          accounts: accountsData?.filter(acc => acc.user_id === user.id) || []
+        }));
+
+        setUsers(usersWithAccounts);
+        setFilteredUsers(usersWithAccounts);
+      }
     } catch (error) {
       console.error('Error fetching users:', error);
+      setError(`Failed to fetch users: ${error.message}`);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteUser = async (userId) => {
+    if (!window.confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+      return;
+    }
+    try {
+      const { error } = await supabase.from('profiles').delete().eq('id', userId);
+      if (error) throw error;
+      setUsers(users.filter(user => user.id !== userId));
+      setFilteredUsers(filteredUsers.filter(user => user.id !== userId));
+      setError('');
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      setError('Failed to delete user.');
+    }
+  };
+
+  const handleStatusChange = async (userId, newStatus) => {
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ status: newStatus })
+        .eq('id', userId);
+      if (error) throw error;
+      setUsers(users.map(user => (user.id === userId ? { ...user, status: newStatus } : user)));
+      setFilteredUsers(filteredUsers.map(user => (user.id === userId ? { ...user, status: newStatus } : user)));
+      setError('');
+    } catch (error) {
+      console.error('Error updating user status:', error);
+      setError('Failed to update user status.');
     }
   };
 
@@ -46,6 +119,8 @@ export default function AdminUsers() {
           ← Back to Dashboard
         </Link>
       </div>
+
+      {error && <div style={styles.errorMessage}>{error}</div>}
 
       <div style={styles.actionsBar}>
         <Link href="/admin/create-user" style={styles.actionButton}>
@@ -74,22 +149,24 @@ export default function AdminUsers() {
                 </tr>
               </thead>
               <tbody>
-                {users.map((user) => (
+                {filteredUsers.map((user) => (
                   <tr key={user.id} style={styles.tableRow}>
-                    <td style={styles.tableCell}>{user.name}</td>
-                    <td style={styles.tableCell}>{user.email}</td>
-                    <td style={styles.tableCell}>{user.accounts}</td>
-                    <td style={styles.tableCell}>${user.balance.toLocaleString()}</td>
+                    <td style={styles.tableCell}>{user.full_name || 'N/A'}</td>
+                    <td style={styles.tableCell}>{user.email || 'N/A'}</td>
+                    <td style={styles.tableCell}>{user.accounts?.length || 0}</td>
+                    <td style={styles.tableCell}>
+                      ${(user.accounts?.reduce((sum, acc) => sum + (acc.balance || 0), 0)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '$0.00'}
+                    </td>
                     <td style={styles.tableCell}>
                       <span style={user.status === 'Active' ? styles.activeStatus : styles.suspendedStatus}>
-                        {user.status}
+                        {user.status || 'Unknown'}
                       </span>
                     </td>
                     <td style={styles.tableCell}>
                       <div style={styles.actionButtons}>
-                        <button style={styles.editButton}>Edit</button>
-                        <button style={styles.viewButton}>View</button>
-                        <button style={styles.deleteButton}>Delete</button>
+                        <Link href={`/admin/edit-user/${user.id}`} style={styles.editButton}>Edit</Link>
+                        <Link href={`/admin/view-user/${user.id}`} style={styles.viewButton}>View</Link>
+                        <button style={styles.deleteButton} onClick={() => handleDeleteUser(user.id)}>Delete</button>
                       </div>
                     </td>
                   </tr>
@@ -213,7 +290,8 @@ const styles = {
     padding: '6px 12px',
     borderRadius: '4px',
     cursor: 'pointer',
-    fontSize: '12px'
+    fontSize: '12px',
+    textDecoration: 'none'
   },
   viewButton: {
     background: '#17a2b8',
@@ -222,7 +300,8 @@ const styles = {
     padding: '6px 12px',
     borderRadius: '4px',
     cursor: 'pointer',
-    fontSize: '12px'
+    fontSize: '12px',
+    textDecoration: 'none'
   },
   deleteButton: {
     background: '#dc3545',
@@ -232,5 +311,13 @@ const styles = {
     borderRadius: '4px',
     cursor: 'pointer',
     fontSize: '12px'
+  },
+  errorMessage: {
+    color: '#dc3545',
+    textAlign: 'center',
+    marginBottom: '20px',
+    padding: '10px',
+    background: '#f8d7da',
+    borderRadius: '4px'
   }
 };

@@ -250,6 +250,16 @@ section {
   }
 }
 
+/* Body padding for sticky footer */
+body {
+  padding-bottom: 120px;
+}
+
+/* Hide body padding on admin pages */
+body.admin-page {
+  padding-bottom: 0;
+}
+
 /* Typography */
 h1, h2, h3, h4, h5, h6 {
   color: var(--primary-text);

@@ -16,13 +16,66 @@ export default function AdminDashboard() {
 
   const ADMIN_PASSWORD = 'Chrismorgan23$';
 
+  // State to track if the user is an admin, initialized to false
+  const [isAdmin, setIsAdmin] = useState(false);
+  // State for general error messages
+  const [adminError, setAdminError] = useState('');
+  // State for dashboard statistics
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalAccounts: 0,
+    totalTransactions: 0,
+    pendingApplications: 0,
+  });
+
   useEffect(() => {
-    const adminAuth = localStorage.getItem('adminAuthenticated');
-    if (adminAuth === 'true') {
-      setIsAuthenticated(true);
-      fetchBankData();
-    }
+    checkAdminAccess();
   }, []);
+
+  useEffect(() => {
+    if (isAdmin) {
+      fetchStats();
+    }
+  }, [isAdmin]);
+
+  const checkAdminAccess = async () => {
+    try {
+      setLoading(true);
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+      if (userError || !user) {
+        console.error('User authentication error:', userError);
+        router.push('/login');
+        return;
+      }
+
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+      if (profileError) {
+        console.error('Profile fetch error:', profileError);
+        setError('Unable to verify admin access. Please try again.');
+        setLoading(false);
+        return;
+      }
+
+      if (!profile || profile.role !== 'admin') {
+        console.log('User is not admin, redirecting...');
+        router.push('/dashboard');
+        return;
+      }
+
+      setIsAdmin(true);
+      setLoading(false);
+    } catch (error) {
+      console.error('Admin access error:', error);
+      setError('An unexpected error occurred. Please try again.');
+      setLoading(false);
+    }
+  };
 
   const handleLogin = (e) => {
     e.preventDefault();
@@ -137,6 +190,41 @@ export default function AdminDashboard() {
     }
   };
 
+  const fetchStats = async () => {
+    try {
+      setLoading(true);
+
+      // Fetch all stats in parallel with proper error handling
+      const [usersResult, accountsResult, transactionsResult, pendingResult] = await Promise.allSettled([
+        supabase.from('profiles').select('*', { count: 'exact', head: true }),
+        supabase.from('accounts').select('*', { count: 'exact', head: true }),
+        supabase.from('transactions').select('*', { count: 'exact', head: true }),
+        supabase.from('applications').select('*', { count: 'exact', head: true }).eq('status', 'pending')
+      ]);
+
+      const newStats = {
+        totalUsers: usersResult.status === 'fulfilled' ? (usersResult.value.count || 0) : 0,
+        totalAccounts: accountsResult.status === 'fulfilled' ? (accountsResult.value.count || 0) : 0,
+        totalTransactions: transactionsResult.status === 'fulfilled' ? (transactionsResult.value.count || 0) : 0,
+        pendingApplications: pendingResult.status === 'fulfilled' ? (pendingResult.value.count || 0) : 0
+      };
+
+      setStats(newStats);
+
+      // Log any failed requests
+      if (usersResult.status === 'rejected') console.warn('Failed to fetch users:', usersResult.reason);
+      if (accountsResult.status === 'rejected') console.warn('Failed to fetch accounts:', accountsResult.reason);
+      if (transactionsResult.status === 'rejected') console.warn('Failed to fetch transactions:', transactionsResult.reason);
+      if (pendingResult.status === 'rejected') console.warn('Failed to fetch pending applications:', pendingResult.reason);
+
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+      setError('Failed to load dashboard statistics. Some features may be unavailable.');
+      setLoading(false);
+    }
+  };
+
   if (!isAuthenticated) {
     return (
       <div style={styles.loginContainer}>
@@ -187,29 +275,29 @@ export default function AdminDashboard() {
           <div style={styles.statCard}>
             <div style={styles.statIcon}>👥</div>
             <div style={styles.statInfo}>
-              <h3 style={styles.statNumber}>{bankStats ? (bankStats.totalUsers || 0).toLocaleString() : 'Loading...'}</h3>
+              <h3 style={styles.statNumber}>{stats ? (stats.totalUsers || 0).toLocaleString() : 'Loading...'}</h3>
               <p style={styles.statLabel}>Total Users</p>
             </div>
           </div>
           <div style={styles.statCard}>
             <div style={styles.statIcon}>💰</div>
             <div style={styles.statInfo}>
-              <h3 style={styles.statNumber}>{bankStats ? `$${(bankStats.totalBalance || 0).toLocaleString()}` : 'Loading...'}</h3>
-              <p style={styles.statLabel}>Total Balance</p>
+              <h3 style={styles.statNumber}>{stats ? `$${(stats.totalAccounts || 0).toLocaleString()}` : 'Loading...'}</h3>
+              <p style={styles.statLabel}>Total Accounts</p>
             </div>
           </div>
           <div style={styles.statCard}>
             <div style={styles.statIcon}>📊</div>
             <div style={styles.statInfo}>
-              <h3 style={styles.statNumber}>{bankStats ? (bankStats.totalTransactions || 0).toLocaleString() : 'Loading...'}</h3>
+              <h3 style={styles.statNumber}>{stats ? (stats.totalTransactions || 0).toLocaleString() : 'Loading...'}</h3>
               <p style={styles.statLabel}>Total Transactions</p>
             </div>
           </div>
           <div style={styles.statCard}>
             <div style={styles.statIcon}>🏦</div>
             <div style={styles.statInfo}>
-              <h3 style={styles.statNumber}>{bankStats ? (bankStats.totalAccounts || 0).toLocaleString() : 'Loading...'}</h3>
-              <p style={styles.statLabel}>Total Accounts</p>
+              <h3 style={styles.statNumber}>{stats ? (stats.pendingApplications || 0).toLocaleString() : 'Loading...'}</h3>
+              <p style={styles.statLabel}>Pending Applications</p>
             </div>
           </div>
         </div>
@@ -422,6 +510,28 @@ export default function AdminDashboard() {
           </div>
         </div>
       </div>
+
+      {/* Sticky Footer with Buttons */}
+      <footer style={styles.stickyFooter}>
+        <button
+          style={styles.footerButton}
+          onClick={() => router.push('/apply')}
+        >
+          📝 Enroll Now
+        </button>
+        <button
+          style={styles.footerButton}
+          onClick={() => router.push('/signin')}
+        >
+          🔑 Sign In
+        </button>
+        <button
+          style={styles.footerButton}
+          onClick={() => router.push('/open-account')}
+        >
+          🏦 Open Account
+        </button>
+      </footer>
     </div>
   );
 }
@@ -446,7 +556,9 @@ const styles = {
   container: {
     minHeight: '100vh',
     background: 'linear-gradient(135deg, #1e3a5f 0%, #2c5282 100%)',
-    padding: '20px'
+    padding: '20px',
+    paddingBottom: '80px', // Add padding to the bottom to make space for the sticky footer
+    position: 'relative', // Needed for absolute positioning of the footer
   },
   header: {
     display: 'flex',
@@ -674,5 +786,36 @@ const styles = {
     color: '#dc3545',
     fontSize: '14px',
     textAlign: 'center'
+  },
+  stickyFooter: {
+    position: 'fixed',
+    bottom: 0,
+    left: 0,
+    width: '100%',
+    display: 'flex',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    background: '#1e3a5f',
+    padding: '15px 0',
+    boxShadow: '0 -2px 10px rgba(0,0,0,0.15)',
+    zIndex: 1000,
+  },
+  footerButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    padding: '10px 18px',
+    background: 'linear-gradient(135deg, #43cea2 0%, #18b590 100%)',
+    color: 'white',
+    border: 'none',
+    borderRadius: '8px',
+    fontSize: '14px',
+    fontWeight: '500',
+    cursor: 'pointer',
+    transition: 'transform 0.2s, box-shadow 0.2s',
+    ':hover': {
+      transform: 'translateY(-2px)',
+      boxShadow: '0 4px 8px rgba(0,0,0,0.2)'
+    }
   }
 };

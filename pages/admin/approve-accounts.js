@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
@@ -13,14 +12,18 @@ export default function ApproveAccounts() {
   const [processing, setProcessing] = useState(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [approvedAccount, setApprovedAccount] = useState(null);
+  const [message, setMessage] = useState(''); // For success messages
+  const [user, setUser] = useState(null); // To store logged-in admin user info
   const router = useRouter();
 
   const ADMIN_PASSWORD = 'Chrismorgan23$';
 
   useEffect(() => {
     const adminAuth = localStorage.getItem('adminAuthenticated');
-    if (adminAuth === 'true') {
+    const adminUserData = localStorage.getItem('adminUser');
+    if (adminAuth === 'true' && adminUserData) {
       setIsAuthenticated(true);
+      setUser(JSON.parse(adminUserData));
       fetchPendingAccounts();
     }
   }, []);
@@ -29,7 +32,12 @@ export default function ApproveAccounts() {
     e.preventDefault();
     if (password === ADMIN_PASSWORD) {
       setIsAuthenticated(true);
+      // In a real app, you'd fetch user data here after authentication
+      // For now, simulating admin user data
+      const adminUser = { id: 'admin_user_123', email: 'admin@example.com', full_name: 'Admin User' };
       localStorage.setItem('adminAuthenticated', 'true');
+      localStorage.setItem('adminUser', JSON.stringify(adminUser));
+      setUser(adminUser);
       setError('');
       fetchPendingAccounts();
     } else {
@@ -40,11 +48,15 @@ export default function ApproveAccounts() {
   const handleLogout = () => {
     setIsAuthenticated(false);
     localStorage.removeItem('adminAuthenticated');
+    localStorage.removeItem('adminUser');
+    setUser(null);
     setPassword('');
+    setPendingAccounts([]);
   };
 
   const fetchPendingAccounts = async () => {
     setLoading(true);
+    setError(''); // Clear previous errors
     try {
       const { data: accounts, error } = await supabase
         .from('accounts')
@@ -63,69 +75,95 @@ export default function ApproveAccounts() {
 
       if (error) {
         console.error('Error fetching pending accounts:', error);
-        setError('Failed to load pending accounts');
+        throw new Error(`Failed to load pending accounts: ${error.message}`);
       } else {
         setPendingAccounts(accounts || []);
       }
     } catch (error) {
       console.error('Error:', error);
-      setError('Failed to load pending accounts');
+      setError(error.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const approveAccount = async (accountId) => {
+  const approveAccount = async (accountId, accountNumber) => {
     setProcessing(accountId);
+    setError(''); // Clear previous errors
     try {
-      const { error } = await supabase
+      // Update account status
+      const { error: updateError } = await supabase
         .from('accounts')
-        .update({ 
+        .update({
           status: 'active',
-          updated_at: new Date().toISOString()
+          approved_at: new Date().toISOString(),
+          approved_by: user?.id // Assuming 'user' state holds the admin's info
         })
         .eq('id', accountId);
 
-      if (error) {
-        console.error('Error approving account:', error);
-        setError('Failed to approve account');
-      } else {
-        // Store approved account data and remove from pending list
-        const approvedAcc = pendingAccounts.find(acc => acc.id === accountId);
-        setApprovedAccount(approvedAcc);
-        setPendingAccounts(prev => prev.filter(acc => acc.id !== accountId));
-        setShowSuccessModal(true);
+      if (updateError) {
+        console.error('Update error:', updateError);
+        throw new Error(`Failed to approve account: ${updateError.message}`);
       }
+
+      // Get account details for user notification (optional, for logging or email)
+      const { data: accountData, error: accountError } = await supabase
+        .from('accounts')
+        .select(`
+          profiles:user_id (
+            email,
+            full_name
+          )
+        `)
+        .eq('id', accountId)
+        .single();
+
+      if (!accountError && accountData?.profiles?.email) {
+        // In a real application, you would send an email here.
+        console.log(`Simulating approval notification to ${accountData.profiles.email}`);
+      }
+
+      setMessage(`Account ${accountNumber} has been approved successfully!`);
+      // Clear the message after some time
+      setTimeout(() => setMessage(''), 5000);
+
+      // Refresh the pending accounts list
+      await fetchPendingAccounts();
     } catch (error) {
-      console.error('Error:', error);
-      setError('Failed to approve account');
+      console.error('Error approving account:', error);
+      setError(error.message);
+      setTimeout(() => setError(''), 5000);
     } finally {
       setProcessing(null);
     }
   };
 
-  const rejectAccount = async (accountId) => {
+  const rejectAccount = async (accountId, accountNumber) => {
     setProcessing(accountId);
+    setError(''); // Clear previous errors
     try {
       const { error } = await supabase
         .from('accounts')
-        .update({ 
+        .update({
           status: 'rejected',
-          updated_at: new Date().toISOString()
+          rejected_at: new Date().toISOString(),
+          rejected_by: user?.id
         })
         .eq('id', accountId);
 
       if (error) {
         console.error('Error rejecting account:', error);
-        setError('Failed to reject account');
+        throw new Error(`Failed to reject account: ${error.message}`);
       } else {
+        setMessage(`Account ${accountNumber} has been rejected successfully!`);
+        setTimeout(() => setMessage(''), 5000);
         // Remove from pending list
         setPendingAccounts(prev => prev.filter(acc => acc.id !== accountId));
-        alert('Account rejected successfully!');
       }
     } catch (error) {
       console.error('Error:', error);
-      setError('Failed to reject account');
+      setError(error.message);
+      setTimeout(() => setError(''), 5000);
     } finally {
       setProcessing(null);
     }
@@ -180,6 +218,9 @@ export default function ApproveAccounts() {
         </div>
       </div>
 
+      {message && (
+        <div style={styles.successMessage}>{message}</div>
+      )}
       {error && (
         <div style={styles.errorMessage}>{error}</div>
       )}
@@ -188,7 +229,7 @@ export default function ApproveAccounts() {
         <h2 style={styles.sectionTitle}>
           Pending Accounts ({pendingAccounts.length})
         </h2>
-        
+
         {loading ? (
           <div style={styles.loading}>Loading pending accounts...</div>
         ) : pendingAccounts.length === 0 ? (
@@ -209,7 +250,7 @@ export default function ApproveAccounts() {
                     PENDING
                   </div>
                 </div>
-                
+
                 <div style={styles.accountDetails}>
                   {account.applications && (
                     <>
@@ -240,17 +281,17 @@ export default function ApproveAccounts() {
                     <span style={styles.detailValue}>{new Date(account.created_at).toLocaleDateString()}</span>
                   </div>
                 </div>
-                
+
                 <div style={styles.actionButtons}>
                   <button
-                    onClick={() => approveAccount(account.id)}
+                    onClick={() => approveAccount(account.id, account.account_number)}
                     disabled={processing === account.id}
                     style={styles.approveButton}
                   >
                     {processing === account.id ? '⏳ Processing...' : '✅ Approve'}
                   </button>
                   <button
-                    onClick={() => rejectAccount(account.id)}
+                    onClick={() => rejectAccount(account.id, account.account_number)}
                     disabled={processing === account.id}
                     style={styles.rejectButton}
                   >
@@ -274,7 +315,7 @@ export default function ApproveAccounts() {
                 The customer has been notified and can now access their account
               </p>
             </div>
-            
+
             <div style={styles.successDetails}>
               <div style={styles.successCard}>
                 <h3 style={styles.successCardTitle}>Account Information</h3>
@@ -305,7 +346,7 @@ export default function ApproveAccounts() {
                   </div>
                 </div>
               </div>
-              
+
               <div style={styles.successActions}>
                 <div style={styles.successActionItem}>
                   <span style={styles.successActionIcon}>📧</span>
@@ -321,7 +362,7 @@ export default function ApproveAccounts() {
                 </div>
               </div>
             </div>
-            
+
             <div style={styles.successFooter}>
               <button
                 onClick={() => {
@@ -490,6 +531,16 @@ const styles = {
     borderRadius: '12px',
     margin: '0 0 1.5rem 0',
     border: '1px solid #fecaca',
+    fontSize: 'clamp(0.875rem, 2.5vw, 1rem)',
+    fontWeight: '500'
+  },
+  successMessage: {
+    background: '#d1fae5',
+    color: '#065f46',
+    padding: 'clamp(1rem, 3vw, 1.25rem)',
+    borderRadius: '12px',
+    margin: '0 0 1.5rem 0',
+    border: '1px solid #a7f3d0',
     fontSize: 'clamp(0.875rem, 2.5vw, 1rem)',
     fontWeight: '500'
   },

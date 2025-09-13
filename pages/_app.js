@@ -5,6 +5,7 @@ import Head from 'next/head';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createContext, useContext, useState } from 'react';
 import { useRouter } from 'next/router';
+import StickyFooter from '../components/StickyFooter';
 
 const queryClient = new QueryClient()
 
@@ -33,6 +34,7 @@ export default function MyApp({ Component, pageProps }) {
         <div style={{ paddingBottom: shouldShowFooter ? '140px' : '0' }}>
           <Component {...pageProps} />
         </div>
+        {shouldShowFooter && <StickyFooter />}
       </PathnameContextProviderAdapter>
     </QueryClientProvider>
   )
