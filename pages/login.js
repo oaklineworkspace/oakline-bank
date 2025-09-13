@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useRouter } from 'next/router';
@@ -42,10 +43,10 @@ export default function LoginPage() {
 
   return (
     <div style={styles.container}>
-      {/* Enhanced Oakline Bank Header */}
+      {/* Single Clean Header */}
       <header style={styles.header}>
         <div style={styles.headerContainer}>
-          <div style={styles.headerMainRow}>
+          <div style={styles.headerContent}>
             <Link href="/" style={styles.logoContainer}>
               <img src="/images/logo-primary.png" alt="Oakline Bank" style={styles.logo} />
               <div style={styles.brandInfo}>
@@ -54,19 +55,6 @@ export default function LoginPage() {
               </div>
             </Link>
 
-            <div style={styles.headerInfo}>
-              <div style={styles.routingInfo}>
-                <span style={styles.routingLabel}>Routing Number:</span>
-                <span style={styles.routingNumber}>075915826</span>
-              </div>
-              <div style={styles.supportInfo}>
-                <span style={styles.supportLabel}>24/7 Support:</span>
-                <span style={styles.supportPhone}>1-800-OAKLINE</span>
-              </div>
-            </div>
-          </div>
-
-          <div style={styles.headerActionsRow}>
             <div style={styles.headerActions}>
               <Link href="/" style={styles.headerButton}>
                 <span style={styles.buttonIcon}>🏠</span>
@@ -74,16 +62,23 @@ export default function LoginPage() {
               </Link>
               <Link href="/apply" style={styles.headerButton}>
                 <span style={styles.buttonIcon}>🚀</span>
-                Open New Account
+                Open Account
               </Link>
               <Link href="/support" style={styles.headerButton}>
                 <span style={styles.buttonIcon}>💬</span>
-                Get Support
+                Support
               </Link>
-              <Link href="/faq" style={styles.headerButton}>
-                <span style={styles.buttonIcon}>❓</span>
-                FAQ
-              </Link>
+            </div>
+          </div>
+
+          <div style={styles.headerInfo}>
+            <div style={styles.infoItem}>
+              <span style={styles.infoLabel}>Routing Number:</span>
+              <span style={styles.infoValue}>075915826</span>
+            </div>
+            <div style={styles.infoItem}>
+              <span style={styles.infoLabel}>24/7 Support:</span>
+              <span style={styles.infoValue}>1-800-OAKLINE</span>
             </div>
           </div>
         </div>
@@ -92,50 +87,6 @@ export default function LoginPage() {
       {/* Main Content */}
       <main style={styles.main}>
         <div style={styles.contentWrapper}>
-          {/* Hero Section for Desktop */}
-          <div style={styles.heroSection}>
-            <div style={styles.heroContent}>
-              <h1 style={styles.heroTitle}>Secure Banking Access</h1>
-              <p style={styles.heroSubtitle}>
-                Access your accounts securely with our state-of-the-art banking platform. 
-                Your financial security is our priority.
-              </p>
-
-              <div style={styles.bankingInfo}>
-                <div style={styles.infoCard}>
-                  <span style={styles.infoIcon}>🏦</span>
-                  <div>
-                    <h3 style={styles.infoTitle}>Routing Number</h3>
-                    <p style={styles.infoText}>075915826</p>
-                  </div>
-                </div>
-
-                <div style={styles.infoCard}>
-                  <span style={styles.infoIcon}>📞</span>
-                  <div>
-                    <h3 style={styles.infoTitle}>24/7 Support</h3>
-                    <p style={styles.infoText}>1-800-OAKLINE</p>
-                  </div>
-                </div>
-              </div>
-
-              <div style={styles.securityFeatures}>
-                <div style={styles.feature}>
-                  <span style={styles.featureIcon}>🔒</span>
-                  <span>256-bit SSL Encryption</span>
-                </div>
-                <div style={styles.feature}>
-                  <span style={styles.featureIcon}>🛡️</span>
-                  <span>Multi-Factor Authentication</span>
-                </div>
-                <div style={styles.feature}>
-                  <span style={styles.featureIcon}>📱</span>
-                  <span>Mobile & Desktop Access</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
           {/* Login Form Section */}
           <div style={styles.loginSection}>
             <div style={styles.loginCard}>
@@ -143,7 +94,7 @@ export default function LoginPage() {
                 <div style={styles.cardLogo}>
                   <img src="/images/logo-primary.png" alt="Oakline Bank" style={styles.cardLogoImg} />
                 </div>
-                <h2 style={styles.loginTitle}>Welcome Back</h2>
+                <h1 style={styles.loginTitle}>Welcome Back</h1>
                 <p style={styles.loginSubtitle}>Sign in to your Oakline Bank account</p>
               </div>
 
@@ -211,6 +162,25 @@ export default function LoginPage() {
                 </div>
               )}
 
+              {/* Security Features */}
+              <div style={styles.securitySection}>
+                <h3 style={styles.securityTitle}>Your Security is Our Priority</h3>
+                <div style={styles.securityFeatures}>
+                  <div style={styles.feature}>
+                    <span style={styles.featureIcon}>🔒</span>
+                    <span>256-bit SSL Encryption</span>
+                  </div>
+                  <div style={styles.feature}>
+                    <span style={styles.featureIcon}>🛡️</span>
+                    <span>Multi-Factor Authentication</span>
+                  </div>
+                  <div style={styles.feature}>
+                    <span style={styles.featureIcon}>📱</span>
+                    <span>Mobile & Desktop Access</span>
+                  </div>
+                </div>
+              </div>
+
               {/* Quick Actions */}
               <div style={styles.quickActions}>
                 <h3 style={styles.quickActionsTitle}>Quick Actions</h3>
@@ -218,10 +188,6 @@ export default function LoginPage() {
                   <Link href="/apply" style={styles.actionButton}>
                     <span style={styles.actionIcon}>🚀</span>
                     Open New Account
-                  </Link>
-                  <Link href="/dashboard" style={styles.actionButton}>
-                    <span style={styles.actionIcon}>📊</span>
-                    Go to Dashboard
                   </Link>
                   <Link href="/main-menu" style={styles.actionButton}>
                     <span style={styles.actionIcon}>☰</span>
@@ -279,16 +245,16 @@ export default function LoginPage() {
 const styles = {
   container: {
     minHeight: '100vh',
-    backgroundColor: '#F5F6F8',
+    backgroundColor: '#ffffff',
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
     width: '100%',
     overflowX: 'hidden'
   },
   header: {
-    background: 'linear-gradient(135deg, #1A3E6F 0%, #2A5490 100%)',
+    backgroundColor: '#1A3E6F',
     color: 'white',
     padding: '1rem 1.5rem',
-    boxShadow: '0 8px 32px rgba(26, 62, 111, 0.25)',
+    boxShadow: '0 4px 12px rgba(26, 62, 111, 0.15)',
     position: 'sticky',
     top: 0,
     zIndex: 100
@@ -300,19 +266,12 @@ const styles = {
     flexDirection: 'column',
     gap: '1rem'
   },
-  headerMainRow: {
+  headerContent: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
     flexWrap: 'wrap',
     gap: '1rem'
-  },
-  headerActionsRow: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderTop: '1px solid rgba(255,255,255,0.2)',
-    paddingTop: '1rem'
   },
   logoContainer: {
     display: 'flex',
@@ -322,7 +281,7 @@ const styles = {
     color: 'white'
   },
   logo: {
-    height: '50px',
+    height: '45px',
     width: 'auto'
   },
   brandInfo: {
@@ -330,172 +289,88 @@ const styles = {
     flexDirection: 'column'
   },
   bankName: {
-    fontSize: '1.5rem',
+    fontSize: '1.4rem',
     fontWeight: 'bold',
     margin: 0,
     color: 'white'
   },
   tagline: {
-    fontSize: '0.9rem',
-    color: '#FFC857'
-  },
-  headerInfo: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'flex-end',
-    gap: '0.5rem'
-  },
-  routingInfo: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.5rem',
-    fontSize: '0.85rem'
-  },
-  routingLabel: {
-    color: '#FFD687',
-    fontWeight: '500'
-  },
-  routingNumber: {
+    fontSize: '0.85rem',
     color: '#FFC857',
-    fontWeight: '700',
-    fontFamily: 'monospace',
-    backgroundColor: 'rgba(255, 200, 87, 0.2)',
-    padding: '2px 8px',
-    borderRadius: '4px'
-  },
-  supportInfo: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.5rem',
-    fontSize: '0.9rem'
-  },
-  supportLabel: {
-    color: '#FFD687',
     fontWeight: '500'
-  },
-  supportPhone: {
-    color: '#FFC857',
-    fontWeight: '700'
   },
   headerActions: {
     display: 'flex',
     gap: '1rem',
     flexWrap: 'wrap',
-    justifyContent: 'center'
+    alignItems: 'center'
   },
   headerButton: {
     display: 'flex',
     alignItems: 'center',
     gap: '0.5rem',
-    padding: '0.75rem 1.25rem',
-    backgroundColor: 'rgba(255,200,87,0.15)',
+    padding: '0.6rem 1rem',
+    backgroundColor: 'rgba(255,255,255,0.1)',
     color: 'white',
     textDecoration: 'none',
-    borderRadius: '8px',
-    fontSize: '0.9rem',
+    borderRadius: '6px',
+    fontSize: '0.85rem',
     fontWeight: '600',
     transition: 'all 0.3s ease',
-    border: '1px solid rgba(255,200,87,0.3)',
+    border: '1px solid rgba(255,255,255,0.2)',
     backdropFilter: 'blur(10px)'
   },
   buttonIcon: {
-    fontSize: '1rem'
+    fontSize: '0.9rem'
+  },
+  headerInfo: {
+    display: 'flex',
+    justifyContent: 'center',
+    gap: '2rem',
+    padding: '0.75rem',
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: '8px',
+    flexWrap: 'wrap'
+  },
+  infoItem: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    fontSize: '0.85rem'
+  },
+  infoLabel: {
+    color: '#CBD5E1',
+    fontWeight: '500'
+  },
+  infoValue: {
+    color: '#FFC857',
+    fontWeight: '700',
+    fontFamily: 'monospace'
   },
   main: {
     flex: 1,
-    minHeight: 'calc(100vh - 120px)'
+    minHeight: 'calc(100vh - 120px)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '2rem 1rem'
   },
   contentWrapper: {
-    display: 'flex',
-    flexDirection: 'column',
-    minHeight: 'calc(100vh - 120px)'
-  },
-  heroSection: {
-    background: 'linear-gradient(135deg, #1A3E6F 0%, #2A5490 100%)',
-    color: 'white',
-    padding: '2rem 1rem',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: '40vh'
-  },
-  heroContent: {
-    maxWidth: '500px',
-    textAlign: 'center'
-  },
-  heroTitle: {
-    fontSize: '2.5rem',
-    fontWeight: 'bold',
-    marginBottom: '1.5rem',
-    lineHeight: '1.2'
-  },
-  heroSubtitle: {
-    fontSize: '1.1rem',
-    marginBottom: '2rem',
-    lineHeight: '1.6',
-    opacity: 0.9
-  },
-  bankingInfo: {
-    display: 'flex',
-    gap: '1.5rem',
-    marginBottom: '2rem',
-    flexWrap: 'wrap'
-  },
-  infoCard: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.75rem',
-    backgroundColor: 'rgba(255,200,87,0.1)',
-    padding: '1rem',
-    borderRadius: '12px',
-    backdropFilter: 'blur(10px)'
-  },
-  infoIcon: {
-    fontSize: '1.5rem'
-  },
-  infoTitle: {
-    fontSize: '0.9rem',
-    fontWeight: 'bold',
-    margin: 0,
-    color: 'white'
-  },
-  infoText: {
-    fontSize: '0.8rem',
-    margin: 0,
-    color: '#FFC857',
-    fontFamily: 'monospace'
-  },
-  securityFeatures: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.75rem'
-  },
-  feature: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.75rem',
-    fontSize: '0.9rem',
-    fontWeight: '500'
-  },
-  featureIcon: {
-    fontSize: '1.2rem'
+    width: '100%',
+    maxWidth: '500px'
   },
   loginSection: {
-    backgroundColor: '#F5F6F8',
-    padding: '2rem 1rem',
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1
+    justifyContent: 'center'
   },
   loginCard: {
     width: '100%',
-    maxWidth: '450px',
     backgroundColor: 'white',
-    borderRadius: '20px',
-    boxShadow: '0 20px 40px rgba(26, 62, 111, 0.1)',
-    padding: '2rem',
-    border: '2px solid #e2e8f0'
+    borderRadius: '16px',
+    boxShadow: '0 12px 32px rgba(26, 62, 111, 0.08)',
+    padding: '2.5rem',
+    border: '1px solid #e2e8f0'
   },
   loginHeader: {
     textAlign: 'center',
@@ -505,7 +380,7 @@ const styles = {
     marginBottom: '1rem'
   },
   cardLogoImg: {
-    height: '40px',
+    height: '35px',
     width: 'auto'
   },
   loginTitle: {
@@ -522,7 +397,8 @@ const styles = {
   form: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '1.5rem'
+    gap: '1.5rem',
+    marginBottom: '2rem'
   },
   inputGroup: {
     display: 'flex',
@@ -538,7 +414,7 @@ const styles = {
     width: '100%',
     padding: '0.75rem 1rem',
     border: '2px solid #e2e8f0',
-    borderRadius: '10px',
+    borderRadius: '8px',
     fontSize: '1rem',
     transition: 'all 0.3s ease',
     boxSizing: 'border-box',
@@ -557,7 +433,7 @@ const styles = {
     backgroundColor: '#1A3E6F',
     color: 'white',
     border: 'none',
-    borderRadius: '10px',
+    borderRadius: '8px',
     fontSize: '1rem',
     fontWeight: '700',
     transition: 'all 0.3s ease',
@@ -591,15 +467,45 @@ const styles = {
     fontWeight: '500',
     border: '1px solid'
   },
-  quickActions: {
+  securitySection: {
     marginTop: '2rem',
     padding: '1.5rem',
-    backgroundColor: '#F5F6F8',
+    backgroundColor: '#f8fafc',
+    borderRadius: '12px',
+    border: '1px solid #e2e8f0'
+  },
+  securityTitle: {
+    fontSize: '1rem',
+    fontWeight: 'bold',
+    color: '#1A3E6F',
+    marginBottom: '1rem',
+    textAlign: 'center'
+  },
+  securityFeatures: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.75rem'
+  },
+  feature: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.75rem',
+    fontSize: '0.85rem',
+    fontWeight: '500',
+    color: '#374151'
+  },
+  featureIcon: {
+    fontSize: '1rem'
+  },
+  quickActions: {
+    marginTop: '1.5rem',
+    padding: '1.5rem',
+    backgroundColor: '#f1f5f9',
     borderRadius: '12px',
     border: '1px solid #e2e8f0'
   },
   quickActionsTitle: {
-    fontSize: '1.1rem',
+    fontSize: '1rem',
     fontWeight: 'bold',
     color: '#1A3E6F',
     marginBottom: '1rem',
@@ -619,7 +525,7 @@ const styles = {
     color: '#1A3E6F',
     textDecoration: 'none',
     borderRadius: '8px',
-    border: '2px solid #e2e8f0',
+    border: '1px solid #e2e8f0',
     fontSize: '0.9rem',
     fontWeight: '500',
     transition: 'all 0.3s ease'
@@ -659,15 +565,15 @@ const styles = {
     marginBottom: '1rem'
   },
   footerTitle: {
-    fontSize: '1.1rem',
+    fontSize: '1rem',
     fontWeight: '600',
     color: '#FFC857',
     marginBottom: '0.5rem'
   },
   footerText: {
-    fontSize: '0.9rem',
+    fontSize: '0.85rem',
     lineHeight: '1.5',
-    color: '#FFD687'
+    color: '#CBD5E1'
   },
   footerBottom: {
     borderTop: '1px solid rgba(255,200,87,0.3)',
@@ -676,185 +582,38 @@ const styles = {
   },
   copyright: {
     fontSize: '0.8rem',
-    color: '#FFD687',
+    color: '#CBD5E1',
     margin: 0
-  },
-  // Dropdown styles to be adjusted for better positioning and size
-  dropdownButton: {
-    padding: '10px 15px',
-    fontSize: '0.9rem',
-    fontWeight: '500',
-    backgroundColor: '#3b82f6',
-    color: 'white',
-    border: 'none',
-    borderRadius: '6px',
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.5rem',
-    transition: 'all 0.3s ease',
-    position: 'relative', // Needed for dropdown content positioning
-    zIndex: 10,
-    minWidth: '120px', // Example: reduce width to not block logo
-  },
-  dropdownContent: {
-    position: 'absolute',
-    top: '100%',
-    left: 0,
-    backgroundColor: 'white',
-    border: '1px solid #e2e8f0',
-    borderRadius: '8px',
-    boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-    padding: '0.5rem 0',
-    marginTop: '5px',
-    minWidth: '180px',
-    zIndex: 20,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.5rem',
-    maxHeight: '200px', // Example: limit height and add scroll
-    overflowY: 'auto',
-    // Positioning adjusted to prevent overflow
-    transformOrigin: 'top left',
-    transform: 'translateX(-0%) translateY(0%)',
-  },
-  dropdownItem: {
-    padding: '8px 15px',
-    fontSize: '0.9rem',
-    fontWeight: '500',
-    color: '#374151',
-    textDecoration: 'none',
-    display: 'block',
-    transition: 'background-color 0.2s ease',
-    whiteSpace: 'nowrap'
-  },
-  // Updated styles for header actions to accommodate new button
-  headerActions: {
-    display: 'flex',
-    gap: '1rem',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    alignItems: 'center' // Ensure buttons align vertically
-  },
-  // Styles for the new Go Back button
-  backButton: {
-    padding: '10px 20px',
-    backgroundColor: '#f8fafc',
-    color: '#1a365d',
-    textDecoration: 'none',
-    borderRadius: '8px',
-    fontSize: '14px',
-    fontWeight: '600',
-    border: '2px solid #e2e8f0',
-    transition: 'all 0.3s ease'
-  },
-  goBackButton: {
-    padding: '10px 20px',
-    backgroundColor: '#1e40af',
-    color: 'white',
-    border: 'none',
-    borderRadius: '8px',
-    fontSize: '14px',
-    fontWeight: '600',
-    cursor: 'pointer',
-    transition: 'all 0.3s ease',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.5rem'
   },
 
   // Mobile Responsive Styles
   '@media (max-width: 768px)': {
-    headerContainer: {
-      padding: '0 1rem'
-    },
-    headerMainRow: {
+    headerContent: {
       flexDirection: 'column',
       alignItems: 'center',
-      gap: '0.5rem'
-    },
-    headerInfo: {
-      alignItems: 'center',
-      width: '100%',
-      textAlign: 'center',
-      marginTop: '0.5rem'
-    },
-    routingInfo: {
-      justifyContent: 'center'
-    },
-    supportInfo: {
-      justifyContent: 'center'
-    },
-    headerActionsRow: {
-      paddingTop: '0.5rem'
+      gap: '1rem'
     },
     headerActions: {
-      flexDirection: 'column',
+      flexDirection: 'row',
+      justifyContent: 'center',
       gap: '0.75rem',
       width: '100%'
     },
     headerButton: {
-      width: '100%',
-      justifyContent: 'center'
-    },
-    heroSection: {
-      padding: '1.5rem 1rem',
-      minHeight: '30vh'
-    },
-    heroTitle: {
-      fontSize: '1.8rem'
-    },
-    heroSubtitle: {
-      fontSize: '1rem'
-    },
-    bankingInfo: {
-      flexDirection: 'column',
-      gap: '1rem'
-    },
-    infoCard: {
-      width: '100%',
+      flex: 1,
       justifyContent: 'center',
-      padding: '1rem'
+      maxWidth: '120px'
     },
-    loginSection: {
-      padding: '1.5rem 1rem'
+    headerInfo: {
+      flexDirection: 'column',
+      gap: '0.5rem'
     },
     loginCard: {
       padding: '2rem 1.5rem',
-      maxWidth: '100%',
-      margin: '0'
-    },
-    loginTitle: {
-      fontSize: '1.6rem'
+      margin: '0 0.5rem'
     },
     input: {
-      fontSize: '16px', // Prevents zoom on iOS
-      padding: '1rem'
-    }
-  },
-  '@media (max-width: 480px)': {
-    heroSection: {
-      padding: '1rem',
-      minHeight: '25vh'
-    },
-    heroTitle: {
-      fontSize: '1.5rem'
-    },
-    heroSubtitle: {
-      fontSize: '0.9rem'
-    },
-    loginSection: {
-      padding: '1rem 0.5rem'
-    },
-    loginCard: {
-      padding: '1.5rem 1rem',
-      borderRadius: '12px'
-    },
-    footerBottom: {
-      paddingTop: '0.5rem'
-    },
-    copyright: {
-      fontSize: '0.7rem'
+      fontSize: '16px' // Prevents zoom on iOS
     }
   }
 };

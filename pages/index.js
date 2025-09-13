@@ -307,12 +307,12 @@ export default function Home() {
   }
 
   return (
-    <div 
+    <div
       style={styles.pageContainer}
       onClick={() => setActiveDropdown(null)}
     >
       {/* Single Clean Header */}
-      <header 
+      <header
         style={styles.mainHeader}
         onClick={(e) => e.stopPropagation()}
       >
@@ -356,7 +356,7 @@ export default function Home() {
 
               {activeDropdown === 'banking' && (
                 <>
-                  <div 
+                  <div
                     style={styles.dropdownBackdrop}
                     onClick={() => setActiveDropdown(null)}
                   ></div>
@@ -365,7 +365,7 @@ export default function Home() {
                       <h3 style={styles.professionalDropdownTitle}>Banking Services</h3>
                       <p style={styles.professionalDropdownSubtitle}>Comprehensive financial solutions for your needs</p>
                     </div>
-                    
+
                     <div style={styles.professionalDropdownGrid}>
                       <div style={styles.professionalDropdownSection}>
                         <div style={styles.professionalSectionHeader}>
@@ -472,7 +472,7 @@ export default function Home() {
                         </div>
                       </div>
                     </div>
-                    
+
                     <div style={styles.professionalDropdownFooter}>
                       <div style={styles.professionalFooterContent}>
                         <div style={styles.professionalFooterText}>
@@ -513,7 +513,7 @@ export default function Home() {
 
               {activeDropdown === 'digital' && (
                 <>
-                  <div 
+                  <div
                     style={styles.dropdownBackdrop}
                     onClick={() => setActiveDropdown(null)}
                   ></div>
@@ -522,7 +522,7 @@ export default function Home() {
                       <h3 style={styles.professionalDropdownTitle}>Digital Banking</h3>
                       <p style={styles.professionalDropdownSubtitle}>Advanced digital tools for modern banking</p>
                     </div>
-                    
+
                     <div style={styles.professionalDropdownGrid}>
                       <div style={styles.professionalDropdownSection}>
                         <div style={styles.professionalSectionHeader}>
@@ -633,7 +633,7 @@ export default function Home() {
                         </div>
                       </div>
                     </div>
-                    
+
                     <div style={styles.professionalDropdownFooter}>
                       <div style={styles.professionalFooterContent}>
                         <div style={styles.professionalFooterText}>
@@ -656,7 +656,7 @@ export default function Home() {
             </div>
           </div>
 
-          
+
         </div>
       </header>
 
@@ -685,21 +685,9 @@ export default function Home() {
                       e.target.src = image.fallback;
                     } else {
                       e.target.style.display = 'none';
-                      const container = e.target.parentNode;
-                      if (container && !container.querySelector('.hero-fallback')) {
-                        const fallback = document.createElement('div');
-                        fallback.className = 'hero-fallback';
-                        fallback.style.cssText = 'position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, #1e293b 0%, #334155 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 4rem;';
-                        fallback.textContent = image.icon;
-                        container.appendChild(fallback);
-                      }
                     }
                   }}
                 />
-                <div style={{
-                  ...styles.heroOverlay,
-                  background: image.gradient
-                }}></div>
               </div>
             ))}
           </div>
@@ -1390,7 +1378,7 @@ export default function Home() {
         </div>
       </section>
 
-      
+
 
       {/* Enhanced Final CTA */}
       <div id="final-cta" data-animate style={{
