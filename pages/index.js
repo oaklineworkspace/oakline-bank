@@ -327,6 +327,13 @@ export default function Home() {
               </div>
             </Link>
 
+            {/* Scrolling Welcome Message */}
+            <div style={styles.scrollingWelcomeContainer}>
+              <div style={styles.scrollingWelcomeText}>
+                🎉 Welcome to Oakline Bank - Your trusted financial partner since 1995 • 💳 Explore all 23 account types with detailed benefits • 🏦 Join over 500,000+ satisfied customers • 📱 Award-winning mobile app • 🔒 FDIC Insured up to $250,000 • 🌟 Rated #1 Customer Service
+              </div>
+            </div>
+
             {/* Banking Services Dropdown */}
             <div style={styles.navigationDropdown}>
               <button
@@ -3369,6 +3376,27 @@ const styles = {
     transition: 'all 0.3s ease'
   },
 
+  // Scrolling Welcome Message Styles
+  scrollingWelcomeContainer: {
+    flex: 1,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: '20px',
+    padding: '0.5rem 1rem',
+    margin: '0 1rem',
+    position: 'relative',
+    minWidth: '300px',
+    maxWidth: '600px'
+  },
+  scrollingWelcomeText: {
+    whiteSpace: 'nowrap',
+    animation: 'scrollWelcome 30s linear infinite',
+    color: '#e2e8f0',
+    fontSize: '0.9rem',
+    fontWeight: '500',
+    letterSpacing: '0.5px'
+  },
+
   // Mobile styles moved to responsive.css for proper media query support
 };
 
@@ -3562,6 +3590,12 @@ if (typeof document !== 'undefined') {
     @keyframes pulseGlow {
       0%, 100% { transform: scale(1); filter: brightness(1); }
       50% { transform: scale(1.02); filter: brightness(1.1); }
+    }
+
+    /* Scrolling Welcome Animation */
+    @keyframes scrollWelcome {
+      0% { transform: translateX(100%); }
+      100% { transform: translateX(-100%); }
     }
 
     /* Hover Effects */

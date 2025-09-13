@@ -255,7 +255,7 @@ export default function Dashboard() {
             <div style={styles.navItem}>
               <button style={styles.navButton} onClick={(e) => { e.stopPropagation(); toggleDropdown('navigation'); }}>
                 <span style={styles.navIcon}>🧭</span>
-                Navigation
+                My Banking
                 <span style={styles.navArrow}>▼</span>
               </button>
               {dropdownOpen.navigation && (
@@ -264,25 +264,44 @@ export default function Dashboard() {
                   <Link href="/main-menu" style={styles.dropdownLink}>📋 Main Menu</Link>
                   <Link href="/account-details" style={styles.dropdownLink}>🏦 Account Details</Link>
                   <Link href="/transfer" style={styles.dropdownLink}>💸 Transfer Money</Link>
-                  <Link href="/cards" style={styles.dropdownLink}>💳 Cards</Link>
-                  <Link href="/transactions" style={styles.dropdownLink}>📜 Transactions</Link>
-                  <Link href="/support" style={styles.dropdownLink}>🎧 Support</Link>
+                  <Link href="/cards" style={styles.dropdownLink}>💳 My Cards</Link>
+                  <Link href="/transactions" style={styles.dropdownLink}>📜 Transaction History</Link>
+                  <Link href="/bill-pay" style={styles.dropdownLink}>🧾 Pay Bills</Link>
+                  <Link href="/deposit-real" style={styles.dropdownLink}>📱 Mobile Deposit</Link>
                 </div>
               )}
             </div>
 
             <div style={styles.navItem}>
               <button style={styles.navButton} onClick={(e) => { e.stopPropagation(); toggleDropdown('services'); }}>
-                <span style={styles.navIcon}>⚡</span>
-                Quick Services
+                <span style={styles.navIcon}>🛡️</span>
+                Security & Settings
                 <span style={styles.navArrow}>▼</span>
               </button>
               {dropdownOpen.services && (
                 <div style={styles.dropdown}>
-                  <Link href="/transfer" style={styles.dropdownLink}>💸 Transfer Money</Link>
-                  <Link href="/bill-pay" style={styles.dropdownLink}>🧾 Pay Bills</Link>
-                  <Link href="/deposit-real" style={styles.dropdownLink}>📱 Mobile Deposit</Link>
-                  <Link href="/apply" style={styles.dropdownLink}>📋 Apply for Account</Link>
+                  <Link href="/security" style={styles.dropdownLink}>🔒 Security Settings</Link>
+                  <Link href="/notifications" style={styles.dropdownLink}>🔔 Notifications</Link>
+                  <Link href="/privacy" style={styles.dropdownLink}>🛡️ Privacy Settings</Link>
+                  <Link href="/profile" style={styles.dropdownLink}>👤 Edit Profile</Link>
+                  <Link href="/messages" style={styles.dropdownLink}>📧 Messages</Link>
+                </div>
+              )}
+            </div>
+
+            <div style={styles.navItem}>
+              <button style={styles.navButton} onClick={(e) => { e.stopPropagation(); toggleDropdown('help'); }}>
+                <span style={styles.navIcon}>❓</span>
+                Help & Support
+                <span style={styles.navArrow}>▼</span>
+              </button>
+              {dropdownOpen.help && (
+                <div style={styles.dropdown}>
+                  <Link href="/support" style={styles.dropdownLink}>🎧 Customer Support</Link>
+                  <Link href="/faq" style={styles.dropdownLink}>❓ FAQ</Link>
+                  <Link href="/financial-education" style={styles.dropdownLink}>📚 Financial Education</Link>
+                  <Link href="/calculators" style={styles.dropdownLink}>🧮 Financial Calculators</Link>
+                  <Link href="/branch-locator" style={styles.dropdownLink}>📍 Find Branch/ATM</Link>
                 </div>
               )}
             </div>
@@ -295,26 +314,14 @@ export default function Dashboard() {
                 <span style={styles.userName}>{getUserDisplayName()}</span>
               </div>
               <div style={styles.userActions}>
-                <div style={styles.navItem}>
-                  <button style={styles.navButton} onClick={(e) => { e.stopPropagation(); toggleDropdown('profile'); }}>
-                    <span style={styles.navIcon}>👤</span>
-                    Profile
-                    <span style={styles.navArrow}>▼</span>
-                  </button>
-                  {dropdownOpen.profile && (
-                      <div style={styles.dropdown}>
-                        <Link href="/profile" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>View Profile</Link>
-                        <Link href="/security" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Security Settings</Link>
-                        <Link href="/notifications" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Notifications</Link>
-                        <Link href="/privacy" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Privacy Settings</Link>
-                        <Link href="/messages" style={{ ...styles.dropdownLink, ...styles.dashboardDropdownLink }}>Messages</Link>
-                      </div>
-                    )}
+                <div style={styles.routingInfo}>
+                  <span style={styles.routingLabel}>Routing #:</span>
+                  <span style={styles.routingNumber}>075915826</span>
                 </div>
-                <button onClick={handleLogout} style={styles.logoutButton}>
-                  <span style={styles.actionIcon}>🚪</span>
-                  Logout
-                </button>
+                <div style={styles.phoneInfo}>
+                  <span style={styles.phoneIcon}>📞</span>
+                  <span>1-800-OAKLINE</span>
+                </div>
               </div>
             </div>
           </div>
@@ -670,6 +677,38 @@ const styles = {
   },
   actionIcon: {
     fontSize: '0.9rem'
+  },
+  routingInfo: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-end',
+    gap: '0.25rem'
+  },
+  routingLabel: {
+    fontSize: '0.7rem',
+    color: '#bfdbfe',
+    fontWeight: '500'
+  },
+  routingNumber: {
+    fontSize: '0.8rem',
+    color: '#059669',
+    fontWeight: '700',
+    fontFamily: 'monospace',
+    letterSpacing: '1px'
+  },
+  phoneInfo: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    padding: '0.5rem 0.75rem',
+    backgroundColor: 'rgba(5, 150, 105, 0.2)',
+    borderRadius: '8px',
+    fontSize: '0.85rem',
+    fontWeight: '600',
+    color: '#059669'
+  },
+  phoneIcon: {
+    fontSize: '1rem'
   },
 
   // Mobile Styles
