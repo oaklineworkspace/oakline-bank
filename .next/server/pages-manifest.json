@@ -3,5 +3,6 @@
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
   "/": "pages/index.js",
-  "/apply-card": "pages/apply-card.js"
+  "/apply-card": "pages/apply-card.js",
+  "/zelle/send": "pages/zelle/send.js"
 }
