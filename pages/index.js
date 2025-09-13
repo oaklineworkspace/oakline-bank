@@ -695,9 +695,6 @@ export default function Home() {
             ...styles.heroContent,
             ...(isVisible.hero ? styles.heroAnimated : {})
           }}>
-            <div style={styles.heroIconContainer}>
-              <div style={styles.heroIcon}>{bankingImages[currentSlide].icon}</div>
-            </div>
             <h1 style={styles.heroTitle}>{bankingImages[currentSlide].title}</h1>
             <p style={styles.heroSubtitle}>{bankingImages[currentSlide].subtitle}</p>
 
