@@ -47,12 +47,12 @@ export default async function handler(req, res) {
     // Get user's cards using multiple approaches
     let cards = [];
     
-    // Try by user_id first
+    // First, try by user_id
     const { data: cardsByUserId, error: cardsError1 } = await supabase
       .from('cards')
       .select(`
         *,
-        accounts (
+        accounts!inner (
           id,
           account_number,
           account_type,
@@ -61,6 +61,8 @@ export default async function handler(req, res) {
         )
       `)
       .eq('user_id', user.id);
+
+    console.log('Cards by user_id:', cardsByUserId, 'Error:', cardsError1);
 
     if (cardsByUserId && cardsByUserId.length > 0) {
       cards = cardsByUserId;
@@ -71,7 +73,7 @@ export default async function handler(req, res) {
         .from('cards')
         .select(`
           *,
-          accounts (
+          accounts!inner (
             id,
             account_number,
             account_type,
@@ -81,8 +83,36 @@ export default async function handler(req, res) {
         `)
         .in('account_id', accountIds);
 
+      console.log('Cards by account_id:', cardsByAccountId, 'Error:', cardsError2);
+
       if (cardsByAccountId && cardsByAccountId.length > 0) {
         cards = cardsByAccountId;
+      }
+    }
+
+    // Also try a simple query without joins
+    if (cards.length === 0) {
+      const { data: simpleCards, error: simpleError } = await supabase
+        .from('cards')
+        .select('*')
+        .eq('user_id', user.id);
+
+      console.log('Simple cards query:', simpleCards, 'Error:', simpleError);
+
+      if (simpleCards && simpleCards.length > 0) {
+        // Get account details separately
+        for (let card of simpleCards) {
+          const { data: accountData } = await supabase
+            .from('accounts')
+            .select('*')
+            .eq('id', card.account_id)
+            .single();
+          
+          if (accountData) {
+            card.accounts = accountData;
+          }
+        }
+        cards = simpleCards;
       }
     }
 

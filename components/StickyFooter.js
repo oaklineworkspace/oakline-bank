@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
@@ -135,12 +134,14 @@ const styles = {
     bottom: 0,
     left: 0,
     right: 0,
-    background: 'linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%)',
-    boxShadow: '0 -4px 20px rgba(30, 64, 175, 0.4)',
+    background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%)',
+    color: 'white',
+    padding: '1rem 1.5rem',
+    boxShadow: '0 -8px 32px rgba(0, 0, 0, 0.3)',
+    backdropFilter: 'blur(20px)',
     zIndex: 1000,
-    borderTop: '2px solid #FFC857',
-    backdropFilter: 'blur(15px)',
-    height: '70px',
+    borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+    minHeight: '70px',
     display: 'flex',
     alignItems: 'center'
   },
@@ -154,8 +155,10 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    width: '100%',
-    gap: '2rem'
+    maxWidth: '1400px',
+    margin: '0 auto',
+    gap: '1.5rem',
+    flexWrap: 'wrap'
   },
   featuresSection: {
     display: 'flex',
@@ -167,17 +170,17 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    gap: '0.25rem',
-    padding: '0.5rem 0.75rem',
+    padding: '0.75rem 1rem',
+    borderRadius: '16px',
     textDecoration: 'none',
     color: 'white',
-    borderRadius: '8px',
-    transition: 'all 0.3s ease',
-    minWidth: '60px',
-    fontSize: '0.75rem',
-    fontWeight: '500',
-    background: 'rgba(255, 255, 255, 0.1)',
-    border: '1px solid rgba(255, 255, 255, 0.2)'
+    background: 'rgba(255, 255, 255, 0.08)',
+    border: '1px solid rgba(255, 255, 255, 0.12)',
+    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+    minWidth: '70px',
+    cursor: 'pointer',
+    backdropFilter: 'blur(10px)',
+    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
   },
   featureIcon: {
     fontSize: '1.2rem',

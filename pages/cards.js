@@ -38,6 +38,8 @@ export default function Cards() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
 
+      console.log('Fetching cards for user:', session.user.id);
+
       const response = await fetch('/api/get-user-cards', {
         headers: {
           'Authorization': `Bearer ${session.access_token}`
@@ -45,15 +47,19 @@ export default function Cards() {
       });
 
       const data = await response.json();
+      console.log('Cards API response:', data);
+      
       if (data.success) {
         setCards(data.cards || []);
         setApplications(data.applications || []);
+        console.log('Cards loaded:', data.cards?.length || 0);
+        console.log('Applications loaded:', data.applications?.length || 0);
       } else {
-        setError('Failed to fetch cards');
+        setError('Failed to fetch cards: ' + (data.message || 'Unknown error'));
       }
     } catch (error) {
       console.error('Error fetching cards:', error);
-      setError('Error loading cards');
+      setError('Error loading cards: ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -213,7 +219,7 @@ export default function Cards() {
                   </div>
                   <div style={styles.detailRow}>
                     <span>Balance:</span>
-                    <span>${parseFloat(card.accounts?.balance || 0).toFixed(2)}</span>
+                    <span>${parseFloat(card.accounts?.balance || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                   </div>
                 </div>
 

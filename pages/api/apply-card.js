@@ -85,7 +85,7 @@ export default async function handler(req, res) {
         account_id: accountId,
         cardholder_name: cardholderName || 'Card Holder',
         status: 'pending',
-        applied_at: new Date().toISOString()
+        card_type: 'debit'
       }])
       .select()
       .single();
