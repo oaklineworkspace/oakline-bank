@@ -52,28 +52,63 @@ export default function Transfer() {
         return;
       }
 
-      console.log('User session found:', session.user.email);
+      console.log('User session found:', {
+        id: session.user.id,
+        email: session.user.email,
+        created_at: session.user.created_at
+      });
       setUser(session.user);
 
-      // Fetch user profile
-      const { data: profile, error: profileError } = await supabase
+      // Fetch user profile with multiple attempts
+      let profile = null;
+      
+      // Try by user ID first
+      const { data: profileById, error: profileByIdError } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', session.user.id)
         .single();
 
-      if (profileError) {
-        console.error('Profile fetch error:', profileError);
-      } else if (profile) {
-        console.log('Profile found:', profile.email);
+      if (!profileByIdError && profileById) {
+        profile = profileById;
+        console.log('Profile found by ID:', {
+          id: profile.id,
+          email: profile.email,
+          application_id: profile.application_id
+        });
+      } else {
+        console.error('Profile fetch by ID error:', profileByIdError);
+        
+        // Try by email as fallback
+        const { data: profileByEmail, error: profileByEmailError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('email', session.user.email)
+          .single();
+
+        if (!profileByEmailError && profileByEmail) {
+          profile = profileByEmail;
+          console.log('Profile found by email:', {
+            id: profile.id,
+            email: profile.email,
+            application_id: profile.application_id
+          });
+        } else {
+          console.error('Profile fetch by email error:', profileByEmailError);
+        }
+      }
+
+      if (profile) {
         setUserProfile(profile);
+      } else {
+        console.warn('No profile found, but continuing with account fetch');
       }
 
       await fetchAccounts(session.user, profile);
 
     } catch (error) {
       console.error('Error in checkUserAndFetchData:', error);
-      router.push('/login');
+      setMessage('Error loading user data. Please try refreshing the page.');
     } finally {
       setPageLoading(false);
     }
@@ -83,7 +118,7 @@ export default function Transfer() {
     try {
       console.log('Fetching accounts for user:', { id: user.id, email: user.email });
       
-      if (!user || !user.id || !user.email) {
+      if (!user || !user.id) {
         console.error('Invalid user object');
         setMessage('Authentication error. Please log in again.');
         setAccounts([]);
@@ -92,8 +127,11 @@ export default function Transfer() {
 
       let accountsData = [];
       
+      // Try multiple methods to find accounts
+      
+      // Method 1: Get accounts through application_id if profile exists
       if (profile?.application_id) {
-        // Primary method: Get accounts through application_id
+        console.log('Trying application_id method:', profile.application_id);
         const { data: accounts, error: accountsError } = await supabase
           .from('accounts')
           .select('*')
@@ -103,24 +141,73 @@ export default function Transfer() {
 
         if (!accountsError && accounts && accounts.length > 0) {
           accountsData = accounts;
-          console.log('Found accounts through application:', accountsData.length);
+          console.log('Found accounts through application_id:', accountsData.length);
+        } else if (accountsError) {
+          console.error('Application ID query error:', accountsError);
         }
       }
 
-      // Fallback: Try direct account lookup if no accounts found
+      // Method 2: Try direct user_id lookup if no accounts found
       if (accountsData.length === 0) {
-        console.log('No accounts found via application_id, trying direct lookup');
-        
+        console.log('Trying direct user_id lookup');
         const { data: directAccounts, error: directError } = await supabase
           .from('accounts')
           .select('*')
-          .or(`user_id.eq.${user.id}`)
+          .eq('user_id', user.id)
           .eq('status', 'active')
           .order('created_at', { ascending: true });
 
         if (!directError && directAccounts && directAccounts.length > 0) {
           accountsData = directAccounts;
-          console.log('Found accounts via direct lookup:', accountsData.length);
+          console.log('Found accounts via direct user_id lookup:', accountsData.length);
+        } else if (directError) {
+          console.error('Direct user_id query error:', directError);
+        }
+      }
+
+      // Method 3: Try looking up by email if still no accounts found
+      if (accountsData.length === 0 && user.email) {
+        console.log('Trying email-based lookup');
+        
+        // First get profile by email
+        const { data: emailProfile, error: profileError } = await supabase
+          .from('profiles')
+          .select('application_id')
+          .eq('email', user.email)
+          .single();
+
+        if (!profileError && emailProfile?.application_id) {
+          const { data: emailAccounts, error: emailAccountsError } = await supabase
+            .from('accounts')
+            .select('*')
+            .eq('application_id', emailProfile.application_id)
+            .eq('status', 'active')
+            .order('created_at', { ascending: true });
+
+          if (!emailAccountsError && emailAccounts && emailAccounts.length > 0) {
+            accountsData = emailAccounts;
+            console.log('Found accounts via email lookup:', accountsData.length);
+          }
+        }
+      }
+
+      // Method 4: Last resort - try finding any accounts associated with the user's email
+      if (accountsData.length === 0 && user.email) {
+        console.log('Last resort: checking accounts table for email patterns');
+        const { data: lastResortAccounts, error: lastError } = await supabase
+          .from('accounts')
+          .select('*')
+          .eq('status', 'active')
+          .order('created_at', { ascending: true });
+
+        if (!lastError && lastResortAccounts) {
+          // Filter accounts that might belong to this user (this is not ideal but helps debug)
+          console.log('All active accounts found:', lastResortAccounts.length);
+          accountsData = lastResortAccounts.filter(account => 
+            account.user_id === user.id || 
+            (account.application_id && profile?.application_id === account.application_id)
+          );
+          console.log('Filtered accounts for user:', accountsData.length);
         }
       }
 
@@ -130,10 +217,16 @@ export default function Transfer() {
         setFromAccount(accountsData[0].id.toString());
         setMessage('');
         console.log('Successfully loaded user accounts:', accountsData.length);
+        console.log('Account details:', accountsData.map(acc => ({
+          id: acc.id,
+          type: acc.account_type,
+          number: acc.account_number,
+          balance: acc.balance
+        })));
       } else {
         setAccounts([]);
         setMessage('No accounts found for your profile. Please contact support or apply for an account first.');
-        console.log('No accounts found for user');
+        console.log('No accounts found for user after all methods');
       }
       
     } catch (error) {
