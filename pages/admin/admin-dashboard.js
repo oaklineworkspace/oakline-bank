@@ -230,6 +230,12 @@ export default function AdminDashboard() {
         </button>
         <button
           style={styles.actionButton}
+          onClick={() => router.push('/admin/approve-accounts')}
+        >
+          ✅ Approve Accounts
+        </button>
+        <button
+          style={styles.actionButton}
           onClick={() => router.push('/admin/manual-transactions')}
         >
           💰 Manual Transactions
@@ -367,6 +373,9 @@ export default function AdminDashboard() {
             </Link>
             <Link href="/admin/admin-approvals" style={styles.adminButton}>
               ✅ Approvals Queue
+            </Link>
+            <Link href="/admin/approve-accounts" style={styles.adminButton}>
+              ✅ Approve Accounts
             </Link>
           </div>
         </div>
