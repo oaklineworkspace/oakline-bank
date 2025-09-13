@@ -2027,7 +2027,7 @@ const styles = {
     left: 0,
     right: 0,
     bottom: 0,
-    background: 'linear-gradient(135deg, rgba(26, 54, 93, 0.3) 0%, rgba(26, 54, 93, 0.4) 100%)',
+    background: 'linear-gradient(135deg, rgba(26, 54, 93, 0.7) 0%, rgba(26, 54, 93, 0.8) 100%)',
     opacity: 1
   },
   heroContent: {

@@ -222,6 +222,15 @@ export default function Settings() {
               <button
                 style={{
                   ...styles.tab,
+                  ...(activeTab === 'linking' ? styles.activeTab : {})
+                }}
+                onClick={() => setActiveTab('linking')}
+              >
+                🔗 Link Accounts
+              </button>
+              <button
+                style={{
+                  ...styles.tab,
                   ...(activeTab === 'services' ? styles.activeTab : {})
                 }}
                 onClick={() => setActiveTab('services')}
@@ -460,56 +469,377 @@ export default function Settings() {
             </div>
           )}
 
+          {/* Account Linking Tab */}
+          {activeTab === 'linking' && (
+            <div style={styles.tabContent}>
+              <div style={styles.sectionTitle}>Link External Accounts</div>
+              
+              <div style={styles.linkingIntro}>
+                <div style={styles.introCard}>
+                  <div style={styles.introIcon}>🔗</div>
+                  <div>
+                    <h3 style={styles.introTitle}>Connect Your Financial Accounts</h3>
+                    <p style={styles.introDesc}>
+                      Securely link your external bank accounts, credit cards, and investment accounts 
+                      to manage all your finances in one place. We use bank-level security to protect your information.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div style={styles.serviceCategory}>
+                <h3 style={styles.categoryTitle}>🏦 Bank Accounts</h3>
+                <div style={styles.servicesList}>
+                  <div style={styles.linkingItem}>
+                    <div style={styles.serviceIcon}>🏛️</div>
+                    <div style={styles.serviceInfo}>
+                      <div style={styles.serviceName}>Connect Checking Account</div>
+                      <div style={styles.serviceDesc}>Link external checking accounts for transfers and monitoring</div>
+                    </div>
+                    <button style={styles.linkButton}>+ Link Account</button>
+                  </div>
+
+                  <div style={styles.linkingItem}>
+                    <div style={styles.serviceIcon}>💰</div>
+                    <div style={styles.serviceInfo}>
+                      <div style={styles.serviceName}>Connect Savings Account</div>
+                      <div style={styles.serviceDesc}>Add savings accounts from other banks to track your total savings</div>
+                    </div>
+                    <button style={styles.linkButton}>+ Link Account</button>
+                  </div>
+
+                  <div style={styles.linkingItem}>
+                    <div style={styles.serviceIcon}>🌐</div>
+                    <div style={styles.serviceInfo}>
+                      <div style={styles.serviceName}>International Accounts</div>
+                      <div style={styles.serviceDesc}>Connect accounts from international banks and manage currency exchange</div>
+                    </div>
+                    <button style={styles.linkButton}>+ Link Account</button>
+                  </div>
+                </div>
+              </div>
+
+              <div style={styles.serviceCategory}>
+                <h3 style={styles.categoryTitle}>💳 Credit Cards & Loans</h3>
+                <div style={styles.servicesList}>
+                  <div style={styles.linkingItem}>
+                    <div style={styles.serviceIcon}>💳</div>
+                    <div style={styles.serviceInfo}>
+                      <div style={styles.serviceName}>Credit Cards</div>
+                      <div style={styles.serviceDesc}>Track balances and payments across all your credit cards</div>
+                    </div>
+                    <button style={styles.linkButton}>+ Link Card</button>
+                  </div>
+
+                  <div style={styles.linkingItem}>
+                    <div style={styles.serviceIcon}>🏠</div>
+                    <div style={styles.serviceInfo}>
+                      <div style={styles.serviceName}>Mortgage & Home Loans</div>
+                      <div style={styles.serviceDesc}>Monitor mortgage balances and payment schedules</div>
+                    </div>
+                    <button style={styles.linkButton}>+ Link Loan</button>
+                  </div>
+
+                  <div style={styles.linkingItem}>
+                    <div style={styles.serviceIcon}>🚗</div>
+                    <div style={styles.serviceInfo}>
+                      <div style={styles.serviceName}>Auto Loans</div>
+                      <div style={styles.serviceDesc}>Track car loan payments and remaining balances</div>
+                    </div>
+                    <button style={styles.linkButton}>+ Link Loan</button>
+                  </div>
+                </div>
+              </div>
+
+              <div style={styles.serviceCategory}>
+                <h3 style={styles.categoryTitle}>📈 Investment Accounts</h3>
+                <div style={styles.servicesList}>
+                  <div style={styles.linkingItem}>
+                    <div style={styles.serviceIcon}>📊</div>
+                    <div style={styles.serviceInfo}>
+                      <div style={styles.serviceName}>Brokerage Accounts</div>
+                      <div style={styles.serviceDesc}>Connect investment accounts to track portfolio performance</div>
+                    </div>
+                    <button style={styles.linkButton}>+ Link Account</button>
+                  </div>
+
+                  <div style={styles.linkingItem}>
+                    <div style={styles.serviceIcon}>🏖️</div>
+                    <div style={styles.serviceInfo}>
+                      <div style={styles.serviceName}>Retirement Accounts (401k, IRA)</div>
+                      <div style={styles.serviceDesc}>Monitor retirement savings and contribution limits</div>
+                    </div>
+                    <button style={styles.linkButton}>+ Link Account</button>
+                  </div>
+
+                  <div style={styles.linkingItem}>
+                    <div style={styles.serviceIcon}>₿</div>
+                    <div style={styles.serviceInfo}>
+                      <div style={styles.serviceName}>Cryptocurrency Wallets</div>
+                      <div style={styles.serviceDesc}>Track crypto holdings across multiple exchanges and wallets</div>
+                    </div>
+                    <button style={styles.linkButton}>+ Link Wallet</button>
+                  </div>
+                </div>
+              </div>
+
+              <div style={styles.linkingSecurityInfo}>
+                <div style={styles.securityCard}>
+                  <div style={styles.securityIcon}>🔒</div>
+                  <div>
+                    <h4 style={styles.securityTitle}>Your Security is Our Priority</h4>
+                    <ul style={styles.securityList}>
+                      <li>We use 256-bit SSL encryption to protect your data</li>
+                      <li>We never store your login credentials</li>
+                      <li>All connections are read-only for your protection</li>
+                      <li>You can disconnect accounts at any time</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Services Tab */}
           {activeTab === 'services' && (
             <div style={styles.tabContent}>
-              <div style={styles.sectionTitle}>Banking Services</div>
+              <div style={styles.sectionTitle}>Banking Services & Account Management</div>
               
-              <div style={styles.servicesList}>
-                <Link href="/zelle-settings" style={styles.serviceItem}>
-                  <div style={styles.serviceIcon}>💳</div>
-                  <div style={styles.serviceInfo}>
-                    <div style={styles.serviceName}>Zelle Settings</div>
-                    <div style={styles.serviceDesc}>Manage Zelle contacts and limits</div>
-                  </div>
-                  <div style={styles.serviceArrow}>→</div>
-                </Link>
+              <div style={styles.serviceCategory}>
+                <h3 style={styles.categoryTitle}>🏦 Account Management</h3>
+                <div style={styles.servicesList}>
+                  <Link href="/account-details" style={styles.serviceItem}>
+                    <div style={styles.serviceIcon}>📊</div>
+                    <div style={styles.serviceInfo}>
+                      <div style={styles.serviceName}>Account Overview</div>
+                      <div style={styles.serviceDesc}>View all account balances and details</div>
+                    </div>
+                    <div style={styles.serviceArrow}>→</div>
+                  </Link>
 
-                <Link href="/cards" style={styles.serviceItem}>
-                  <div style={styles.serviceIcon}>💳</div>
-                  <div style={styles.serviceInfo}>
-                    <div style={styles.serviceName}>Card Management</div>
-                    <div style={styles.serviceDesc}>Manage debit and credit cards</div>
-                  </div>
-                  <div style={styles.serviceArrow}>→</div>
-                </Link>
+                  <Link href="/account-types" style={styles.serviceItem}>
+                    <div style={styles.serviceIcon}>🔗</div>
+                    <div style={styles.serviceInfo}>
+                      <div style={styles.serviceName}>Link New Account</div>
+                      <div style={styles.serviceDesc}>Connect external bank accounts and credit cards</div>
+                    </div>
+                    <div style={styles.serviceArrow}>→</div>
+                  </Link>
 
-                <Link href="/security" style={styles.serviceItem}>
-                  <div style={styles.serviceIcon}>🔐</div>
-                  <div style={styles.serviceInfo}>
-                    <div style={styles.serviceName}>Advanced Security</div>
-                    <div style={styles.serviceDesc}>Manage security settings and devices</div>
-                  </div>
-                  <div style={styles.serviceArrow}>→</div>
-                </Link>
+                  <Link href="/transfer" style={styles.serviceItem}>
+                    <div style={styles.serviceIcon}>💸</div>
+                    <div style={styles.serviceInfo}>
+                      <div style={styles.serviceName}>Transfer Limits</div>
+                      <div style={styles.serviceDesc}>Manage daily and monthly transfer limits</div>
+                    </div>
+                    <div style={styles.serviceArrow}>→</div>
+                  </Link>
 
-                <Link href="/profile" style={styles.serviceItem}>
-                  <div style={styles.serviceIcon}>👤</div>
-                  <div style={styles.serviceInfo}>
-                    <div style={styles.serviceName}>Profile Settings</div>
-                    <div style={styles.serviceDesc}>Update personal information</div>
+                  <div style={styles.serviceItem}>
+                    <div style={styles.serviceIcon}>📋</div>
+                    <div style={styles.serviceInfo}>
+                      <div style={styles.serviceName}>Account Statements</div>
+                      <div style={styles.serviceDesc}>Download monthly and annual statements</div>
+                    </div>
+                    <div style={styles.serviceArrow}>→</div>
                   </div>
-                  <div style={styles.serviceArrow}>→</div>
-                </Link>
+                </div>
+              </div>
 
-                <Link href="/notifications" style={styles.serviceItem}>
-                  <div style={styles.serviceIcon}>🔔</div>
-                  <div style={styles.serviceInfo}>
-                    <div style={styles.serviceName}>Notification Center</div>
-                    <div style={styles.serviceDesc}>View and manage notifications</div>
+              <div style={styles.serviceCategory}>
+                <h3 style={styles.categoryTitle}>💳 Card & Payment Services</h3>
+                <div style={styles.servicesList}>
+                  <Link href="/cards" style={styles.serviceItem}>
+                    <div style={styles.serviceIcon}>💳</div>
+                    <div style={styles.serviceInfo}>
+                      <div style={styles.serviceName}>Card Management</div>
+                      <div style={styles.serviceDesc}>Manage debit and credit cards, set limits</div>
+                    </div>
+                    <div style={styles.serviceArrow}>→</div>
+                  </Link>
+
+                  <Link href="/zelle-settings" style={styles.serviceItem}>
+                    <div style={styles.serviceIcon}>⚡</div>
+                    <div style={styles.serviceInfo}>
+                      <div style={styles.serviceName}>Zelle Settings</div>
+                      <div style={styles.serviceDesc}>Manage Zelle contacts and transaction limits</div>
+                    </div>
+                    <div style={styles.serviceArrow}>→</div>
+                  </Link>
+
+                  <Link href="/bill-pay" style={styles.serviceItem}>
+                    <div style={styles.serviceIcon}>🧾</div>
+                    <div style={styles.serviceInfo}>
+                      <div style={styles.serviceName}>Bill Pay Setup</div>
+                      <div style={styles.serviceDesc}>Manage automatic bill payments and payees</div>
+                    </div>
+                    <div style={styles.serviceArrow}>→</div>
+                  </Link>
+
+                  <div style={styles.serviceItem}>
+                    <div style={styles.serviceIcon}>📱</div>
+                    <div style={styles.serviceInfo}>
+                      <div style={styles.serviceName}>Mobile Wallet</div>
+                      <div style={styles.serviceDesc}>Apple Pay, Google Pay, Samsung Pay settings</div>
+                    </div>
+                    <div style={styles.serviceArrow}>→</div>
                   </div>
-                  <div style={styles.serviceArrow}>→</div>
-                </Link>
+                </div>
+              </div>
+
+              <div style={styles.serviceCategory}>
+                <h3 style={styles.categoryTitle}>🔐 Security & Identity</h3>
+                <div style={styles.servicesList}>
+                  <Link href="/security" style={styles.serviceItem}>
+                    <div style={styles.serviceIcon}>🔐</div>
+                    <div style={styles.serviceInfo}>
+                      <div style={styles.serviceName}>Advanced Security</div>
+                      <div style={styles.serviceDesc}>Multi-factor authentication and device management</div>
+                    </div>
+                    <div style={styles.serviceArrow}>→</div>
+                  </Link>
+
+                  <Link href="/profile" style={styles.serviceItem}>
+                    <div style={styles.serviceIcon}>👤</div>
+                    <div style={styles.serviceInfo}>
+                      <div style={styles.serviceName}>Personal Information</div>
+                      <div style={styles.serviceDesc}>Update address, phone, email, and tax information</div>
+                    </div>
+                    <div style={styles.serviceArrow}>→</div>
+                  </Link>
+
+                  <div style={styles.serviceItem}>
+                    <div style={styles.serviceIcon}>🆔</div>
+                    <div style={styles.serviceInfo}>
+                      <div style={styles.serviceName}>Identity Verification</div>
+                      <div style={styles.serviceDesc}>Update ID documents and beneficiary information</div>
+                    </div>
+                    <div style={styles.serviceArrow}>→</div>
+                  </div>
+
+                  <div style={styles.serviceItem}>
+                    <div style={styles.serviceIcon}>🔒</div>
+                    <div style={styles.serviceInfo}>
+                      <div style={styles.serviceName}>Login & Password</div>
+                      <div style={styles.serviceDesc}>Change password and security questions</div>
+                    </div>
+                    <div style={styles.serviceArrow}>→</div>
+                  </div>
+                </div>
+              </div>
+
+              <div style={styles.serviceCategory}>
+                <h3 style={styles.categoryTitle}>📈 Investment & Loans</h3>
+                <div style={styles.servicesList}>
+                  <Link href="/investments" style={styles.serviceItem}>
+                    <div style={styles.serviceIcon}>📈</div>
+                    <div style={styles.serviceInfo}>
+                      <div style={styles.serviceName}>Investment Accounts</div>
+                      <div style={styles.serviceDesc}>Manage portfolio, risk tolerance, and automatic investing</div>
+                    </div>
+                    <div style={styles.serviceArrow}>→</div>
+                  </Link>
+
+                  <Link href="/loans" style={styles.serviceItem}>
+                    <div style={styles.serviceIcon}>🏠</div>
+                    <div style={styles.serviceInfo}>
+                      <div style={styles.serviceName}>Loan Management</div>
+                      <div style={styles.serviceDesc}>View loan details, make payments, and apply for new loans</div>
+                    </div>
+                    <div style={styles.serviceArrow}>→</div>
+                  </Link>
+
+                  <div style={styles.serviceItem}>
+                    <div style={styles.serviceIcon}>💰</div>
+                    <div style={styles.serviceInfo}>
+                      <div style={styles.serviceName}>Savings Goals</div>
+                      <div style={styles.serviceDesc}>Set up and track savings goals and automatic transfers</div>
+                    </div>
+                    <div style={styles.serviceArrow}>→</div>
+                  </div>
+
+                  <Link href="/crypto" style={styles.serviceItem}>
+                    <div style={styles.serviceIcon}>₿</div>
+                    <div style={styles.serviceInfo}>
+                      <div style={styles.serviceName}>Cryptocurrency</div>
+                      <div style={styles.serviceDesc}>Manage digital asset trading and storage preferences</div>
+                    </div>
+                    <div style={styles.serviceArrow}>→</div>
+                  </Link>
+                </div>
+              </div>
+
+              <div style={styles.serviceCategory}>
+                <h3 style={styles.categoryTitle}>📞 Communication & Support</h3>
+                <div style={styles.servicesList}>
+                  <Link href="/notifications" style={styles.serviceItem}>
+                    <div style={styles.serviceIcon}>🔔</div>
+                    <div style={styles.serviceInfo}>
+                      <div style={styles.serviceName}>Notification Center</div>
+                      <div style={styles.serviceDesc}>View and manage all alerts and messages</div>
+                    </div>
+                    <div style={styles.serviceArrow}>→</div>
+                  </Link>
+
+                  <Link href="/messages" style={styles.serviceItem}>
+                    <div style={styles.serviceIcon}>💬</div>
+                    <div style={styles.serviceInfo}>
+                      <div style={styles.serviceName}>Secure Messages</div>
+                      <div style={styles.serviceDesc}>Communicate securely with your banking team</div>
+                    </div>
+                    <div style={styles.serviceArrow}>→</div>
+                  </Link>
+
+                  <div style={styles.serviceItem}>
+                    <div style={styles.serviceIcon}>📧</div>
+                    <div style={styles.serviceInfo}>
+                      <div style={styles.serviceName}>Email Preferences</div>
+                      <div style={styles.serviceDesc}>Manage marketing emails and communication preferences</div>
+                    </div>
+                    <div style={styles.serviceArrow}>→</div>
+                  </div>
+
+                  <Link href="/support" style={styles.serviceItem}>
+                    <div style={styles.serviceIcon}>🎧</div>
+                    <div style={styles.serviceInfo}>
+                      <div style={styles.serviceName}>Customer Support</div>
+                      <div style={styles.serviceDesc}>Contact support, schedule appointments, view case history</div>
+                    </div>
+                    <div style={styles.serviceArrow}>→</div>
+                  </Link>
+                </div>
+              </div>
+
+              <div style={styles.serviceCategory}>
+                <h3 style={styles.categoryTitle}>📄 Documents & Legal</h3>
+                <div style={styles.servicesList}>
+                  <Link href="/forms-documents" style={styles.serviceItem}>
+                    <div style={styles.serviceIcon}>📋</div>
+                    <div style={styles.serviceInfo}>
+                      <div style={styles.serviceName}>Forms & Documents</div>
+                      <div style={styles.serviceDesc}>Access tax forms, account agreements, and disclosures</div>
+                    </div>
+                    <div style={styles.serviceArrow}>→</div>
+                  </Link>
+
+                  <Link href="/privacy" style={styles.serviceItem}>
+                    <div style={styles.serviceIcon}>🛡️</div>
+                    <div style={styles.serviceInfo}>
+                      <div style={styles.serviceName}>Privacy Controls</div>
+                      <div style={styles.serviceDesc}>Manage data sharing and privacy preferences</div>
+                    </div>
+                    <div style={styles.serviceArrow}>→</div>
+                  </Link>
+
+                  <Link href="/compliance" style={styles.serviceItem}>
+                    <div style={styles.serviceIcon}>⚖️</div>
+                    <div style={styles.serviceInfo}>
+                      <div style={styles.serviceName}>Compliance & Reporting</div>
+                      <div style={styles.serviceDesc}>Tax reporting, regulatory compliance, and legal notices</div>
+                    </div>
+                    <div style={styles.serviceArrow}>→</div>
+                  </Link>
+                </div>
               </div>
             </div>
           )}
@@ -731,6 +1061,20 @@ const styles = {
     cursor: 'pointer',
     transition: 'all 0.2s'
   },
+  serviceCategory: {
+    marginBottom: '2rem'
+  },
+  categoryTitle: {
+    fontSize: '1.1rem',
+    fontWeight: '700',
+    color: '#1e40af',
+    marginBottom: '1rem',
+    paddingBottom: '0.5rem',
+    borderBottom: '2px solid #e2e8f0',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem'
+  },
   servicesList: {
     display: 'flex',
     flexDirection: 'column',
@@ -849,5 +1193,84 @@ const styles = {
     textDecoration: 'none',
     borderRadius: '8px',
     fontWeight: '500'
+  },
+  linkingIntro: {
+    marginBottom: '2rem'
+  },
+  introCard: {
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: '1rem',
+    backgroundColor: '#f0f9ff',
+    padding: '1.5rem',
+    borderRadius: '12px',
+    border: '2px solid #0ea5e9'
+  },
+  introIcon: {
+    fontSize: '2rem',
+    flexShrink: 0
+  },
+  introTitle: {
+    fontSize: '1.2rem',
+    fontWeight: '700',
+    color: '#1e293b',
+    marginBottom: '0.5rem'
+  },
+  introDesc: {
+    fontSize: '0.95rem',
+    color: '#64748b',
+    lineHeight: '1.5',
+    margin: 0
+  },
+  linkingItem: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '1rem',
+    padding: '1rem',
+    backgroundColor: '#f8fafc',
+    borderRadius: '12px',
+    border: '1px solid #e2e8f0',
+    transition: 'all 0.2s'
+  },
+  linkButton: {
+    padding: '0.5rem 1rem',
+    backgroundColor: '#059669',
+    color: 'white',
+    border: 'none',
+    borderRadius: '8px',
+    fontSize: '0.85rem',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+    flexShrink: 0
+  },
+  linkingSecurityInfo: {
+    marginTop: '2rem'
+  },
+  securityCard: {
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: '1rem',
+    backgroundColor: '#fefce8',
+    padding: '1.5rem',
+    borderRadius: '12px',
+    border: '2px solid #fbbf24'
+  },
+  securityIcon: {
+    fontSize: '1.5rem',
+    flexShrink: 0
+  },
+  securityTitle: {
+    fontSize: '1rem',
+    fontWeight: '700',
+    color: '#1e293b',
+    marginBottom: '0.75rem'
+  },
+  securityList: {
+    fontSize: '0.9rem',
+    color: '#64748b',
+    lineHeight: '1.6',
+    margin: 0,
+    paddingLeft: '1.2rem'
   }
 };
