@@ -1,395 +1,417 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { supabase } from '../lib/supabaseClient';
 
 export default function StickyFooter() {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const quickActions = [
-    {
-      icon: '💳',
-      label: 'Quick Pay',
-      href: '/bill-pay',
-      description: 'Pay bills instantly'
-    },
-    {
-      icon: '📱',
-      label: 'Transfer',
-      href: '/transfer',
-      description: 'Send money fast'
-    },
-    {
-      icon: '📊',
-      label: 'Balance',
-      href: '/dashboard',
-      description: 'Check accounts'
-    },
-    {
-      icon: '🏦',
-      label: 'ATM',
-      href: '/atm',
-      description: 'Find locations'
-    },
-    {
-      icon: '💬',
-      label: 'Support',
-      href: '/support',
-      description: '24/7 help'
-    }
-  ];
+  useEffect(() => {
+    // Get initial session
+    const getSession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        setUser(session?.user || null);
+      } catch (error) {
+        console.error('Error getting session:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    getSession();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setUser(session?.user || null);
+        setLoading(false);
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  if (loading) {
+    return null; // Don't render while loading
+  }
 
   return (
-    <div style={styles.stickyFooter}>
-      {/* Expanded Menu */}
-      {isExpanded && (
-        <>
-          <div style={styles.overlay} onClick={() => setIsExpanded(false)} />
-          <div style={styles.expandedMenu}>
-            <div style={styles.expandedHeader}>
-              <h3 style={styles.expandedTitle}>Quick Banking</h3>
-              <button 
-                style={styles.closeButton}
-                onClick={() => setIsExpanded(false)}
-              >
-                ✕
-              </button>
+    <footer style={styles.footer}>
+      <div style={styles.container}>
+        {/* Quick Navigation */}
+        <div style={styles.quickNav}>
+          <Link href="/" style={styles.quickNavItem}>
+            <span style={styles.icon}>🏠</span>
+            <span style={styles.label}>Home</span>
+          </Link>
+          
+          {user ? (
+            <>
+              <Link href="/dashboard" style={styles.quickNavItem}>
+                <span style={styles.icon}>📊</span>
+                <span style={styles.label}>Dashboard</span>
+              </Link>
+              <Link href="/main-menu" style={styles.quickNavItem}>
+                <span style={styles.icon}>☰</span>
+                <span style={styles.label}>Menu</span>
+              </Link>
+              <Link href="/transfer" style={styles.quickNavItem}>
+                <span style={styles.icon}>💸</span>
+                <span style={styles.label}>Transfer</span>
+              </Link>
+              <Link href="/notifications" style={styles.quickNavItem}>
+                <span style={styles.icon}>🔔</span>
+                <span style={styles.label}>Alerts</span>
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link href="/login" style={styles.quickNavItem}>
+                <span style={styles.icon}>👤</span>
+                <span style={styles.label}>Sign In</span>
+              </Link>
+              <Link href="/apply" style={styles.quickNavItem}>
+                <span style={styles.icon}>🚀</span>
+                <span style={styles.label}>Apply</span>
+              </Link>
+              <Link href="/account-types" style={styles.quickNavItem}>
+                <span style={styles.icon}>🏦</span>
+                <span style={styles.label}>Accounts</span>
+              </Link>
+              <Link href="/support" style={styles.quickNavItem}>
+                <span style={styles.icon}>🎧</span>
+                <span style={styles.label}>Support</span>
+              </Link>
+            </>
+          )}
+        </div>
+
+        {/* Main Navigation Links */}
+        <div style={styles.mainLinks}>
+          <div style={styles.linkGroup}>
+            <h4 style={styles.groupTitle}>Banking Services</h4>
+            <Link href="/account-types" style={styles.link}>Account Types</Link>
+            <Link href="/loans" style={styles.link}>Loans & Credit</Link>
+            <Link href="/investments" style={styles.link}>Investments</Link>
+            <Link href="/cards" style={styles.link}>Credit Cards</Link>
+          </div>
+
+          <div style={styles.linkGroup}>
+            <h4 style={styles.groupTitle}>Digital Banking</h4>
+            {user ? (
+              <>
+                <Link href="/dashboard" style={styles.link}>Online Banking</Link>
+                <Link href="/transfer" style={styles.link}>Money Transfer</Link>
+                <Link href="/bill-pay" style={styles.link}>Bill Pay</Link>
+                <Link href="/messages" style={styles.link}>Messages</Link>
+              </>
+            ) : (
+              <>
+                <Link href="/login" style={styles.link}>Online Banking</Link>
+                <Link href="/apply" style={styles.link}>Open Account</Link>
+                <Link href="/mobile-app" style={styles.link}>Mobile App</Link>
+                <Link href="/security" style={styles.link}>Security</Link>
+              </>
+            )}
+          </div>
+
+          <div style={styles.linkGroup}>
+            <h4 style={styles.groupTitle}>Support & Info</h4>
+            <Link href="/support" style={styles.link}>Customer Support</Link>
+            <Link href="/faq" style={styles.link}>FAQ</Link>
+            <Link href="/branch-locator" style={styles.link}>Branch Locator</Link>
+            <Link href="/financial-education" style={styles.link}>Financial Education</Link>
+          </div>
+
+          <div style={styles.linkGroup}>
+            <h4 style={styles.groupTitle}>Company</h4>
+            <Link href="/about" style={styles.link}>About Us</Link>
+            <Link href="/market-news" style={styles.link}>Market News</Link>
+            <Link href="/compliance" style={styles.link}>Compliance</Link>
+            <Link href="/privacy" style={styles.link}>Privacy Policy</Link>
+          </div>
+        </div>
+
+        {/* Contact Info & Logo */}
+        <div style={styles.bottomSection}>
+          <div style={styles.brandSection}>
+            <div style={styles.logoContainer}>
+              <img src="/images/logo-primary.png" alt="Oakline Bank" style={styles.logo} />
+              <div style={styles.brandInfo}>
+                <span style={styles.brandName}>Oakline Bank</span>
+                <span style={styles.tagline}>Your Financial Partner</span>
+              </div>
             </div>
-            <div style={styles.quickActionsGrid}>
-              {quickActions.map((action, index) => (
-                <Link key={index} href={action.href} style={styles.quickActionLink}>
-                  <div style={styles.quickActionCard}>
-                    <div style={styles.quickActionIcon}>{action.icon}</div>
-                    <div style={styles.quickActionText}>
-                      <span style={styles.quickActionLabel}>{action.label}</span>
-                      <span style={styles.quickActionDesc}>{action.description}</span>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-            <div style={styles.emergencyContact}>
-              <div style={styles.emergencyIcon}>🚨</div>
-              <div>
-                <span style={styles.emergencyLabel}>Emergency Banking</span>
-                <span style={styles.emergencyNumber}>1-800-OAKLINE</span>
+            <div style={styles.contactInfo}>
+              <div style={styles.contactItem}>
+                <span style={styles.contactIcon}>📞</span>
+                <span style={styles.contactText}>1-800-OAKLINE</span>
+              </div>
+              <div style={styles.contactItem}>
+                <span style={styles.contactIcon}>📧</span>
+                <span style={styles.contactText}>support@oaklinebank.com</span>
+              </div>
+              <div style={styles.contactItem}>
+                <span style={styles.contactIcon}>🏦</span>
+                <span style={styles.contactText}>Routing: 075915826</span>
               </div>
             </div>
           </div>
-        </>
-      )}
 
-      {/* Main Footer Bar */}
-      <div style={styles.footerBar}>
-        <Link href="/dashboard" style={styles.footerAction}>
-          <div style={styles.actionIcon}>🏠</div>
-          <span style={styles.actionLabel}>Home</span>
-        </Link>
-
-        <Link href="/transactions" style={styles.footerAction}>
-          <div style={styles.actionIcon}>📋</div>
-          <span style={styles.actionLabel}>Activity</span>
-        </Link>
-
-        <button 
-          style={styles.centerAction}
-          onClick={() => setIsExpanded(!isExpanded)}
-        >
-          <div style={styles.centerActionIcon}>
-            {isExpanded ? '✕' : '+'}
+          <div style={styles.legalSection}>
+            <div style={styles.legalLinks}>
+              <Link href="/terms" style={styles.legalLink}>Terms of Service</Link>
+              <Link href="/privacy" style={styles.legalLink}>Privacy Policy</Link>
+              <Link href="/accessibility" style={styles.legalLink}>Accessibility</Link>
+              <Link href="/disclosures" style={styles.legalLink}>Disclosures</Link>
+            </div>
+            <div style={styles.copyright}>
+              <p style={styles.copyrightText}>
+                © {new Date().getFullYear()} Oakline Bank. All rights reserved.
+              </p>
+              <p style={styles.fdic}>
+                Member FDIC. Equal Housing Lender.
+              </p>
+            </div>
           </div>
-        </button>
-
-        <Link href="/messages" style={styles.footerAction}>
-          <div style={styles.actionIcon}>📧</div>
-          <span style={styles.actionLabel}>Messages</span>
-        </Link>
-
-        <Link href="/profile" style={styles.footerAction}>
-          <div style={styles.actionIcon}>👤</div>
-          <span style={styles.actionLabel}>Profile</span>
-        </Link>
-      </div>
-
-      {/* Security Banner */}
-      <div style={styles.securityBanner}>
-        <div style={styles.securityContent}>
-          <span style={styles.securityIcon}>🔒</span>
-          <span style={styles.securityText}>FDIC Insured • SSL Secured • Member FDIC</span>
-          <span style={styles.routingInfo}>Routing: 075915826</span>
         </div>
       </div>
-    </div>
+    </footer>
   );
 }
 
 const styles = {
-  stickyFooter: {
+  footer: {
     position: 'fixed',
     bottom: 0,
     left: 0,
     right: 0,
-    zIndex: 1000,
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+    backgroundColor: '#1e40af',
+    color: 'white',
+    boxShadow: '0 -4px 20px rgba(0,0,0,0.15)',
+    zIndex: 999,
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    overflowY: 'auto',
+    maxHeight: '50vh',
   },
-
-  // Overlay
-  overlay: {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    zIndex: -1
+  container: {
+    maxWidth: '1400px',
+    margin: '0 auto',
+    padding: '1rem',
   },
-
-  // Expanded Menu
-  expandedMenu: {
-    backgroundColor: '#ffffff',
-    borderTopLeftRadius: '20px',
-    borderTopRightRadius: '20px',
-    padding: '20px',
-    marginBottom: '80px',
-    boxShadow: '0 -10px 30px rgba(0, 0, 0, 0.15)',
-    border: '1px solid #e2e8f0',
-    maxHeight: '60vh',
-    overflowY: 'auto'
-  },
-
-  expandedHeader: {
+  quickNav: {
     display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '20px',
-    paddingBottom: '15px',
-    borderBottom: '2px solid #f1f5f9'
-  },
-
-  expandedTitle: {
-    fontSize: '1.3rem',
-    fontWeight: '700',
-    color: '#1e293b',
-    margin: 0
-  },
-
-  closeButton: {
-    background: '#f1f5f9',
-    border: 'none',
-    borderRadius: '50%',
-    width: '35px',
-    height: '35px',
-    display: 'flex',
-    alignItems: 'center',
     justifyContent: 'center',
-    cursor: 'pointer',
-    fontSize: '16px',
-    color: '#64748b',
-    transition: 'all 0.2s ease'
-  },
-
-  quickActionsGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-    gap: '15px',
-    marginBottom: '20px'
-  },
-
-  quickActionLink: {
-    textDecoration: 'none',
-    color: 'inherit'
-  },
-
-  quickActionCard: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px',
-    padding: '15px',
-    backgroundColor: '#f8fafc',
-    borderRadius: '12px',
-    border: '1px solid #e2e8f0',
-    transition: 'all 0.2s ease',
-    cursor: 'pointer'
-  },
-
-  quickActionIcon: {
-    fontSize: '1.5rem',
-    minWidth: '30px'
-  },
-
-  quickActionText: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '2px'
-  },
-
-  quickActionLabel: {
-    fontSize: '0.9rem',
-    fontWeight: '600',
-    color: '#1e293b'
-  },
-
-  quickActionDesc: {
-    fontSize: '0.75rem',
-    color: '#64748b'
-  },
-
-  emergencyContact: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px',
-    padding: '15px',
-    backgroundColor: '#fef2f2',
-    borderRadius: '10px',
-    border: '1px solid #fecaca'
-  },
-
-  emergencyIcon: {
-    fontSize: '1.2rem'
-  },
-
-  emergencyLabel: {
-    display: 'block',
-    fontSize: '0.8rem',
-    fontWeight: '600',
-    color: '#dc2626'
-  },
-
-  emergencyNumber: {
-    display: 'block',
-    fontSize: '0.9rem',
-    fontWeight: '700',
-    color: '#991b1b',
-    fontFamily: 'monospace'
-  },
-
-  // Main Footer Bar
-  footerBar: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-around',
-    backgroundColor: '#1e293b',
-    padding: '12px 0 8px 0',
-    boxShadow: '0 -5px 20px rgba(0, 0, 0, 0.1)'
-  },
-
-  footerAction: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: '4px',
-    textDecoration: 'none',
-    color: '#cbd5e1',
-    transition: 'all 0.2s ease',
-    padding: '8px 12px',
-    borderRadius: '8px',
-    minWidth: '60px'
-  },
-
-  actionIcon: {
-    fontSize: '1.3rem',
-    marginBottom: '2px'
-  },
-
-  actionLabel: {
-    fontSize: '0.7rem',
-    fontWeight: '500',
-    textAlign: 'center'
-  },
-
-  centerAction: {
-    backgroundColor: '#059669',
-    border: 'none',
-    borderRadius: '50%',
-    width: '55px',
-    height: '55px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    cursor: 'pointer',
-    boxShadow: '0 4px 15px rgba(5, 150, 105, 0.3)',
-    transition: 'all 0.2s ease',
-    transform: 'translateY(-5px)'
-  },
-
-  centerActionIcon: {
-    fontSize: '1.5rem',
-    color: '#ffffff',
-    fontWeight: 'bold'
-  },
-
-  // Security Banner
-  securityBanner: {
-    backgroundColor: '#0f172a',
-    padding: '8px 0',
-    borderTop: '1px solid #334155'
-  },
-
-  securityContent: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: '8px',
+    gap: '0.5rem',
+    paddingBottom: '1rem',
+    borderBottom: '1px solid rgba(255,255,255,0.1)',
+    marginBottom: '1rem',
     flexWrap: 'wrap',
-    padding: '0 20px'
   },
-
-  securityIcon: {
-    fontSize: '0.9rem'
+  quickNavItem: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '0.25rem',
+    padding: '0.75rem 1rem',
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: '12px',
+    textDecoration: 'none',
+    color: 'white',
+    transition: 'all 0.2s',
+    minWidth: '70px',
+    border: '1px solid rgba(255,255,255,0.1)',
   },
-
-  securityText: {
+  icon: {
+    fontSize: '1.2rem',
+  },
+  label: {
+    fontSize: '0.75rem',
+    fontWeight: '500',
+    textAlign: 'center',
+  },
+  mainLinks: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+    gap: '1.5rem',
+    marginBottom: '1.5rem',
+  },
+  linkGroup: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.5rem',
+  },
+  groupTitle: {
+    fontSize: '0.9rem',
+    fontWeight: 'bold',
+    marginBottom: '0.5rem',
+    color: '#fbbf24',
+    borderBottom: '1px solid rgba(251, 191, 36, 0.3)',
+    paddingBottom: '0.25rem',
+  },
+  link: {
+    color: 'rgba(255,255,255,0.8)',
+    textDecoration: 'none',
+    fontSize: '0.85rem',
+    padding: '0.25rem 0',
+    transition: 'color 0.2s',
+  },
+  bottomSection: {
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap: '2rem',
+    borderTop: '1px solid rgba(255,255,255,0.1)',
+    paddingTop: '1rem',
+  },
+  brandSection: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1rem',
+  },
+  logoContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.75rem',
+  },
+  logo: {
+    height: '35px',
+    width: 'auto',
+  },
+  brandInfo: {
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  brandName: {
+    fontSize: '1.1rem',
+    fontWeight: 'bold',
+    color: 'white',
+  },
+  tagline: {
+    fontSize: '0.8rem',
+    color: 'rgba(255,255,255,0.7)',
+  },
+  contactInfo: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.5rem',
+  },
+  contactItem: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+  },
+  contactIcon: {
+    fontSize: '0.9rem',
+  },
+  contactText: {
+    fontSize: '0.85rem',
+    color: 'rgba(255,255,255,0.9)',
+  },
+  legalSection: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1rem',
+    justifyContent: 'space-between',
+  },
+  legalLinks: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '1rem',
+  },
+  legalLink: {
+    color: 'rgba(255,255,255,0.7)',
+    textDecoration: 'none',
+    fontSize: '0.75rem',
+    transition: 'color 0.2s',
+  },
+  copyright: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.25rem',
+  },
+  copyrightText: {
+    fontSize: '0.75rem',
+    color: 'rgba(255,255,255,0.6)',
+    margin: 0,
+  },
+  fdic: {
     fontSize: '0.7rem',
-    color: '#94a3b8',
-    fontWeight: '500'
+    color: 'rgba(255,255,255,0.5)',
+    margin: 0,
   },
-
-  routingInfo: {
-    fontSize: '0.7rem',
-    color: '#64748b',
-    fontFamily: 'monospace',
-    fontWeight: '600'
-  }
 };
 
-// Add hover effects
+// Add responsive styles and hover effects
 if (typeof document !== 'undefined') {
   const styleSheet = document.createElement('style');
   styleSheet.textContent = `
-    .quickActionCard:hover {
-      background-color: #f1f5f9 !important;
-      border-color: #3b82f6 !important;
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1) !important;
+    /* Hover Effects */
+    footer a:hover {
+      color: #fbbf24 !important;
+      transform: translateY(-1px);
     }
-
-    .footerAction:hover {
-      color: #60a5fa !important;
-      background-color: rgba(96, 165, 250, 0.1) !important;
+    
+    .quickNavItem:hover {
+      background-color: rgba(255,255,255,0.2) !important;
+      border-color: rgba(251, 191, 36, 0.5) !important;
     }
-
-    .centerAction:hover {
-      background-color: #047857 !important;
-      transform: translateY(-7px) !important;
-      box-shadow: 0 8px 25px rgba(5, 150, 105, 0.4) !important;
+    
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+      .quickNav {
+        gap: 0.25rem;
+      }
+      
+      .quickNavItem {
+        padding: 0.5rem 0.75rem;
+        min-width: 60px;
+      }
+      
+      .icon {
+        font-size: 1rem;
+      }
+      
+      .label {
+        font-size: 0.7rem;
+      }
+      
+      .mainLinks {
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+      }
+      
+      .bottomSection {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+      
+      .legalLinks {
+        gap: 0.5rem;
+      }
+      
+      .brandName {
+        font-size: 1rem;
+      }
+      
+      .tagline {
+        font-size: 0.75rem;
+      }
     }
-
-    .closeButton:hover {
-      background-color: #e2e8f0 !important;
-      color: #1e293b !important;
-    }
-
+    
     @media (max-width: 480px) {
-      .quickActionsGrid {
-        grid-template-columns: repeat(2, 1fr) !important;
+      .mainLinks {
+        grid-template-columns: 1fr;
       }
       
-      .securityContent {
-        flex-direction: column !important;
-        gap: 4px !important;
+      .quickNav {
+        justify-content: space-around;
       }
       
-      .footerBar {
-        padding: 10px 0 6px 0 !important;
+      .quickNavItem {
+        flex: 1;
+        max-width: 80px;
       }
     }
   `;
