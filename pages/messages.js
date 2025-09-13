@@ -33,20 +33,20 @@ export default function Messages() {
 
   const fetchMessages = async (userId) => {
     try {
-      // Fetch user profile for personalization
+      // Fetch user profile
       const { data: profile } = await supabase
         .from('profiles')
         .select('first_name, last_name, email')
         .eq('id', userId)
         .single();
 
-      // Fetch user accounts for account-specific messages
+      // Fetch user accounts with proper query
       const { data: accounts } = await supabase
         .from('accounts')
         .select('*')
-        .eq('application_id', userId);
+        .eq('application_id', profile?.application_id || userId);
 
-      // Fetch recent transactions for transaction-related messages
+      // Fetch recent transactions
       const { data: transactions } = await supabase
         .from('transactions')
         .select('*')
@@ -70,7 +70,7 @@ export default function Messages() {
         priority: 'high'
       });
 
-      // Account setup confirmation
+      // Account setup confirmations
       if (accounts && accounts.length > 0) {
         accounts.forEach((account) => {
           realMessages.push({
@@ -120,13 +120,10 @@ export default function Messages() {
         priority: 'high'
       });
 
-      // Sort messages by date (newest first)
       realMessages.sort((a, b) => new Date(b.date) - new Date(a.date));
-      
       setMessages(realMessages);
     } catch (error) {
       console.error('Error fetching messages:', error);
-      // Fallback message
       setMessages([{
         id: 'fallback',
         from: 'Oakline Bank',
@@ -168,7 +165,6 @@ export default function Messages() {
       setNewMessage('');
       setShowCompose(false);
 
-      // Auto-reply simulation
       setTimeout(() => {
         const autoReply = {
           id: `auto_reply_${Date.now()}`,
@@ -219,7 +215,7 @@ export default function Messages() {
       <Head>
         <title>Secure Messages - Oakline Bank</title>
         <meta name="description" content="View and manage your secure banking messages" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
       </Head>
 
       <div style={styles.container}>
@@ -255,7 +251,7 @@ export default function Messages() {
                 onChange={(e) => setNewMessage(e.target.value)}
                 placeholder="Type your message here... Our customer service team will respond within 24 hours."
                 style={styles.textarea}
-                rows="5"
+                rows="4"
                 disabled={sending}
               />
               <div style={styles.composeActions}>
@@ -311,7 +307,7 @@ export default function Messages() {
                     </div>
                     <div style={styles.messageSubject}>{message.subject}</div>
                     <div style={styles.messagePreview}>
-                      {message.message.substring(0, 120)}...
+                      {message.message.substring(0, 100)}...
                     </div>
                     <div style={styles.messageFooter}>
                       <span style={styles.messageType}>
@@ -383,25 +379,26 @@ const styles = {
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
   },
   main: {
-    maxWidth: '1200px',
+    maxWidth: '100%',
     margin: '0 auto',
-    padding: '1rem'
+    padding: '0.5rem'
   },
   header: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: '1.5rem',
+    marginBottom: '1rem',
     flexWrap: 'wrap',
-    gap: '1rem'
+    gap: '0.5rem',
+    padding: '0 0.5rem'
   },
   titleSection: {
     display: 'flex',
     alignItems: 'center',
-    gap: '0.75rem'
+    gap: '0.5rem'
   },
   title: {
-    fontSize: 'clamp(1.5rem, 4vw, 2rem)',
+    fontSize: 'clamp(1.25rem, 5vw, 2rem)',
     color: '#1e293b',
     margin: 0,
     fontWeight: '700'
@@ -420,35 +417,37 @@ const styles = {
     backgroundColor: '#059669',
     color: 'white',
     border: 'none',
-    padding: '0.75rem 1.25rem',
+    padding: '0.5rem 0.75rem',
     borderRadius: '8px',
     cursor: 'pointer',
     fontWeight: '600',
-    fontSize: '0.875rem',
-    transition: 'background-color 0.2s'
+    fontSize: '0.8rem'
   },
   composeSection: {
     backgroundColor: 'white',
-    padding: '1.5rem',
+    padding: '1rem',
     borderRadius: '12px',
-    marginBottom: '1.5rem',
+    marginBottom: '1rem',
     boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-    border: '1px solid #e2e8f0'
+    border: '1px solid #e2e8f0',
+    margin: '0 0.5rem 1rem 0.5rem'
   },
   composeHeader: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: '1rem'
+    marginBottom: '0.75rem',
+    flexWrap: 'wrap',
+    gap: '0.5rem'
   },
   composeTitle: {
     margin: 0,
-    fontSize: '1.125rem',
+    fontSize: '1rem',
     fontWeight: '600',
     color: '#1e293b'
   },
   secureIndicator: {
-    fontSize: '0.875rem',
+    fontSize: '0.8rem',
     color: '#059669',
     fontWeight: '500'
   },
@@ -457,26 +456,29 @@ const styles = {
     padding: '0.75rem',
     borderRadius: '8px',
     border: '1px solid #d1d5db',
-    fontSize: '0.875rem',
+    fontSize: '0.9rem',
     fontFamily: 'inherit',
-    marginBottom: '1rem',
+    marginBottom: '0.75rem',
     resize: 'vertical',
-    minHeight: '120px',
-    lineHeight: '1.5'
+    minHeight: '100px',
+    lineHeight: '1.5',
+    boxSizing: 'border-box'
   },
   composeActions: {
     display: 'flex',
-    gap: '0.75rem'
+    gap: '0.5rem',
+    flexWrap: 'wrap'
   },
   sendButton: {
     backgroundColor: '#1e40af',
     color: 'white',
     border: 'none',
-    padding: '0.75rem 1.5rem',
+    padding: '0.5rem 1rem',
     borderRadius: '8px',
     cursor: 'pointer',
     fontWeight: '500',
-    fontSize: '0.875rem'
+    fontSize: '0.8rem',
+    flex: '1'
   },
   sendingButton: {
     backgroundColor: '#9ca3af',
@@ -486,17 +488,15 @@ const styles = {
     backgroundColor: '#6b7280',
     color: 'white',
     border: 'none',
-    padding: '0.75rem 1.5rem',
+    padding: '0.5rem 1rem',
     borderRadius: '8px',
     cursor: 'pointer',
     fontWeight: '500',
-    fontSize: '0.875rem'
+    fontSize: '0.8rem',
+    flex: '1'
   },
   messagesContainer: {
-    display: 'grid',
-    gridTemplateColumns: '400px 1fr',
-    gap: '1.5rem',
-    height: '600px'
+    display: 'block'
   },
   messagesList: {
     backgroundColor: 'white',
@@ -504,10 +504,12 @@ const styles = {
     padding: '0',
     overflow: 'auto',
     boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-    border: '1px solid #e2e8f0'
+    border: '1px solid #e2e8f0',
+    margin: '0 0.5rem',
+    maxHeight: '70vh'
   },
   messageItem: {
-    padding: '1.25rem',
+    padding: '1rem',
     borderBottom: '1px solid #f1f5f9',
     cursor: 'pointer',
     transition: 'background-color 0.2s'
@@ -524,12 +526,14 @@ const styles = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: '0.5rem'
+    marginBottom: '0.5rem',
+    flexWrap: 'wrap',
+    gap: '0.25rem'
   },
   messageFrom: {
     fontWeight: '600',
     color: '#1e293b',
-    fontSize: '0.875rem',
+    fontSize: '0.8rem',
     display: 'flex',
     alignItems: 'center',
     gap: '0.25rem'
@@ -537,24 +541,24 @@ const styles = {
   priorityIndicator: {
     color: '#dc2626',
     fontWeight: 'bold',
-    fontSize: '1rem'
+    fontSize: '0.9rem'
   },
   messageDate: {
     color: '#64748b',
-    fontSize: '0.75rem'
+    fontSize: '0.7rem'
   },
   messageSubject: {
     fontWeight: '500',
     marginBottom: '0.5rem',
-    fontSize: '0.875rem',
+    fontSize: '0.8rem',
     color: '#1e293b',
-    lineHeight: '1.4'
+    lineHeight: '1.3'
   },
   messagePreview: {
     color: '#64748b',
-    fontSize: '0.8rem',
-    lineHeight: '1.4',
-    marginBottom: '0.75rem'
+    fontSize: '0.75rem',
+    lineHeight: '1.3',
+    marginBottom: '0.5rem'
   },
   messageFooter: {
     display: 'flex',
@@ -564,17 +568,17 @@ const styles = {
   messageType: {
     backgroundColor: '#f1f5f9',
     color: '#475569',
-    padding: '0.25rem 0.5rem',
+    padding: '0.2rem 0.4rem',
     borderRadius: '4px',
-    fontSize: '0.7rem',
+    fontSize: '0.65rem',
     fontWeight: '500',
     textTransform: 'uppercase'
   },
   unreadIndicator: {
     backgroundColor: '#f59e0b',
     color: 'white',
-    fontSize: '0.65rem',
-    padding: '0.2rem 0.4rem',
+    fontSize: '0.6rem',
+    padding: '0.15rem 0.3rem',
     borderRadius: '4px',
     fontWeight: 'bold'
   },
@@ -585,91 +589,93 @@ const styles = {
     boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
     border: '1px solid #e2e8f0',
     display: 'flex',
-    flexDirection: 'column'
+    flexDirection: 'column',
+    margin: '1rem 0.5rem 0 0.5rem',
+    maxHeight: '60vh'
   },
   detailHeader: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    padding: '1.5rem 1.5rem 1rem 1.5rem',
+    padding: '1rem 1rem 0.5rem 1rem',
     borderBottom: '1px solid #f1f5f9',
-    gap: '1rem'
+    gap: '0.5rem'
   },
   detailTitleSection: {
     flex: 1
   },
   detailTitle: {
     margin: '0 0 0.5rem 0',
-    fontSize: '1.125rem',
+    fontSize: '1rem',
     fontWeight: '600',
     color: '#1e293b',
-    lineHeight: '1.4'
+    lineHeight: '1.3'
   },
   highPriority: {
     backgroundColor: '#fef2f2',
     color: '#dc2626',
-    padding: '0.25rem 0.5rem',
+    padding: '0.2rem 0.4rem',
     borderRadius: '4px',
-    fontSize: '0.75rem',
+    fontSize: '0.7rem',
     fontWeight: '600'
   },
   closeButton: {
     background: 'none',
     border: 'none',
-    fontSize: '1.25rem',
+    fontSize: '1.1rem',
     cursor: 'pointer',
     color: '#64748b',
-    padding: '0.25rem',
+    padding: '0.2rem',
     borderRadius: '4px',
     flexShrink: 0
   },
   detailMeta: {
-    padding: '0 1.5rem 1rem 1.5rem',
+    padding: '0 1rem 0.5rem 1rem',
     borderBottom: '1px solid #f1f5f9'
   },
   detailMetaRow: {
     display: 'flex',
-    marginBottom: '0.5rem',
-    fontSize: '0.875rem'
+    marginBottom: '0.25rem',
+    fontSize: '0.8rem'
   },
   metaLabel: {
     fontWeight: '600',
     color: '#374151',
-    width: '60px',
+    width: '50px',
     flexShrink: 0
   },
   metaValue: {
     color: '#64748b'
   },
   detailContent: {
-    padding: '1.5rem',
+    padding: '1rem',
     flex: 1,
     overflow: 'auto'
   },
   messageLine: {
-    margin: '0 0 1rem 0',
-    lineHeight: '1.6',
+    margin: '0 0 0.75rem 0',
+    lineHeight: '1.5',
     color: '#374151',
-    fontSize: '0.875rem'
+    fontSize: '0.8rem'
   },
   emptyState: {
     textAlign: 'center',
-    padding: '3rem 1rem',
+    padding: '2rem 1rem',
     color: '#64748b'
   },
   emptyIcon: {
-    fontSize: '3rem',
+    fontSize: '2.5rem',
     marginBottom: '1rem'
   },
   emptyTitle: {
-    fontSize: '1.25rem',
+    fontSize: '1.1rem',
     fontWeight: '600',
     color: '#1e293b',
     margin: '0 0 0.5rem 0'
   },
   emptyMessage: {
     margin: 0,
-    fontSize: '1rem'
+    fontSize: '0.9rem'
   },
   loadingContainer: {
     display: 'flex',
@@ -694,7 +700,7 @@ const styles = {
   },
   loginPrompt: {
     textAlign: 'center',
-    padding: '3rem 1rem',
+    padding: '2rem 1rem',
     backgroundColor: 'white',
     borderRadius: '12px',
     boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
@@ -702,7 +708,7 @@ const styles = {
     maxWidth: '400px'
   },
   loginTitle: {
-    fontSize: '1.5rem',
+    fontSize: '1.3rem',
     fontWeight: '600',
     color: '#1e293b',
     margin: '0 0 0.5rem 0'
@@ -710,45 +716,6 @@ const styles = {
   loginMessage: {
     color: '#64748b',
     margin: 0,
-    fontSize: '1rem'
-  },
-
-  // Mobile Responsive
-  '@media (max-width: 768px)': {
-    main: {
-      padding: '0.5rem'
-    },
-    messagesContainer: {
-      gridTemplateColumns: '1fr',
-      height: 'auto'
-    },
-    messagesList: {
-      height: '400px',
-      marginBottom: '1rem'
-    },
-    messageDetail: {
-      height: '500px'
-    },
-    header: {
-      flexDirection: 'column',
-      alignItems: 'stretch',
-      textAlign: 'center'
-    },
-    titleSection: {
-      justifyContent: 'center'
-    },
-    composeSection: {
-      padding: '1rem'
-    },
-    messageItem: {
-      padding: '1rem'
-    },
-    detailHeader: {
-      flexDirection: 'column',
-      alignItems: 'flex-start'
-    },
-    closeButton: {
-      alignSelf: 'flex-end'
-    }
+    fontSize: '0.9rem'
   }
 };

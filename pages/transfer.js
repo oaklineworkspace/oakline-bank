@@ -24,6 +24,7 @@ export default function Transfer() {
   });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [pageLoading, setPageLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
@@ -32,16 +33,18 @@ export default function Transfer() {
 
   const checkUser = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) {
         router.push('/login');
         return;
       }
-      setUser(user);
-      await fetchAccounts(user);
+      setUser(session.user);
+      await fetchAccounts(session.user);
     } catch (error) {
       console.error('Error checking user:', error);
       router.push('/login');
+    } finally {
+      setPageLoading(false);
     }
   };
 
@@ -49,7 +52,6 @@ export default function Transfer() {
     try {
       console.log('Fetching accounts for user:', { id: user.id, email: user.email });
       
-      // Ensure we have a valid user
       if (!user || !user.id || !user.email) {
         console.error('Invalid user object');
         setMessage('Authentication error. Please log in again.');
@@ -59,7 +61,7 @@ export default function Transfer() {
 
       let accountsData = [];
       
-      // First, get the user's profile to find their application_id
+      // Get user profile first
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('application_id')
@@ -69,7 +71,7 @@ export default function Transfer() {
       if (profileError || !profile?.application_id) {
         console.log('No profile/application found, trying direct account lookup');
         
-        // Fallback: Try direct account lookup by user_id only
+        // Fallback: Try direct account lookup
         const { data: directAccounts, error: directError } = await supabase
           .from('accounts')
           .select('*')
@@ -78,11 +80,10 @@ export default function Transfer() {
           .order('created_at', { ascending: true });
 
         if (!directError && directAccounts && directAccounts.length > 0) {
-          // Additional security check - ensure these accounts really belong to this user
           accountsData = directAccounts.filter(account => account.user_id === user.id);
         }
       } else {
-        // Primary method: Get accounts through application_id with security validation
+        // Primary method: Get accounts through application_id
         const { data: accounts, error: accountsError } = await supabase
           .from('accounts')
           .select(`
@@ -99,7 +100,6 @@ export default function Transfer() {
           .order('created_at', { ascending: true });
 
         if (!accountsError && accounts && accounts.length > 0) {
-          // Security validation: ensure the application belongs to the current user
           const validAccounts = accounts.filter(account => {
             const applicationMatches = account.application_id === profile.application_id;
             const emailMatches = account.applications?.email === user.email;
@@ -115,7 +115,6 @@ export default function Transfer() {
 
       // Final validation and setup
       if (accountsData.length > 0) {
-        // One final security check - ensure all accounts belong to the current user
         const secureAccounts = accountsData.filter(account => {
           return account.user_id === user.id || 
                  (account.applications && account.applications.email === user.email);
@@ -259,7 +258,6 @@ export default function Transfer() {
         bank_name: '', swift_code: '', country: '', purpose: '', recipient_address: ''
       });
       
-      // Refresh accounts to show updated balance
       fetchAccounts(user);
 
       setTimeout(() => {
@@ -424,7 +422,7 @@ export default function Transfer() {
             <div style={styles.formGroup}>
               <label style={styles.label}>Recipient Address</label>
               <textarea
-                style={{...styles.input, minHeight: '80px', resize: 'vertical'}}
+                style={{...styles.input, minHeight: '60px', resize: 'vertical'}}
                 value={transferDetails.recipient_address}
                 onChange={(e) => handleTransferDetailsChange('recipient_address', e.target.value)}
                 placeholder="Complete address of recipient"
@@ -438,12 +436,21 @@ export default function Transfer() {
     }
   };
 
+  if (pageLoading) {
+    return (
+      <div style={styles.loadingContainer}>
+        <div style={styles.spinner}></div>
+        <p style={styles.loadingText}>Loading transfer page...</p>
+      </div>
+    );
+  }
+
   if (accounts.length === 0 && !loading) {
     return (
       <div style={styles.container}>
         <div style={styles.header}>
           <Link href="/" style={styles.logoContainer}>
-            <img src="/images/logo-primary.png.jpg" alt="Oakline Bank" style={styles.logo} />
+            <div style={styles.logoPlaceholder}>🏦</div>
             <span style={styles.logoText}>Oakline Bank</span>
           </Link>
           <div style={styles.routingInfo}>Routing Number: 075915826</div>
@@ -462,135 +469,142 @@ export default function Transfer() {
   const totalAmount = (parseFloat(amount) || 0) + fee;
 
   return (
-    <div style={styles.container}>
-      {/* Header */}
-      <div style={styles.header}>
-        <Link href="/" style={styles.logoContainer}>
-          <img src="/images/logo-primary.png.jpg" alt="Oakline Bank" style={styles.logo} />
-          <span style={styles.logoText}>Oakline Bank</span>
-        </Link>
-        <div style={styles.headerInfo}>
-          <div style={styles.routingInfo}>Routing Number: 075915826</div>
-          <Link href="/dashboard" style={styles.backButton}>← Back to Dashboard</Link>
+    <>
+      <Head>
+        <title>Transfer Funds - Oakline Bank</title>
+        <meta name="description" content="Send money securely with bank-level encryption" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+      </Head>
+      
+      <div style={styles.container}>
+        <div style={styles.header}>
+          <Link href="/" style={styles.logoContainer}>
+            <div style={styles.logoPlaceholder}>🏦</div>
+            <span style={styles.logoText}>Oakline Bank</span>
+          </Link>
+          <div style={styles.headerInfo}>
+            <div style={styles.routingInfo}>Routing Number: 075915826</div>
+            <Link href="/dashboard" style={styles.backButton}>← Dashboard</Link>
+          </div>
         </div>
-      </div>
 
-      <div style={styles.content}>
-        <div style={styles.titleSection}>
-          <h1 style={styles.title}>💸 Transfer Funds</h1>
-          <p style={styles.subtitle}>Send money securely with bank-level encryption</p>
-        </div>
-
-        {message && (
-          <div style={{
-            ...styles.message,
-            backgroundColor: message.includes('✅') ? '#d4edda' : '#f8d7da',
-            color: message.includes('✅') ? '#155724' : '#721c24',
-            borderColor: message.includes('✅') ? '#c3e6cb' : '#f5c6cb'
-          }}>
-            {message}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} style={styles.form}>
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Transfer From Account *</label>
-            <select
-              style={styles.select}
-              value={fromAccount}
-              onChange={(e) => setFromAccount(e.target.value)}
-              required
-            >
-              <option value="">Choose account to transfer from</option>
-              {accounts.map(account => (
-                <option key={account.id} value={account.id}>
-                  {account.account_name || account.account_type?.replace('_', ' ')?.toUpperCase()} - 
-                  ****{account.account_number?.slice(-4)} - 
-                  Balance: {formatCurrency(account.balance || 0)}
-                </option>
-              ))}
-            </select>
+        <div style={styles.content}>
+          <div style={styles.titleSection}>
+            <h1 style={styles.title}>💸 Transfer Funds</h1>
+            <p style={styles.subtitle}>Send money securely with bank-level encryption</p>
           </div>
 
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Transfer Type *</label>
-            <select
-              style={styles.select}
-              value={transferType}
-              onChange={(e) => setTransferType(e.target.value)}
-              required
-            >
-              <option value="internal">🏦 Internal Transfer (Free - Same Bank)</option>
-              <option value="domestic_external">🇺🇸 Domestic External ($2-5 fee)</option>
-              <option value="international">🌍 International Transfer ($30 fee)</option>
-            </select>
-          </div>
-
-          <div style={styles.formGroup}>
-            <label style={styles.label}>To Account Number *</label>
-            <input
-              type="text"
-              style={styles.input}
-              value={toAccountNumber}
-              onChange={(e) => setToAccountNumber(e.target.value)}
-              placeholder={transferType === 'internal' ? 'Oakline Bank account number' : 'Recipient account number'}
-              required
-            />
-          </div>
-
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Transfer Amount ($) *</label>
-            <input
-              type="number"
-              style={styles.input}
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              placeholder="Enter amount"
-              step="0.01"
-              min="0.01"
-              max={selectedAccountData ? parseFloat(selectedAccountData.balance || 0) - fee : 25000}
-              required
-            />
-          </div>
-
-          <div style={styles.detailsSection}>
-            <h3 style={styles.sectionTitle}>Transfer Details</h3>
-            {renderTransferTypeFields()}
-          </div>
-
-          {fee > 0 && (
-            <div style={styles.feeNotice}>
-              <h4 style={styles.feeTitle}>💰 Fee Notice</h4>
-              <p>This transfer type incurs a {formatCurrency(fee)} fee.</p>
-              <p><strong>Total Deduction: {formatCurrency(totalAmount)}</strong></p>
+          {message && (
+            <div style={{
+              ...styles.message,
+              backgroundColor: message.includes('✅') ? '#d4edda' : '#f8d7da',
+              color: message.includes('✅') ? '#155724' : '#721c24',
+              borderColor: message.includes('✅') ? '#c3e6cb' : '#f5c6cb'
+            }}>
+              {message}
             </div>
           )}
 
-          <button
-            type="submit"
-            style={{
-              ...styles.submitButton,
-              opacity: loading ? 0.7 : 1,
-              cursor: loading ? 'not-allowed' : 'pointer'
-            }}
-            disabled={loading}
-          >
-            {loading ? '🔄 Processing Transfer...' : `Transfer ${formatCurrency(parseFloat(amount) || 0)}${fee > 0 ? ` (+${formatCurrency(fee)} fee)` : ''}`}
-          </button>
-        </form>
+          <form onSubmit={handleSubmit} style={styles.form}>
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Transfer From Account *</label>
+              <select
+                style={styles.select}
+                value={fromAccount}
+                onChange={(e) => setFromAccount(e.target.value)}
+                required
+              >
+                <option value="">Choose account to transfer from</option>
+                {accounts.map(account => (
+                  <option key={account.id} value={account.id}>
+                    {account.account_name || account.account_type?.replace('_', ' ')?.toUpperCase()} - 
+                    ****{account.account_number?.slice(-4)} - 
+                    Balance: {formatCurrency(account.balance || 0)}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-        <div style={styles.infoSection}>
-          <h4 style={styles.infoTitle}>🔒 Transfer Information</h4>
-          <ul style={styles.infoList}>
-            <li><strong>Internal:</strong> Instant transfers between Oakline Bank accounts</li>
-            <li><strong>Domestic:</strong> 1-3 business days to other US banks</li>
-            <li><strong>International:</strong> 3-5 business days worldwide</li>
-            <li>All transfers are secured with bank-level encryption</li>
-            <li>Daily transfer limit: $25,000 (contact support for higher limits)</li>
-          </ul>
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Transfer Type *</label>
+              <select
+                style={styles.select}
+                value={transferType}
+                onChange={(e) => setTransferType(e.target.value)}
+                required
+              >
+                <option value="internal">🏦 Internal Transfer (Free - Same Bank)</option>
+                <option value="domestic_external">🇺🇸 Domestic External ($2-5 fee)</option>
+                <option value="international">🌍 International Transfer ($30 fee)</option>
+              </select>
+            </div>
+
+            <div style={styles.formGroup}>
+              <label style={styles.label}>To Account Number *</label>
+              <input
+                type="text"
+                style={styles.input}
+                value={toAccountNumber}
+                onChange={(e) => setToAccountNumber(e.target.value)}
+                placeholder={transferType === 'internal' ? 'Oakline Bank account number' : 'Recipient account number'}
+                required
+              />
+            </div>
+
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Transfer Amount ($) *</label>
+              <input
+                type="number"
+                style={styles.input}
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                placeholder="Enter amount"
+                step="0.01"
+                min="0.01"
+                max={selectedAccountData ? parseFloat(selectedAccountData.balance || 0) - fee : 25000}
+                required
+              />
+            </div>
+
+            <div style={styles.detailsSection}>
+              <h3 style={styles.sectionTitle}>Transfer Details</h3>
+              {renderTransferTypeFields()}
+            </div>
+
+            {fee > 0 && (
+              <div style={styles.feeNotice}>
+                <h4 style={styles.feeTitle}>💰 Fee Notice</h4>
+                <p>This transfer type incurs a {formatCurrency(fee)} fee.</p>
+                <p><strong>Total Deduction: {formatCurrency(totalAmount)}</strong></p>
+              </div>
+            )}
+
+            <button
+              type="submit"
+              style={{
+                ...styles.submitButton,
+                opacity: loading ? 0.7 : 1,
+                cursor: loading ? 'not-allowed' : 'pointer'
+              }}
+              disabled={loading}
+            >
+              {loading ? '🔄 Processing Transfer...' : `Transfer ${formatCurrency(parseFloat(amount) || 0)}${fee > 0 ? ` (+${formatCurrency(fee)} fee)` : ''}`}
+            </button>
+          </form>
+
+          <div style={styles.infoSection}>
+            <h4 style={styles.infoTitle}>🔒 Transfer Information</h4>
+            <ul style={styles.infoList}>
+              <li><strong>Internal:</strong> Instant transfers between Oakline Bank accounts</li>
+              <li><strong>Domestic:</strong> 1-3 business days to other US banks</li>
+              <li><strong>International:</strong> 3-5 business days worldwide</li>
+              <li>All transfers are secured with bank-level encryption</li>
+              <li>Daily transfer limit: $25,000 (contact support for higher limits)</li>
+            </ul>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -603,183 +617,207 @@ const styles = {
   header: {
     backgroundColor: '#1e40af',
     color: 'white',
-    padding: '1rem 2rem',
+    padding: '0.75rem',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+    flexWrap: 'wrap',
+    gap: '0.5rem'
   },
   logoContainer: {
     display: 'flex',
     alignItems: 'center',
-    gap: '0.75rem',
+    gap: '0.5rem',
     textDecoration: 'none',
     color: 'white'
   },
-  logo: {
-    height: '40px',
-    width: 'auto'
+  logoPlaceholder: {
+    fontSize: '1.5rem'
   },
   logoText: {
-    fontSize: '1.5rem',
+    fontSize: 'clamp(1rem, 4vw, 1.5rem)',
     fontWeight: 'bold'
   },
   headerInfo: {
     display: 'flex',
     alignItems: 'center',
-    gap: '2rem'
+    gap: '0.75rem',
+    flexWrap: 'wrap'
   },
   routingInfo: {
-    fontSize: '0.9rem',
+    fontSize: '0.8rem',
     backgroundColor: 'rgba(255,255,255,0.2)',
-    padding: '0.5rem 1rem',
+    padding: '0.4rem 0.6rem',
     borderRadius: '6px'
   },
   backButton: {
-    padding: '0.5rem 1rem',
+    padding: '0.4rem 0.6rem',
     backgroundColor: 'rgba(255,255,255,0.2)',
     color: 'white',
     textDecoration: 'none',
     borderRadius: '6px',
-    fontSize: '0.9rem',
+    fontSize: '0.8rem',
     border: '1px solid rgba(255,255,255,0.3)'
   },
   content: {
-    maxWidth: '800px',
+    maxWidth: '100%',
     margin: '0 auto',
-    padding: '2rem 1rem'
+    padding: '1rem 0.5rem'
   },
   titleSection: {
     textAlign: 'center',
-    marginBottom: '2rem'
+    marginBottom: '1.5rem'
   },
   title: {
-    fontSize: '2.5rem',
+    fontSize: 'clamp(1.5rem, 6vw, 2.5rem)',
     fontWeight: 'bold',
     color: '#1e293b',
     marginBottom: '0.5rem'
   },
   subtitle: {
-    fontSize: '1.1rem',
+    fontSize: 'clamp(0.9rem, 3vw, 1.1rem)',
     color: '#64748b'
   },
   form: {
     backgroundColor: 'white',
-    padding: '2rem',
+    padding: '1rem',
     borderRadius: '16px',
     boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-    marginBottom: '2rem'
+    marginBottom: '1rem'
   },
   formGroup: {
-    marginBottom: '1.5rem'
+    marginBottom: '1rem'
   },
   label: {
     display: 'block',
-    fontSize: '0.9rem',
+    fontSize: '0.85rem',
     fontWeight: '600',
     color: '#374151',
-    marginBottom: '0.5rem'
+    marginBottom: '0.4rem'
   },
   select: {
     width: '100%',
-    padding: '0.75rem',
+    padding: '0.6rem',
     border: '2px solid #e2e8f0',
     borderRadius: '8px',
-    fontSize: '1rem',
+    fontSize: '0.9rem',
     backgroundColor: 'white',
     boxSizing: 'border-box'
   },
   input: {
     width: '100%',
-    padding: '0.75rem',
+    padding: '0.6rem',
     border: '2px solid #e2e8f0',
     borderRadius: '8px',
-    fontSize: '1rem',
+    fontSize: '0.9rem',
     boxSizing: 'border-box'
   },
   detailsSection: {
     backgroundColor: '#f8fafc',
-    padding: '1.5rem',
+    padding: '1rem',
     borderRadius: '12px',
-    marginBottom: '1.5rem',
+    marginBottom: '1rem',
     border: '2px solid #e2e8f0'
   },
   sectionTitle: {
     color: '#1e40af',
-    marginBottom: '1rem',
-    fontSize: '1.2rem'
+    marginBottom: '0.75rem',
+    fontSize: '1rem'
   },
   feeNotice: {
     backgroundColor: '#fff3cd',
     border: '2px solid #fbbf24',
     borderRadius: '12px',
-    padding: '1rem',
-    marginBottom: '1.5rem'
+    padding: '0.75rem',
+    marginBottom: '1rem'
   },
   feeTitle: {
     color: '#92400e',
-    marginBottom: '0.5rem',
-    fontSize: '1rem'
+    marginBottom: '0.4rem',
+    fontSize: '0.9rem'
   },
   submitButton: {
     width: '100%',
-    padding: '1rem',
+    padding: '0.75rem',
     backgroundColor: '#1e40af',
     color: 'white',
     border: 'none',
     borderRadius: '12px',
-    fontSize: '1rem',
+    fontSize: '0.9rem',
     fontWeight: '600',
     cursor: 'pointer',
     transition: 'all 0.2s'
   },
   message: {
-    padding: '1rem',
+    padding: '0.75rem',
     borderRadius: '8px',
     border: '2px solid',
-    marginBottom: '2rem',
-    fontSize: '0.9rem'
+    marginBottom: '1rem',
+    fontSize: '0.85rem'
   },
   infoSection: {
     backgroundColor: 'white',
-    padding: '1.5rem',
+    padding: '1rem',
     borderRadius: '12px',
     boxShadow: '0 4px 12px rgba(0,0,0,0.08)'
   },
   infoTitle: {
     color: '#1e40af',
-    marginBottom: '1rem',
-    fontSize: '1.1rem'
+    marginBottom: '0.75rem',
+    fontSize: '0.95rem'
   },
   infoList: {
     margin: 0,
-    paddingLeft: '1.5rem',
+    paddingLeft: '1.2rem',
     color: '#374151',
-    lineHeight: '1.6'
+    lineHeight: '1.5',
+    fontSize: '0.8rem'
   },
   emptyState: {
     textAlign: 'center',
-    padding: '4rem 2rem',
+    padding: '2rem 1rem',
     maxWidth: '600px',
     margin: '0 auto'
   },
   emptyTitle: {
-    fontSize: '2rem',
+    fontSize: 'clamp(1.3rem, 5vw, 2rem)',
     color: '#1e293b',
     marginBottom: '1rem'
   },
   emptyDesc: {
-    fontSize: '1.1rem',
+    fontSize: 'clamp(0.9rem, 3vw, 1.1rem)',
     color: '#64748b',
-    marginBottom: '2rem'
+    marginBottom: '1.5rem'
   },
   emptyButton: {
-    padding: '1rem 2rem',
+    padding: '0.75rem 1.5rem',
     backgroundColor: '#1e40af',
     color: 'white',
     textDecoration: 'none',
     borderRadius: '12px',
-    fontSize: '1rem',
+    fontSize: '0.9rem',
     fontWeight: '600'
+  },
+  loadingContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: '100vh',
+    backgroundColor: '#f8fafc'
+  },
+  spinner: {
+    width: '32px',
+    height: '32px',
+    border: '3px solid #e2e8f0',
+    borderTop: '3px solid #1e40af',
+    borderRadius: '50%',
+    animation: 'spin 1s linear infinite'
+  },
+  loadingText: {
+    marginTop: '1rem',
+    color: '#64748b',
+    fontSize: '1rem'
   }
 };
