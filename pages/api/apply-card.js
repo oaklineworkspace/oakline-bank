@@ -58,12 +58,38 @@ export default async function handler(req, res) {
     // Verify the account exists and belongs to the user
     const { data: account, error: accountError } = await supabase
       .from('accounts')
-      .select('id, user_id, application_id')
+      .select('id, user_id, application_id, status')
       .eq('id', accountId)
       .single();
 
     if (accountError || !account) {
       return res.status(404).json({ error: 'Account not found' });
+    }
+
+    // Check if account belongs to user or is associated with user
+    let accountBelongsToUser = false;
+    
+    if (account.user_id === user.id) {
+      accountBelongsToUser = true;
+    } else if (account.application_id) {
+      // Check if user is associated with this application
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('application_id')
+        .eq('id', user.id)
+        .single();
+        
+      if (profile && profile.application_id === account.application_id) {
+        accountBelongsToUser = true;
+      }
+    }
+
+    if (!accountBelongsToUser) {
+      return res.status(403).json({ error: 'Account does not belong to user' });
+    }
+
+    if (account.status !== 'active') {
+      return res.status(400).json({ error: 'Account must be active to apply for a card' });
     }
 
     // Get user profile for cardholder name
