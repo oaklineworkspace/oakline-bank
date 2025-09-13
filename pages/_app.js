@@ -5,7 +5,7 @@ import '../styles/responsive.css';
 import '../styles/StickyFooter.css';
 import Head from 'next/head';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, memo } from 'react';
 import { useRouter } from 'next/router';
 import StickyFooter from '../components/StickyFooter';
 
@@ -23,7 +23,8 @@ function PathnameContextProviderAdapter({ children, router }) {
   )
 }
 
-export default function MyApp({ Component, pageProps }) {
+// Memoize the app component for better performance
+const App = memo(function App({ Component, pageProps }) {
   const router = useRouter()
 
   // Pages where sticky footer should not appear
@@ -40,4 +41,6 @@ export default function MyApp({ Component, pageProps }) {
       </PathnameContextProviderAdapter>
     </QueryClientProvider>
   )
-}
+});
+
+export default App;

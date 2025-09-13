@@ -13,24 +13,43 @@ export default function AccountDetails() {
   const { id } = router.query;
 
   useEffect(() => {
-    if (id) {
+    if (id && id !== 'undefined') {
       checkUserAndFetchAccount();
+    } else if (id === undefined) {
+      // Still waiting for router to populate
+      return;
+    } else {
+      setError('Invalid account ID');
+      setLoading(false);
     }
   }, [id]);
 
   const checkUserAndFetchAccount = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      // Add timeout to prevent infinite loading
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Request timeout')), 10000)
+      );
+
+      const userPromise = supabase.auth.getUser();
+      
+      const { data: { user } } = await Promise.race([userPromise, timeoutPromise]);
+      
       if (!user) {
         router.push('/login');
         return;
       }
+      
       setUser(user);
       await fetchAccountDetails(user, id);
     } catch (error) {
       console.error('Error checking user:', error);
-      setError('Authentication error. Please try logging in again.');
-      router.push('/login');
+      if (error.message === 'Request timeout') {
+        setError('Connection timeout. Please refresh the page.');
+      } else {
+        setError('Authentication error. Please try logging in again.');
+        router.push('/login');
+      }
     } finally {
       setLoading(false);
     }
@@ -38,51 +57,51 @@ export default function AccountDetails() {
 
   const fetchAccountDetails = async (user, accountId) => {
     try {
-      // Fetch account details with multiple query attempts
-      let accountData = null;
-      let error = null;
+      console.log('Fetching account details for:', { accountId, userId: user.id, userEmail: user.email });
+      
+      // First, try to get account by ID and user_id
+      let { data: accountData, error: accountError } = await supabase
+        .from('accounts')
+        .select('*')
+        .eq('id', accountId)
+        .eq('user_id', user.id)
+        .single();
 
-      // Try different query methods to find the account
-      const queries = [
-        // Query by account ID and user ID
-        () => supabase
-          .from('accounts')
-          .select('*')
-          .eq('id', accountId)
-          .eq('user_id', user.id)
-          .single(),
-
-        // Query by account ID and user email
-        () => supabase
+      // If that fails, try by user_email
+      if (accountError && accountError.code === 'PGRST116') {
+        console.log('Trying by user_email...');
+        const result = await supabase
           .from('accounts')
           .select('*')
           .eq('id', accountId)
           .eq('user_email', user.email)
-          .single(),
+          .single();
+        
+        accountData = result.data;
+        accountError = result.error;
+      }
 
-        // Query by account ID with OR condition
-        () => supabase
+      // If still no account, try by email field
+      if (accountError && accountError.code === 'PGRST116') {
+        console.log('Trying by email field...');
+        const result = await supabase
           .from('accounts')
           .select('*')
           .eq('id', accountId)
-          .or(`user_id.eq.${user.id},user_email.eq.${user.email},email.eq.${user.email}`)
-          .single()
-      ];
-
-      for (const query of queries) {
-        const result = await query();
-        if (result.data && !result.error) {
-          accountData = result.data;
-          break;
-        }
-        error = result.error;
+          .eq('email', user.email)
+          .single();
+        
+        accountData = result.data;
+        accountError = result.error;
       }
 
-      if (!accountData) {
+      if (accountError || !accountData) {
+        console.error('Account fetch error:', accountError);
         setError('Account not found or you do not have permission to view this account.');
         return;
       }
 
+      console.log('Account found:', accountData);
       setAccount(accountData);
 
       // Fetch transactions for this account
@@ -95,6 +114,8 @@ export default function AccountDetails() {
 
       if (transactionsError) {
         console.error('Error fetching transactions:', transactionsError);
+        // Don't fail completely if transactions fail
+        setTransactions([]);
       } else {
         setTransactions(transactionsData || []);
       }

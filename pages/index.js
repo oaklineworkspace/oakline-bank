@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo, lazy, Suspense } from 'react';
 import Link from 'next/link';
 import { supabase } from '../lib/supabaseClient';
 import MainMenu from '../components/MainMenu';
@@ -11,6 +11,12 @@ import TestimonialsSection from '../components/TestimonialsSection';
 import CTA from '../components/CTA';
 import Footer from '../components/Footer';
 import LiveChat from '../components/LiveChat';
+
+// Lazy load heavy components
+const Testimonials = lazy(() => import('../components/Testimonials'));
+const TestimonialsSection = lazy(() => import('../components/TestimonialsSection'));
+const LoanApprovalSection = lazy(() => import('../components/LoanApprovalSection'));
+const CTA = lazy(() => import('../components/CTA'));
 
 export default function Home() {
   const [user, setUser] = useState(null);
@@ -1172,7 +1178,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Enhanced Services Section */}
+      {/* Services Section */}
       <ServicesSection />
 
       {/* Banking Success Stories Section */}
@@ -1325,10 +1331,16 @@ export default function Home() {
       </section>
 
       {/* Enhanced Loan Section with Better Imagery */}
-      <LoanApprovalSection />
+      <Suspense fallback={<div style={styles.loadingComponent}>Loading...</div>}>
+        <LoanApprovalSection />
+      </Suspense>
 
       {/* Testimonials Section */}
-      <TestimonialsSection />
+      <Suspense fallback={<div style={styles.loadingComponent}>Loading testimonials...</div>}>
+        <TestimonialsSection />
+      </Suspense>
+
+
 
       {/* Account Types Discovery Section */}
       <section style={styles.accountTypesDiscovery} id="account-types-discovery" data-animate>
@@ -1390,16 +1402,18 @@ export default function Home() {
       <div id="final-cta" data-animate style={{
         ...(isVisible['final-cta'] ? styles.pulseGlow : {})
       }}>
-        <CTA
-          title={user ? "Ready to Expand Your Banking?" : "Ready to Start Your Financial Journey?"}
-          subtitle={user ?
-            "Explore additional account types and premium services available to you as a valued customer." :
-            "Join over 500,000 customers who trust Oakline Bank for their financial needs. Open your account today and experience the difference."
-          }
-          buttonText={user ? "Explore More Services" : "Open Account Now"}
-          buttonLink={user ? "/account-types" : "/apply"}
-          variant="primary"
-        />
+        <Suspense fallback={<div style={styles.loadingComponent}>Loading...</div>}>
+          <CTA
+            title={user ? "Ready to Expand Your Banking?" : "Ready to Start Your Financial Journey?"}
+            subtitle={user ?
+              "Access premium banking services and explore all account options." :
+              "Join over 500,000 customers who trust Oakline Bank. Open your account today."
+            }
+            buttonText={user ? "View Account Types" : "Open Account Now"}
+            buttonLink={user ? "/account-types" : "/apply"}
+            variant="primary"
+          />
+        </Suspense>
       </div>
 
       {/* Live Chat Component */}
@@ -2535,8 +2549,7 @@ const styles = {
     fontSize: '1rem',
     fontWeight: '700',
     transition: 'all 0.3s ease',
-    boxShadow: '0 6px 20px rgba(14, 165, 233, 0.4)',
-    border: 'none'
+    boxShadow: '0 6px 20px rgba(14, 165, 233, 0.4)'
   },
   applyNowButton: {
     display: 'inline-flex',
@@ -3528,7 +3541,231 @@ const styles = {
     minWidth: '120px'
   },
 
-  // Mobile styles moved to responsive.css for proper media query support
+  // Loading Component for Suspense
+  loadingComponent: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '100px',
+    fontSize: '1.2rem',
+    color: '#64748b',
+    fontWeight: '500'
+  },
+
+  // Account Card styles
+  accountCard: {
+    backgroundColor: 'white',
+    borderRadius: '16px',
+    padding: '1.5rem',
+    border: '2px solid #e2e8f0',
+    transition: 'all 0.3s ease',
+    cursor: 'pointer',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    textAlign: 'center',
+    boxShadow: '0 4px 15px rgba(0,0,0,0.05)'
+  },
+  accountIconContainer: {
+    width: '60px',
+    height: '60px',
+    borderRadius: '50%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: '1rem',
+    background: 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)',
+    color: 'white',
+    fontSize: '1.8rem',
+    boxShadow: '0 6px 20px rgba(14, 165, 233, 0.3)'
+  },
+  accountIcon: {
+    position: 'relative',
+    top: '2px'
+  },
+  accountTitle: {
+    fontSize: '1.2rem',
+    fontWeight: '700',
+    color: '#1e293b',
+    marginBottom: '0.5rem'
+  },
+  accountRate: {
+    fontSize: '1.1rem',
+    fontWeight: '600',
+    color: '#059669',
+    marginBottom: '1rem'
+  },
+  accountDesc: {
+    fontSize: '0.9rem',
+    color: '#64748b',
+    lineHeight: '1.5',
+    flexGrow: 1,
+    marginBottom: '1rem'
+  },
+  accountCardButton: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    padding: '0.8rem 1.5rem',
+    background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
+    color: 'white',
+    textDecoration: 'none',
+    borderRadius: '10px',
+    fontSize: '1rem',
+    fontWeight: '700',
+    transition: 'all 0.3s ease',
+    marginTop: 'auto',
+    boxShadow: '0 6px 20px rgba(30, 64, 175, 0.3)'
+  },
+
+  // Account Types Discovery Section
+  accountTypesDiscovery: {
+    padding: 'clamp(4rem, 8vw, 6rem) 0',
+    backgroundColor: '#f8fafc',
+    width: '100%'
+  },
+  accountTypesPreview: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))',
+    gap: '2rem',
+    marginTop: '3rem',
+    marginBottom: '3rem'
+  },
+  previewCard: {
+    backgroundColor: 'white',
+    borderRadius: '20px',
+    padding: '2.5rem',
+    border: '2px solid #e2e8f0',
+    transition: 'all 0.4s ease',
+    cursor: 'pointer',
+    textAlign: 'center',
+    boxShadow: '0 8px 25px rgba(0,0,0,0.05)',
+    position: 'relative',
+    overflow: 'hidden'
+  },
+  previewIconContainer: {
+    width: '70px',
+    height: '70px',
+    borderRadius: '50%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    margin: '0 auto 1.5rem',
+    background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+    color: 'white',
+    fontSize: '2rem',
+    boxShadow: '0 8px 20px rgba(5, 150, 105, 0.3)'
+  },
+  previewIcon: {
+    position: 'relative',
+    top: '3px'
+  },
+  previewTitle: {
+    fontSize: '1.3rem',
+    fontWeight: '700',
+    color: '#1e293b',
+    marginBottom: '0.75rem'
+  },
+  previewDesc: {
+    fontSize: '1rem',
+    color: '#64748b',
+    lineHeight: '1.5'
+  },
+  previewAccent: {
+    position: 'absolute',
+    bottom: '-2px',
+    left: '-2px',
+    right: '-2px',
+    height: '10px',
+    borderBottomLeftRadius: '18px',
+    borderBottomRightRadius: '18px'
+  },
+  accountTypesAction: {
+    textAlign: 'center'
+  },
+  exploreButton: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.8rem',
+    padding: '1.1rem 2.2rem',
+    background: 'linear-gradient(135deg, #1e40af 0%, #0ea5e9 100%)',
+    color: 'white',
+    textDecoration: 'none',
+    borderRadius: '12px',
+    fontSize: '1.1rem',
+    fontWeight: '700',
+    transition: 'all 0.3s ease',
+    boxShadow: '0 8px 25px rgba(30, 64, 175, 0.3)',
+    border: 'none',
+    cursor: 'pointer'
+  },
+  actionNote: {
+    fontSize: '0.9rem',
+    color: '#64748b',
+    marginTop: '1rem',
+    lineHeight: '1.5'
+  },
+
+  // CTA Button Styles
+  ctaButton: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.75rem',
+    padding: '1.15rem 2.3rem',
+    backgroundColor: '#1e40af',
+    color: 'white',
+    textDecoration: 'none',
+    borderRadius: '12px',
+    fontWeight: '600',
+    fontSize: '1.27rem',
+    border: 'none',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    boxShadow: '0 4px 20px rgba(30, 64, 175, 0.3)'
+  },
+  ctaButtonSecondary: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.75rem',
+    padding: '1.15rem 2.3rem',
+    backgroundColor: 'transparent',
+    color: '#1e40af',
+    textDecoration: 'none',
+    borderRadius: '12px',
+    fontWeight: '600',
+    fontSize: '1.27rem',
+    border: '2px solid #1e40af',
+    transition: 'all 0.3s ease',
+    cursor: 'pointer'
+  },
+  ctaIcon: {
+    fontSize: '1.2rem'
+  },
+
+  // Pulse Glow animation style for CTA
+  pulseGlow: {
+    animation: 'pulseGlow 2s infinite ease-in-out'
+  },
+
+  // Testimonials Section Styles
+  testimonialsSection: {
+    padding: 'clamp(4rem, 8vw, 6rem) 0',
+    backgroundColor: '#ffffff',
+    width: '100%'
+  },
+
+  // Loan Approval Section Styles
+  loanApprovalSection: {
+    padding: 'clamp(4rem, 8vw, 6rem) 0',
+    backgroundColor: '#f8fafc',
+    width: '100%'
+  },
+
+  // Add CSS animations to the document
+  // These should be defined in the global scope or loaded via a CSS file.
+  // For demonstration purposes, we include them here.
+  // NOTE: In a real React application, it's better to use a CSS-in-JS solution
+  // that handles dynamic keyframe creation or import a CSS file.
 };
 
 // Add hover effects for dropdown items
