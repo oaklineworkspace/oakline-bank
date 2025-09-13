@@ -2,7 +2,9 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/notifications": "pages/notifications.js",
-  "/atm": "pages/atm.js",
-  "/": "pages/index.js"
+  "/": "pages/index.js",
+  "/dashboard": "pages/dashboard.js",
+  "/messages": "pages/messages.js",
+  "/login": "pages/login.js",
+  "/notifications": "pages/notifications.js"
 }
