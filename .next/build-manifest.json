@@ -32,10 +32,10 @@
       "static/chunks/main.js",
       "static/chunks/pages/dashboard.js"
     ],
-    "/main-menu": [
+    "/transfer": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/main-menu.js"
+      "static/chunks/pages/transfer.js"
     ]
   },
   "ampFirstPages": []
