@@ -60,52 +60,37 @@ export default function StickyFooter() {
 
   if (!isVisible || loading) return null;
 
+  // Define navigation links based on user authentication status
+  const navigation = user ? [
+    { name: 'Home', href: '/', icon: '🏠' },
+    { name: 'Menu', href: '/main-menu', icon: '☰' },
+    { name: 'Zelle', href: '/zelle', icon: 'Z' },
+    { name: 'Settings', href: '/zelle-settings', icon: '⚙️' },
+    { name: 'Sign Out', href: '#', icon: '🚪', onClick: handleSignOut }
+  ] : [
+    { name: 'Home', href: '/', icon: '🏠' },
+    { name: 'Menu', href: '/main-menu', icon: '☰' },
+    { name: 'Sign In', href: '/login', icon: '🔑' },
+    { name: 'Apply', href: '/apply', icon: '📝' }
+  ];
+
   return (
     <div style={styles.stickyFooter} className="sticky-footer">
       <div style={styles.footerContainer}>
         <div style={styles.footerContent}>
           {/* Single Row Navigation Buttons */}
           <div style={styles.navigationSection}>
-            <Link href="/" style={styles.navButton}>
-              <span style={styles.navIcon}>🏠</span>
-              <span style={styles.navText}>Home</span>
-            </Link>
-            
-            <Link href="/main-menu" style={styles.navButton}>
-              <span style={styles.navIcon}>☰</span>
-              <span style={styles.navText}>Menu</span>
-            </Link>
-            
-            {user ? (
-              <>
-                <Link href="/dashboard" style={styles.navButton}>
-                  <span style={styles.navIcon}>📊</span>
-                  <span style={styles.navText}>Dashboard</span>
-                </Link>
-                
-                <Link href="/profile" style={styles.navButton}>
-                  <span style={styles.navIcon}>👤</span>
-                  <span style={styles.navText}>Profile</span>
-                </Link>
-                
-                <button onClick={handleSignOut} style={styles.navButton}>
-                  <span style={styles.navIcon}>🚪</span>
-                  <span style={styles.navText}>Sign Out</span>
-                </button>
-              </>
-            ) : (
-              <>
-                <Link href="/login" style={styles.navButton}>
-                  <span style={styles.navIcon}>🔐</span>
-                  <span style={styles.navText}>Sign In</span>
-                </Link>
-                
-                <Link href="/apply" style={styles.navButton}>
-                  <span style={styles.navIcon}>✨</span>
-                  <span style={styles.navText}>Open Account</span>
-                </Link>
-              </>
-            )}
+            {navigation.map((navItem) => (
+              <Link
+                key={navItem.name}
+                href={navItem.href}
+                style={styles.navButton}
+                onClick={navItem.onClick}
+              >
+                <span style={styles.navIcon}>{navItem.icon}</span>
+                <span style={styles.navText}>{navItem.name}</span>
+              </Link>
+            ))}
           </div>
         </div>
       </div>
