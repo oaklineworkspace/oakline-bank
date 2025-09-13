@@ -141,7 +141,7 @@ export default function LoginPage() {
             <div style={styles.loginCard}>
               <div style={styles.loginHeader}>
                 <div style={styles.cardLogo}>
-                  <img src="/images/logo-primary.png.jpg" alt="Oakline Bank" style={styles.cardLogoImg} />
+                  <img src="/images/logo-primary.png" alt="Oakline Bank" style={styles.cardLogoImg} />
                 </div>
                 <h2 style={styles.loginTitle}>Welcome Back</h2>
                 <p style={styles.loginSubtitle}>Sign in to your Oakline Bank account</p>
@@ -182,7 +182,7 @@ export default function LoginPage() {
                   disabled={loading}
                   style={{
                     ...styles.loginButton,
-                    backgroundColor: loading ? '#9ca3af' : '#1e40af',
+                    backgroundColor: loading ? '#9ca3af' : '#1A3E6F',
                     cursor: loading ? 'not-allowed' : 'pointer'
                   }}
                 >
@@ -279,16 +279,16 @@ export default function LoginPage() {
 const styles = {
   container: {
     minHeight: '100vh',
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#F5F6F8',
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
     width: '100%',
     overflowX: 'hidden'
   },
   header: {
-    background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
+    background: 'linear-gradient(135deg, #1A3E6F 0%, #2A5490 100%)',
     color: 'white',
     padding: '1rem 1.5rem',
-    boxShadow: '0 8px 32px rgba(30, 64, 175, 0.25)',
+    boxShadow: '0 8px 32px rgba(26, 62, 111, 0.25)',
     position: 'sticky',
     top: 0,
     zIndex: 100
@@ -337,7 +337,7 @@ const styles = {
   },
   tagline: {
     fontSize: '0.9rem',
-    color: '#bfdbfe'
+    color: '#FFC857'
   },
   headerInfo: {
     display: 'flex',
@@ -352,14 +352,14 @@ const styles = {
     fontSize: '0.85rem'
   },
   routingLabel: {
-    color: '#cbd5e1',
+    color: '#FFD687',
     fontWeight: '500'
   },
   routingNumber: {
-    color: '#fbbf24',
+    color: '#FFC857',
     fontWeight: '700',
     fontFamily: 'monospace',
-    backgroundColor: 'rgba(251, 191, 36, 0.2)',
+    backgroundColor: 'rgba(255, 200, 87, 0.2)',
     padding: '2px 8px',
     borderRadius: '4px'
   },
@@ -370,11 +370,11 @@ const styles = {
     fontSize: '0.9rem'
   },
   supportLabel: {
-    color: '#cbd5e1',
+    color: '#FFD687',
     fontWeight: '500'
   },
   supportPhone: {
-    color: '#10b981',
+    color: '#FFC857',
     fontWeight: '700'
   },
   headerActions: {
@@ -388,14 +388,14 @@ const styles = {
     alignItems: 'center',
     gap: '0.5rem',
     padding: '0.75rem 1.25rem',
-    backgroundColor: 'rgba(255,255,255,0.15)',
+    backgroundColor: 'rgba(255,200,87,0.15)',
     color: 'white',
     textDecoration: 'none',
     borderRadius: '8px',
     fontSize: '0.9rem',
     fontWeight: '600',
     transition: 'all 0.3s ease',
-    border: '1px solid rgba(255,255,255,0.3)',
+    border: '1px solid rgba(255,200,87,0.3)',
     backdropFilter: 'blur(10px)'
   },
   buttonIcon: {
@@ -411,7 +411,7 @@ const styles = {
     minHeight: 'calc(100vh - 120px)'
   },
   heroSection: {
-    background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
+    background: 'linear-gradient(135deg, #1A3E6F 0%, #2A5490 100%)',
     color: 'white',
     padding: '2rem 1rem',
     display: 'flex',
@@ -445,7 +445,7 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     gap: '0.75rem',
-    backgroundColor: 'rgba(255,255,255,0.1)',
+    backgroundColor: 'rgba(255,200,87,0.1)',
     padding: '1rem',
     borderRadius: '12px',
     backdropFilter: 'blur(10px)'
@@ -462,7 +462,7 @@ const styles = {
   infoText: {
     fontSize: '0.8rem',
     margin: 0,
-    color: '#bfdbfe',
+    color: '#FFC857',
     fontFamily: 'monospace'
   },
   securityFeatures: {
@@ -481,7 +481,7 @@ const styles = {
     fontSize: '1.2rem'
   },
   loginSection: {
-    backgroundColor: 'white',
+    backgroundColor: '#F5F6F8',
     padding: '2rem 1rem',
     display: 'flex',
     alignItems: 'center',
@@ -493,7 +493,7 @@ const styles = {
     maxWidth: '450px',
     backgroundColor: 'white',
     borderRadius: '20px',
-    boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
+    boxShadow: '0 20px 40px rgba(26, 62, 111, 0.1)',
     padding: '2rem',
     border: '2px solid #e2e8f0'
   },
@@ -511,7 +511,7 @@ const styles = {
   loginTitle: {
     fontSize: '1.8rem',
     fontWeight: 'bold',
-    color: '#1e40af',
+    color: '#1A3E6F',
     marginBottom: '0.5rem'
   },
   loginSubtitle: {
@@ -532,7 +532,7 @@ const styles = {
   label: {
     fontSize: '0.9rem',
     fontWeight: '600',
-    color: '#374151'
+    color: '#1A3E6F'
   },
   input: {
     width: '100%',
@@ -545,7 +545,7 @@ const styles = {
     outline: 'none'
   },
   forgotPassword: {
-    color: '#1e40af',
+    color: '#1A3E6F',
     textDecoration: 'none',
     fontSize: '0.85rem',
     fontWeight: '500',
@@ -554,7 +554,7 @@ const styles = {
   loginButton: {
     width: '100%',
     padding: '1rem',
-    backgroundColor: '#1e40af',
+    backgroundColor: '#1A3E6F',
     color: 'white',
     border: 'none',
     borderRadius: '10px',
@@ -582,9 +582,6 @@ const styles = {
     borderRadius: '50%',
     animation: 'spin 1s linear infinite'
   },
-  buttonIcon: {
-    fontSize: '1rem'
-  },
   message: {
     marginTop: '1rem',
     padding: '0.75rem 1rem',
@@ -597,14 +594,14 @@ const styles = {
   quickActions: {
     marginTop: '2rem',
     padding: '1.5rem',
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#F5F6F8',
     borderRadius: '12px',
     border: '1px solid #e2e8f0'
   },
   quickActionsTitle: {
     fontSize: '1.1rem',
     fontWeight: 'bold',
-    color: '#1e40af',
+    color: '#1A3E6F',
     marginBottom: '1rem',
     textAlign: 'center'
   },
@@ -619,7 +616,7 @@ const styles = {
     gap: '0.75rem',
     padding: '0.75rem 1rem',
     backgroundColor: 'white',
-    color: '#374151',
+    color: '#1A3E6F',
     textDecoration: 'none',
     borderRadius: '8px',
     border: '2px solid #e2e8f0',
@@ -649,7 +646,7 @@ const styles = {
     padding: '0.5rem'
   },
   footer: {
-    backgroundColor: '#1f2937',
+    backgroundColor: '#1A3E6F',
     color: 'white',
     padding: '2rem 1.5rem 1rem'
   },
@@ -664,22 +661,22 @@ const styles = {
   footerTitle: {
     fontSize: '1.1rem',
     fontWeight: '600',
-    color: '#f9fafb',
+    color: '#FFC857',
     marginBottom: '0.5rem'
   },
   footerText: {
     fontSize: '0.9rem',
     lineHeight: '1.5',
-    color: '#d1d5db'
+    color: '#FFD687'
   },
   footerBottom: {
-    borderTop: '1px solid #374151',
+    borderTop: '1px solid rgba(255,200,87,0.3)',
     paddingTop: '1rem',
     textAlign: 'center'
   },
   copyright: {
     fontSize: '0.8rem',
-    color: '#9ca3af',
+    color: '#FFD687',
     margin: 0
   },
   // Dropdown styles to be adjusted for better positioning and size
@@ -768,12 +765,35 @@ const styles = {
 
   // Mobile Responsive Styles
   '@media (max-width: 768px)': {
-    headerContent: {
+    headerContainer: {
+      padding: '0 1rem'
+    },
+    headerMainRow: {
       flexDirection: 'column',
-      gap: '1rem',
-      padding: '0.75rem'
+      alignItems: 'center',
+      gap: '0.5rem'
+    },
+    headerInfo: {
+      alignItems: 'center',
+      width: '100%',
+      textAlign: 'center',
+      marginTop: '0.5rem'
+    },
+    routingInfo: {
+      justifyContent: 'center'
+    },
+    supportInfo: {
+      justifyContent: 'center'
+    },
+    headerActionsRow: {
+      paddingTop: '0.5rem'
     },
     headerActions: {
+      flexDirection: 'column',
+      gap: '0.75rem',
+      width: '100%'
+    },
+    headerButton: {
       width: '100%',
       justifyContent: 'center'
     },
@@ -829,6 +849,12 @@ const styles = {
     loginCard: {
       padding: '1.5rem 1rem',
       borderRadius: '12px'
+    },
+    footerBottom: {
+      paddingTop: '0.5rem'
+    },
+    copyright: {
+      fontSize: '0.7rem'
     }
   }
 };

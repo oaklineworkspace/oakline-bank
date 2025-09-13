@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
@@ -607,14 +608,14 @@ export default function Apply() {
   const styles = {
     container: {
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
+      background: 'linear-gradient(135deg, #F5F6F8 0%, #e0f2fe 100%)',
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
     },
     header: {
-      background: 'linear-gradient(135deg, #059669 0%, #0891b2 100%)',
+      background: 'linear-gradient(135deg, #1A3E6F 0%, #2A5490 100%)',
       color: 'white',
       padding: '1.5rem 0 0.5rem',
-      boxShadow: '0 8px 32px rgba(5, 150, 105, 0.25)',
+      boxShadow: '0 8px 32px rgba(26, 62, 111, 0.25)',
       position: 'sticky',
       top: 0,
       zIndex: 100
@@ -649,7 +650,7 @@ export default function Apply() {
       fontSize: '0.85rem',
       fontWeight: '500',
       opacity: 0.8,
-      color: '#bfdbfe'
+      color: '#FFC857'
     },
     headerInfo: {
       display: 'flex',
@@ -666,12 +667,13 @@ export default function Apply() {
     supportLabel: {
       fontSize: '0.85rem',
       opacity: 0.9,
-      fontWeight: '500'
+      fontWeight: '500',
+      color: '#FFD687'
     },
     supportPhone: {
       fontSize: '1rem',
       fontWeight: '700',
-      color: '#10b981'
+      color: '#FFC857'
     },
     headerActions: {
       display: 'flex',
@@ -683,8 +685,8 @@ export default function Apply() {
       alignItems: 'center',
       gap: '0.5rem',
       padding: '0.8rem 1.5rem',
-      backgroundColor: 'rgba(255,255,255,0.15)',
-      border: '2px solid rgba(255,255,255,0.3)',
+      backgroundColor: 'rgba(255,200,87,0.15)',
+      border: '2px solid rgba(255,200,87,0.3)',
       color: 'white',
       textDecoration: 'none',
       borderRadius: '10px',
@@ -699,13 +701,13 @@ export default function Apply() {
       alignItems: 'center',
       gap: '0.5rem',
       padding: '0.6rem 1.2rem',
-      backgroundColor: 'rgba(255,255,255,0.15)',
+      backgroundColor: 'rgba(255,200,87,0.15)',
       color: 'white',
       textDecoration: 'none',
       borderRadius: '8px',
       fontSize: '0.9rem',
       fontWeight: '600',
-      border: '2px solid rgba(255, 255, 255, 0.3)',
+      border: '2px solid rgba(255,200,87, 0.3)',
       transition: 'all 0.3s ease',
       backdropFilter: 'blur(10px)'
     },
@@ -714,9 +716,9 @@ export default function Apply() {
       alignItems: 'center',
       gap: '0.5rem',
       padding: '0.6rem 1.2rem',
-      backgroundColor: 'rgba(255,255,255,0.25)',
+      backgroundColor: 'rgba(255,200,87,0.25)',
       color: 'white',
-      border: '2px solid rgba(255,255,255,0.4)',
+      border: '2px solid rgba(255,200,87,0.4)',
       borderRadius: '8px',
       fontSize: '0.9rem',
       fontWeight: '600',
@@ -735,14 +737,14 @@ export default function Apply() {
     progressBar: {
       width: '100%',
       height: '4px',
-      backgroundColor: 'rgba(255,255,255,0.2)',
+      backgroundColor: 'rgba(255,200,87,0.2)',
       borderRadius: '2px',
       marginBottom: '1rem',
       overflow: 'hidden'
     },
     progressFill: {
       height: '100%',
-      background: 'linear-gradient(90deg, #fbbf24 0%, #f59e0b 100%)',
+      background: 'linear-gradient(90deg, #FFC857 0%, #FFD687 100%)',
       borderRadius: '2px',
       transition: 'width 0.5s ease'
     },
@@ -762,7 +764,7 @@ export default function Apply() {
     },
     progressStepActive: {
       opacity: 1,
-      color: '#fbbf24',
+      color: '#FFC857',
       fontWeight: '700'
     },
     formCard: {
@@ -777,7 +779,7 @@ export default function Apply() {
     sectionTitle: {
       fontSize: '24px',
       fontWeight: '700',
-      color: '#1e293b',
+      color: '#1A3E6F',
       marginBottom: '2rem',
       textAlign: 'center',
       display: 'flex',
@@ -803,7 +805,7 @@ export default function Apply() {
     label: {
       fontSize: '14px',
       fontWeight: '600',
-      color: '#374151',
+      color: '#1A3E6F',
       display: 'flex',
       alignItems: 'center',
       gap: '5px'
@@ -824,8 +826,8 @@ export default function Apply() {
     },
     inputFocus: {
       outline: 'none',
-      borderColor: '#1a365d',
-      boxShadow: '0 0 0 3px rgba(26, 54, 93, 0.1)'
+      borderColor: '#1A3E6F',
+      boxShadow: '0 0 0 3px rgba(26, 62, 111, 0.1)'
     },
     inputError: {
       borderColor: '#ef4444',
@@ -853,7 +855,7 @@ export default function Apply() {
     },
     toggleButton: {
       fontSize: '12px',
-      color: '#3b82f6',
+      color: '#1A3E6F',
       background: 'none',
       border: 'none',
       cursor: 'pointer',
@@ -877,10 +879,10 @@ export default function Apply() {
       overflow: 'hidden'
     },
     accountCardSelected: {
-      borderColor: '#1a365d',
+      borderColor: '#1A3E6F',
       backgroundColor: '#f0f4f8',
       transform: 'translateY(-2px)',
-      boxShadow: '0 8px 25px rgba(26, 54, 93, 0.15)'
+      boxShadow: '0 8px 25px rgba(26, 62, 111, 0.15)'
     },
     accountCardHover: {
       borderColor: '#9ca3af',
@@ -902,7 +904,7 @@ export default function Apply() {
     accountName: {
       fontSize: '16px',
       fontWeight: '600',
-      color: '#1e293b'
+      color: '#1A3E6F'
     },
     accountDescription: {
       fontSize: '14px',
@@ -913,8 +915,8 @@ export default function Apply() {
     accountRate: {
       fontSize: '14px',
       fontWeight: '600',
-      color: '#059669',
-      backgroundColor: '#ecfdf5',
+      color: '#1A3E6F',
+      backgroundColor: '#FFC857',
       padding: '4px 8px',
       borderRadius: '6px',
       display: 'inline-block'
@@ -935,14 +937,14 @@ export default function Apply() {
       height: '20px',
       marginTop: '2px',
       cursor: 'pointer',
-      accentColor: '#059669',
+      accentColor: '#1A3E6F',
       transform: 'scale(1.2)',
       position: 'relative',
       zIndex: 11
     },
     checkboxLabel: {
       fontSize: '15px',
-      color: '#374151',
+      color: '#1A3E6F',
       lineHeight: '1.6',
       cursor: 'pointer',
       fontWeight: '500',
@@ -951,7 +953,7 @@ export default function Apply() {
       paddingTop: '1px'
     },
     link: {
-      color: '#3b82f6',
+      color: '#1A3E6F',
       textDecoration: 'none',
       fontWeight: '600'
     },
@@ -976,7 +978,7 @@ export default function Apply() {
       minHeight: '52px'
     },
     primaryButton: {
-      background: 'linear-gradient(135deg, #059669 0%, #0891b2 100%)',
+      background: 'linear-gradient(135deg, #1A3E6F 0%, #2A5490 100%)',
       color: 'white',
       border: 'none',
       padding: '1rem 2rem',
@@ -985,14 +987,14 @@ export default function Apply() {
       fontWeight: '700',
       cursor: 'pointer',
       transition: 'all 0.3s ease',
-      boxShadow: '0 6px 20px rgba(5, 150, 105, 0.4)',
+      boxShadow: '0 6px 20px rgba(26, 62, 111, 0.4)',
       position: 'relative',
       overflow: 'hidden'
     },
     secondaryButton: {
       backgroundColor: 'transparent',
-      color: '#059669',
-      border: '2px solid #059669',
+      color: '#1A3E6F',
+      border: '2px solid #1A3E6F',
       padding: '1rem 2rem',
       borderRadius: '10px',
       fontSize: '1rem',
@@ -1046,7 +1048,7 @@ export default function Apply() {
 
     // Footer Styles
     footer: {
-      backgroundColor: '#1f2937',
+      backgroundColor: '#1A3E6F',
       color: 'white',
       padding: '3rem 0 1rem',
       marginTop: '2rem'
@@ -1084,17 +1086,17 @@ export default function Apply() {
     },
     footerTagline: {
       fontSize: '0.8rem',
-      color: '#9ca3af'
+      color: '#FFC857'
     },
     footerDescription: {
       fontSize: '0.9rem',
-      color: '#d1d5db',
+      color: '#FFD687',
       lineHeight: '1.5'
     },
     footerColumnTitle: {
       fontSize: '1.1rem',
       fontWeight: '600',
-      color: '#f9fafb',
+      color: '#FFC857',
       marginBottom: '0.5rem'
     },
     footerLinks: {
@@ -1106,7 +1108,7 @@ export default function Apply() {
       gap: '0.5rem'
     },
     footerLink: {
-      color: '#d1d5db',
+      color: '#FFD687',
       textDecoration: 'none',
       fontSize: '0.9rem',
       transition: 'color 0.3s ease'
@@ -1117,7 +1119,7 @@ export default function Apply() {
       gap: '0.5rem'
     },
     securityBadge: {
-      backgroundColor: '#374151',
+      backgroundColor: '#2A5490',
       padding: '0.5rem 0.75rem',
       borderRadius: '6px',
       fontSize: '0.8rem',
@@ -1133,7 +1135,7 @@ export default function Apply() {
       flexWrap: 'wrap',
       gap: '1rem',
       paddingTop: '2rem',
-      borderTop: '1px solid #374151'
+      borderTop: '1px solid rgba(255,200,87,0.3)'
     },
     footerBottomLeft: {
       display: 'flex',
@@ -1143,12 +1145,12 @@ export default function Apply() {
     routingText: {
       fontSize: '0.9rem',
       fontWeight: '600',
-      color: '#fbbf24',
+      color: '#FFC857',
       fontFamily: 'monospace'
     },
     memberText: {
       fontSize: '0.8rem',
-      color: '#10b981',
+      color: '#FFD687',
       fontWeight: '500'
     },
     footerBottomRight: {
@@ -1157,7 +1159,7 @@ export default function Apply() {
       flexWrap: 'wrap'
     },
     footerBottomLink: {
-      color: '#9ca3af',
+      color: '#FFD687',
       textDecoration: 'none',
       fontSize: '0.8rem',
       transition: 'color 0.3s ease'
@@ -1165,7 +1167,7 @@ export default function Apply() {
     copyright: {
       textAlign: 'center',
       paddingTop: '1rem',
-      borderTop: '1px solid #374151',
+      borderTop: '1px solid rgba(255,200,87,0.3)',
       marginTop: '1rem'
     }
   };
@@ -1634,7 +1636,7 @@ export default function Apply() {
                       <div style={styles.accountHeader}>
                         <div style={{
                           ...styles.accountIcon,
-                          backgroundColor: formData.accountTypes.includes(account.id) ? '#dbeafe' : '#f1f5f9'
+                          backgroundColor: formData.accountTypes.includes(account.id) ? '#FFC857' : '#f1f5f9'
                         }}>
                           {account.icon}
                         </div>
@@ -1647,7 +1649,7 @@ export default function Apply() {
                           position: 'absolute',
                           top: '12px',
                           right: '12px',
-                          backgroundColor: '#0070f3',
+                          backgroundColor: '#1A3E6F',
                           color: 'white',
                           borderRadius: '50%',
                           width: '24px',
@@ -1721,7 +1723,7 @@ export default function Apply() {
 
               <div style={{
                 ...styles.checkboxContainer,
-                borderColor: formData.agreeToTerms ? '#059669' : '#e2e8f0',
+                borderColor: formData.agreeToTerms ? '#1A3E6F' : '#e2e8f0',
                 backgroundColor: formData.agreeToTerms ? '#f0fdf4' : '#f8fafc'
               }}>
                 <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
@@ -1733,7 +1735,7 @@ export default function Apply() {
                     style={styles.checkbox}
                   />
                   {formData.agreeToTerms && (
-                    <span style={{color: '#059669', fontSize: '16px', fontWeight: 'bold'}}>✓</span>
+                    <span style={{color: '#1A3E6F', fontSize: '16px', fontWeight: 'bold'}}>✓</span>
                   )}
                 </div>
                 <label
@@ -1926,8 +1928,8 @@ export default function Apply() {
 
         input:focus, select:focus {
           outline: none !important;
-          border-color: #1a365d !important;
-          box-shadow: 0 0 0 3px rgba(26, 54, 93, 0.1) !important;
+          border-color: #1A3E6F !important;
+          box-shadow: 0 0 0 3px rgba(26, 62, 111, 0.1) !important;
         }
       `}</style>
     </div>
