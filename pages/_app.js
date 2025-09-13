@@ -1,6 +1,7 @@
 // pages/_app.js
 import '../styles/globals.css';
 import '../styles/responsive.css';
+import '../styles/StickyFooter.css';
 import Head from 'next/head';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createContext, useContext, useState } from 'react';

@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { supabase } from '../lib/supabaseClient';
-import '../styles/StickyFooter.css';
 
 export default function StickyFooter() {
   const [user, setUser] = useState(null);
