@@ -11,6 +11,8 @@ export default function ApproveAccounts() {
   const [pendingAccounts, setPendingAccounts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [processing, setProcessing] = useState(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [approvedAccount, setApprovedAccount] = useState(null);
   const router = useRouter();
 
   const ADMIN_PASSWORD = 'Chrismorgan23$';
@@ -88,9 +90,11 @@ export default function ApproveAccounts() {
         console.error('Error approving account:', error);
         setError('Failed to approve account');
       } else {
-        // Remove from pending list
+        // Store approved account data and remove from pending list
+        const approvedAcc = pendingAccounts.find(acc => acc.id === accountId);
+        setApprovedAccount(approvedAcc);
         setPendingAccounts(prev => prev.filter(acc => acc.id !== accountId));
-        alert('Account approved successfully!');
+        setShowSuccessModal(true);
       }
     } catch (error) {
       console.error('Error:', error);
@@ -258,6 +262,80 @@ export default function ApproveAccounts() {
           </div>
         )}
       </div>
+
+      {/* Professional Success Modal */}
+      {showSuccessModal && approvedAccount && (
+        <div style={styles.modalOverlay}>
+          <div style={styles.successModal}>
+            <div style={styles.successHeader}>
+              <div style={styles.successIcon}>✅</div>
+              <h2 style={styles.successTitle}>Account Approved Successfully!</h2>
+              <p style={styles.successSubtitle}>
+                The customer has been notified and can now access their account
+              </p>
+            </div>
+            
+            <div style={styles.successDetails}>
+              <div style={styles.successCard}>
+                <h3 style={styles.successCardTitle}>Account Information</h3>
+                <div style={styles.successInfo}>
+                  <div style={styles.successInfoRow}>
+                    <span style={styles.successLabel}>Account Number:</span>
+                    <span style={styles.successValue}>{approvedAccount.account_number}</span>
+                  </div>
+                  <div style={styles.successInfoRow}>
+                    <span style={styles.successLabel}>Account Type:</span>
+                    <span style={styles.successValue}>
+                      {approvedAccount.account_type?.replace('_', ' ').toUpperCase()}
+                    </span>
+                  </div>
+                  <div style={styles.successInfoRow}>
+                    <span style={styles.successLabel}>Customer Name:</span>
+                    <span style={styles.successValue}>
+                      {approvedAccount.applications?.first_name} {approvedAccount.applications?.last_name}
+                    </span>
+                  </div>
+                  <div style={styles.successInfoRow}>
+                    <span style={styles.successLabel}>Email:</span>
+                    <span style={styles.successValue}>{approvedAccount.applications?.email}</span>
+                  </div>
+                  <div style={styles.successInfoRow}>
+                    <span style={styles.successLabel}>Status:</span>
+                    <span style={styles.successStatusActive}>ACTIVE</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div style={styles.successActions}>
+                <div style={styles.successActionItem}>
+                  <span style={styles.successActionIcon}>📧</span>
+                  <span style={styles.successActionText}>Welcome email sent automatically</span>
+                </div>
+                <div style={styles.successActionItem}>
+                  <span style={styles.successActionIcon}>🔐</span>
+                  <span style={styles.successActionText}>Online banking access enabled</span>
+                </div>
+                <div style={styles.successActionItem}>
+                  <span style={styles.successActionIcon}>💳</span>
+                  <span style={styles.successActionText}>Debit card can now be issued</span>
+                </div>
+              </div>
+            </div>
+            
+            <div style={styles.successFooter}>
+              <button
+                onClick={() => {
+                  setShowSuccessModal(false);
+                  setApprovedAccount(null);
+                }}
+                style={styles.successCloseButton}
+              >
+                Continue
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -556,6 +634,142 @@ const styles = {
     justifyContent: 'center',
     gap: '0.5rem'
   },
+  // Success Modal Styles
+  modalOverlay: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.75)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1000,
+    padding: 'clamp(1rem, 3vw, 2rem)'
+  },
+  successModal: {
+    backgroundColor: 'white',
+    borderRadius: '20px',
+    boxShadow: '0 25px 50px rgba(0, 0, 0, 0.25)',
+    maxWidth: '600px',
+    width: '100%',
+    maxHeight: '90vh',
+    overflow: 'auto',
+    animation: 'slideIn 0.3s ease-out'
+  },
+  successHeader: {
+    textAlign: 'center',
+    padding: 'clamp(2rem, 6vw, 3rem) clamp(1.5rem, 4vw, 2rem) clamp(1rem, 3vw, 1.5rem)',
+    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+    color: 'white',
+    borderRadius: '20px 20px 0 0'
+  },
+  successIcon: {
+    fontSize: 'clamp(3rem, 8vw, 4rem)',
+    marginBottom: '1rem',
+    display: 'block'
+  },
+  successTitle: {
+    fontSize: 'clamp(1.5rem, 5vw, 2rem)',
+    fontWeight: '700',
+    margin: '0 0 0.5rem 0',
+    lineHeight: '1.2'
+  },
+  successSubtitle: {
+    fontSize: 'clamp(1rem, 3vw, 1.125rem)',
+    opacity: 0.9,
+    margin: 0,
+    lineHeight: '1.4'
+  },
+  successDetails: {
+    padding: 'clamp(1.5rem, 4vw, 2rem)'
+  },
+  successCard: {
+    backgroundColor: '#f8fafc',
+    borderRadius: '16px',
+    padding: 'clamp(1.5rem, 4vw, 2rem)',
+    marginBottom: '1.5rem',
+    border: '2px solid #e2e8f0'
+  },
+  successCardTitle: {
+    fontSize: 'clamp(1.125rem, 3.5vw, 1.25rem)',
+    fontWeight: '700',
+    color: '#1e293b',
+    marginBottom: '1rem',
+    margin: '0 0 1rem 0'
+  },
+  successInfo: {
+    display: 'grid',
+    gap: '0.75rem'
+  },
+  successInfoRow: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '0.75rem 0',
+    borderBottom: '1px solid #e2e8f0'
+  },
+  successLabel: {
+    fontSize: 'clamp(0.875rem, 2.5vw, 1rem)',
+    fontWeight: '600',
+    color: '#64748b'
+  },
+  successValue: {
+    fontSize: 'clamp(0.875rem, 2.5vw, 1rem)',
+    fontWeight: '600',
+    color: '#1e293b',
+    textAlign: 'right'
+  },
+  successStatusActive: {
+    backgroundColor: '#10b981',
+    color: 'white',
+    padding: '0.375rem 0.75rem',
+    borderRadius: '12px',
+    fontSize: 'clamp(0.75rem, 2vw, 0.875rem)',
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: '0.025em'
+  },
+  successActions: {
+    display: 'grid',
+    gap: '1rem'
+  },
+  successActionItem: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.75rem',
+    padding: '1rem',
+    backgroundColor: '#ecfdf5',
+    borderRadius: '12px',
+    border: '1px solid #d1fae5'
+  },
+  successActionIcon: {
+    fontSize: 'clamp(1.25rem, 3vw, 1.5rem)'
+  },
+  successActionText: {
+    fontSize: 'clamp(0.875rem, 2.5vw, 1rem)',
+    fontWeight: '600',
+    color: '#065f46'
+  },
+  successFooter: {
+    padding: 'clamp(1rem, 3vw, 1.5rem) clamp(1.5rem, 4vw, 2rem) clamp(1.5rem, 4vw, 2rem)',
+    borderTop: '1px solid #e2e8f0',
+    textAlign: 'center'
+  },
+  successCloseButton: {
+    background: 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)',
+    color: 'white',
+    border: 'none',
+    padding: 'clamp(0.75rem, 3vw, 1rem) clamp(2rem, 6vw, 3rem)',
+    borderRadius: '12px',
+    fontSize: 'clamp(1rem, 3vw, 1.125rem)',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+    boxShadow: '0 8px 20px rgba(30, 60, 114, 0.3)',
+    minWidth: '120px'
+  },
   '@media (max-width: 768px)': {
     headerActions: {
       width: '100%',
@@ -567,6 +781,14 @@ const styles = {
     actionButtons: {
       gridTemplateColumns: '1fr',
       gap: '0.5rem'
+    },
+    successInfoRow: {
+      flexDirection: 'column',
+      alignItems: 'flex-start',
+      gap: '0.25rem'
+    },
+    successValue: {
+      textAlign: 'left'
     }
   }
 };
