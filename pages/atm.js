@@ -529,6 +529,60 @@ export default function ATM() {
         <meta name="description" content="Secure ATM services - withdraw, deposit, check balance and view transaction history" />
       </Head>
 
+      {/* Professional ATM Gallery Section */}
+      <section style={styles.atmGallerySection}>
+        <div style={styles.galleryContainer}>
+          <h2 style={styles.galleryTitle}>Oakline Bank ATM Network</h2>
+          <p style={styles.gallerySubtitle}>
+            Access your accounts 24/7 at our modern, secure ATM locations nationwide
+          </p>
+          <div style={styles.imageGrid}>
+            <div style={styles.galleryImageContainer} className="gallery-image-container">
+              <img 
+                src="https://images.unsplash.com/photo-1556740749-887f6717d7e4?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                alt="People using Oakline Bank ATM" 
+                style={styles.galleryImage}
+                onError={(e) => {
+                  e.target.src = '/images/atm-with-people.png';
+                }}
+              />
+              <div style={styles.imageOverlay} className="image-overlay">
+                <h3 style={styles.overlayTitle}>Convenient Locations</h3>
+                <p style={styles.overlayText}>Find ATMs in convenient locations near you</p>
+              </div>
+            </div>
+            <div style={styles.galleryImageContainer} className="gallery-image-container">
+              <img 
+                src="https://images.unsplash.com/photo-1563013544-824ae1b704d3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                alt="ATM transaction screen" 
+                style={styles.galleryImage}
+                onError={(e) => {
+                  e.target.src = '/images/atm-transaction.png';
+                }}
+              />
+              <div style={styles.imageOverlay} className="image-overlay">
+                <h3 style={styles.overlayTitle}>Secure Transactions</h3>
+                <p style={styles.overlayText}>Advanced security for all your banking needs</p>
+              </div>
+            </div>
+            <div style={styles.galleryImageContainer} className="gallery-image-container">
+              <img 
+                src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                alt="Modern bank interior with ATM" 
+                style={styles.galleryImage}
+                onError={(e) => {
+                  e.target.src = '/images/Modern_bank_lobby_interior_d535acc7.png';
+                }}
+              />
+              <div style={styles.imageOverlay} className="image-overlay">
+                <h3 style={styles.overlayTitle}>Modern Banking</h3>
+                <p style={styles.overlayText}>State-of-the-art banking technology</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <div style={styles.container}>
         <div style={styles.atmMachine}>
           <div style={styles.atmHeader}>
@@ -562,6 +616,73 @@ export default function ATM() {
 }
 
 const styles = {
+  // ATM Gallery Section
+  atmGallerySection: {
+    padding: '4rem 2rem',
+    backgroundColor: 'var(--neutral-gray, #F5F6F8)',
+    borderBottom: '1px solid #e2e8f0'
+  },
+  galleryContainer: {
+    maxWidth: '1200px',
+    margin: '0 auto',
+    textAlign: 'center'
+  },
+  galleryTitle: {
+    fontSize: 'clamp(2rem, 4vw, 2.5rem)',
+    fontWeight: '900',
+    color: 'var(--primary-navy, #1A3E6F)',
+    marginBottom: '1rem',
+    letterSpacing: '-0.01em'
+  },
+  gallerySubtitle: {
+    fontSize: '1.1rem',
+    color: 'var(--secondary-text, #4A4A4A)',
+    marginBottom: '3rem',
+    maxWidth: '600px',
+    margin: '0 auto 3rem'
+  },
+  imageGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 350px), 1fr))',
+    gap: '2rem',
+    marginBottom: '2rem'
+  },
+  galleryImageContainer: {
+    position: 'relative',
+    borderRadius: '16px',
+    overflow: 'hidden',
+    boxShadow: '0 8px 25px rgba(26, 54, 93, 0.1)',
+    transition: 'all 0.3s ease',
+    cursor: 'pointer',
+    backgroundColor: 'white'
+  },
+  galleryImage: {
+    width: '100%',
+    height: '250px',
+    objectFit: 'cover',
+    transition: 'transform 0.3s ease'
+  },
+  imageOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    background: 'linear-gradient(transparent, rgba(26, 54, 93, 0.9))',
+    color: 'white',
+    padding: '2rem 1.5rem 1.5rem',
+    transform: 'translateY(20px)',
+    opacity: 0,
+    transition: 'all 0.3s ease'
+  },
+  overlayTitle: {
+    fontSize: '1.2rem',
+    fontWeight: 'bold',
+    marginBottom: '0.5rem'
+  },
+  overlayText: {
+    fontSize: '0.9rem',
+    opacity: 0.9
+  },
   container: {
     minHeight: '100vh',
     backgroundColor: '#1a365d',
@@ -908,3 +1029,32 @@ const styles = {
     color: '#FFC857'
   }
 };
+
+// Add interactive effects
+if (typeof document !== 'undefined') {
+  const galleryStyles = document.createElement('style');
+  galleryStyles.textContent = `
+    .gallery-image-container:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 40px rgba(26, 54, 93, 0.2) !important;
+    }
+    
+    .gallery-image-container:hover img {
+      transform: scale(1.05);
+    }
+    
+    .gallery-image-container:hover .image-overlay {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    @media (max-width: 768px) {
+      .image-overlay {
+        opacity: 1;
+        transform: translateY(0);
+        background: linear-gradient(transparent, rgba(26, 54, 93, 0.8));
+      }
+    }
+  `;
+  document.head.appendChild(galleryStyles);
+}
