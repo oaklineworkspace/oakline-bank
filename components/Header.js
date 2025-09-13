@@ -1,11 +1,78 @@
 // components/Header.js
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { supabase } from '../lib/supabaseClient';
 
 export default function Header() {
   const [scrollText, setScrollText] = useState("Welcome to Oakline Bank – Secure, Convenient, and Innovative Banking Solutions for Everyone!");
   const [dropdownOpen, setDropdownOpen] = useState({});
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [user, setUser] = useState(null);
+  const [scrollingWelcomeMessage, setScrollingWelcomeMessage] = useState("");
+
+  // Professional welcome messages
+  const publicWelcomeMessages = [
+    "Welcome to Oakline Bank - Your Premier Financial Partner Since 1995 • Trusted by Over 500,000 Customers Nationwide",
+    "Experience Banking Excellence with Oakline Bank • FDIC Insured • Award-Winning Customer Service • Secure Digital Banking",
+    "Join the Oakline Bank Family Today • 23 Account Types • Competitive Rates • Premium Banking Services • Apply Online Now",
+    "Oakline Bank: Where Innovation Meets Tradition • Mobile Banking • Investment Services • Personalized Financial Solutions",
+    "Your Financial Success Starts Here • Oakline Bank • Professional Banking • Business Solutions • Personal Banking Excellence"
+  ];
+
+  const getPersonalizedWelcomeMessages = (userName) => [
+    `Welcome back, ${userName}! • Oakline Bank is here to serve your financial needs • Check your dashboard for updates`,
+    `Hello ${userName}! • Thank you for choosing Oakline Bank • Manage your accounts • Transfer funds • Pay bills securely`,
+    `Good day, ${userName}! • Your trusted banking partner • Explore our premium services • Investment opportunities await`,
+    `Welcome ${userName}! • Oakline Bank Premium Member • Exclusive rates • Priority support • Advanced banking features`,
+    `Greetings ${userName}! • Your financial journey continues with Oakline Bank • New features • Special offers • Account updates`
+  ];
+
+  // Get user session
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user ?? null);
+    };
+
+    getUser();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setUser(session?.user ?? null);
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Update welcome message based on user state
+  useEffect(() => {
+    if (user) {
+      const userName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'Valued Customer';
+      const messages = getPersonalizedWelcomeMessages(userName);
+      let currentIndex = 0;
+      
+      const updateMessage = () => {
+        setScrollingWelcomeMessage(messages[currentIndex]);
+        currentIndex = (currentIndex + 1) % messages.length;
+      };
+      
+      updateMessage();
+      const interval = setInterval(updateMessage, 6000);
+      return () => clearInterval(interval);
+    } else {
+      let currentIndex = 0;
+      
+      const updateMessage = () => {
+        setScrollingWelcomeMessage(publicWelcomeMessages[currentIndex]);
+        currentIndex = (currentIndex + 1) % publicWelcomeMessages.length;
+      };
+      
+      updateMessage();
+      const interval = setInterval(updateMessage, 6000);
+      return () => clearInterval(interval);
+    }
+  }, [user]);
 
   // For scrolling effect
   useEffect(() => {
@@ -116,10 +183,11 @@ export default function Header() {
             <Link href="/market-news" style={styles.navLink}>Market News</Link>
           </div>
 
-          {/* Action Buttons */}
-          <div style={styles.actionButtons}>
-            <Link href="/apply" style={styles.applyBtn}>Apply Now</Link>
-            <Link href="/login" style={styles.loginBtn}>Sign In</Link>
+          {/* Scrolling Welcome Message */}
+          <div style={styles.welcomeMessageContainer}>
+            <div style={styles.scrollingWelcome}>
+              {scrollingWelcomeMessage}
+            </div>
           </div>
 
           {/* Mobile Menu Button */}
@@ -279,32 +347,25 @@ const styles = {
     borderRadius: '6px',
     transition: 'all 0.2s',
   },
-  actionButtons: {
+  welcomeMessageContainer: {
     display: 'flex',
     alignItems: 'center',
-    gap: '12px',
-  },
-  applyBtn: {
-    backgroundColor: '#FFC857',
-    color: '#1E1E1E',
-    textDecoration: 'none',
-    padding: '12px 24px',
+    maxWidth: '400px',
+    minWidth: '300px',
+    overflow: 'hidden',
+    padding: '8px 16px',
+    backgroundColor: 'rgba(26, 62, 111, 0.05)',
     borderRadius: '8px',
-    fontWeight: '600',
-    fontSize: '14px',
-    transition: 'all 0.2s',
-    boxShadow: '0 2px 4px rgba(255, 200, 87, 0.3)',
+    border: '1px solid rgba(26, 62, 111, 0.1)',
   },
-  loginBtn: {
-    backgroundColor: '#1A3E6F',
-    color: '#ffffff',
-    textDecoration: 'none',
-    padding: '12px 24px',
-    borderRadius: '8px',
-    fontWeight: '600',
+  scrollingWelcome: {
+    color: '#1A3E6F',
     fontSize: '14px',
-    transition: 'all 0.2s',
-    boxShadow: '0 2px 4px rgba(26, 62, 111, 0.3)',
+    fontWeight: '500',
+    whiteSpace: 'nowrap',
+    animation: 'fadeIn 0.8s ease-in-out',
+    lineHeight: '1.4',
+    textAlign: 'center',
   },
   mobileMenuBtn: {
     display: 'none',

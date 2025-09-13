@@ -1,6 +1,22 @@
 /* Professional Banking Footer Styles */
 .sticky-footer {
-  animation: slideUpFooter 0.5s ease-out;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+    color: white;
+    padding: 0.5rem 1rem;
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(20px);
+    z-index: 1000;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    min-height: 35px;
+    display: flex;
+    align-items: center;
+  }
+
+animation: slideUpFooter 0.5s ease-out;
 }
 
 @keyframes slideUpFooter {

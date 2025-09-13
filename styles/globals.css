@@ -95,7 +95,7 @@ body {
   --neutral-gray: #F5F6F8;
   --light-gray: #F5F6F8;
   --white: #ffffff;
-  
+
   /* Text Colors */
   --primary-text: #1E1E1E;
   --secondary-text: #4A4A4A;
@@ -252,7 +252,7 @@ section {
 
 /* Body padding for sticky footer */
 body {
-  padding-bottom: 120px;
+  padding-bottom: 50px;
 }
 
 /* Hide body padding on admin pages */
