@@ -169,8 +169,8 @@ export default function AdminBalance() {
       console.log('Admin Action:', adminAction);
 
       setMessage(`✅ Balance updated successfully! 
-        Previous: $${currentBalance.toLocaleString()} 
-        New: $${newBalance.toLocaleString()}`);
+        Previous: $${currentBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} 
+        New: $${newBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
       setBalanceAmount('');
       setSelectedAccount('');
       setSelectedUser('');
@@ -262,7 +262,7 @@ export default function AdminBalance() {
                   {getUserAccounts(selectedUser).map(account => (
                     <option key={account.id} value={account.id}>
                       {account.account_type} - ****{account.account_number?.slice(-4)} 
-                      (Current: ${parseFloat(account.balance || 0).toLocaleString()})
+                      (Current: ${parseFloat(account.balance || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})
                     </option>
                   ))}
                 </select>
@@ -325,7 +325,7 @@ export default function AdminBalance() {
           </div>
           <div style={styles.summaryItem}>
             <span style={styles.summaryNumber}>
-              ${accounts.reduce((sum, acc) => sum + parseFloat(acc.balance || 0), 0).toLocaleString()}
+              ${accounts.reduce((sum, acc) => sum + parseFloat(acc.balance || 0), 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </span>
             <span style={styles.summaryLabel}>Total Balance</span>
           </div>

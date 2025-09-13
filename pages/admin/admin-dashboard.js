@@ -330,6 +330,12 @@ export default function AdminDashboard() {
         </button>
         <button
           style={styles.actionButton}
+          onClick={() => router.push('/admin/admin-balance')}
+        >
+          💳 Update User Balance
+        </button>
+        <button
+          style={styles.actionButton}
           onClick={() => router.push('/admin/bulk-transactions')}
         >
           📦 Bulk Transactions
