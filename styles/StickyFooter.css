@@ -131,11 +131,6 @@
   }
 }
 
-/* Ensure footer doesn't overlap content */
-body {
-  padding-bottom: 80px;
-}
-
 /* Animation for feature buttons */
 .sticky-footer a[style*="featureButton"] {
   animation: fadeInScale 0.6s ease-out;
@@ -156,21 +151,6 @@ body {
   to {
     opacity: 1;
     transform: scale(1);
-  }
-}
-
-  .sticky-footer-button {
-    width: 100% !important;
-    max-width: none !important;
-    justify-content: center !important;
-  }
-
-  .sticky-footer-title {
-    font-size: 1rem !important;
-  }
-
-  .sticky-footer-subtitle {
-    font-size: 0.8rem !important;
   }
 }
 
