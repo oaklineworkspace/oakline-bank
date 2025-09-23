@@ -181,9 +181,9 @@ export default function Disclosures() {
           </p>
           <ul style={styles.list}>
             <li style={styles.listItem}>Receive electronic statements and notices</li>
-            <li style={styles.listItem">Maintain the security of your login credentials</li>
-            <li style={styles.listItem">Report unauthorized transactions promptly</li>
-            <li style={styles.listItem">Use services in accordance with our terms</li>
+            <li style={styles.listItem}>Maintain the security of your login credentials</li>
+            <li style={styles.listItem}>Report unauthorized transactions promptly</li>
+            <li style={styles.listItem}>Use services in accordance with our terms</li>
           </ul>
           
           <div style={styles.warning}>
@@ -206,10 +206,10 @@ export default function Disclosures() {
               you deposit by check available to you on the business day after we receive your deposit.
             </p>
             <ul style={styles.list}>
-              <li style={styles.listItem">Deposits over $5,525 may be held for up to 2 additional business days</li>
-              <li style={styles.listItem">New accounts may have extended hold periods</li>
-              <li style={styles.listItem">Repeated overdrafts may result in longer holds</li>
-              <li style={styles.listItem">Reasonable doubt about collectibility</li>
+              <li style={styles.listItem}>Deposits over $5,525 may be held for up to 2 additional business days</li>
+              <li style={styles.listItem}>New accounts may have extended hold periods</li>
+              <li style={styles.listItem}>Repeated overdrafts may result in longer holds</li>
+              <li style={styles.listItem}>Reasonable doubt about collectibility</li>
             </ul>
           </div>
         </div>
@@ -248,7 +248,7 @@ export default function Disclosures() {
               </tr>
               <tr>
                 <td style={styles.tableCell}>Account Research</td>
-                <td style={styles.tableCell">$25 per hour</td>
+                <td style={styles.tableCell}>$25 per hour</td>
               </tr>
             </tbody>
           </table>
@@ -276,10 +276,10 @@ export default function Disclosures() {
             All loan products are subject to credit approval and may require:
           </p>
           <ul style={styles.list}>
-            <li style={styles.listItem">Income verification and employment history</li>
-            <li style={styles.listItem">Collateral evaluation (for secured loans)</li>
-            <li style={styles.listItem">Debt-to-income ratio within acceptable limits</li>
-            <li style={styles.listItem">Minimum credit score requirements</li>
+            <li style={styles.listItem}>Income verification and employment history</li>
+            <li style={styles.listItem}>Collateral evaluation (for secured loans)</li>
+            <li style={styles.listItem}>Debt-to-income ratio within acceptable limits</li>
+            <li style={styles.listItem}>Minimum credit score requirements</li>
             <li style={styles.listItem}>Property appraisal (for real estate loans)</li>
           </ul>
         </div>
@@ -292,7 +292,7 @@ export default function Disclosures() {
             </p>
             <ul style={styles.list}>
               <li style={styles.listItem}>Phone: 1-800-OAKLINE (625-5463)</li>
-              <li style={styles.listItem">Email: info@oaklinebank.com</li>
+              <li style={styles.listItem}>Email: info@oaklinebank.com</li>
               <li style={styles.listItem}>Visit: Any Oakline Bank branch location</li>
               <li style={styles.listItem}>Mail: Customer Service, Oakline Bank, 123 Financial District, NY 10001</li>
             </ul>
