@@ -1,4 +1,5 @@
 
+
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabaseClient';
@@ -40,7 +41,20 @@ export default function Cards() {
 
       console.log('Fetching cards for user:', authUser.id, 'Email:', authUser.email);
 
-      // First, get user's accounts to establish the relationship
+      // First, find the user in the applications table (where real users are stored)
+      const { data: userProfile, error: profileError } = await supabase
+        .from('applications')
+        .select('*')
+        .eq('email', authUser.email)
+        .single();
+
+      if (profileError && profileError.code !== 'PGRST116') {
+        console.error('Error fetching user profile:', profileError);
+      }
+
+      console.log('Found user profile:', userProfile ? 'Yes' : 'No');
+
+      // Get user's accounts using both user_id and email
       const { data: userAccounts, error: accountsError } = await supabase
         .from('accounts')
         .select('*')
