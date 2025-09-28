@@ -1,10 +1,25 @@
-
 import { useState } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 
 export default function About() {
   const [activeSection, setActiveSection] = useState('mission');
+  const [teamMembers, setTeamMembers] = useState([]); // Default empty array for teamMembers
+  const [achievements, setAchievements] = useState([]); // Assuming achievements might also be fetched
+  const [locations, setLocations] = useState([]); // Assuming locations might also be fetched
+
+  // In a real application, you would fetch this data:
+  // useEffect(() => {
+  //   fetch('/api/team')
+  //     .then(res => res.json())
+  //     .then(data => setTeamMembers(data));
+  //   fetch('/api/achievements')
+  //     .then(res => res.json())
+  //     .then(data => setAchievements(data));
+  //   fetch('/api/locations')
+  //     .then(res => res.json())
+  //     .then(data => setLocations(data));
+  // }, []);
 
   return (
     <div style={styles.container}>
@@ -127,30 +142,16 @@ export default function About() {
             <section style={styles.section}>
               <h2 style={styles.sectionTitle}>Leadership Team</h2>
               <div style={styles.teamGrid}>
-                <div style={styles.teamCard}>
-                  <div style={styles.avatar}>👨‍💼</div>
-                  <h4 style={styles.teamName}>John Anderson</h4>
-                  <p style={styles.teamRole}>Chief Executive Officer</p>
-                  <p style={styles.teamBio}>
-                    20+ years of experience in financial services and digital transformation.
-                  </p>
-                </div>
-                <div style={styles.teamCard}>
-                  <div style={styles.avatar}>👩‍💼</div>
-                  <h4 style={styles.teamName}>Sarah Chen</h4>
-                  <p style={styles.teamRole}>Chief Technology Officer</p>
-                  <p style={styles.teamBio}>
-                    Former Silicon Valley engineer with expertise in fintech and cybersecurity.
-                  </p>
-                </div>
-                <div style={styles.teamCard}>
-                  <div style={styles.avatar}>👨‍💼</div>
-                  <h4 style={styles.teamName}>Michael Rodriguez</h4>
-                  <p style={styles.teamRole}>Chief Financial Officer</p>
-                  <p style={styles.teamBio}>
-                    Chartered accountant with extensive experience in banking operations.
-                  </p>
-                </div>
+                {teamMembers && teamMembers.length > 0 && teamMembers.map((member, index) => (
+                  <div key={index} style={styles.teamCard}>
+                    <div style={styles.avatar}>👨‍💼</div>
+                    <h4 style={styles.teamName}>{member.name}</h4>
+                    <p style={styles.teamRole}>{member.role}</p>
+                    <p style={styles.teamBio}>
+                      {member.bio}
+                    </p>
+                  </div>
+                ))}
               </div>
             </section>
           )}
