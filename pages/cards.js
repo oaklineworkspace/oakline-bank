@@ -26,40 +26,149 @@ export default function Cards() {
         return;
       }
       setUser(session.user);
-      await fetchUserCards();
+      await fetchUserCards(session.user);
     } catch (error) {
       console.error('Auth check error:', error);
       router.push('/login');
     }
   };
 
-  const fetchUserCards = async () => {
+  const fetchUserCards = async (authUser) => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
+      setLoading(true);
+      setError('');
 
-      console.log('Fetching cards for user:', session.user.id);
+      console.log('Fetching cards for user:', authUser.id, 'Email:', authUser.email);
 
-      const response = await fetch('/api/get-user-cards', {
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`
-        }
-      });
+      // First, get user's accounts to establish the relationship
+      const { data: userAccounts, error: accountsError } = await supabase
+        .from('accounts')
+        .select('*')
+        .or(`user_id.eq.${authUser.id},email.eq.${authUser.email}`)
+        .eq('status', 'active');
 
-      const data = await response.json();
-      console.log('Cards API response:', data);
-      
-      if (data.success) {
-        setCards(data.cards || []);
-        setApplications(data.applications || []);
-        console.log('Cards loaded:', data.cards?.length || 0);
-        console.log('Applications loaded:', data.applications?.length || 0);
-      } else {
-        setError('Failed to fetch cards: ' + (data.message || 'Unknown error'));
+      if (accountsError) {
+        console.error('Error fetching accounts:', accountsError);
+        throw new Error(`Failed to fetch accounts: ${accountsError.message}`);
       }
+
+      console.log('Found accounts:', userAccounts?.length || 0);
+
+      // Get cards for this user
+      let cardsData = [];
+      if (userAccounts && userAccounts.length > 0) {
+        const accountIds = userAccounts.map(acc => acc.id);
+        
+        const { data: userCards, error: cardsError } = await supabase
+          .from('cards')
+          .select(`
+            *,
+            accounts!inner (
+              id,
+              account_number,
+              account_type,
+              balance,
+              user_id,
+              email
+            )
+          `)
+          .or(`user_id.eq.${authUser.id},account_id.in.(${accountIds.join(',')})`)
+          .eq('status', 'active');
+
+        if (cardsError) {
+          console.error('Error fetching cards:', cardsError);
+        } else {
+          cardsData = userCards || [];
+        }
+      }
+
+      // Also try direct user_id match for cards
+      if (cardsData.length === 0) {
+        const { data: directCards, error: directError } = await supabase
+          .from('cards')
+          .select(`
+            *,
+            accounts (
+              id,
+              account_number,
+              account_type,
+              balance,
+              user_id,
+              email
+            )
+          `)
+          .eq('user_id', authUser.id);
+
+        if (!directError && directCards) {
+          cardsData = directCards;
+        }
+      }
+
+      console.log('Found cards:', cardsData.length);
+
+      // Mask sensitive card data for display
+      const safeCards = cardsData.map(card => ({
+        ...card,
+        card_number: card.card_number ? `****-****-****-${card.card_number.slice(-4)}` : '****-****-****-0000'
+      }));
+
+      setCards(safeCards);
+
+      // Get card applications
+      let applicationsData = [];
+      if (userAccounts && userAccounts.length > 0) {
+        const accountIds = userAccounts.map(acc => acc.id);
+        
+        const { data: userApplications, error: appsError } = await supabase
+          .from('card_applications')
+          .select(`
+            *,
+            accounts (
+              id,
+              account_number,
+              account_type,
+              balance,
+              user_id,
+              email
+            )
+          `)
+          .or(`user_id.eq.${authUser.id},account_id.in.(${accountIds.join(',')})`)
+          .order('created_at', { ascending: false });
+
+        if (!appsError && userApplications) {
+          applicationsData = userApplications;
+        }
+      }
+
+      // Also try direct user_id match for applications
+      if (applicationsData.length === 0) {
+        const { data: directApps, error: directAppError } = await supabase
+          .from('card_applications')
+          .select(`
+            *,
+            accounts (
+              id,
+              account_number,
+              account_type,
+              balance,
+              user_id,
+              email
+            )
+          `)
+          .eq('user_id', authUser.id)
+          .order('created_at', { ascending: false });
+
+        if (!directAppError && directApps) {
+          applicationsData = directApps;
+        }
+      }
+
+      console.log('Found applications:', applicationsData.length);
+      setApplications(applicationsData);
+
     } catch (error) {
-      console.error('Error fetching cards:', error);
-      setError('Error loading cards: ' + error.message);
+      console.error('Error fetching user cards:', error);
+      setError(`Failed to load cards: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -70,25 +179,39 @@ export default function Cards() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
 
-      const response = await fetch('/api/cards', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`
-        },
-        body: JSON.stringify({
-          cardId,
-          action,
-          ...additionalData
-        })
-      });
+      let updateData = {};
+      
+      switch (action) {
+        case 'lock':
+          updateData.is_locked = true;
+          break;
+        case 'unlock':
+          updateData.is_locked = false;
+          break;
+        case 'deactivate':
+          updateData.status = 'inactive';
+          break;
+        case 'update_limits':
+          if (additionalData.dailyLimit !== undefined) updateData.daily_limit = additionalData.dailyLimit;
+          if (additionalData.monthlyLimit !== undefined) updateData.monthly_limit = additionalData.monthlyLimit;
+          break;
+        default:
+          setError('Invalid action');
+          return;
+      }
 
-      const data = await response.json();
-      if (data.success) {
-        await fetchUserCards(); // Refresh cards
-        setError('');
+      const { error: updateError } = await supabase
+        .from('cards')
+        .update(updateData)
+        .eq('id', cardId)
+        .eq('user_id', user.id);
+
+      if (updateError) {
+        console.error('Error updating card:', updateError);
+        setError(`Failed to ${action} card: ${updateError.message}`);
       } else {
-        setError(data.error || 'Failed to update card');
+        await fetchUserCards(user); // Refresh cards
+        setError('');
       }
     } catch (error) {
       console.error('Error updating card:', error);
@@ -101,18 +224,20 @@ export default function Cards() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
 
-      const response = await fetch(`/api/card-transactions?cardId=${cardId}`, {
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`
-        }
-      });
+      const { data: cardTransactions, error: transError } = await supabase
+        .from('card_transactions')
+        .select('*')
+        .eq('card_id', cardId)
+        .eq('status', 'completed')
+        .order('created_at', { ascending: false })
+        .limit(20);
 
-      const data = await response.json();
-      if (data.success) {
-        setTransactions(data.transactions);
-        setShowTransactions(true);
-      } else {
+      if (transError) {
+        console.error('Error fetching transactions:', transError);
         setError('Failed to fetch transactions');
+      } else {
+        setTransactions(cardTransactions || []);
+        setShowTransactions(true);
       }
     } catch (error) {
       console.error('Error fetching transactions:', error);
@@ -123,7 +248,7 @@ export default function Cards() {
   if (loading) {
     return (
       <div style={styles.container}>
-        <div style={styles.loading}>Loading cards...</div>
+        <div style={styles.loading}>Loading your cards...</div>
       </div>
     );
   }
@@ -141,6 +266,12 @@ export default function Cards() {
       </div>
 
       {error && <div style={styles.error}>{error}</div>}
+
+      {user && (
+        <div style={styles.userInfo}>
+          <p>Account holder: <strong>{user.email}</strong></p>
+        </div>
+      )}
 
       {/* Card Applications */}
       {applications.length > 0 && (
@@ -160,9 +291,11 @@ export default function Cards() {
                   </span>
                 </div>
                 <div style={styles.applicationDetails}>
-                  <p><strong>Type:</strong> {app.card_type}</p>
+                  <p><strong>Type:</strong> {app.card_type || 'Debit Card'}</p>
                   <p><strong>Applied:</strong> {new Date(app.created_at).toLocaleDateString()}</p>
-                  <p><strong>Account:</strong> {app.accounts?.account_type}</p>
+                  {app.accounts && (
+                    <p><strong>Account:</strong> {app.accounts.account_type} - ****{app.accounts.account_number?.slice(-4)}</p>
+                  )}
                 </div>
               </div>
             ))}
@@ -190,9 +323,9 @@ export default function Cards() {
               <div key={card.id} style={styles.cardItem}>
                 <div style={styles.cardVisual}>
                   <div style={styles.cardNumber}>{card.card_number}</div>
-                  <div style={styles.cardHolder}>{card.cardholder_name}</div>
+                  <div style={styles.cardHolder}>{card.cardholder_name || user?.email}</div>
                   <div style={styles.cardExpiry}>Expires: {card.expiry_date}</div>
-                  <div style={styles.cardType}>{card.card_type.toUpperCase()}</div>
+                  <div style={styles.cardType}>{(card.card_type || 'DEBIT').toUpperCase()}</div>
                 </div>
                 
                 <div style={styles.cardDetails}>
@@ -207,20 +340,24 @@ export default function Cards() {
                   </div>
                   <div style={styles.detailRow}>
                     <span>Daily Limit:</span>
-                    <span>${parseFloat(card.daily_limit || 0).toFixed(2)}</span>
+                    <span>${parseFloat(card.daily_limit || 1000).toFixed(2)}</span>
                   </div>
                   <div style={styles.detailRow}>
                     <span>Monthly Limit:</span>
-                    <span>${parseFloat(card.monthly_limit || 0).toFixed(2)}</span>
+                    <span>${parseFloat(card.monthly_limit || 10000).toFixed(2)}</span>
                   </div>
-                  <div style={styles.detailRow}>
-                    <span>Account:</span>
-                    <span>{card.accounts?.account_type}</span>
-                  </div>
-                  <div style={styles.detailRow}>
-                    <span>Balance:</span>
-                    <span>${parseFloat(card.accounts?.balance || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                  </div>
+                  {card.accounts && (
+                    <>
+                      <div style={styles.detailRow}>
+                        <span>Account:</span>
+                        <span>{card.accounts.account_type}</span>
+                      </div>
+                      <div style={styles.detailRow}>
+                        <span>Balance:</span>
+                        <span>${parseFloat(card.accounts.balance || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 <div style={styles.cardActions}>
@@ -282,8 +419,8 @@ export default function Cards() {
                 transactions.map((transaction) => (
                   <div key={transaction.id} style={styles.transactionItem}>
                     <div style={styles.transactionInfo}>
-                      <strong>{transaction.merchant}</strong>
-                      <span style={styles.transactionLocation}>{transaction.location}</span>
+                      <strong>{transaction.merchant || 'Card Transaction'}</strong>
+                      <span style={styles.transactionLocation}>{transaction.location || 'N/A'}</span>
                     </div>
                     <div style={styles.transactionAmount}>
                       -${parseFloat(transaction.amount).toFixed(2)}
@@ -339,6 +476,14 @@ const styles = {
     cursor: 'pointer',
     fontSize: '16px',
     fontWeight: '500'
+  },
+  userInfo: {
+    background: 'white',
+    padding: '15px 20px',
+    borderRadius: '8px',
+    marginBottom: '20px',
+    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+    color: '#666'
   },
   loading: {
     textAlign: 'center',
