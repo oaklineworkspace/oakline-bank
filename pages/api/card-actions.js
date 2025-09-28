@@ -37,6 +37,9 @@ export default async function handler(req, res) {
       case 'deactivate':
         updateData.status = 'inactive';
         break;
+      case 'activate':
+        updateData.status = 'active';
+        break;
       case 'update_limits':
         if (additionalData.dailyLimit !== undefined) updateData.daily_limit = additionalData.dailyLimit;
         if (additionalData.monthlyLimit !== undefined) updateData.monthly_limit = additionalData.monthlyLimit;
