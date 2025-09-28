@@ -54,12 +54,34 @@ export default function Cards() {
 
       console.log('Found user profile:', userProfile ? 'Yes' : 'No');
 
-      // Get user's accounts using both user_id and email
-      const { data: userAccounts, error: accountsError } = await supabase
+      // Get user's accounts using user_id and application_id
+      let userAccounts = [];
+      let accountsError = null;
+
+      // First try to get accounts by user_id
+      const { data: directAccounts, error: directError } = await supabase
         .from('accounts')
         .select('*')
-        .or(`user_id.eq.${authUser.id},email.eq.${authUser.email}`)
+        .eq('user_id', authUser.id)
         .eq('status', 'active');
+
+      if (!directError && directAccounts && directAccounts.length > 0) {
+        userAccounts = directAccounts;
+      } else if (userProfile?.id) {
+        // If no direct accounts, try using application_id from user profile
+        const { data: appAccounts, error: appError } = await supabase
+          .from('accounts')
+          .select('*')
+          .eq('application_id', userProfile.id)
+          .eq('status', 'active');
+        
+        if (!appError && appAccounts) {
+          userAccounts = appAccounts;
+        }
+        accountsError = appError;
+      } else {
+        accountsError = directError;
+      }
 
       if (accountsError) {
         console.error('Error fetching accounts:', accountsError);
@@ -82,8 +104,7 @@ export default function Cards() {
               account_number,
               account_type,
               balance,
-              user_id,
-              email
+              user_id
             )
           `)
           .or(`user_id.eq.${authUser.id},account_id.in.(${accountIds.join(',')})`)
@@ -107,8 +128,7 @@ export default function Cards() {
               account_number,
               account_type,
               balance,
-              user_id,
-              email
+              user_id
             )
           `)
           .eq('user_id', authUser.id);
@@ -142,8 +162,7 @@ export default function Cards() {
               account_number,
               account_type,
               balance,
-              user_id,
-              email
+              user_id
             )
           `)
           .or(`user_id.eq.${authUser.id},account_id.in.(${accountIds.join(',')})`)
@@ -165,8 +184,7 @@ export default function Cards() {
               account_number,
               account_type,
               balance,
-              user_id,
-              email
+              user_id
             )
           `)
           .eq('user_id', authUser.id)
