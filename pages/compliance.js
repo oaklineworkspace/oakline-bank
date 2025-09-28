@@ -125,7 +125,7 @@ export default function Compliance() {
             <li style={styles.listItem}>Suspicious Activity Report (SAR) filing when required</li>
             <li style={styles.listItem}>Currency Transaction Report (CTR) filing for transactions over $10,000</li>
             <li style={styles.listItem}>OFAC sanctions screening and monitoring</li>
-            <li style={styles.listItem">Regular employee training on AML requirements</li>
+            <li style={styles.listItem}>Regular employee training on AML requirements</li>
           </ul>
         </div>
 
@@ -144,14 +144,14 @@ export default function Compliance() {
 
         <div style={styles.section}>
           <h2 style={styles.sectionTitle}>Privacy & Data Protection</h2>
-          <p style={styles.text">
+          <p style={styles.text}>
             We maintain strict compliance with privacy regulations:
           </p>
           <ul style={styles.list}>
             <li style={styles.listItem}>Gramm-Leach-Bliley Act (GLBA) privacy requirements</li>
             <li style={styles.listItem}>California Consumer Privacy Act (CCPA) where applicable</li>
             <li style={styles.listItem}>PCI DSS compliance for payment card data</li>
-            <li style={styles.listItem">SOX compliance for financial reporting</li>
+            <li style={styles.listItem}>SOX compliance for financial reporting</li>
             <li style={styles.listItem}>Regular cybersecurity assessments and updates</li>
           </ul>
         </div>
@@ -182,10 +182,10 @@ export default function Compliance() {
           </p>
           <ul style={styles.list}>
             <li style={styles.listItem}>FINRA Member - Check our BrokerCheck record</li>
-            <li style={styles.listItem">SIPC Member - Securities investor protection</li>
+            <li style={styles.listItem}>SIPC Member - Securities investor protection</li>
             <li style={styles.listItem}>SEC oversight for investment advisory services</li>
             <li style={styles.listItem}>Suitability and best interest standards</li>
-            <li style={styles.listItem">Regular compliance examinations</li>
+            <li style={styles.listItem}>Regular compliance examinations</li>
           </ul>
         </div>
 
@@ -195,11 +195,11 @@ export default function Compliance() {
             We maintain transparency through regular reporting:
           </p>
           <ul style={styles.list}>
-            <li style={styles.listItem">Quarterly Call Reports to regulators</li>
+            <li style={styles.listItem}>Quarterly Call Reports to regulators</li>
             <li style={styles.listItem}>Annual CRA Performance Evaluation</li>
-            <li style={styles.listItem">HMDA Data reporting and disclosure</li>
-            <li style={styles.listItem">Public availability of regulatory reports</li>
-            <li style={styles.listItem">Regular board and committee oversight</li>
+            <li style={styles.listItem}>HMDA Data reporting and disclosure</li>
+            <li style={styles.listItem}>Public availability of regulatory reports</li>
+            <li style={styles.listItem}>Regular board and committee oversight</li>
           </ul>
         </div>
 
