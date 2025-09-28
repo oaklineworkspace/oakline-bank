@@ -294,12 +294,19 @@ export default function Cards() {
                     </button>
                   )}
 
-                  {card.status === 'active' && (
+                  {card.status === 'active' ? (
                     <button
                       onClick={() => handleCardAction(card.id, 'deactivate')}
                       style={styles.deactivateButton}
                     >
                       ❌ Deactivate
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => handleCardAction(card.id, 'activate')}
+                      style={styles.activateButton}
+                    >
+                      ✅ Activate
                     </button>
                   )}
                 </div>
@@ -559,6 +566,17 @@ const styles = {
   },
   deactivateButton: {
     background: '#dc3545',
+    color: 'white',
+    border: 'none',
+    padding: '8px 16px',
+    borderRadius: '6px',
+    cursor: 'pointer',
+    fontSize: '14px',
+    flex: '1',
+    minWidth: '120px'
+  },
+  activateButton: {
+    background: '#28a745',
     color: 'white',
     border: 'none',
     padding: '8px 16px',
