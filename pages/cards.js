@@ -1,5 +1,4 @@
 
-
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabaseClient';
@@ -41,162 +40,36 @@ export default function Cards() {
 
       console.log('Fetching cards for user:', authUser.id, 'Email:', authUser.email);
 
-      // First, find the user in the applications table (where real users are stored)
-      const { data: userProfile, error: profileError } = await supabase
-        .from('applications')
-        .select('*')
-        .eq('email', authUser.email)
-        .single();
-
-      if (profileError && profileError.code !== 'PGRST116') {
-        console.error('Error fetching user profile:', profileError);
+      // Get session token for API calls
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        throw new Error('No valid session token');
       }
 
-      console.log('Found user profile:', userProfile ? 'Yes' : 'No');
-
-      // Get user's accounts using user_id and application_id
-      let userAccounts = [];
-      let accountsError = null;
-
-      // First try to get accounts by user_id
-      const { data: directAccounts, error: directError } = await supabase
-        .from('accounts')
-        .select('*')
-        .eq('user_id', authUser.id)
-        .eq('status', 'active');
-
-      if (!directError && directAccounts && directAccounts.length > 0) {
-        userAccounts = directAccounts;
-      } else if (userProfile?.id) {
-        // If no direct accounts, try using application_id from user profile
-        const { data: appAccounts, error: appError } = await supabase
-          .from('accounts')
-          .select('*')
-          .eq('application_id', userProfile.id)
-          .eq('status', 'active');
-        
-        if (!appError && appAccounts) {
-          userAccounts = appAccounts;
+      // Fetch cards and applications from backend API
+      const response = await fetch('/api/user-cards', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json'
         }
-        accountsError = appError;
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to fetch cards');
+      }
+
+      const data = await response.json();
+
+      if (data.success) {
+        setCards(data.cards || []);
+        setApplications(data.applications || []);
+        console.log('Successfully loaded cards:', data.cards?.length || 0);
+        console.log('Successfully loaded applications:', data.applications?.length || 0);
       } else {
-        accountsError = directError;
+        throw new Error(data.error || 'Failed to load cards');
       }
-
-      if (accountsError) {
-        console.error('Error fetching accounts:', accountsError);
-        throw new Error(`Failed to fetch accounts: ${accountsError.message}`);
-      }
-
-      console.log('Found accounts:', userAccounts?.length || 0);
-
-      // Get cards for this user
-      let cardsData = [];
-      if (userAccounts && userAccounts.length > 0) {
-        const accountIds = userAccounts.map(acc => acc.id);
-        
-        const { data: userCards, error: cardsError } = await supabase
-          .from('cards')
-          .select(`
-            *,
-            accounts!inner (
-              id,
-              account_number,
-              account_type,
-              balance,
-              user_id
-            )
-          `)
-          .or(`user_id.eq.${authUser.id},account_id.in.(${accountIds.join(',')})`)
-          .eq('status', 'active');
-
-        if (cardsError) {
-          console.error('Error fetching cards:', cardsError);
-        } else {
-          cardsData = userCards || [];
-        }
-      }
-
-      // Also try direct user_id match for cards
-      if (cardsData.length === 0) {
-        const { data: directCards, error: directError } = await supabase
-          .from('cards')
-          .select(`
-            *,
-            accounts (
-              id,
-              account_number,
-              account_type,
-              balance,
-              user_id
-            )
-          `)
-          .eq('user_id', authUser.id);
-
-        if (!directError && directCards) {
-          cardsData = directCards;
-        }
-      }
-
-      console.log('Found cards:', cardsData.length);
-
-      // Mask sensitive card data for display
-      const safeCards = cardsData.map(card => ({
-        ...card,
-        card_number: card.card_number ? `****-****-****-${card.card_number.slice(-4)}` : '****-****-****-0000'
-      }));
-
-      setCards(safeCards);
-
-      // Get card applications
-      let applicationsData = [];
-      if (userAccounts && userAccounts.length > 0) {
-        const accountIds = userAccounts.map(acc => acc.id);
-        
-        const { data: userApplications, error: appsError } = await supabase
-          .from('card_applications')
-          .select(`
-            *,
-            accounts (
-              id,
-              account_number,
-              account_type,
-              balance,
-              user_id
-            )
-          `)
-          .or(`user_id.eq.${authUser.id},account_id.in.(${accountIds.join(',')})`)
-          .order('created_at', { ascending: false });
-
-        if (!appsError && userApplications) {
-          applicationsData = userApplications;
-        }
-      }
-
-      // Also try direct user_id match for applications
-      if (applicationsData.length === 0) {
-        const { data: directApps, error: directAppError } = await supabase
-          .from('card_applications')
-          .select(`
-            *,
-            accounts (
-              id,
-              account_number,
-              account_type,
-              balance,
-              user_id
-            )
-          `)
-          .eq('user_id', authUser.id)
-          .order('created_at', { ascending: false });
-
-        if (!directAppError && directApps) {
-          applicationsData = directApps;
-        }
-      }
-
-      console.log('Found applications:', applicationsData.length);
-      setApplications(applicationsData);
 
     } catch (error) {
       console.error('Error fetching user cards:', error);
@@ -209,71 +82,76 @@ export default function Cards() {
   const handleCardAction = async (cardId, action, additionalData = {}) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
-
-      let updateData = {};
-      
-      switch (action) {
-        case 'lock':
-          updateData.is_locked = true;
-          break;
-        case 'unlock':
-          updateData.is_locked = false;
-          break;
-        case 'deactivate':
-          updateData.status = 'inactive';
-          break;
-        case 'update_limits':
-          if (additionalData.dailyLimit !== undefined) updateData.daily_limit = additionalData.dailyLimit;
-          if (additionalData.monthlyLimit !== undefined) updateData.monthly_limit = additionalData.monthlyLimit;
-          break;
-        default:
-          setError('Invalid action');
-          return;
+      if (!session?.access_token) {
+        setError('No valid session found');
+        return;
       }
 
-      const { error: updateError } = await supabase
-        .from('cards')
-        .update(updateData)
-        .eq('id', cardId)
-        .eq('user_id', user.id);
+      const response = await fetch('/api/card-actions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          cardId,
+          action,
+          additionalData
+        })
+      });
 
-      if (updateError) {
-        console.error('Error updating card:', updateError);
-        setError(`Failed to ${action} card: ${updateError.message}`);
-      } else {
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `Failed to ${action} card`);
+      }
+
+      const data = await response.json();
+
+      if (data.success) {
         await fetchUserCards(user); // Refresh cards
         setError('');
+      } else {
+        throw new Error(data.error || `Failed to ${action} card`);
       }
     } catch (error) {
       console.error('Error updating card:', error);
-      setError('Error updating card');
+      setError(`Error updating card: ${error.message}`);
     }
   };
 
   const fetchCardTransactions = async (cardId) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
+      if (!session?.access_token) {
+        setError('No valid session found');
+        return;
+      }
 
-      const { data: cardTransactions, error: transError } = await supabase
-        .from('card_transactions')
-        .select('*')
-        .eq('card_id', cardId)
-        .eq('status', 'completed')
-        .order('created_at', { ascending: false })
-        .limit(20);
+      const response = await fetch(`/api/card-transactions?cardId=${cardId}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      });
 
-      if (transError) {
-        console.error('Error fetching transactions:', transError);
-        setError('Failed to fetch transactions');
-      } else {
-        setTransactions(cardTransactions || []);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to fetch transactions');
+      }
+
+      const data = await response.json();
+
+      if (data.success) {
+        setTransactions(data.transactions || []);
         setShowTransactions(true);
+        setError('');
+      } else {
+        throw new Error(data.error || 'Failed to fetch transactions');
       }
     } catch (error) {
       console.error('Error fetching transactions:', error);
-      setError('Error loading transactions');
+      setError(`Error loading transactions: ${error.message}`);
     }
   };
 
@@ -359,7 +237,7 @@ export default function Cards() {
                   <div style={styles.cardExpiry}>Expires: {card.expiry_date}</div>
                   <div style={styles.cardType}>{(card.card_type || 'DEBIT').toUpperCase()}</div>
                 </div>
-                
+
                 <div style={styles.cardDetails}>
                   <div style={styles.detailRow}>
                     <span>Status:</span>
@@ -399,7 +277,7 @@ export default function Cards() {
                   >
                     📋 View Transactions
                   </button>
-                  
+
                   {card.is_locked ? (
                     <button
                       onClick={() => handleCardAction(card.id, 'unlock')}
@@ -415,7 +293,7 @@ export default function Cards() {
                       🔒 Lock Card
                     </button>
                   )}
-                  
+
                   {card.status === 'active' && (
                     <button
                       onClick={() => handleCardAction(card.id, 'deactivate')}
