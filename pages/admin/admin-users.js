@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import { supabase } from '../utils/supabaseClient'; // Assuming supabase client is set up here
+import { supabase } from '../../lib/supabaseClient';
 
 export default function AdminUsers() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
