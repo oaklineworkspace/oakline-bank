@@ -1,5 +1,5 @@
 
-import { supabase } from '../../../lib/supabaseAdmin';
+import { supabaseAdmin } from '../../../lib/supabaseAdmin';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -14,7 +14,7 @@ export default async function handler(req, res) {
     }
 
     // Check if user already has a card for this account
-    const { data: existingCard } = await supabase
+    const { data: existingCard } = await supabaseAdmin
       .from('cards')
       .select('id')
       .eq('user_id', userId)
@@ -48,7 +48,7 @@ export default async function handler(req, res) {
     };
 
     // Get account details
-    const { data: accountData, error: accountError } = await supabase
+    const { data: accountData, error: accountError } = await supabaseAdmin
       .from('accounts')
       .select('account_number, account_type')
       .eq('id', accountId)
@@ -63,7 +63,7 @@ export default async function handler(req, res) {
     const cvv = generateCVV();
 
     // Insert card directly (admin assignment)
-    const { data: cardData, error: cardError } = await supabase
+    const { data: cardData, error: cardError } = await supabaseAdmin
       .from('cards')
       .insert({
         user_id: userId,
