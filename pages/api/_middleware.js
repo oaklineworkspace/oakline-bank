@@ -1,30 +1,49 @@
 import { NextResponse } from 'next/server';
 
-const allowedOrigins = [
-  'https://oakline-frontend.vercel.app',
+// Allowed origins for CORS
+const ALLOWED_ORIGINS = [
   'https://theoaklinebank.com',
-  'https://www.theoaklinebank.com'
+  'https://www.theoaklinebank.com',
+  'https://oakline-frontend.vercel.app'
 ];
 
-export function middleware(req) {
-  const origin = req.headers.get('origin');
-  const res = NextResponse.next();
-
-  if (origin && allowedOrigins.includes(origin)) {
-    res.headers.set('Access-Control-Allow-Origin', origin);
+export function middleware(request) {
+  // Get the origin from the request headers
+  const origin = request.headers.get('origin');
+  
+  // Check if the origin is in our allowed list
+  const isAllowedOrigin = ALLOWED_ORIGINS.includes(origin);
+  
+  // Handle preflight OPTIONS requests
+  if (request.method === 'OPTIONS') {
+    const response = new NextResponse(null, { status: 200 });
+    
+    if (isAllowedOrigin) {
+      response.headers.set('Access-Control-Allow-Origin', origin);
+    }
+    
+    response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    response.headers.set('Access-Control-Max-Age', '86400'); // Cache preflight for 24 hours
+    
+    return response;
   }
 
-  res.headers.set('Access-Control-Allow-Credentials', 'true');
-  res.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-
-  // Handle OPTIONS preflight requests
-  if (req.method === 'OPTIONS') {
-    return new Response(null, {
-      status: 200,
-      headers: res.headers,
-    });
+  // For non-OPTIONS requests, continue to the API route
+  const response = NextResponse.next();
+  
+  // Add CORS headers to the response
+  if (isAllowedOrigin) {
+    response.headers.set('Access-Control-Allow-Origin', origin);
   }
-
-  return res;
+  
+  response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  
+  return response;
 }
+
+// Configure which paths this middleware should run on
+export const config = {
+  matcher: '/api/:path*'
+};
