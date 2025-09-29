@@ -726,6 +726,10 @@ export default function Home() {
                     <span style={styles.buttonIcon}>🚀</span>
                     Start Banking Today
                   </Link>
+                  <Link href="/enroll" style={styles.enrollButton}>
+                    <span style={styles.buttonIcon}>📝</span>
+                    Enroll Now
+                  </Link>
                   <Link href="/login" style={styles.secondaryButton}>
                     <span style={styles.buttonIcon}>👤</span>
                     Sign In
@@ -2137,6 +2141,23 @@ const styles = {
     fontSize: 'clamp(0.9rem, 2vw, 1.1rem)',
     fontWeight: '700',
     boxShadow: '0 8px 24px rgba(14, 165, 233, 0.4)',
+    transition: 'all 0.3s ease',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    border: 'none',
+    transform: 'translateY(0)',
+    animation: 'buttonPulse 2s ease-in-out infinite'
+  },
+  enrollButton: {
+    background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+    color: 'white',
+    textDecoration: 'none',
+    padding: 'clamp(1rem, 2vw, 1.3rem) clamp(1.5rem, 4vw, 2.5rem)',
+    borderRadius: '12px',
+    fontSize: 'clamp(0.9rem, 2vw, 1.1rem)',
+    fontWeight: '700',
+    boxShadow: '0 8px 24px rgba(5, 150, 105, 0.4)',
     transition: 'all 0.3s ease',
     display: 'inline-flex',
     alignItems: 'center',
