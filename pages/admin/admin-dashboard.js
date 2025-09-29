@@ -7,36 +7,26 @@ export default function AdminDashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [bankStats, setBankStats] = useState(null);
-
-  const [recentUsers, setRecentUsers] = useState([]);
-  const [recentTransactions, setRecentTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
 
-  const ADMIN_PASSWORD = 'Chrismorgan23$';
-
-  // State to track if the user is an admin, initialized to false
-  const [isAdmin, setIsAdmin] = useState(false);
-  // State for general error messages
-  const [adminError, setAdminError] = useState('');
-  // State for dashboard statistics
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalAccounts: 0,
     totalTransactions: 0,
     pendingApplications: 0,
+    totalBalance: 0
   });
 
+  const [recentUsers, setRecentUsers] = useState([]);
+  const [recentTransactions, setRecentTransactions] = useState([]);
+
+  const router = useRouter();
+  const ADMIN_PASSWORD = 'Chrismorgan23$';
+
+  // Check admin authentication on mount
   useEffect(() => {
     checkAdminAccess();
   }, []);
-
-  useEffect(() => {
-    if (isAdmin) {
-      fetchStats();
-    }
-  }, [isAdmin]);
 
   const checkAdminAccess = async () => {
     try {
@@ -44,7 +34,6 @@ export default function AdminDashboard() {
       const { data: { user }, error: userError } = await supabase.auth.getUser();
 
       if (userError || !user) {
-        console.error('User authentication error:', userError);
         router.push('/login');
         return;
       }
@@ -55,35 +44,31 @@ export default function AdminDashboard() {
         .eq('id', user.id)
         .single();
 
-      if (profileError) {
-        console.error('Profile fetch error:', profileError);
-        setError('Unable to verify admin access. Please try again.');
-        setLoading(false);
-        return;
-      }
-
-      if (!profile || profile.role !== 'admin') {
-        console.log('User is not admin, redirecting...');
+      if (profileError || !profile || profile.role !== 'admin') {
         router.push('/dashboard');
         return;
       }
 
-      setIsAdmin(true);
-      setLoading(false);
-    } catch (error) {
-      console.error('Admin access error:', error);
-      setError('An unexpected error occurred. Please try again.');
+      setIsAuthenticated(true);
+      fetchStats();
+      fetchRecentData();
+    } catch (err) {
+      console.error('Admin access error:', err);
+      setError('Failed to verify admin access.');
+    } finally {
       setLoading(false);
     }
   };
 
+  // Handle manual admin login
   const handleLogin = (e) => {
     e.preventDefault();
     if (password === ADMIN_PASSWORD) {
       setIsAuthenticated(true);
       localStorage.setItem('adminAuthenticated', 'true');
       setError('');
-      fetchBankData();
+      fetchStats();
+      fetchRecentData();
     } else {
       setError('Invalid password');
     }
@@ -95,165 +80,71 @@ export default function AdminDashboard() {
     setPassword('');
   };
 
-  const fetchBankData = async () => {
+  // Fetch dashboard stats
+  const fetchStats = async () => {
     try {
       setLoading(true);
 
-      // Initialize with default values
-      let users = [], accounts = [], transactions = [];
+      const [usersResult, accountsResult, transactionsResult, pendingResult, balanceResult] =
+        await Promise.allSettled([
+          supabase.from('full_profiles').select('*', { count: 'exact' }),
+          supabase.from('accounts').select('*', { count: 'exact' }),
+          supabase.from('transactions').select('*', { count: 'exact' }),
+          supabase.from('full_profiles').select('*', { count: 'exact' }).eq('application_status', 'pending'),
+          supabase.from('accounts').select('balance')
+        ]);
 
-      // Fetch users data from full_profiles view (includes joined profiles and applications)
-      try {
-        const { data: fullProfiles, error: profilesError } = await supabase
-          .from('full_profiles')
-          .select('*')
-          .order('created_at', { ascending: false });
+      const totalUsers = usersResult.status === 'fulfilled' ? usersResult.value.count || 0 : 0;
+      const totalAccounts = accountsResult.status === 'fulfilled' ? accountsResult.value.count || 0 : 0;
+      const totalTransactions = transactionsResult.status === 'fulfilled' ? transactionsResult.value.count || 0 : 0;
+      const pendingApplications = pendingResult.status === 'fulfilled' ? pendingResult.value.count || 0 : 0;
 
-        if (!profilesError && fullProfiles) {
-          users = fullProfiles.map(profile => ({
-            id: profile.id,
-            email: profile.email,
-            name: `${profile.first_name || ''} ${profile.middle_name ? profile.middle_name + ' ' : ''}${profile.last_name || ''}`.trim(),
-            created_at: profile.created_at,
-            phone: profile.phone,
-            status: profile.status || 'pending'
-          }));
-        }
-      } catch (error) {
-        console.error('Error fetching users from full_profiles:', error);
+      let totalBalance = 0;
+      if (balanceResult.status === 'fulfilled' && balanceResult.value.data) {
+        totalBalance = balanceResult.value.data.reduce(
+          (sum, acc) => sum + (parseFloat(acc.balance) || 0),
+          0
+        );
       }
 
-      // Fetch accounts data
-      try {
-        const { data: accountsData, error: accountsError } = await supabase
-          .from('accounts')
-          .select('*')
-          .order('created_at', { ascending: false });
+      setStats({ totalUsers, totalAccounts, totalTransactions, pendingApplications, totalBalance });
 
-        if (!accountsError && accountsData) {
-          accounts = accountsData;
-        }
-      } catch (error) {
-        console.error('Error fetching accounts:', error);
-      }
-
-      // Fetch transactions data
-      try {
-        const { data: transactionsData, error: transactionsError } = await supabase
-          .from('transactions')
-          .select('*')
-          .order('created_at', { ascending: false })
-          .limit(100);
-
-        if (!transactionsError && transactionsData) {
-          transactions = transactionsData;
-        }
-      } catch (error) {
-        console.error('Error fetching transactions:', error);
-      }
-
-      // Calculate stats with safe defaults
-      const totalBalance = accounts.reduce((sum, acc) => sum + (parseFloat(acc.balance) || 0), 0);
-      const todayUsers = users.filter(user => {
-        try {
-          const userDate = new Date(user.created_at).toDateString();
-          const today = new Date().toDateString();
-          return userDate === today;
-        } catch {
-          return false;
-        }
-      }).length;
-
-      setBankStats({
-        totalUsers: users.length,
-        totalAccounts: accounts.length,
-        totalBalance: totalBalance,
-        totalTransactions: transactions.length,
-        pendingTransactions: transactions.filter(t => t.status === 'pending').length,
-        activeLoans: 0,
-        totalDeposits: transactions
-          .filter(t => t.type === 'deposit')
-          .reduce((sum, t) => sum + (parseFloat(t.amount) || 0), 0),
-        totalWithdrawals: transactions
-          .filter(t => t.type === 'withdrawal')
-          .reduce((sum, t) => sum + (parseFloat(t.amount) || 0), 0),
-        newUsersToday: todayUsers
-      });
-
-      setRecentUsers(users.slice(-5));
-      setRecentTransactions(transactions.slice(-10));
-
-    } catch (error) {
-      console.error('Error fetching bank data:', error);
+    } catch (err) {
+      console.error('Error fetching stats:', err);
+      setError('Failed to load dashboard stats.');
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchStats = async () => {
+  // Fetch recent users and transactions
+  const fetchRecentData = async () => {
     try {
       setLoading(true);
-
-      // Fetch all stats in parallel with proper error handling using full_profiles view
-      const [usersResult, accountsResult, transactionsResult, pendingResult, balanceResult, recentUsersResult, recentTransactionsResult] = await Promise.allSettled([
-        supabase.from('full_profiles').select('*', { count: 'exact', head: true }),
-        supabase.from('accounts').select('*', { count: 'exact', head: true }),
-        supabase.from('transactions').select('*', { count: 'exact', head: true }),
-        supabase.from('full_profiles').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
-        supabase.from('accounts').select('balance'),
-        supabase.from('full_profiles').select('*').order('created_at', { ascending: false }).limit(5),
+      const [recentUsersResult, recentTransactionsResult] = await Promise.allSettled([
+        supabase.from('full_profiles').select('*').order('profile_created_at', { ascending: false }).limit(5),
         supabase.from('transactions').select('*').order('created_at', { ascending: false }).limit(10)
       ]);
 
-      // Calculate total balance
-      let totalBalance = 0;
-      if (balanceResult.status === 'fulfilled' && balanceResult.value.data) {
-        totalBalance = balanceResult.value.data.reduce((sum, account) => {
-          return sum + (parseFloat(account.balance) || 0);
-        }, 0);
-      }
-
-      // Set recent users from full_profiles view
       if (recentUsersResult.status === 'fulfilled' && recentUsersResult.value.data) {
-        const formattedUsers = recentUsersResult.value.data.map(user => ({
-          id: user.id,
-          email: user.email,
-          name: `${user.first_name || ''} ${user.middle_name ? user.middle_name + ' ' : ''}${user.last_name || ''}`.trim(),
-          created_at: user.created_at,
-          phone: user.phone,
-          status: user.status || 'pending'
-        }));
-        setRecentUsers(formattedUsers);
+        setRecentUsers(
+          recentUsersResult.value.data.map(user => ({
+            id: user.user_id,
+            email: user.email,
+            name: `${user.first_name || ''} ${user.middle_name ? user.middle_name + ' ' : ''}${user.last_name || ''}`.trim(),
+            created_at: user.profile_created_at,
+            phone: user.phone,
+            status: user.application_status || 'pending'
+          }))
+        );
       }
 
-      // Set recent transactions
       if (recentTransactionsResult.status === 'fulfilled' && recentTransactionsResult.value.data) {
         setRecentTransactions(recentTransactionsResult.value.data);
       }
-
-      const newStats = {
-        totalUsers: usersResult.status === 'fulfilled' ? (usersResult.value.count || 0) : 0,
-        totalAccounts: accountsResult.status === 'fulfilled' ? (accountsResult.value.count || 0) : 0,
-        totalTransactions: transactionsResult.status === 'fulfilled' ? (transactionsResult.value.count || 0) : 0,
-        pendingApplications: pendingResult.status === 'fulfilled' ? (pendingResult.value.count || 0) : 0,
-        totalBalance: totalBalance
-      };
-
-      setStats(newStats);
-
-      // Log any failed requests
-      if (usersResult.status === 'rejected') console.warn('Failed to fetch users from full_profiles:', usersResult.reason);
-      if (accountsResult.status === 'rejected') console.warn('Failed to fetch accounts:', accountsResult.reason);
-      if (transactionsResult.status === 'rejected') console.warn('Failed to fetch transactions:', transactionsResult.reason);
-      if (pendingResult.status === 'rejected') console.warn('Failed to fetch pending applications from full_profiles:', pendingResult.reason);
-      if (balanceResult.status === 'rejected') console.warn('Failed to fetch balance data:', balanceResult.reason);
-      if (recentUsersResult.status === 'rejected') console.warn('Failed to fetch recent users from full_profiles:', recentUsersResult.reason);
-      if (recentTransactionsResult.status === 'rejected') console.warn('Failed to fetch recent transactions:', recentTransactionsResult.reason);
-
-      setLoading(false);
-    } catch (error) {
-      console.error('Error fetching stats:', error);
-      setError('Failed to load dashboard statistics. Some features may be unavailable.');
+    } catch (err) {
+      console.error('Error fetching recent data:', err);
+    } finally {
       setLoading(false);
     }
   };
@@ -285,299 +176,75 @@ export default function AdminDashboard() {
     );
   }
 
+  // Render dashboard
   return (
     <div style={styles.container}>
       <div style={styles.header}>
-        <div style={styles.welcomeSection}>
+        <div>
           <h1 style={styles.title}>🏦 Admin Dashboard</h1>
-          <p style={styles.subtitle}>Oakline Bank Management System</p>
-          {loading && <p style={styles.loadingText}>Loading bank data...</p>}
+          {loading && <p>Loading data...</p>}
         </div>
-        <div style={styles.headerActions}>
-          <button onClick={fetchBankData} style={styles.refreshButton} disabled={loading}>
-            {loading ? '🔄 Loading...' : '🔄 Refresh'}
-          </button>
-          <button onClick={handleLogout} style={styles.logoutButton}>
-            🚪 Logout
-          </button>
-        </div>
+        <button onClick={handleLogout} style={styles.logoutButton}>🚪 Logout</button>
       </div>
 
-      {/* Statistics Cards */}
+      {/* Stats */}
       <div style={styles.statsGrid}>
-          <div style={styles.statCard}>
-            <div style={styles.statIcon}>👥</div>
-            <div style={styles.statInfo}>
-              <h3 style={styles.statNumber}>{stats ? (stats.totalUsers || 0).toLocaleString() : 'Loading...'}</h3>
-              <p style={styles.statLabel}>Total Users</p>
-            </div>
-          </div>
-          <div style={styles.statCard}>
-            <div style={styles.statIcon}>🏦</div>
-            <div style={styles.statInfo}>
-              <h3 style={styles.statNumber}>{stats ? (stats.totalAccounts || 0).toLocaleString() : 'Loading...'}</h3>
-              <p style={styles.statLabel}>Total Accounts</p>
-            </div>
-          </div>
-          <div style={styles.statCard}>
-            <div style={styles.statIcon}>💰</div>
-            <div style={styles.statInfo}>
-              <h3 style={styles.statNumber}>{stats ? `$${(stats.totalBalance || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : 'Loading...'}</h3>
-              <p style={styles.statLabel}>Total Balance</p>
-            </div>
-          </div>
-          <div style={styles.statCard}>
-            <div style={styles.statIcon}>📊</div>
-            <div style={styles.statInfo}>
-              <h3 style={styles.statNumber}>{stats ? (stats.totalTransactions || 0).toLocaleString() : 'Loading...'}</h3>
-              <p style={styles.statLabel}>Total Transactions</p>
-            </div>
-          </div>
-          <div style={styles.statCard}>
-            <div style={styles.statIcon}>🏦</div>
-            <div style={styles.statInfo}>
-              <h3 style={styles.statNumber}>{stats ? (stats.pendingApplications || 0).toLocaleString() : 'Loading...'}</h3>
-              <p style={styles.statLabel}>Pending Applications</p>
-            </div>
+        <div style={styles.statCard}>
+          <div style={styles.statIcon}>👥</div>
+          <div>
+            <h3 style={styles.statNumber}>{stats.totalUsers.toLocaleString()}</h3>
+            <p>Total Users</p>
           </div>
         </div>
-
-      {/* Quick Actions */}
-      <div style={styles.quickActions}>
-        <button
-          style={styles.actionButton}
-          onClick={() => router.push('/admin/admin-users')}
-        >
-          👥 Manage Users
-        </button>
-        <button
-          style={styles.actionButton}
-          onClick={() => router.push('/admin/admin-users-management')}
-        >
-          👨‍💼 Admin Users
-        </button>
-        <button
-          style={styles.actionButton}
-          onClick={() => router.push('/admin/approve-accounts')}
-        >
-          ✅ Approve Accounts
-        </button>
-        <button
-          style={styles.actionButton}
-          onClick={() => router.push('/admin/manual-transactions')}
-        >
-          💰 Manual Transactions
-        </button>
-        <button
-          style={styles.actionButton}
-          onClick={() => router.push('/admin/admin-balance')}
-        >
-          💳 Update User Balance
-        </button>
-        <button
-          style={styles.actionButton}
-          onClick={() => router.push('/admin/bulk-transactions')}
-        >
-          📦 Bulk Transactions
-        </button>
-        <button
-          style={styles.actionButton}
-          onClick={() => router.push('/admin/create-user')}
-        >
-          ➕ Create User
-        </button>
-        <button
-          style={styles.actionButton}
-          onClick={() => router.push('/admin/admin-loans')}
-        >
-          🏠 Manage Loans
-        </button>
-        <button
-          style={styles.actionButton}
-          onClick={() => router.push('/admin/admin-investments')}
-        >
-          📈 Manage Investments
-        </button>
-        <button
-          style={styles.actionButton}
-          onClick={() => router.push('/admin/admin-crypto')}
-        >
-          ₿ Manage Crypto
-        </button>
-        <button
-          style={styles.actionButton}
-          onClick={() => router.push('/admin/admin-card-applications')}
-        >
-          💳 Card Applications
-        </button>
-        <button
-          style={styles.actionButton}
-          onClick={() => router.push('/admin/admin-balance')}
-        >
-          💳 Balance Management
-        </button>
-      </div>
-
-      {/* Recent Activity */}
-      <div style={styles.activityGrid}>
-        <div style={styles.section}>
-          <h2 style={styles.sectionTitle}>👥 Recent Users</h2>
-          {recentUsers.length === 0 ? (
-            <p>No recent users</p>
-          ) : (
-            <ul style={styles.activityList}>
-              {recentUsers.map((user) => (
-                <li key={user.id} style={styles.activityItem}>
-                  <span>{user.name}</span>
-                  <span>{new Date(user.created_at).toLocaleDateString()}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-        <div style={styles.section}>
-          <h2 style={styles.sectionTitle}>💸 Recent Transactions</h2>
-          {recentTransactions.length === 0 ? (
-            <p>No recent transactions</p>
-          ) : (
-            <ul style={styles.activityList}>
-              {recentTransactions.map((tx) => (
-                <li key={tx.id} style={styles.activityItem}>
-                  <span>{tx.type} - ${tx.amount.toLocaleString()}</span>
-                  <span>{tx.status}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </div>
-
-      {/* Admin Navigation */}
-      <div style={styles.adminGrid}>
-        <div style={styles.section}>
-          <h2 style={styles.sectionTitle}>👥 User Management</h2>
-          <div style={styles.buttonGrid}>
-            <Link href="/admin/admin-users" style={styles.adminButton}>
-              👤 Manage Users
-            </Link>
-            <Link href="/admin/admin-users-management" style={styles.adminButton}>
-              👨‍💼 Admin Users
-            </Link>
-            <Link href="/admin/create-user" style={styles.adminButton}>
-              ➕ Create User
-            </Link>
-            <Link href="/admin/delete-user" style={styles.adminButton}>
-              🗑️ Delete User
-            </Link>
-            <Link href="/admin/admin-roles" style={styles.adminButton}>
-              🔐 User Roles
-            </Link>
+        <div style={styles.statCard}>
+          <div style={styles.statIcon}>🏦</div>
+          <div>
+            <h3 style={styles.statNumber}>{stats.totalAccounts.toLocaleString()}</h3>
+            <p>Total Accounts</p>
           </div>
         </div>
-
-        <div style={styles.section}>
-          <h2 style={styles.sectionTitle}>💰 Financial Management</h2>
-          <div style={styles.buttonGrid}>
-            <Link href="/admin/admin-balance" style={styles.adminButton}>
-              💳 Balance Management
-            </Link>
-            <Link href="/admin/admin-transactions" style={styles.adminButton}>
-              📊 All Transactions
-            </Link>
-            <Link href="/admin/manual-transactions" style={styles.adminButton}>
-              ✍️ Manual Transactions
-            </Link>
-            <Link href="/admin/bulk-transactions" style={styles.adminButton}>
-              📦 Bulk Transactions
-            </Link>
+        <div style={styles.statCard}>
+          <div style={styles.statIcon}>💰</div>
+          <div>
+            <h3 style={styles.statNumber}>${stats.totalBalance.toLocaleString()}</h3>
+            <p>Total Balance</p>
           </div>
         </div>
-
-        <div style={styles.section}>
-          <h2 style={styles.sectionTitle}>🏦 Banking Operations</h2>
-          <div style={styles.buttonGrid}>
-            <Link href="/admin/admin-loans" style={styles.adminButton}>
-              🏠 Loan Management
-            </Link>
-            <Link href="/admin/admin-crypto" style={styles.adminButton}>
-              ₿ Crypto Operations
-            </Link>
-            <Link href="/admin/admin-investments" style={styles.adminButton}>
-              📈 Investment Management
-            </Link>
-            <Link href="/admin/admin-approvals" style={styles.adminButton}>
-              ✅ Approvals Queue
-            </Link>
-            <Link href="/admin/approve-accounts" style={styles.adminButton}>
-              ✅ Approve Accounts
-            </Link>
+        <div style={styles.statCard}>
+          <div style={styles.statIcon}>📊</div>
+          <div>
+            <h3 style={styles.statNumber}>{stats.totalTransactions.toLocaleString()}</h3>
+            <p>Total Transactions</p>
           </div>
         </div>
-
-        <div style={styles.section}>
-          <h2 style={styles.sectionTitle}>📋 Reports & Compliance</h2>
-          <div style={styles.buttonGrid}>
-            <Link href="/admin/admin-reports" style={styles.adminButton}>
-              📊 Financial Reports
-            </Link>
-            <Link href="/admin/admin-audit" style={styles.adminButton}>
-              🔍 Audit Logs
-            </Link>
-            <Link href="/admin/admin-logs" style={styles.adminButton}>
-              📝 System Logs
-            </Link>
-            <Link href="/admin/admin-notifications" style={styles.adminButton}>
-              🔔 Send Notifications
-            </Link>
-            <Link href="/admin/admin-card-applications" style={styles.adminButton}>
-              💳 Card Applications
-            </Link>
-          </div>
-        </div>
-
-        <div style={styles.section}>
-          <h2 style={styles.sectionTitle}>⚙️ System Settings</h2>
-          <div style={styles.buttonGrid}>
-            <Link href="/admin/admin-settings" style={styles.adminButton}>
-              ⚙️ System Settings
-            </Link>
-            <Link href="/admin/resend-enrollment" style={styles.adminButton}>
-              📧 Resend Enrollment
-            </Link>
-          </div>
-        </div>
-        {/* New section for Cards Management */}
-        <div style={styles.section}>
-          <h2 style={styles.sectionTitle}>💳 Card Management</h2>
-          <div style={styles.buttonGrid}>
-            <Link href="/admin/admin-cards-dashboard" style={styles.adminButton}>
-              💳 All Cards Dashboard
-            </Link>
+        <div style={styles.statCard}>
+          <div style={styles.statIcon}>⌛</div>
+          <div>
+            <h3 style={styles.statNumber}>{stats.pendingApplications.toLocaleString()}</h3>
+            <p>Pending Applications</p>
           </div>
         </div>
       </div>
 
-      {/* Sticky Footer with Buttons */}
-      <footer style={styles.stickyFooter}>
-        <button
-          style={styles.footerButton}
-          onClick={() => router.push('/apply')}
-        >
-          📝 Enroll Now
-        </button>
-        <button
-          style={styles.footerButton}
-          onClick={() => router.push('/signin')}
-        >
-          🔑 Sign In
-        </button>
-        <button
-          style={styles.footerButton}
-          onClick={() => router.push('/open-account')}
-        >
-          🏦 Open Account
-        </button>
-      </footer>
+      {/* Recent Users */}
+      <div>
+        <h2>👥 Recent Users</h2>
+        <ul>
+          {recentUsers.map(u => (
+            <li key={u.id}>{u.name} — {new Date(u.created_at).toLocaleDateString()}</li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Recent Transactions */}
+      <div>
+        <h2>💸 Recent Transactions</h2>
+        <ul>
+          {recentTransactions.map(tx => (
+            <li key={tx.id}>{tx.type} - ${tx.amount} ({tx.status})</li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 }
