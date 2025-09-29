@@ -4,252 +4,219 @@ import Link from 'next/link';
 import { supabase } from '../../lib/supabaseClient';
 
 export default function AdminDashboard() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalAccounts: 0,
     totalTransactions: 0,
     pendingApplications: 0,
-    totalBalance: 0
+    totalBalance: 0,
   });
-
   const [recentUsers, setRecentUsers] = useState([]);
   const [recentTransactions, setRecentTransactions] = useState([]);
 
-  const router = useRouter();
-  const ADMIN_PASSWORD = 'Chrismorgan23$';
-
-  // Check admin authentication on mount
-  useEffect(() => {
-    checkAdminAccess();
-  }, []);
-
+  // -------------------
+  // Check Admin Access
+  // -------------------
   const checkAdminAccess = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      const {
+        data: { user },
+        error: userError
+      } = await supabase.auth.getUser();
 
-      if (userError || !user) {
+      if (userError) {
+        console.error('Auth error:', userError);
         router.push('/login');
         return;
       }
 
+      if (!user) {
+        // Not logged in yet, just wait
+        setLoading(false);
+        return;
+      }
+
+      // Fetch the profile to check role
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('role')
         .eq('id', user.id)
         .single();
 
-      if (profileError || !profile || profile.role !== 'admin') {
+      if (profileError) {
+        console.error('Profile fetch error:', profileError);
+        setError('Failed to verify admin access.');
+        setLoading(false);
+        return;
+      }
+
+      if (!profile || profile.role !== 'admin') {
+        // Logged in but not admin
         router.push('/dashboard');
         return;
       }
 
       setIsAuthenticated(true);
-      fetchStats();
-      fetchRecentData();
+      fetchStats(); // Fetch stats only if admin
     } catch (err) {
-      console.error('Admin access error:', err);
-      setError('Failed to verify admin access.');
+      console.error('Unexpected error:', err);
+      setError('An unexpected error occurred.');
     } finally {
       setLoading(false);
     }
   };
 
-  // Handle manual admin login
-  const handleLogin = (e) => {
-    e.preventDefault();
-    if (password === ADMIN_PASSWORD) {
-      setIsAuthenticated(true);
-      localStorage.setItem('adminAuthenticated', 'true');
-      setError('');
-      fetchStats();
-      fetchRecentData();
-    } else {
-      setError('Invalid password');
-    }
-  };
+  useEffect(() => {
+    checkAdminAccess();
+  }, []);
 
-  const handleLogout = () => {
-    setIsAuthenticated(false);
-    localStorage.removeItem('adminAuthenticated');
-    setPassword('');
-  };
-
-  // Fetch dashboard stats
+  // -------------------
+  // Fetch Stats & Data
+  // -------------------
   const fetchStats = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
+      // Fetch total users from full_profiles
+      const { data: usersData, error: usersError } = await supabase
+        .from('full_profiles')
+        .select('*', { count: 'exact' })
+        .order('submitted_at', { ascending: false });
 
-      const [usersResult, accountsResult, transactionsResult, pendingResult, balanceResult] =
-        await Promise.allSettled([
-          supabase.from('full_profiles').select('*', { count: 'exact' }),
-          supabase.from('accounts').select('*', { count: 'exact' }),
-          supabase.from('transactions').select('*', { count: 'exact' }),
-          supabase.from('full_profiles').select('*', { count: 'exact' }).eq('application_status', 'pending'),
-          supabase.from('accounts').select('balance')
-        ]);
+      if (usersError) console.error('Error fetching users:', usersError);
 
-      const totalUsers = usersResult.status === 'fulfilled' ? usersResult.value.count || 0 : 0;
-      const totalAccounts = accountsResult.status === 'fulfilled' ? accountsResult.value.count || 0 : 0;
-      const totalTransactions = transactionsResult.status === 'fulfilled' ? transactionsResult.value.count || 0 : 0;
-      const pendingApplications = pendingResult.status === 'fulfilled' ? pendingResult.value.count || 0 : 0;
+      const users = usersData || [];
 
-      let totalBalance = 0;
-      if (balanceResult.status === 'fulfilled' && balanceResult.value.data) {
-        totalBalance = balanceResult.value.data.reduce(
-          (sum, acc) => sum + (parseFloat(acc.balance) || 0),
-          0
-        );
-      }
+      // Fetch accounts
+      const { data: accountsData, error: accountsError } = await supabase
+        .from('accounts')
+        .select('*');
 
-      setStats({ totalUsers, totalAccounts, totalTransactions, pendingApplications, totalBalance });
+      if (accountsError) console.error('Error fetching accounts:', accountsError);
 
+      const accounts = accountsData || [];
+
+      // Fetch transactions
+      const { data: transactionsData, error: transactionsError } = await supabase
+        .from('transactions')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(100);
+
+      if (transactionsError) console.error('Error fetching transactions:', transactionsError);
+
+      const transactions = transactionsData || [];
+
+      // Calculate total balance
+      const totalBalance = accounts.reduce((sum, acc) => sum + (parseFloat(acc.balance) || 0), 0);
+
+      // Recent users
+      const recentUsersList = users.slice(0, 5).map(user => ({
+        id: user.user_id,
+        name: `${user.first_name || ''} ${user.middle_name ? user.middle_name + ' ' : ''}${user.last_name || ''}`.trim(),
+        email: user.email,
+        created_at: user.submitted_at,
+        status: user.application_status || 'pending'
+      }));
+
+      // Recent transactions
+      const recentTxList = transactions.slice(0, 10);
+
+      // Pending applications
+      const pendingApplications = users.filter(u => u.application_status === 'pending').length;
+
+      setStats({
+        totalUsers: users.length,
+        totalAccounts: accounts.length,
+        totalTransactions: transactions.length,
+        pendingApplications,
+        totalBalance,
+      });
+
+      setRecentUsers(recentUsersList);
+      setRecentTransactions(recentTxList);
     } catch (err) {
       console.error('Error fetching stats:', err);
-      setError('Failed to load dashboard stats.');
+      setError('Failed to fetch dashboard data.');
     } finally {
       setLoading(false);
     }
   };
 
-  // Fetch recent users and transactions
-  const fetchRecentData = async () => {
-    try {
-      setLoading(true);
-      const [recentUsersResult, recentTransactionsResult] = await Promise.allSettled([
-        supabase.from('full_profiles').select('*').order('profile_created_at', { ascending: false }).limit(5),
-        supabase.from('transactions').select('*').order('created_at', { ascending: false }).limit(10)
-      ]);
+  // -------------------
+  // Render
+  // -------------------
+  if (loading) return <div style={{ padding: '50px', textAlign: 'center' }}>Loading...</div>;
+  if (!isAuthenticated) return <div style={{ padding: '50px', textAlign: 'center' }}>Checking access...</div>;
 
-      if (recentUsersResult.status === 'fulfilled' && recentUsersResult.value.data) {
-        setRecentUsers(
-          recentUsersResult.value.data.map(user => ({
-            id: user.user_id,
-            email: user.email,
-            name: `${user.first_name || ''} ${user.middle_name ? user.middle_name + ' ' : ''}${user.last_name || ''}`.trim(),
-            created_at: user.profile_created_at,
-            phone: user.phone,
-            status: user.application_status || 'pending'
-          }))
-        );
-      }
-
-      if (recentTransactionsResult.status === 'fulfilled' && recentTransactionsResult.value.data) {
-        setRecentTransactions(recentTransactionsResult.value.data);
-      }
-    } catch (err) {
-      console.error('Error fetching recent data:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (!isAuthenticated) {
-    return (
-      <div style={styles.loginContainer}>
-        <div style={styles.loginCard}>
-          <h1 style={styles.title}>🏦 Oakline Bank Admin</h1>
-          <form onSubmit={handleLogin} style={styles.form}>
-            <div style={styles.inputGroup}>
-              <label style={styles.label}>Admin Password</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                style={styles.input}
-                placeholder="Enter admin password"
-                required
-              />
-            </div>
-            {error && <div style={styles.error}>{error}</div>}
-            <button type="submit" style={styles.loginButton}>
-              🔐 Access Admin Panel
-            </button>
-          </form>
-        </div>
-      </div>
-    );
-  }
-
-  // Render dashboard
   return (
-    <div style={styles.container}>
-      <div style={styles.header}>
-        <div>
-          <h1 style={styles.title}>🏦 Admin Dashboard</h1>
-          {loading && <p>Loading data...</p>}
-        </div>
-        <button onClick={handleLogout} style={styles.logoutButton}>🚪 Logout</button>
-      </div>
+    <div style={{ padding: '20px', minHeight: '100vh', background: '#f0f4f8' }}>
+      <h1>🏦 Admin Dashboard</h1>
 
       {/* Stats */}
-      <div style={styles.statsGrid}>
-        <div style={styles.statCard}>
-          <div style={styles.statIcon}>👥</div>
-          <div>
-            <h3 style={styles.statNumber}>{stats.totalUsers.toLocaleString()}</h3>
-            <p>Total Users</p>
-          </div>
-        </div>
-        <div style={styles.statCard}>
-          <div style={styles.statIcon}>🏦</div>
-          <div>
-            <h3 style={styles.statNumber}>{stats.totalAccounts.toLocaleString()}</h3>
-            <p>Total Accounts</p>
-          </div>
-        </div>
-        <div style={styles.statCard}>
-          <div style={styles.statIcon}>💰</div>
-          <div>
-            <h3 style={styles.statNumber}>${stats.totalBalance.toLocaleString()}</h3>
-            <p>Total Balance</p>
-          </div>
-        </div>
-        <div style={styles.statCard}>
-          <div style={styles.statIcon}>📊</div>
-          <div>
-            <h3 style={styles.statNumber}>{stats.totalTransactions.toLocaleString()}</h3>
-            <p>Total Transactions</p>
-          </div>
-        </div>
-        <div style={styles.statCard}>
-          <div style={styles.statIcon}>⌛</div>
-          <div>
-            <h3 style={styles.statNumber}>{stats.pendingApplications.toLocaleString()}</h3>
-            <p>Pending Applications</p>
-          </div>
-        </div>
+      <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
+        <StatCard label="Total Users" value={stats.totalUsers} />
+        <StatCard label="Total Accounts" value={stats.totalAccounts} />
+        <StatCard label="Total Transactions" value={stats.totalTransactions} />
+        <StatCard label="Pending Applications" value={stats.pendingApplications} />
+        <StatCard label="Total Balance" value={`$${stats.totalBalance.toFixed(2)}`} />
       </div>
 
       {/* Recent Users */}
-      <div>
-        <h2>👥 Recent Users</h2>
+      <h2 style={{ marginTop: '30px' }}>👥 Recent Users</h2>
+      {recentUsers.length === 0 ? <p>No recent users</p> : (
         <ul>
-          {recentUsers.map(u => (
-            <li key={u.id}>{u.name} — {new Date(u.created_at).toLocaleDateString()}</li>
+          {recentUsers.map(user => (
+            <li key={user.id}>{user.name} - {user.email} - {new Date(user.created_at).toLocaleDateString()}</li>
           ))}
         </ul>
-      </div>
+      )}
 
       {/* Recent Transactions */}
-      <div>
-        <h2>💸 Recent Transactions</h2>
+      <h2 style={{ marginTop: '30px' }}>💸 Recent Transactions</h2>
+      {recentTransactions.length === 0 ? <p>No recent transactions</p> : (
         <ul>
           {recentTransactions.map(tx => (
-            <li key={tx.id}>{tx.type} - ${tx.amount} ({tx.status})</li>
+            <li key={tx.id}>{tx.type} - ${parseFloat(tx.amount).toLocaleString()} - {tx.status}</li>
           ))}
         </ul>
+      )}
+
+      {/* Quick Links */}
+      <h2 style={{ marginTop: '30px' }}>Quick Actions</h2>
+      <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+        <Link href="/admin/admin-users"><button>Manage Users</button></Link>
+        <Link href="/admin/approve-accounts"><button>Approve Accounts</button></Link>
+        <Link href="/admin/admin-transactions"><button>All Transactions</button></Link>
+        <Link href="/admin/admin-loans"><button>Manage Loans</button></Link>
+        <Link href="/admin/admin-card-applications"><button>Card Applications</button></Link>
       </div>
     </div>
   );
 }
 
-const styles = {
+// -------------------
+// Stat Card Component
+// -------------------
+function StatCard({ label, value }) {
+  return (
+    <div style={{
+      background: 'white',
+      padding: '20px',
+      borderRadius: '12px',
+      boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+      minWidth: '150px'
+    }}>
+      <h3 style={{ margin: 0 }}>{label}</h3>
+      <p style={{ fontSize: '20px', fontWeight: 'bold', margin: 0 }}>{value}</p>
+    </div>
+  );
+}const styles = {
   loginContainer: {
     minHeight: '100vh',
     display: 'flex',
