@@ -102,25 +102,25 @@ export default function AdminDashboard() {
       // Initialize with default values
       let users = [], accounts = [], transactions = [];
 
-      // Fetch users data from applications table (real bank customers)
+      // Fetch users data from full_profiles view (includes joined profiles and applications)
       try {
-        const { data: applications, error: appError } = await supabase
-          .from('applications')
+        const { data: fullProfiles, error: profilesError } = await supabase
+          .from('full_profiles')
           .select('*')
           .order('created_at', { ascending: false });
 
-        if (!appError && applications) {
-          users = applications.map(app => ({
-            id: app.id,
-            email: app.email,
-            name: `${app.first_name || ''} ${app.middle_name ? app.middle_name + ' ' : ''}${app.last_name || ''}`.trim(),
-            created_at: app.created_at,
-            phone: app.phone,
-            status: app.status || 'pending'
+        if (!profilesError && fullProfiles) {
+          users = fullProfiles.map(profile => ({
+            id: profile.id,
+            email: profile.email,
+            name: `${profile.first_name || ''} ${profile.middle_name ? profile.middle_name + ' ' : ''}${profile.last_name || ''}`.trim(),
+            created_at: profile.created_at,
+            phone: profile.phone,
+            status: profile.status || 'pending'
           }));
         }
       } catch (error) {
-        console.error('Error fetching users:', error);
+        console.error('Error fetching users from full_profiles:', error);
       }
 
       // Fetch accounts data
@@ -194,28 +194,61 @@ export default function AdminDashboard() {
     try {
       setLoading(true);
 
-      // Fetch all stats in parallel with proper error handling
-      const [usersResult, accountsResult, transactionsResult, pendingResult] = await Promise.allSettled([
-        supabase.from('profiles').select('*', { count: 'exact', head: true }),
+      // Fetch all stats in parallel with proper error handling using full_profiles view
+      const [usersResult, accountsResult, transactionsResult, pendingResult, balanceResult, recentUsersResult, recentTransactionsResult] = await Promise.allSettled([
+        supabase.from('full_profiles').select('*', { count: 'exact', head: true }),
         supabase.from('accounts').select('*', { count: 'exact', head: true }),
         supabase.from('transactions').select('*', { count: 'exact', head: true }),
-        supabase.from('applications').select('*', { count: 'exact', head: true }).eq('status', 'pending')
+        supabase.from('full_profiles').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+        supabase.from('accounts').select('balance'),
+        supabase.from('full_profiles').select('*').order('created_at', { ascending: false }).limit(5),
+        supabase.from('transactions').select('*').order('created_at', { ascending: false }).limit(10)
       ]);
+
+      // Calculate total balance
+      let totalBalance = 0;
+      if (balanceResult.status === 'fulfilled' && balanceResult.value.data) {
+        totalBalance = balanceResult.value.data.reduce((sum, account) => {
+          return sum + (parseFloat(account.balance) || 0);
+        }, 0);
+      }
+
+      // Set recent users from full_profiles view
+      if (recentUsersResult.status === 'fulfilled' && recentUsersResult.value.data) {
+        const formattedUsers = recentUsersResult.value.data.map(user => ({
+          id: user.id,
+          email: user.email,
+          name: `${user.first_name || ''} ${user.middle_name ? user.middle_name + ' ' : ''}${user.last_name || ''}`.trim(),
+          created_at: user.created_at,
+          phone: user.phone,
+          status: user.status || 'pending'
+        }));
+        setRecentUsers(formattedUsers);
+      }
+
+      // Set recent transactions
+      if (recentTransactionsResult.status === 'fulfilled' && recentTransactionsResult.value.data) {
+        setRecentTransactions(recentTransactionsResult.value.data);
+      }
 
       const newStats = {
         totalUsers: usersResult.status === 'fulfilled' ? (usersResult.value.count || 0) : 0,
         totalAccounts: accountsResult.status === 'fulfilled' ? (accountsResult.value.count || 0) : 0,
         totalTransactions: transactionsResult.status === 'fulfilled' ? (transactionsResult.value.count || 0) : 0,
-        pendingApplications: pendingResult.status === 'fulfilled' ? (pendingResult.value.count || 0) : 0
+        pendingApplications: pendingResult.status === 'fulfilled' ? (pendingResult.value.count || 0) : 0,
+        totalBalance: totalBalance
       };
 
       setStats(newStats);
 
       // Log any failed requests
-      if (usersResult.status === 'rejected') console.warn('Failed to fetch users:', usersResult.reason);
+      if (usersResult.status === 'rejected') console.warn('Failed to fetch users from full_profiles:', usersResult.reason);
       if (accountsResult.status === 'rejected') console.warn('Failed to fetch accounts:', accountsResult.reason);
       if (transactionsResult.status === 'rejected') console.warn('Failed to fetch transactions:', transactionsResult.reason);
-      if (pendingResult.status === 'rejected') console.warn('Failed to fetch pending applications:', pendingResult.reason);
+      if (pendingResult.status === 'rejected') console.warn('Failed to fetch pending applications from full_profiles:', pendingResult.reason);
+      if (balanceResult.status === 'rejected') console.warn('Failed to fetch balance data:', balanceResult.reason);
+      if (recentUsersResult.status === 'rejected') console.warn('Failed to fetch recent users from full_profiles:', recentUsersResult.reason);
+      if (recentTransactionsResult.status === 'rejected') console.warn('Failed to fetch recent transactions:', recentTransactionsResult.reason);
 
       setLoading(false);
     } catch (error) {
@@ -280,10 +313,17 @@ export default function AdminDashboard() {
             </div>
           </div>
           <div style={styles.statCard}>
+            <div style={styles.statIcon}>🏦</div>
+            <div style={styles.statInfo}>
+              <h3 style={styles.statNumber}>{stats ? (stats.totalAccounts || 0).toLocaleString() : 'Loading...'}</h3>
+              <p style={styles.statLabel}>Total Accounts</p>
+            </div>
+          </div>
+          <div style={styles.statCard}>
             <div style={styles.statIcon}>💰</div>
             <div style={styles.statInfo}>
-              <h3 style={styles.statNumber}>{stats ? `$${(stats.totalAccounts || 0).toLocaleString()}` : 'Loading...'}</h3>
-              <p style={styles.statLabel}>Total Accounts</p>
+              <h3 style={styles.statNumber}>{stats ? `$${(stats.totalBalance || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : 'Loading...'}</h3>
+              <p style={styles.statLabel}>Total Balance</p>
             </div>
           </div>
           <div style={styles.statCard}>
