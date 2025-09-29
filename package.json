@@ -1,13 +1,12 @@
-
 {
   "name": "oakline-bank",
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -H 0.0.0.0 -p 5000",
     "build": "next build",
-    "start": "next start",
-    "lint": "next lint",
+    "start": "next start -H 0.0.0.0 -p $PORT",
+    "lint": "next lint"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",
@@ -30,4 +29,3 @@
     "eslint-config-next": "14.2.3"
   }
 }
- 
