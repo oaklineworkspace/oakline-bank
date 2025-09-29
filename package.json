@@ -1,14 +1,13 @@
 
 
-  
-{
+  {
   "name": "oakline-bank",
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -H 0.0.0.0 -p 5000",
     "build": "next build",
-    "start": "next start",
+    "start": "next start -H 0.0.0.0 -p 5000",
     "lint": "next lint"
   },
   "dependencies": {
@@ -19,6 +18,7 @@
     "@tanstack/react-query": "^5.86.0",
     "bcryptjs": "^3.0.2",
     "next": "14.2.3",
+    "nextjs-cors": "^2.2.0",
     "nodemailer": "^6.9.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
