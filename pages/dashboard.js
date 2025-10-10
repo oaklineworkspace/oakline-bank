@@ -4,40 +4,30 @@ import Link from 'next/link';
 import { supabase } from '../lib/supabaseClient';
 import DebitCard from '../components/DebitCard';
 import LiveChat from '../components/LiveChat';
+import { useAuth } from '../contexts/AuthContext';
+import ProtectedRoute from '../components/ProtectedRoute';
 
-export default function Dashboard() {
-  const [user, setUser] = useState(null);
+function DashboardContent() {
+  const { user, signOut } = useAuth();
   const [userProfile, setUserProfile] = useState(null);
   const [accounts, setAccounts] = useState([]);
   const [transactions, setTransactions] = useState([]);
+  const [cards, setCards] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
   const [dropdownOpen, setDropdownOpen] = useState({});
   const [cardApplicationStatus, setCardApplicationStatus] = useState(null);
+  const [flippedCards, setFlippedCards] = useState({});
   const router = useRouter();
 
   useEffect(() => {
-    checkUser();
-  }, []);
-
-  const checkUser = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        router.push('/login');
-        return;
-      }
-      setUser(user);
-      await fetchUserData(user);
-    } catch (error) {
-      console.error('Error checking user:', error);
-      router.push('/login');
-    } finally {
-      setLoading(false);
+    if (user) {
+      loadUserData(user.id);
     }
-  };
+  }, [user]);
 
-  const fetchUserData = async (user) => {
+  const loadUserData = async (userId) => {
+    setLoading(true);
     try {
       // Fetch user profile
       const { data: profile } = await supabase
@@ -50,51 +40,36 @@ export default function Dashboard() {
         setUserProfile(profile);
       }
 
-      // Fetch accounts with better error handling
+      // Fetch accounts - use single query method to avoid duplicates
       let accountsData = [];
 
       try {
-        // First try to get user's application to find linked accounts
-        const { data: userApplication } = await supabase
-          .from('applications')
-          .select('id')
-          .eq('email', user.email)
-          .single();
+        // Primary method: fetch by user_id
+        const { data: accountsByUserId, error: accountsError } = await supabase
+          .from('accounts')
+          .select('*')
+          .eq('user_id', userId)
+          .order('created_at', { ascending: true });
 
-        if (userApplication) {
-          // Try to find accounts linked to the application
-          const { data: accountsByAppId } = await supabase
+        if (!accountsError && accountsByUserId && accountsByUserId.length > 0) {
+          accountsData = accountsByUserId;
+        } else {
+          // Fallback: try by email if user_id doesn't work
+          const { data: accountsByEmail } = await supabase
             .from('accounts')
             .select('*')
-            .eq('application_id', userApplication.id)
+            .eq('email', user.email)
             .order('created_at', { ascending: true });
 
-          if (accountsByAppId && accountsByAppId.length > 0) {
-            accountsData = accountsByAppId;
-          }
+          accountsData = accountsByEmail || [];
         }
 
-        // If no accounts found by application, try other methods
-        if (accountsData.length === 0) {
-          const { data: accountsByUserId } = await supabase
-            .from('accounts')
-            .select('*')
-            .eq('user_id', user.id)
-            .order('created_at', { ascending: true });
+        // Remove duplicates by account_number (in case there are any)
+        const uniqueAccounts = accountsData.filter((account, index, self) =>
+          index === self.findIndex((a) => a.account_number === account.account_number)
+        );
 
-          if (accountsByUserId && accountsByUserId.length > 0) {
-            accountsData = accountsByUserId;
-          } else {
-            // Try by email
-            const { data: accountsByEmail } = await supabase
-              .from('accounts')
-              .select('*')
-              .or(`user_email.eq.${user.email},email.eq.${user.email}`)
-              .order('created_at', { ascending: true });
-
-            accountsData = accountsByEmail || [];
-          }
-        }
+        accountsData = uniqueAccounts;
       } catch (accountError) {
         console.error('Error fetching accounts:', accountError);
         accountsData = [];
@@ -106,14 +81,26 @@ export default function Dashboard() {
       const { data: transactionsData } = await supabase
         .from('transactions')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', userId)
         .order('created_at', { ascending: false })
         .limit(5);
 
       setTransactions(transactionsData || []);
 
+      // Fetch user cards
+      const { data: cardsData } = await supabase
+        .from('cards')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+
+      setCards(cardsData || []);
+
     } catch (error) {
       console.error('Error fetching user data:', error);
+      setError('Failed to load dashboard data. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -159,7 +146,9 @@ export default function Dashboard() {
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD'
+      currency: 'USD',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
     }).format(Math.abs(amount || 0));
   };
 
@@ -193,14 +182,11 @@ export default function Dashboard() {
     setDropdownOpen({});
   };
 
-  const handleLogout = async () => {
+  const handleSignOut = async () => {
     try {
-      await supabase.auth.signOut();
-      router.push('/');
+      await signOut();
     } catch (error) {
       console.error('Error signing out:', error);
-      // Force redirect even if signOut fails
-      router.push('/');
     }
   };
 
@@ -243,7 +229,7 @@ export default function Dashboard() {
         <div style={styles.headerContainer}>
           <div style={styles.headerLeft}>
             <Link href="/" style={styles.logoContainer}>
-              <img src="/images/logo-primary.png.jpg" alt="Oakline Bank" style={styles.logo} />
+              <img src="/images/Oakline_Bank_logo_design_c1b04ae0.png" alt="Oakline Bank" style={styles.logo} />
               <div style={styles.brandInfo}>
                 <h1 style={styles.brandName}>Oakline Bank</h1>
                 <span style={styles.brandTagline}>Your Financial Partner</span>
@@ -253,55 +239,70 @@ export default function Dashboard() {
 
           <nav style={styles.mainNav}>
             <div style={styles.navItem}>
-              <button style={styles.navButton} onClick={(e) => { e.stopPropagation(); toggleDropdown('navigation'); }}>
-                <span style={styles.navIcon}>🧭</span>
-                My Banking
+              <button style={styles.navButton} onClick={(e) => { e.stopPropagation(); toggleDropdown('main'); }}>
+                <span style={styles.navIcon}>☰</span>
+                Banking Menu
                 <span style={styles.navArrow}>▼</span>
               </button>
-              {dropdownOpen.navigation && (
+              {dropdownOpen.main && (
                 <div style={styles.dropdown}>
-                  <Link href="/" style={styles.dropdownLink}>🏠 Home</Link>
-                  <Link href="/main-menu" style={styles.dropdownLink}>📋 Main Menu</Link>
-                  <Link href="/account-details" style={styles.dropdownLink}>🏦 Account Details</Link>
-                  <Link href="/transfer" style={styles.dropdownLink}>💸 Transfer Money</Link>
-                  <Link href="/cards" style={styles.dropdownLink}>💳 My Cards</Link>
-                  <Link href="/transactions" style={styles.dropdownLink}>📜 Transaction History</Link>
-                  <Link href="/bill-pay" style={styles.dropdownLink}>🧾 Pay Bills</Link>
-                  <Link href="/deposit-real" style={styles.dropdownLink}>📱 Mobile Deposit</Link>
-                </div>
-              )}
-            </div>
-
-            <div style={styles.navItem}>
-              <button style={styles.navButton} onClick={(e) => { e.stopPropagation(); toggleDropdown('services'); }}>
-                <span style={styles.navIcon}>🛡️</span>
-                Security & Settings
-                <span style={styles.navArrow}>▼</span>
-              </button>
-              {dropdownOpen.services && (
-                <div style={styles.dropdown}>
-                  <Link href="/security" style={styles.dropdownLink}>🔒 Security Settings</Link>
-                  <Link href="/notifications" style={styles.dropdownLink}>🔔 Notifications</Link>
-                  <Link href="/privacy" style={styles.dropdownLink}>🛡️ Privacy Settings</Link>
-                  <Link href="/profile" style={styles.dropdownLink}>👤 Edit Profile</Link>
-                  <Link href="/messages" style={styles.dropdownLink}>📧 Messages</Link>
-                </div>
-              )}
-            </div>
-
-            <div style={styles.navItem}>
-              <button style={styles.navButton} onClick={(e) => { e.stopPropagation(); toggleDropdown('help'); }}>
-                <span style={styles.navIcon}>❓</span>
-                Help & Support
-                <span style={styles.navArrow}>▼</span>
-              </button>
-              {dropdownOpen.help && (
-                <div style={styles.dropdown}>
-                  <Link href="/support" style={styles.dropdownLink}>🎧 Customer Support</Link>
-                  <Link href="/faq" style={styles.dropdownLink}>❓ FAQ</Link>
-                  <Link href="/financial-education" style={styles.dropdownLink}>📚 Financial Education</Link>
-                  <Link href="/calculators" style={styles.dropdownLink}>🧮 Financial Calculators</Link>
-                  <Link href="/branch-locator" style={styles.dropdownLink}>📍 Find Branch/ATM</Link>
+                  <div style={styles.dropdownSection}>
+                    <h4 style={styles.dropdownSectionTitle}>🏦 My Banking</h4>
+                    <Link href="/" style={styles.dropdownLink}>🏠 Home</Link>
+                    <Link href="/main-menu" style={styles.dropdownLink}>📋 Main Menu</Link>
+                    <Link href="/account-details" style={styles.dropdownLink}>🏦 Account Details</Link>
+                    <Link href="/transfer" style={styles.dropdownLink}>💸 Transfer Money</Link>
+                    <Link href="/cards" style={styles.dropdownLink}>💳 My Cards</Link>
+                    <Link href="/transactions" style={styles.dropdownLink}>📜 Transaction History</Link>
+                    <Link href="/bill-pay" style={styles.dropdownLink}>🧾 Pay Bills</Link>
+                    <Link href="/deposit-real" style={styles.dropdownLink}>📱 Mobile Deposit</Link>
+                    <Link href="/withdrawal" style={styles.dropdownLink}>📤 Withdraw Funds</Link>
+                    <Link href="/zelle" style={styles.dropdownLink}>💰 Zelle</Link>
+                  </div>
+                  <div style={styles.dropdownDivider}></div>
+                  <div style={styles.dropdownSection}>
+                    <h4 style={styles.dropdownSectionTitle}>💼 Loans & Credit</h4>
+                    <Link href="/loans" style={styles.dropdownLink}>💰 Apply for Loan</Link>
+                    <Link href="/credit-report" style={styles.dropdownLink}>📊 Credit Report</Link>
+                    <Link href="/apply-card" style={styles.dropdownLink}>💳 Apply for Card</Link>
+                  </div>
+                  <div style={styles.dropdownDivider}></div>
+                  <div style={styles.dropdownSection}>
+                    <h4 style={styles.dropdownSectionTitle}>📈 Investments</h4>
+                    <Link href="/investments" style={styles.dropdownLink}>📊 Portfolio</Link>
+                    <Link href="/crypto" style={styles.dropdownLink}>₿ Crypto Trading</Link>
+                    <Link href="/market-news" style={styles.dropdownLink}>📰 Market News</Link>
+                  </div>
+                  <div style={styles.dropdownDivider}></div>
+                  <div style={styles.dropdownSection}>
+                    <h4 style={styles.dropdownSectionTitle}>🛡️ Security & Settings</h4>
+                    <Link href="/security" style={styles.dropdownLink}>🔒 Security Settings</Link>
+                    <Link href="/notifications" style={styles.dropdownLink}>🔔 Notifications</Link>
+                    <Link href="/privacy" style={styles.dropdownLink}>🛡️ Privacy Settings</Link>
+                    <Link href="/profile" style={styles.dropdownLink}>👤 Edit Profile</Link>
+                    <Link href="/messages" style={styles.dropdownLink}>📧 Messages</Link>
+                  </div>
+                  <div style={styles.dropdownDivider}></div>
+                  <div style={styles.dropdownSection}>
+                    <h4 style={styles.dropdownSectionTitle}>📬 Communications</h4>
+                    <Link href="/notifications" style={styles.dropdownLink}>🔔 Alerts & Notifications</Link>
+                    <Link href="/messages" style={styles.dropdownLink}>💬 Messages</Link>
+                  </div>
+                  <div style={styles.dropdownDivider}></div>
+                  <div style={styles.dropdownSection}>
+                    <h4 style={styles.dropdownSectionTitle}>❓ Help & Support</h4>
+                    <Link href="/support" style={styles.dropdownLink}>🎧 Customer Support</Link>
+                    <Link href="/faq" style={styles.dropdownLink}>❓ FAQ</Link>
+                    <Link href="/financial-education" style={styles.dropdownLink}>📚 Financial Education</Link>
+                    <Link href="/calculators" style={styles.dropdownLink}>🧮 Financial Calculators</Link>
+                    <Link href="/branch-locator" style={styles.dropdownLink}>📍 Find Branch/ATM</Link>
+                  </div>
+                  <div style={styles.dropdownDivider}></div>
+                  <div style={styles.dropdownSection}>
+                    <button onClick={handleSignOut} style={styles.logoutDropdownButton}>
+                      Sign Out
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
@@ -310,18 +311,8 @@ export default function Dashboard() {
           <div style={styles.headerRight}>
             <div style={styles.userSection}>
               <div style={styles.userInfo}>
-                <span style={styles.welcomeText}>Welcome</span>
+                <span style={styles.welcomeText}>Welcome back</span>
                 <span style={styles.userName}>{getUserDisplayName()}</span>
-              </div>
-              <div style={styles.userActions}>
-                <div style={styles.routingInfo}>
-                  <span style={styles.routingLabel}>Routing #:</span>
-                  <span style={styles.routingNumber}>075915826</span>
-                </div>
-                <div style={styles.phoneInfo}>
-                  <span style={styles.phoneIcon}>📞</span>
-                  <span>1-800-OAKLINE</span>
-                </div>
               </div>
             </div>
           </div>
@@ -338,75 +329,40 @@ export default function Dashboard() {
           </div>
 
           <div style={styles.summaryCards}>
-            <div style={styles.summaryCard}>
-              <div style={styles.cardIcon} style={{backgroundColor: '#e3f2fd'}}>💰</div>
-              <div style={styles.cardContent}>
-                <h3 style={styles.cardLabel}>Total Balance</h3>
-                <div style={styles.cardValue}>{formatCurrency(getTotalBalance())}</div>
-                <span style={styles.cardSubtext}>Across {accounts.length} account{accounts.length !== 1 ? 's' : ''}</span>
+            <div style={styles.primaryBalanceCard}>
+              <div style={styles.balanceCardHeader}>
+                <div style={styles.balanceHeaderInfo}>
+                  <h3 style={styles.balanceCardLabel}>Total Available Balance</h3>
+                  <span style={styles.balanceCardSubtext}>Across {accounts.length} account{accounts.length !== 1 ? 's' : ''}</span>
+                </div>
               </div>
-            </div>
-
-            <div style={styles.summaryCard}>
-              <div style={styles.cardIcon} style={{backgroundColor: '#f3e5f5'}}>📈</div>
-              <div style={styles.cardContent}>
-                <h3 style={styles.cardLabel}>Monthly Growth</h3>
-                <div style={styles.cardValue}>+2.4%</div>
-                <span style={styles.cardSubtext}>vs last month</span>
+              <div style={styles.balanceAmountContainer}>
+                <div style={styles.balanceAmount}>
+                  {new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'USD',
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                  }).format(getTotalBalance())}
+                </div>
+                <div style={styles.balanceSubInfo}>
+                  Available Balance • Updated {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                </div>
               </div>
-            </div>
-
-            <div style={styles.summaryCard}>
-              <div style={styles.cardIcon} style={{backgroundColor: '#e8f5e8'}}>💳</div>
-              <div style={styles.cardContent}>
-                <h3 style={styles.cardLabel}>Available Credit</h3>
-                <div style={styles.cardValue}>$15,000</div>
-                <span style={styles.cardSubtext}>85% available</span>
+              <div style={styles.balanceCardFooter}>
+                <div style={styles.balanceFooterItem}>
+                  <span style={styles.footerText}>FDIC Insured</span>
+                </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Quick Actions */}
-        <section style={styles.quickActionsSection}>
-          <h3 style={styles.sectionTitle}>Quick Actions</h3>
-          <div style={styles.quickActions}>
-            <Link href="/transfer" style={{ ...styles.quickAction, ...styles.dashboardDropdownLink }}>
-              <span style={styles.quickActionIcon}>💸</span>
-              <span style={styles.quickActionText}>Transfer Money</span>
-            </Link>
-            <Link href="/deposit-real" style={{ ...styles.quickAction, ...styles.dashboardDropdownLink }}>
-              <span style={styles.quickActionIcon}>📥</span>
-              <span style={styles.quickActionText}>Mobile Deposit</span>
-            </Link>
-            <Link href="/bill-pay" style={{ ...styles.quickAction, ...styles.dashboardDropdownLink }}>
-              <span style={styles.quickActionIcon}>🧾</span>
-              <span style={styles.quickActionText}>Pay Bills</span>
-            </Link>
-            <button onClick={applyForCard} style={{ ...styles.quickAction, ...styles.dashboardDropdownLink }}>
-              <span style={styles.quickActionIcon}>💳</span>
-              <span style={styles.quickActionText}>Apply for Card</span>
-            </button>
-          </div>
-
-          {cardApplicationStatus && (
-            <div style={{
-              ...styles.statusMessage,
-              backgroundColor: cardApplicationStatus.startsWith('error') ? '#ffebee' : '#e8f5e8',
-              color: cardApplicationStatus.startsWith('error') ? '#c62828' : '#2e7d32'
-            }}>
-              {cardApplicationStatus.startsWith('error') 
-                ? cardApplicationStatus.replace('error: ', '❌ ') 
-                : '✅ Card application submitted successfully!'}
-            </div>
-          )}
-        </section>
-
-        {/* Accounts Overview */}
+        {/* Account Details Section - Moved below balance */}
         <section style={styles.accountsSection}>
           <div style={styles.sectionHeaderWithAction}>
-            <h3 style={styles.sectionTitle}>My Accounts</h3>
-            <Link href="/account-details" style={styles.viewAllLink}>View All Details →</Link>
+            <h3 style={styles.sectionTitle}>Account Details</h3>
+            <Link href="/account-details-list" style={styles.viewAllLink}>View All Details →</Link>
           </div>
 
           <div style={styles.accountsList}>
@@ -432,7 +388,7 @@ export default function Dashboard() {
           </div>
         </section>
 
-        {/* Recent Transactions */}
+        {/* Recent Transactions - Moved after Account Details */}
         <section style={styles.transactionsSection}>
           <div style={styles.sectionHeaderWithAction}>
             <h3 style={styles.sectionTitle}>Recent Transactions</h3>
@@ -471,16 +427,160 @@ export default function Dashboard() {
             )}
           </div>
         </section>
+
+        {/* Quick Actions */}
+        <section style={styles.quickActionsSection}>
+          <h3 style={styles.sectionTitle}>Quick Actions</h3>
+          <div style={styles.quickActions}>
+            <Link href="/transfer" style={styles.standardActionButton}>
+              <span style={styles.quickActionIcon}>💸</span>
+              <span style={styles.quickActionText}>Transfer Money</span>
+            </Link>
+            <Link href="/deposit-real" style={styles.standardActionButton}>
+              <span style={styles.quickActionIcon}>📥</span>
+              <span style={styles.quickActionText}>Mobile Deposit</span>
+            </Link>
+            <Link href="/bill-pay" style={styles.standardActionButton}>
+              <span style={styles.quickActionIcon}>🧾</span>
+              <span style={styles.quickActionText}>Pay Bills</span>
+            </Link>
+            <Link href="/withdrawal" style={styles.standardActionButton}>
+              <span style={styles.quickActionIcon}>📤</span>
+              <span style={styles.quickActionText}>Withdraw Funds</span>
+            </Link>
+            <Link href="/apply-card" style={styles.standardActionButton}>
+              <span style={styles.quickActionIcon}>💳</span>
+              <span style={styles.quickActionText}>Apply for Card</span>
+            </Link>
+            <Link href="/zelle" style={styles.standardActionButton}>
+              <span style={styles.quickActionIcon}>⚡</span>
+              <span style={styles.quickActionText}>Send with Zelle</span>
+            </Link>
+            <Link href="/loans" style={styles.standardActionButton}>
+              <span style={styles.quickActionIcon}>💰</span>
+              <span style={styles.quickActionText}>Apply for Loan</span>
+            </Link>
+            <Link href="/investments" style={styles.standardActionButton}>
+              <span style={styles.quickActionIcon}>📈</span>
+              <span style={styles.quickActionText}>Invest</span>
+            </Link>
+          </div>
+        </section>
+
+        
+
+        {/* My Cards Section */}
+        {cards.length > 0 && (
+          <section style={styles.cardsSection}>
+            <div style={styles.sectionHeaderWithAction}>
+              <h3 style={styles.sectionTitle}>My Cards</h3>
+              <Link href="/cards" style={styles.viewAllLink}>Manage Cards →</Link>
+            </div>
+
+            <div style={styles.cardsGrid}>
+              {cards.map(card => (
+                <div key={card.id} style={styles.cardContainer}>
+                  <div 
+                    style={{
+                      ...styles.cardFlipWrapper,
+                      transform: flippedCards[card.id] ? 'rotateY(180deg)' : 'rotateY(0deg)'
+                    }}
+                    onClick={() => setFlippedCards(prev => ({ ...prev, [card.id]: !prev[card.id] }))}
+                  >
+                    {/* Card Front */}
+                    <div style={{
+                      ...styles.cardFace,
+                      ...styles.cardFront,
+                      opacity: flippedCards[card.id] ? 0 : 1
+                    }}>
+                      <div style={styles.cardHeader}>
+                        <span style={styles.bankNameCard}>OAKLINE BANK</span>
+                        <span style={styles.cardTypeLabel}>DEBIT</span>
+                      </div>
+                      
+                      <div style={styles.chipSection}>
+                        <div style={styles.chip}></div>
+                        <div style={styles.contactless}>
+                          <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 18C15.3137 18 18 15.3137 18 12C18 8.68629 15.3137 6 12 6" stroke="white" strokeWidth="2"/>
+                            <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2" stroke="white" strokeWidth="2"/>
+                            <path d="M12 14C13.1046 14 14 13.1046 14 12C14 10.8954 13.1046 10 12 10" stroke="white" strokeWidth="2"/>
+                          </svg>
+                        </div>
+                      </div>
+
+                      <div style={styles.cardNumberDisplay}>
+                        {card.card_number ? card.card_number.replace(/(.{4})/g, '$1 ').trim() : '**** **** **** ****'}
+                      </div>
+
+                      <div style={styles.cardFooterDetails}>
+                        <div>
+                          <div style={styles.cardLabelSmall}>CARDHOLDER</div>
+                          <div style={styles.cardValueSmall}>
+                            {userProfile ? `${userProfile.first_name?.toUpperCase() || ''} ${userProfile.last_name?.toUpperCase() || ''}`.trim() : card.cardholder_name || 'CARDHOLDER NAME'}
+                          </div>
+                        </div>
+                        <div>
+                          <div style={styles.cardLabelSmall}>EXPIRES</div>
+                          <div style={styles.cardValueSmall}>{card.expiry_date || 'MM/YY'}</div>
+                        </div>
+                        <div>
+                          <div style={styles.cardLabelSmall}>CVV</div>
+                          <div style={styles.cardValueSmall}>{card.cvv || '***'}</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Card Back */}
+                    <div style={{
+                      ...styles.cardFace,
+                      ...styles.cardBack,
+                      opacity: flippedCards[card.id] ? 1 : 0,
+                      transform: 'rotateY(180deg)'
+                    }}>
+                      <div style={styles.magneticStripe}></div>
+                      <div style={styles.cvvSection}>
+                        <div style={styles.cvvLabel}>CVV</div>
+                        <div style={styles.cvvBox}>{card.cvv || '***'}</div>
+                      </div>
+                      <div style={styles.cardBackInfo}>
+                        <p style={styles.cardBackText}>For customer service call 1-800-OAKLINE</p>
+                        <p style={styles.cardBackText}>This card is property of Oakline Bank</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div style={styles.cardStatus}>
+                    <span style={{
+                      ...styles.statusBadge,
+                      backgroundColor: card.is_locked ? '#ef4444' : '#10b981'
+                    }}>
+                      {card.is_locked ? '🔒 Locked' : '✓ Active'}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
       </main>
       <LiveChat />
     </div>
   );
 }
 
+export default function Dashboard() {
+  return (
+    <ProtectedRoute>
+      <DashboardContent />
+    </ProtectedRoute>
+  );
+}
+
 const styles = {
   container: {
     minHeight: '100vh',
-    backgroundColor: '#f8fafc',
+    background: '#f8fafc',
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
     width: '100%',
     overflowX: 'hidden'
@@ -516,7 +616,7 @@ const styles = {
     opacity: 0.95
   },
   header: {
-    backgroundColor: '#1a365d',
+    background: '#1a365d',
     borderBottom: '3px solid #059669',
     boxShadow: '0 4px 12px rgba(26, 54, 93, 0.2)'
   },
@@ -524,16 +624,16 @@ const styles = {
     maxWidth: '100%',
     margin: '0 auto',
     padding: '0.75rem 1rem',
-    display: 'flex',
+    display: 'grid',
+    gridTemplateColumns: '1fr auto 1fr',
     alignItems: 'center',
-    justifyContent: 'space-between',
     minHeight: '70px',
-    flexWrap: 'wrap',
-    gap: '0.5rem'
+    gap: '1rem'
   },
   headerLeft: {
     display: 'flex',
-    alignItems: 'center'
+    alignItems: 'center',
+    justifyContent: 'flex-start'
   },
   logoContainer: {
     display: 'flex',
@@ -565,7 +665,6 @@ const styles = {
     display: 'flex',
     gap: '0.25rem',
     flexWrap: 'wrap',
-    flex: 1,
     justifyContent: 'center'
   },
   navItem: {
@@ -599,12 +698,46 @@ const styles = {
     top: '100%',
     left: 0,
     backgroundColor: 'white',
-    borderRadius: '8px',
+    borderRadius: '12px',
     boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
-    padding: '0.5rem',
-    minWidth: '200px',
+    padding: '1rem',
+    minWidth: '280px',
+    maxHeight: '70vh',
+    overflowY: 'auto',
     zIndex: 1000,
-    marginTop: '0.5rem'
+    marginTop: '0.5rem',
+    border: '1px solid #e2e8f0'
+  },
+  dropdownSection: {
+    marginBottom: '0.5rem'
+  },
+  dropdownSectionTitle: {
+    fontSize: '0.8rem',
+    fontWeight: 'bold',
+    color: '#1A3E6F',
+    margin: '0 0 0.5rem 0',
+    padding: '0 0.5rem',
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px'
+  },
+  dropdownDivider: {
+    height: '1px',
+    backgroundColor: '#e2e8f0',
+    margin: '0.75rem 0',
+    width: '100%'
+  },
+  logoutDropdownButton: {
+    width: '100%',
+    padding: '0.75rem 1rem',
+    backgroundColor: '#dc2626',
+    color: 'white',
+    border: 'none',
+    borderRadius: '6px',
+    fontSize: '0.9rem',
+    fontWeight: '500',
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+    textAlign: 'left'
   },
   dropdownLink: {
     display: 'block',
@@ -617,7 +750,8 @@ const styles = {
   },
   headerRight: {
     display: 'flex',
-    alignItems: 'center'
+    alignItems: 'center',
+    justifyContent: 'flex-end'
   },
   userSection: {
     display: 'flex',
@@ -628,10 +762,8 @@ const styles = {
   userInfo: {
     display: 'flex',
     flexDirection: 'column',
-    alignItems: 'flex-end',
-    '@media (max-width: 768px)': {
-      alignItems: 'center'
-    }
+    alignItems: 'center',
+    textAlign: 'center'
   },
   welcomeText: {
     fontSize: '0.8rem',
@@ -642,31 +774,13 @@ const styles = {
     fontWeight: '600',
     color: 'white'
   },
-  userActions: {
-    display: 'flex',
-    gap: '0.25rem',
-    flexWrap: 'wrap'
-  },
-  actionButton: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.3rem',
-    padding: '0.4rem 0.6rem',
-    backgroundColor: 'rgba(5, 150, 105, 0.2)',
-    color: 'white',
-    textDecoration: 'none',
-    borderRadius: '6px',
-    fontSize: '0.75rem',
-    fontWeight: '500',
-    transition: 'all 0.2s',
-    whiteSpace: 'nowrap'
-  },
+
   logoutButton: {
     display: 'flex',
     alignItems: 'center',
     gap: '0.5rem',
     padding: '0.5rem 0.75rem',
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    background: 'rgba(255,255,255,0.2)',
     color: 'white',
     border: 'none',
     borderRadius: '6px',
@@ -674,9 +788,6 @@ const styles = {
     fontSize: '0.85rem',
     fontWeight: '500',
     transition: 'all 0.2s'
-  },
-  actionIcon: {
-    fontSize: '0.9rem'
   },
   routingInfo: {
     display: 'flex',
@@ -701,7 +812,7 @@ const styles = {
     alignItems: 'center',
     gap: '0.5rem',
     padding: '0.5rem 0.75rem',
-    backgroundColor: 'rgba(5, 150, 105, 0.2)',
+    background: 'rgba(5, 150, 105, 0.2)',
     borderRadius: '8px',
     fontSize: '0.85rem',
     fontWeight: '600',
@@ -732,14 +843,7 @@ const styles = {
     userSection: {
       order: 1,
       width: '100%',
-      justifyContent: 'space-between'
-    },
-    userActions: {
-      gap: '0.25rem'
-    },
-    actionButton: {
-      padding: '0.3rem 0.5rem',
-      fontSize: '0.7rem'
+      justifyContent: 'flex-end'
     },
     main: {
       padding: '0.75rem 0.5rem'
@@ -789,11 +893,13 @@ const styles = {
     boxSizing: 'border-box'
   },
   summarySection: {
-    backgroundColor: 'white',
-    borderRadius: '12px',
-    padding: '2rem',
+    background: 'white',
+    borderRadius: '16px',
+    padding: '2.5rem',
     boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-    border: '1px solid #e2e8f0'
+    border: '1px solid #e2e8f0',
+    position: 'relative',
+    overflow: 'hidden',
   },
   summaryHeader: {
     display: 'flex',
@@ -802,18 +908,18 @@ const styles = {
     marginBottom: '1.5rem'
   },
   sectionTitle: {
-    fontSize: '1.4rem',
+    fontSize: '1.7rem',
     fontWeight: 'bold',
-    color: '#1e293b',
+    color: '#1a365d',
     margin: 0
   },
   lastUpdated: {
-    fontSize: '0.85rem',
+    fontSize: '0.9rem',
     color: '#64748b'
   },
   summaryCards: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+    gridTemplateColumns: '1fr',
     gap: '1rem'
   },
   summaryCard: {
@@ -821,36 +927,141 @@ const styles = {
     alignItems: 'center',
     gap: '1rem',
     padding: '1.5rem',
-    backgroundColor: '#f8fafc',
-    borderRadius: '10px',
-    border: '1px solid #e2e8f0'
+    background: 'rgba(255, 255, 255, 0.15)',
+    borderRadius: '12px',
+    border: '1px solid rgba(255, 255, 255, 0.2)',
+    backdropFilter: 'blur(10px)',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
   },
   cardIcon: {
     fontSize: '2rem',
     padding: '1rem',
-    borderRadius: '10px'
+    borderRadius: '10px',
+    background: 'rgba(255, 255, 255, 0.25)'
   },
   cardContent: {
     flex: 1
   },
   cardLabel: {
-    fontSize: '0.9rem',
-    color: '#64748b',
+    fontSize: '1rem',
+    fontWeight: '600',
     margin: '0 0 0.5rem 0',
-    fontWeight: '600'
+    color: 'rgba(255,255,255,0.9)'
   },
   cardValue: {
-    fontSize: '1.8rem',
+    fontSize: '2rem',
     fontWeight: 'bold',
-    color: '#1e293b',
-    margin: '0 0 0.25rem 0'
+    color: 'white',
+    margin: '0 0 0.25rem 0',
+    textShadow: '0 1px 3px rgba(0,0,0,0.1)'
   },
   cardSubtext: {
-    fontSize: '0.8rem',
+    fontSize: '0.85rem',
+    color: 'rgba(255,255,255,0.75)'
+  },
+  primaryBalanceCard: {
+    gridColumn: 'span 1',
+    background: 'white',
+    borderRadius: '16px',
+    padding: '2rem',
+    color: '#1a365d',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+    border: '1px solid #e2e8f0',
+    position: 'relative',
+    overflow: 'hidden',
+    minWidth: '320px'
+  },
+  balanceCardHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '1rem',
+    marginBottom: '1.5rem'
+  },
+  balanceIconLarge: {
+    fontSize: '2.5rem',
+    background: 'rgba(255,255,255,0.2)',
+    padding: '1rem',
+    borderRadius: '12px',
+    backdropFilter: 'blur(10px)'
+  },
+  balanceHeaderInfo: {
+    flex: 1
+  },
+  balanceCardLabel: {
+    fontSize: '1rem',
+    fontWeight: '600',
+    margin: '0 0 0.25rem 0',
+    color: '#1a365d'
+  },
+  balanceCardSubtext: {
+    fontSize: '0.85rem',
     color: '#64748b'
   },
+  balanceAmountContainer: {
+    margin: '1.5rem 0',
+    width: '100%',
+    overflow: 'visible'
+  },
+  balanceAmount: {
+    fontSize: 'clamp(1.8rem, 3.5vw, 2.5rem)',
+    fontWeight: 'bold',
+    marginBottom: '0.5rem',
+    letterSpacing: '0.5px',
+    wordBreak: 'keep-all',
+    whiteSpace: 'nowrap',
+    overflow: 'visible',
+    fontFamily: '"Courier New", Courier, monospace',
+    display: 'block',
+    color: '#1a365d'
+  },
+  balanceSubInfo: {
+    fontSize: '0.85rem',
+    color: '#64748b',
+    fontWeight: '500',
+    marginTop: '0.5rem'
+  },
+  balanceGrowthIndicator: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    background: 'rgba(34, 197, 94, 0.2)',
+    padding: '0.5rem 1rem',
+    borderRadius: '20px',
+    width: 'fit-content',
+    border: '1px solid rgba(34, 197, 94, 0.3)'
+  },
+  growthArrow: {
+    fontSize: '1.2rem',
+    color: '#4ade80'
+  },
+  growthText: {
+    fontSize: '0.9rem',
+    fontWeight: '600',
+    color: 'rgba(255,255,255,0.95)'
+  },
+  balanceCardFooter: {
+    display: 'flex',
+    gap: '1.5rem',
+    marginTop: '1.5rem',
+    paddingTop: '1.5rem',
+    borderTop: '1px solid #e2e8f0',
+    justifyContent: 'center'
+  },
+  balanceFooterItem: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem'
+  },
+  footerIcon: {
+    fontSize: '1.2rem'
+  },
+  footerText: {
+    fontSize: '0.85rem',
+    color: '#64748b',
+    fontWeight: '500'
+  },
   quickActionsSection: {
-    backgroundColor: 'white',
+    background: 'white',
     borderRadius: '12px',
     padding: '1.5rem',
     boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
@@ -868,13 +1079,29 @@ const styles = {
     alignItems: 'center',
     gap: '0.5rem',
     padding: '1.5rem 1rem',
-    backgroundColor: '#f8fafc',
+    background: '#f8fafc',
     borderRadius: '10px',
     border: '2px solid #e2e8f0',
     textDecoration: 'none',
     color: '#374151',
     transition: 'all 0.2s',
     cursor: 'pointer'
+  },
+  standardActionButton: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '0.5rem',
+    padding: '1.5rem 1rem',
+    backgroundColor: '#1a365d',
+    color: 'white',
+    borderRadius: '10px',
+    border: 'none',
+    textDecoration: 'none',
+    transition: 'all 0.2s',
+    cursor: 'pointer',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    fontSize: 'inherit'
   },
   quickActionIcon: {
     fontSize: '1.5rem'
@@ -892,7 +1119,7 @@ const styles = {
     fontWeight: '500'
   },
   accountsSection: {
-    backgroundColor: 'white',
+    background: 'white',
     borderRadius: '12px',
     padding: '1.5rem',
     boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
@@ -920,7 +1147,7 @@ const styles = {
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: '1rem',
-    backgroundColor: '#f8fafc',
+    background: '#f8fafc',
     borderRadius: '8px',
     border: '1px solid #e2e8f0'
   },
@@ -932,7 +1159,7 @@ const styles = {
   accountTypeIcon: {
     fontSize: '1.5rem',
     padding: '0.5rem',
-    backgroundColor: '#eff6ff',
+    background: '#eff6ff',
     borderRadius: '8px'
   },
   accountDetails: {
@@ -956,7 +1183,7 @@ const styles = {
     color: '#1e40af'
   },
   transactionsSection: {
-    backgroundColor: 'white',
+    background: 'white',
     borderRadius: '12px',
     padding: '1.5rem',
     boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
@@ -972,14 +1199,14 @@ const styles = {
     alignItems: 'center',
     gap: '1rem',
     padding: '1rem',
-    backgroundColor: '#f8fafc',
+    background: '#f8fafc',
     borderRadius: '8px',
     border: '1px solid #e2e8f0'
   },
   transactionIcon: {
     fontSize: '1.2rem',
     padding: '0.5rem',
-    backgroundColor: '#eff6ff',
+    background: '#eff6ff',
     borderRadius: '6px'
   },
   transactionDetails: {
@@ -1021,5 +1248,160 @@ const styles = {
   emptyDesc: {
     fontSize: '0.9rem',
     margin: 0
+  },
+  dashboardDropdownLink: {
+    textDecoration: 'none',
+    color: 'inherit',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center'
+  },
+  cardsSection: {
+    background: 'white',
+    borderRadius: '12px',
+    padding: '1.5rem',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+    border: '1px solid #e2e8f0'
+  },
+  cardsGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))',
+    gap: '1.5rem',
+    marginTop: '1rem'
+  },
+  cardContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1rem'
+  },
+  cardFlipWrapper: {
+    perspective: '1000px',
+    width: '100%',
+    maxWidth: '380px',
+    height: '240px',
+    position: 'relative',
+    transformStyle: 'preserve-3d',
+    transition: 'transform 0.6s',
+    cursor: 'pointer',
+    margin: '0 auto'
+  },
+  cardFace: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    backfaceVisibility: 'hidden',
+    borderRadius: '16px',
+    padding: '1.5rem',
+    background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #1e3a8a 100%)',
+    color: 'white',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    boxShadow: '0 8px 32px rgba(30, 64, 175, 0.3)',
+    transition: 'opacity 0.3s'
+  },
+  cardFront: {
+    zIndex: 2
+  },
+  cardBack: {
+    background: 'linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%)'
+  },
+  cardHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start'
+  },
+  bankNameCard: {
+    fontSize: '1rem',
+    fontWeight: 'bold',
+    letterSpacing: '1px'
+  },
+  cardTypeLabel: {
+    fontSize: '0.875rem',
+    fontWeight: 'bold',
+    opacity: 0.9
+  },
+  chipSection: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '1rem',
+    margin: '0.5rem 0'
+  },
+  chip: {
+    width: '50px',
+    height: '40px',
+    background: 'linear-gradient(135deg, #ffd700 0%, #ffed4e 100%)',
+    borderRadius: '8px'
+  },
+  contactless: {
+    opacity: 0.8
+  },
+  cardNumberDisplay: {
+    fontSize: '1.4rem',
+    fontWeight: 'bold',
+    letterSpacing: '3px',
+    fontFamily: 'monospace',
+    textAlign: 'center',
+    margin: '0.5rem 0'
+  },
+  cardFooterDetails: {
+    display: 'flex',
+    justifyContent: 'space-between'
+  },
+  cardLabelSmall: {
+    fontSize: '0.7rem',
+    opacity: 0.8,
+    marginBottom: '4px'
+  },
+  cardValueSmall: {
+    fontSize: '0.9rem',
+    fontWeight: 'bold'
+  },
+  magneticStripe: {
+    width: '100%',
+    height: '45px',
+    backgroundColor: '#000',
+    marginTop: '20px'
+  },
+  cvvSection: {
+    backgroundColor: 'white',
+    color: 'black',
+    padding: '1rem',
+    margin: '20px 0',
+    borderRadius: '8px',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  },
+  cvvLabel: {
+    fontSize: '0.9rem',
+    fontWeight: 'bold'
+  },
+  cvvBox: {
+    backgroundColor: '#f3f4f6',
+    padding: '6px 12px',
+    borderRadius: '6px',
+    fontFamily: 'monospace',
+    fontSize: '1.1rem',
+    fontWeight: 'bold'
+  },
+  cardBackInfo: {
+    fontSize: '0.7rem',
+    opacity: 0.8
+  },
+  cardBackText: {
+    margin: '4px 0'
+  },
+  cardStatus: {
+    display: 'flex',
+    justifyContent: 'center',
+    marginTop: '0.5rem'
+  },
+  statusBadge: {
+    padding: '0.5rem 1rem',
+    borderRadius: '20px',
+    color: 'white',
+    fontSize: '0.85rem',
+    fontWeight: '600'
   }
 };
