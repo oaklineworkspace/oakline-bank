@@ -40,7 +40,13 @@ export const AuthProvider = ({ children }) => {
         setLoading(false);
 
         if (event === 'SIGNED_IN') {
-          router.push('/dashboard');
+          // Don't auto-redirect if user is in enrollment flow or on specific pages
+          const noRedirectPaths = ['/enroll', '/apply', '/sign-in', '/login', '/reset-password'];
+          const shouldNotRedirect = noRedirectPaths.some(path => router.pathname.includes(path));
+          
+          if (!shouldNotRedirect) {
+            router.push('/dashboard');
+          }
         } else if (event === 'SIGNED_OUT') {
           router.push('/sign-in');
         }
