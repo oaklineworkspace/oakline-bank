@@ -6,7 +6,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { accountId, userId, type, amount, description } = req.body;
+    const { accountId, userId, type, amount, description, transactionDate } = req.body;
 
     // Validate required fields
     if (!accountId || !userId || !type || !amount) {
@@ -38,34 +38,73 @@ export default async function handler(req, res) {
     const currentBalance = parseFloat(account.balance);
     let newBalance;
     let transactionAmount;
+    let transactionType;
 
     // Determine transaction amount and new balance based on type
+    // Note: Store amounts as POSITIVE values, type determines if it's debit/credit
     switch (type) {
       case 'deposit':
       case 'interest':
       case 'bonus':
       case 'refund':
-        transactionAmount = numericAmount;
+      case 'transfer_in':
+        transactionAmount = numericAmount; // Positive amount
         newBalance = currentBalance + numericAmount;
+        transactionType = 'credit';
         break;
+      
       case 'withdrawal':
-      case 'fee':
-        transactionAmount = -numericAmount;
+      case 'atm_withdrawal':
+        transactionAmount = numericAmount; // Store as positive
         newBalance = currentBalance - numericAmount;
+        transactionType = 'debit';
         break;
+      
+      case 'debit_card':
+      case 'card_charge':
+        transactionAmount = numericAmount; // Store as positive
+        newBalance = currentBalance - numericAmount;
+        transactionType = 'debit';
+        break;
+      
+      case 'transfer':
+      case 'transfer_out':
+      case 'wire_transfer':
+      case 'ach_transfer':
+        transactionAmount = numericAmount; // Store as positive
+        newBalance = currentBalance - numericAmount;
+        transactionType = 'transfer_out';
+        break;
+      
+      case 'check':
+      case 'check_payment':
+        transactionAmount = numericAmount; // Store as positive
+        newBalance = currentBalance - numericAmount;
+        transactionType = 'debit';
+        break;
+      
+      case 'fee':
+      case 'service_fee':
+        transactionAmount = numericAmount; // Store as positive
+        newBalance = currentBalance - numericAmount;
+        transactionType = 'fee';
+        break;
+      
       case 'adjustment':
-        // For adjustments, determine if adding or subtracting based on amount sign
-        transactionAmount = numericAmount;
+        // For adjustments, the amount can be positive or negative
+        transactionAmount = Math.abs(numericAmount);
         newBalance = currentBalance + numericAmount;
+        transactionType = numericAmount >= 0 ? 'credit' : 'debit';
         break;
+      
       default:
         return res.status(400).json({ error: 'Invalid transaction type' });
     }
 
-    // Check for negative balance (optional - you might want to allow overdrafts)
+    // Check for negative balance on debit transactions
     if (newBalance < 0 && !['adjustment'].includes(type)) {
       return res.status(400).json({ 
-        error: `Transaction would result in negative balance: $${newBalance.toFixed(2)}` 
+        error: `Insufficient funds. Current balance: $${currentBalance.toFixed(2)}, Transaction amount: $${numericAmount.toFixed(2)}` 
       });
     }
 
@@ -83,20 +122,44 @@ export default async function handler(req, res) {
     }
 
     // Create transaction record
-    const { data: transaction, error: transactionError } = await supabase
+    // Try with reference_number first, fallback to reference if needed
+    const transactionData = {
+      account_id: accountId,
+      user_id: userId,
+      type: transactionType,
+      amount: transactionAmount,
+      status: 'completed',
+      description: description || `Manual ${type.replace(/_/g, ' ')}`,
+      created_at: transactionDate ? new Date(transactionDate).toISOString() : new Date().toISOString()
+    };
+
+    // Check if table has reference_number or reference column
+    const referenceValue = `MANUAL_${Date.now()}`;
+    
+    // Try to insert with both possible column names
+    let transaction, transactionError;
+    
+    // First attempt with reference_number
+    const result1 = await supabase
       .from('transactions')
-      .insert([{
-        account_id: accountId,
-        user_id: userId,
-        type: type,
-        amount: transactionAmount,
-        status: 'completed',
-        description: description || `Manual ${type}`,
-        reference: `MANUAL_${Date.now()}`,
-        created_at: new Date().toISOString()
-      }])
+      .insert([{ ...transactionData, reference_number: referenceValue }])
       .select()
       .single();
+    
+    if (result1.error && result1.error.message.includes('reference_number')) {
+      // Fallback to 'reference' column name
+      const result2 = await supabase
+        .from('transactions')
+        .insert([{ ...transactionData, reference: referenceValue }])
+        .select()
+        .single();
+      
+      transaction = result2.data;
+      transactionError = result2.error;
+    } else {
+      transaction = result1.data;
+      transactionError = result1.error;
+    }
 
     if (transactionError) {
       // Try to revert balance update if transaction creation fails
@@ -113,7 +176,7 @@ export default async function handler(req, res) {
 
     res.status(200).json({
       success: true,
-      message: 'Transaction added successfully',
+      message: 'Transaction processed successfully',
       transaction: transaction,
       newBalance: newBalance.toFixed(2),
       previousBalance: currentBalance.toFixed(2)
