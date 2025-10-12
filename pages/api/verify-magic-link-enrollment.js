@@ -36,6 +36,22 @@ export default async function handler(req, res) {
       return res.status(404).json({ error: 'Application not found or email mismatch' });
     }
 
+    // Check if enrollment is already completed (enrollment record may not exist for magic links)
+    const { data: enrollment, error: enrollmentError } = await supabaseAdmin
+      .from('enrollments')
+      .select('is_used, completed_at')
+      .eq('application_id', applicationId)
+      .eq('email', email)
+      .maybeSingle(); // Use maybeSingle() instead of single() to allow null results
+
+    // Only block if enrollment record exists and is already used
+    if (enrollment && enrollment.is_used) {
+      return res.status(400).json({ 
+        error: 'This enrollment has already been completed. Please sign in using your password.',
+        enrollment_completed: true
+      });
+    }
+
     // Get account numbers for this application
     const { data: accounts, error: accountsError } = await supabaseAdmin
       .from('accounts')
@@ -52,6 +68,7 @@ export default async function handler(req, res) {
       message: 'Magic link verification successful',
       application: applicationData,
       account_numbers: accountNumbers,
+      enrollment_completed: false,
       user: {
         id: authUser.user.id,
         email: authUser.user.email
