@@ -56,26 +56,40 @@ export default function ApproveAccounts() {
 
   const fetchPendingAccounts = async () => {
     setLoading(true);
-    setError(''); // Clear previous errors
+    setError('');
     try {
-      const { data: accounts, error } = await supabase
+      // Fetch pending accounts
+      const { data: accounts, error: accountsError } = await supabase
         .from('accounts')
-        .select(`
-          *,
-          applications:application_id (
-            email,
-            first_name,
-            last_name,
-            phone,
-            address
-          )
-        `)
+        .select('*')
         .eq('status', 'pending')
         .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Error fetching pending accounts:', error);
-        throw new Error(`Failed to load pending accounts: ${error.message}`);
+      if (accountsError) {
+        console.error('Error fetching pending accounts:', accountsError);
+        throw new Error(`Failed to load pending accounts: ${accountsError.message}`);
+      }
+
+      // Fetch related applications
+      const applicationIds = accounts?.map(acc => acc.application_id).filter(Boolean) || [];
+      
+      if (applicationIds.length > 0) {
+        const { data: applications, error: appsError } = await supabase
+          .from('applications')
+          .select('*')
+          .in('id', applicationIds);
+
+        if (appsError) {
+          console.error('Error fetching applications:', appsError);
+        }
+
+        // Merge application data with accounts
+        const enrichedAccounts = accounts.map(account => ({
+          ...account,
+          applications: applications?.find(app => app.id === account.application_id) || null
+        }));
+
+        setPendingAccounts(enrichedAccounts);
       } else {
         setPendingAccounts(accounts || []);
       }
@@ -89,15 +103,14 @@ export default function ApproveAccounts() {
 
   const approveAccount = async (accountId, accountNumber) => {
     setProcessing(accountId);
-    setError(''); // Clear previous errors
+    setError('');
     try {
-      // Update account status
+      // Update account status to active
       const { error: updateError } = await supabase
         .from('accounts')
         .update({
           status: 'active',
-          approved_at: new Date().toISOString(),
-          approved_by: user?.id // Assuming 'user' state holds the admin's info
+          updated_at: new Date().toISOString()
         })
         .eq('id', accountId);
 
@@ -106,25 +119,7 @@ export default function ApproveAccounts() {
         throw new Error(`Failed to approve account: ${updateError.message}`);
       }
 
-      // Get account details for user notification (optional, for logging or email)
-      const { data: accountData, error: accountError } = await supabase
-        .from('accounts')
-        .select(`
-          profiles:user_id (
-            email,
-            full_name
-          )
-        `)
-        .eq('id', accountId)
-        .single();
-
-      if (!accountError && accountData?.profiles?.email) {
-        // In a real application, you would send an email here.
-        console.log(`Simulating approval notification to ${accountData.profiles.email}`);
-      }
-
-      setMessage(`Account ${accountNumber} has been approved successfully!`);
-      // Clear the message after some time
+      setMessage(`✅ Account ${accountNumber} has been approved successfully!`);
       setTimeout(() => setMessage(''), 5000);
 
       // Refresh the pending accounts list
