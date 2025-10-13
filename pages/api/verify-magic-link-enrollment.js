@@ -58,11 +58,22 @@ export default async function handler(req, res) {
       .eq('email', email)
       .maybeSingle();
 
-    // Update click count (trigger will handle incrementing and setting is_used if needed)
+    // Increment click count manually (instead of relying on trigger that fires on all updates)
     if (enrollment) {
+      const newClickCount = (enrollment.click_count || 0) + 1;
+      
+      // Check if this will exceed the limit
+      if (newClickCount > 4) {
+        return res.status(400).json({ 
+          error: 'This enrollment link has expired after 4 uses. Please contact support for a new enrollment link.',
+          enrollment_completed: true
+        });
+      }
+
       const { error: updateError } = await supabaseAdmin
         .from('enrollments')
         .update({ 
+          click_count: newClickCount,
           updated_at: new Date().toISOString() 
         })
         .eq('application_id', applicationId)
@@ -70,21 +81,8 @@ export default async function handler(req, res) {
 
       if (updateError) {
         console.error('Error updating enrollment click count:', updateError);
-      }
-
-      // Re-fetch to get updated values after trigger
-      const { data: updatedEnrollment } = await supabaseAdmin
-        .from('enrollments')
-        .select('is_used, click_count')
-        .eq('application_id', applicationId)
-        .eq('email', email)
-        .single();
-
-      if (updatedEnrollment && updatedEnrollment.is_used) {
-        return res.status(400).json({ 
-          error: 'This enrollment link has expired after 4 uses. Please contact support for a new enrollment link.',
-          enrollment_completed: true
-        });
+      } else {
+        console.log(`✅ Enrollment click count updated: ${newClickCount}/4`);
       }
     }
 

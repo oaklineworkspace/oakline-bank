@@ -217,18 +217,50 @@ export default async function handler(req, res) {
 
     // Update or create enrollment record
     try {
-      const { error: enrollmentError } = await supabaseAdmin
+      // First check if enrollment exists
+      const { data: existingEnrollment } = await supabaseAdmin
         .from('enrollments')
-        .upsert([{
-          email: email,
-          application_id: applicationId,
-          is_used: false,
-          token: linkData.properties.action_link, // Store the magic link
-          created_at: new Date().toISOString()
-        }], { onConflict: 'email,application_id' });
+        .select('*')
+        .eq('email', email)
+        .eq('application_id', applicationId)
+        .maybeSingle();
 
-      if (enrollmentError) {
-        console.warn('Failed to update enrollment record:', enrollmentError);
+      if (existingEnrollment) {
+        // Update existing enrollment - reset click count and is_used
+        const { error: updateError } = await supabaseAdmin
+          .from('enrollments')
+          .update({
+            is_used: false,
+            click_count: 0,
+            token: linkData.properties.action_link,
+            updated_at: new Date().toISOString()
+          })
+          .eq('email', email)
+          .eq('application_id', applicationId);
+
+        if (updateError) {
+          console.warn('Failed to update enrollment record:', updateError);
+        } else {
+          console.log('✅ Enrollment record reset successfully');
+        }
+      } else {
+        // Create new enrollment
+        const { error: insertError } = await supabaseAdmin
+          .from('enrollments')
+          .insert([{
+            email: email,
+            application_id: applicationId,
+            is_used: false,
+            click_count: 0,
+            token: linkData.properties.action_link,
+            created_at: new Date().toISOString()
+          }]);
+
+        if (insertError) {
+          console.warn('Failed to create enrollment record:', insertError);
+        } else {
+          console.log('✅ Enrollment record created successfully');
+        }
       }
     } catch (enrollmentUpdateError) {
       console.warn('Error updating enrollment record:', enrollmentUpdateError);
