@@ -2,10 +2,7 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/admin/resend-enrollment": "pages/admin/resend-enrollment.js",
   "/": "pages/index.js",
-  "/api/admin/get-applications-with-status": "pages/api/admin/get-applications-with-status.js",
-  "/enroll": "pages/enroll.js",
-  "/api/verify-magic-link-enrollment": "pages/api/verify-magic-link-enrollment.js",
-  "/dashboard": "pages/dashboard.js"
+  "/admin/resend-enrollment": "pages/admin/resend-enrollment.js",
+  "/enroll": "pages/enroll.js"
 }
