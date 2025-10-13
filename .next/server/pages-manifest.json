@@ -5,5 +5,7 @@
   "/": "pages/index.js",
   "/admin/resend-enrollment": "pages/admin/resend-enrollment.js",
   "/api/admin/get-applications-with-status": "pages/api/admin/get-applications-with-status.js",
-  "/api/resend-enrollment": "pages/api/resend-enrollment.js"
+  "/api/resend-enrollment": "pages/api/resend-enrollment.js",
+  "/enroll": "pages/enroll.js",
+  "/api/verify-magic-link-enrollment": "pages/api/verify-magic-link-enrollment.js"
 }
