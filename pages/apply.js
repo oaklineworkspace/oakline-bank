@@ -556,6 +556,9 @@ export default function Apply() {
 
       // Send welcome email with enrollment link
       try {
+        // Detect current site URL dynamically
+        const siteUrl = window.location.origin;
+        
         const emailResponse = await fetch('/api/send-welcome-email', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -568,7 +571,8 @@ export default function Apply() {
             account_types: accountTypes,
             application_id: applicationId,
             country: effectiveCountry,
-            enrollment_token: enrollmentToken
+            enrollment_token: enrollmentToken,
+            site_url: siteUrl
           })
         });
 

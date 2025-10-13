@@ -92,13 +92,14 @@ export default async function handler(req, res) {
       authUser = newUser.user;
     }
 
-    // Get site URL from environment variable (Replit Secrets) with proper fallback
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.REPL_SLUG 
-      ? `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co` 
-      : 'https://theoaklinebank.com';
+    // Detect site URL dynamically from multiple sources
+    const protocol = req.headers['x-forwarded-proto'] || 'http';
+    const host = req.headers['x-forwarded-host'] || req.headers.host;
+    
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || `${protocol}://${host}`;
     
     console.log('Using site URL for redirect:', siteUrl);
-    console.log('Environment check - NEXT_PUBLIC_SITE_URL:', process.env.NEXT_PUBLIC_SITE_URL);
+    console.log('Detected from headers - Protocol:', protocol, 'Host:', host);
 
     // Generate magic link using Supabase Admin API
     const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({

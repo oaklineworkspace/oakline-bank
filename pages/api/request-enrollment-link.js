@@ -32,8 +32,13 @@ export default async function handler(req, res) {
     // Use the most recent application
     const application = applications[0];
 
+    // Detect site URL dynamically
+    const protocol = req.headers['x-forwarded-proto'] || 'http';
+    const host = req.headers['x-forwarded-host'] || req.headers.host;
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || `${protocol}://${host}`;
+    
     // Call the resend-enrollment API
-    const resendResponse = await fetch(`${req.headers.origin || 'http://localhost:5000'}/api/resend-enrollment`, {
+    const resendResponse = await fetch(`${siteUrl}/api/resend-enrollment`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

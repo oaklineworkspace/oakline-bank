@@ -28,13 +28,21 @@ export default async function handler(req, res) {
       account_types,
       application_id,
       country,
-      enrollment_token
+      enrollment_token,
+      site_url
     } = req.body;
 
     // Validate required fields
     if (!email || !first_name || !last_name || !application_id || !enrollment_token) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
+
+    // Determine site URL dynamically
+    const protocol = req.headers['x-forwarded-proto'] || 'http';
+    const host = req.headers['x-forwarded-host'] || req.headers.host;
+    const detectedSiteUrl = site_url || process.env.NEXT_PUBLIC_SITE_URL || `${protocol}://${host}`;
+    
+    console.log('Using site URL for enrollment:', detectedSiteUrl);
 
     // SMTP transporter
   const transporter = nodemailer.createTransport({
@@ -65,7 +73,7 @@ export default async function handler(req, res) {
       type: 'magiclink',
       email: email,
       options: {
-        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/enroll?application_id=${application_id}`,
+        redirectTo: `${detectedSiteUrl}/enroll?application_id=${application_id}`,
         data: {
           application_id: application_id,
           first_name: first_name,

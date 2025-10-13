@@ -345,6 +345,9 @@ export default function EnrollPage() {
       return;
     }
     
+    // Detect current site URL
+    const siteUrl = window.location.origin;
+    
     try {
       const response = await fetch('/api/request-enrollment-link', {
         method: 'POST',
