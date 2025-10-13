@@ -60,8 +60,15 @@ export default async function handler(req, res) {
       });
     }
 
-    // Get site URL
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://oaklineworkspac-oakline-bank.repl.co';
+    // Get site URL from environment variable
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+    if (!siteUrl) {
+      console.error('NEXT_PUBLIC_SITE_URL environment variable is not set');
+      return res.status(500).json({ 
+        error: 'Site URL not configured',
+        message: 'NEXT_PUBLIC_SITE_URL environment variable must be set'
+      });
+    }
     const enrollLink = `${siteUrl}/enroll?token=${enrollment_token}&application_id=${application_id}`;
 
     // Clean up account numbers and types
