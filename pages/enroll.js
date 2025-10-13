@@ -487,33 +487,48 @@ export default function EnrollPage() {
      return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', backgroundColor: '#f9fafb' }}>
         <div style={{ textAlign: 'center', maxWidth: '500px', padding: '2rem', backgroundColor: 'white', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
+          <div style={{ fontSize: '48px', marginBottom: '1rem' }}>⚠️</div>
           <h2 style={{ color: '#dc2626', marginBottom: '1rem' }}>Enrollment Error</h2>
           {error && (
-            <p style={{ marginBottom: '1.5rem', color: '#374151', lineHeight: '1.6' }}>{error}</p>
+            <p style={{ marginBottom: '1.5rem', color: '#374151', lineHeight: '1.6', fontSize: '16px' }}>{error}</p>
           )}
           {message && (
-            <p style={{ marginBottom: '1.5rem', color: '#059669', lineHeight: '1.6' }}>{message}</p>
+            <p style={{ marginBottom: '1.5rem', color: '#059669', lineHeight: '1.6', fontSize: '16px', fontWeight: '600' }}>{message}</p>
           )}
-          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap', marginTop: '2rem' }}>
             <button
               onClick={handleRequestNewLink}
-              disabled={requestingNewLink || !applicationId}
+              disabled={requestingNewLink}
               style={{
-                padding: '12px 24px',
+                padding: '16px 32px',
                 backgroundColor: requestingNewLink ? '#9ca3af' : '#1e40af',
                 color: 'white',
                 border: 'none',
-                borderRadius: '6px',
+                borderRadius: '8px',
                 cursor: requestingNewLink ? 'not-allowed' : 'pointer',
-                fontSize: '14px',
-                fontWeight: '600'
+                fontSize: '16px',
+                fontWeight: '600',
+                boxShadow: '0 2px 8px rgba(30, 64, 175, 0.3)',
+                transition: 'all 0.2s'
+              }}
+              onMouseOver={(e) => {
+                if (!requestingNewLink) {
+                  e.target.style.backgroundColor = '#1e3a8a';
+                  e.target.style.transform = 'translateY(-2px)';
+                }
+              }}
+              onMouseOut={(e) => {
+                if (!requestingNewLink) {
+                  e.target.style.backgroundColor = '#1e40af';
+                  e.target.style.transform = 'translateY(0)';
+                }
               }}
             >
-              {requestingNewLink ? 'Sending...' : 'Request New Enrollment Link'}
+              {requestingNewLink ? '📧 Sending...' : '📧 Request New Enrollment Link'}
             </button>
           </div>
-          <p style={{ marginTop: '1.5rem', fontSize: '14px', color: '#6b7280' }}>
-            Need help? Contact support at <a href="mailto:support@theoaklinebank.com" style={{ color: '#1e40af' }}>support@theoaklinebank.com</a>
+          <p style={{ marginTop: '2rem', fontSize: '14px', color: '#6b7280' }}>
+            Need help? Contact support at <a href="mailto:support@theoaklinebank.com" style={{ color: '#1e40af', textDecoration: 'underline' }}>support@theoaklinebank.com</a>
           </p>
         </div>
       </div>

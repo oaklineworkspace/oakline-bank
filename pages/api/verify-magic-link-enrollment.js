@@ -50,7 +50,7 @@ export default async function handler(req, res) {
       });
     }
 
-    // Check enrollment record
+    // Check enrollment record - but don't enforce click limits during verification
     const { data: enrollment, error: enrollmentError } = await supabaseAdmin
       .from('enrollments')
       .select('is_used, click_count, updated_at')
@@ -75,44 +75,10 @@ export default async function handler(req, res) {
       if (createError) {
         console.error('Error creating enrollment:', createError);
       }
-    } else if (enrollment) {
-      // Only check and increment if enrollment exists
-      const currentClickCount = enrollment.click_count || 0;
-      
-      // Check if already exceeded the limit
-      if (currentClickCount >= 4) {
-        return res.status(400).json({ 
-          error: 'This enrollment link has expired after 4 uses. Please contact support for a new enrollment link.',
-          enrollment_completed: true
-        });
-      }
-
-      // Implement debouncing: only increment if last update was more than 10 seconds ago
-      const lastUpdated = enrollment.updated_at ? new Date(enrollment.updated_at) : new Date(0);
-      const now = new Date();
-      const timeSinceLastUpdate = (now - lastUpdated) / 1000; // in seconds
-
-      if (timeSinceLastUpdate > 10) {
-        // Increment click count only if enough time has passed
-        const newClickCount = currentClickCount + 1;
-        const { error: updateError } = await supabaseAdmin
-          .from('enrollments')
-          .update({ 
-            click_count: newClickCount,
-            updated_at: new Date().toISOString() 
-          })
-          .eq('application_id', applicationId)
-          .eq('email', email);
-
-        if (updateError) {
-          console.error('Error updating enrollment click count:', updateError);
-        } else {
-          console.log(`✅ Enrollment click count updated: ${newClickCount}/4`);
-        }
-      } else {
-        console.log(`⏭️ Skipping click count increment (last update was ${timeSinceLastUpdate.toFixed(1)}s ago)`);
-      }
     }
+    
+    // Note: We're removing click count enforcement here since it's causing false expiration
+    // Click count will only be enforced when enrollment is actually completed
 
     // Get account numbers for this application
     const { data: accounts, error: accountsError } = await supabaseAdmin
