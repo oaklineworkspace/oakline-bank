@@ -12,8 +12,12 @@ const transporter = nodemailer.createTransporter({
   },
 });
 
-// Current working Replit URL
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://oaklineworkspac-oakline-bank.repl.co';
+// Site URL from environment variable
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+if (!siteUrl) {
+  console.error('Error: NEXT_PUBLIC_SITE_URL environment variable is not set');
+  process.exit(1);
+}
 
 // Test user info - replace with actual application data
 const testApplicationId = "1"; // Replace with actual application ID from your database
