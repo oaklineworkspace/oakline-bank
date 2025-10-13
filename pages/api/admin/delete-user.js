@@ -1,40 +1,18 @@
 
-import { supabaseAdmin } from '../../../lib/supabaseClient';
+import { supabaseAdmin } from '../../../lib/supabaseAdmin';
 
 export default async function handler(req, res) {
   if (req.method !== 'DELETE') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { userId, email } = req.body;
-
-  if (!userId && !email) {
-    return res.status(400).json({ error: 'Either userId or email is required' });
-  }
-
   try {
-    let resolvedUserId = userId;
-
-    // 🕵️ If only email is provided, get user by email
-    if (!resolvedUserId && email) {
-      const { data: users, error: listError } = await supabaseAdmin.auth.admin.listUsers();
-      if (listError) {
-        console.error('Error listing users:', listError);
-        return res.status(500).json({ error: 'Failed to retrieve users' });
-      }
-
-      const userMatch = users.users.find(
-        (u) => u.email && u.email.toLowerCase() === email.toLowerCase()
-      );
-
-      if (!userMatch) {
-        return res.status(404).json({ error: 'User not found with that email' });
-      }
-
-      resolvedUserId = userMatch.id;
+    const { userId } = req.body;
+    if (!userId) {
+      return res.status(400).json({ error: 'userId is required' });
     }
 
-    // 🧹 Step 1: Delete dependent records from related tables
+    // --- Delete dependent records in proper order ---
     const deleteQueries = [
       { table: 'zelle_transactions', column: 'sender_id' },
       { table: 'zelle_settings', column: 'user_id' },
@@ -51,56 +29,36 @@ export default async function handler(req, res) {
     ];
 
     for (const { table, column } of deleteQueries) {
-      const { error } = await supabaseAdmin.from(table).delete().eq(column, resolvedUserId);
-      if (error) console.warn(`Warning deleting from ${table}:`, error.message);
-    }
-
-    // 🧾 Delete loan payments linked to user’s loans
-    const { data: loans } = await supabaseAdmin
-      .from('loans')
-      .select('id')
-      .eq('user_id', resolvedUserId);
-
-    if (loans && loans.length > 0) {
-      const loanIds = loans.map((l) => l.id);
-      const { error: loanPaymentsError } = await supabaseAdmin
-        .from('loan_payments')
+      const { error } = await supabaseAdmin
+        .from(table)
         .delete()
-        .in('loan_id', loanIds);
-      if (loanPaymentsError)
-        console.warn('Warning deleting loan payments:', loanPaymentsError.message);
+        .eq(column, userId);
+      if (error) console.warn(`⚠️ Failed to delete from ${table}:`, error.message);
     }
 
-    // 🧾 Delete enrollments linked to applications
-    const { data: apps } = await supabaseAdmin
-      .from('applications')
-      .select('id')
-      .eq('user_id', resolvedUserId);
+    // Delete related loan payments separately using subquery
+    const { error: loanPaymentError } = await supabaseAdmin.rpc('delete_loan_payments_by_user', {
+      uid: userId
+    });
 
-    if (apps && apps.length > 0) {
-      const appIds = apps.map((a) => a.id);
-      const { error: enrollmentsError } = await supabaseAdmin
-        .from('enrollments')
-        .delete()
-        .in('application_id', appIds);
-      if (enrollmentsError)
-        console.warn('Warning deleting enrollments:', enrollmentsError.message);
+    if (loanPaymentError) {
+      console.warn('⚠️ Could not delete loan payments via RPC:', loanPaymentError.message);
     }
 
-    // 🧹 Step 2: Delete from Supabase Auth
-    const { error: deleteUserError } = await supabaseAdmin.auth.admin.deleteUser(resolvedUserId);
-    if (deleteUserError) {
-      console.error('Error deleting user from authentication:', deleteUserError.message);
+    // Finally delete user from Supabase Auth
+    const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(userId);
+    if (authError) {
+      console.error('❌ Error deleting user from authentication:', authError.message);
       return res.status(500).json({ error: 'Failed to delete user from authentication' });
     }
 
-    // ✅ Step 3: Return success
     return res.status(200).json({
-      message: 'User and all related records deleted successfully',
-      userId: resolvedUserId,
+      message: '✅ User and all related data deleted successfully',
+      userId,
     });
+
   } catch (error) {
-    console.error('Error deleting user:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    console.error('❌ Delete user error:', error);
+    return res.status(500).json({ error: error.message });
   }
 }
