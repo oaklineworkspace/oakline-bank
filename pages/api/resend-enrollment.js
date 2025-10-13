@@ -23,19 +23,36 @@ export default async function handler(req, res) {
     const { applicationId, email, firstName, middleName, lastName, country } = req.body;
 
     // Validate required fields
-    if (!applicationId || !email) {
-      return res.status(400).json({ error: 'Application ID and email are required' });
+    if (!applicationId && !email) {
+      return res.status(400).json({ error: 'Either application ID or email is required' });
     }
 
-    // Get application data
-    const { data: applicationData, error: applicationError } = await supabaseAdmin
-      .from('applications')
-      .select('*')
-      .eq('id', applicationId)
-      .single();
+    // Get application data - allow lookup by email if applicationId is missing
+    let applicationData;
+    if (applicationId) {
+      const { data, error: applicationError } = await supabaseAdmin
+        .from('applications')
+        .select('*')
+        .eq('id', applicationId)
+        .single();
 
-    if (applicationError || !applicationData) {
-      return res.status(404).json({ error: 'Application not found' });
+      if (applicationError || !data) {
+        return res.status(404).json({ error: 'Application not found' });
+      }
+      applicationData = data;
+    } else if (email) {
+      const { data, error: applicationError } = await supabaseAdmin
+        .from('applications')
+        .select('*')
+        .eq('email', email)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (applicationError || !data) {
+        return res.status(404).json({ error: 'No application found for this email' });
+      }
+      applicationData = data;
     }
 
     // Get user's accounts

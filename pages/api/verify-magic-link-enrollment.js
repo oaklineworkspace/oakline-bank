@@ -53,7 +53,7 @@ export default async function handler(req, res) {
     // Check enrollment record
     const { data: enrollment, error: enrollmentError } = await supabaseAdmin
       .from('enrollments')
-      .select('is_used, click_count')
+      .select('is_used, click_count, updated_at')
       .eq('application_id', applicationId)
       .eq('email', email)
       .maybeSingle();
@@ -67,8 +67,9 @@ export default async function handler(req, res) {
           email: email,
           application_id: applicationId,
           is_used: false,
-          click_count: 1,
-          created_at: new Date().toISOString()
+          click_count: 0,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
         }]);
 
       if (createError) {
@@ -86,21 +87,30 @@ export default async function handler(req, res) {
         });
       }
 
-      // Increment click count
-      const newClickCount = currentClickCount + 1;
-      const { error: updateError } = await supabaseAdmin
-        .from('enrollments')
-        .update({ 
-          click_count: newClickCount,
-          updated_at: new Date().toISOString() 
-        })
-        .eq('application_id', applicationId)
-        .eq('email', email);
+      // Implement debouncing: only increment if last update was more than 10 seconds ago
+      const lastUpdated = enrollment.updated_at ? new Date(enrollment.updated_at) : new Date(0);
+      const now = new Date();
+      const timeSinceLastUpdate = (now - lastUpdated) / 1000; // in seconds
 
-      if (updateError) {
-        console.error('Error updating enrollment click count:', updateError);
+      if (timeSinceLastUpdate > 10) {
+        // Increment click count only if enough time has passed
+        const newClickCount = currentClickCount + 1;
+        const { error: updateError } = await supabaseAdmin
+          .from('enrollments')
+          .update({ 
+            click_count: newClickCount,
+            updated_at: new Date().toISOString() 
+          })
+          .eq('application_id', applicationId)
+          .eq('email', email);
+
+        if (updateError) {
+          console.error('Error updating enrollment click count:', updateError);
+        } else {
+          console.log(`✅ Enrollment click count updated: ${newClickCount}/4`);
+        }
       } else {
-        console.log(`✅ Enrollment click count updated: ${newClickCount}/4`);
+        console.log(`⏭️ Skipping click count increment (last update was ${timeSinceLastUpdate.toFixed(1)}s ago)`);
       }
     }
 
