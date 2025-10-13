@@ -136,7 +136,9 @@ CREATE TABLE public.profiles (
   ssn text,
   id_number text,
   enrollment_completed boolean DEFAULT false,
+  enrollment_completed_at timestamp with time zone,
   created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
   CONSTRAINT profiles_pkey PRIMARY KEY (id),
   CONSTRAINT profiles_id_fkey FOREIGN KEY (id) REFERENCES auth.users(id) ON DELETE CASCADE,
   CONSTRAINT profiles_application_id_fkey FOREIGN KEY (application_id) REFERENCES public.applications(id) ON DELETE SET NULL

@@ -86,6 +86,7 @@ export default async function handler(req, res) {
       id: userId,
       email: applicationData.email,
       enrollment_completed: true,
+      enrollment_completed_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     };
 
@@ -97,7 +98,7 @@ export default async function handler(req, res) {
       console.error('Error creating profile record:', profileError);
       // Don't fail the process for profile creation error, just log it
     } else {
-      console.log('✅ Profile marked as enrollment_completed');
+      console.log('✅ Profile marked as enrollment_completed with timestamp');
     }
 
     // 7️⃣ Mark enrollment as used (password setup completed)

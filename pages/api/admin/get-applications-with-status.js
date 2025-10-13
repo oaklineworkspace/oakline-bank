@@ -6,21 +6,55 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Get all applications with their user status
-    const { data: applicationsData, error: appsError } = await supabaseAdmin
+    // Fetch all applications
+    const { data: applications, error } = await supabaseAdmin
       .from('applications')
-      .select(`
-        id,
-        email,
-        first_name,
-        middle_name,
-        last_name,
-        created_at,
-        country
-      `)
+      .select('*')
       .order('created_at', { ascending: false });
 
-    if (appsError) throw appsError;
+    if (error) {
+      console.error('Error fetching applications:', error);
+      return res.status(500).json({ error: 'Failed to fetch applications' });
+    }
+
+    // Get enrollment data and profile completion status for each application
+    const applicationsWithStatus = await Promise.all(
+      applications.map(async (app) => {
+        // Check enrollments table
+        const { data: enrollment } = await supabaseAdmin
+          .from('enrollments')
+          .select('is_used')
+          .eq('email', app.email)
+          .maybeSingle();
+
+        // Check profiles table for actual enrollment completion
+        const { data: profile } = await supabaseAdmin
+          .from('profiles')
+          .select('enrollment_completed, enrollment_completed_at')
+          .eq('email', app.email)
+          .maybeSingle();
+
+        let status = 'pending';
+        let enrollmentCompleted = false;
+
+        if (profile?.enrollment_completed) {
+          status = 'completed';
+          enrollmentCompleted = true;
+        } else if (enrollment?.is_used) {
+          status = 'completed';
+          enrollmentCompleted = true;
+        } else if (enrollment) {
+          status = 'enrollment_sent';
+        }
+
+        return {
+          ...app,
+          status,
+          enrollment_completed: enrollmentCompleted,
+          enrollment_completed_at: profile?.enrollment_completed_at
+        };
+      })
+    );
 
     // Get users table to check auth status
     const { data: usersData, error: usersError } = await supabaseAdmin
@@ -42,25 +76,30 @@ export default async function handler(req, res) {
 
     // Check Supabase Auth users
     const { data: authUsersData } = await supabaseAdmin.auth.admin.listUsers();
-    
+
     // Combine data
-    const enrichedApplications = applicationsData.map(app => {
+    const enrichedApplications = applicationsWithStatus.map(app => {
       const userRecord = usersData?.find(u => u.application_id === app.id);
       const enrollmentRecord = enrollmentsData?.find(e => e.application_id === app.id || e.email === app.email);
       const authUser = authUsersData?.users?.find(u => u.email === app.email);
-      
-      let status = 'pending';
+
+      let combinedStatus = 'pending';
       if (authUser && userRecord?.is_active) {
-        status = 'completed';
+        combinedStatus = 'completed';
       } else if (authUser) {
-        status = 'auth_created';
+        combinedStatus = 'auth_created';
       } else if (enrollmentRecord) {
-        status = 'enrollment_sent';
+        combinedStatus = 'enrollment_sent';
       }
+      // Use the status derived from the profile/enrollment check if it's 'completed'
+      if (app.status === 'completed') {
+          combinedStatus = 'completed';
+      }
+
 
       return {
         ...app,
-        status,
+        status: combinedStatus, // Use the combined status
         user_record: userRecord,
         enrollment_record: enrollmentRecord,
         auth_user: authUser
@@ -73,9 +112,9 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error('Error fetching applications:', error);
-    return res.status(500).json({ 
+    return res.status(500).json({
       error: 'Failed to fetch applications',
-      details: error.message 
+      details: error.message
     });
   }
 }

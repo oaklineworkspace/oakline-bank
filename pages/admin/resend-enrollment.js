@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 
 export default function ResendEnrollmentPage() {
@@ -5,6 +6,7 @@ export default function ResendEnrollmentPage() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
   const [resendingId, setResendingId] = useState(null);
+  const [filter, setFilter] = useState('all'); // all, pending, completed
 
   useEffect(() => {
     fetchApplications();
@@ -14,7 +16,6 @@ export default function ResendEnrollmentPage() {
     try {
       setLoading(true);
       
-      // Fetch applications via API endpoint
       const response = await fetch('/api/admin/get-applications-with-status');
       
       if (!response.ok) {
@@ -52,49 +53,63 @@ export default function ResendEnrollmentPage() {
       const result = await response.json();
 
       if (response.ok) {
-        setMessage(`Enrollment link sent successfully to ${application.email}!`);
-        fetchApplications(); // Refresh the list
+        setMessage(`✅ Enrollment link sent successfully to ${application.email}!`);
+        fetchApplications();
       } else {
-        setMessage(`Error: ${result.error || 'Failed to send enrollment link'}`);
+        setMessage(`❌ Error: ${result.error || 'Failed to send enrollment link'}`);
       }
     } catch (error) {
       console.error('Error resending enrollment:', error);
-      setMessage('Error sending enrollment link');
+      setMessage('❌ Error sending enrollment link');
     } finally {
       setResendingId(null);
     }
   };
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'completed':
-        return { backgroundColor: '#d1fae5', color: '#059669' };
-      case 'auth_created':
-        return { backgroundColor: '#dbeafe', color: '#1d4ed8' };
-      case 'enrollment_sent':
-        return { backgroundColor: '#fef3c7', color: '#d97706' };
-      default:
-        return { backgroundColor: '#fee2e2', color: '#dc2626' };
-    }
+  const getEnrollmentStatus = (app) => {
+    if (app.enrollment_completed) return 'completed';
+    if (app.status === 'auth_created' || app.status === 'enrollment_sent') return 'pending';
+    return 'not_sent';
   };
 
-  const getStatusText = (status) => {
-    switch (status) {
-      case 'completed':
-        return 'Completed';
-      case 'auth_created':
-        return 'Auth Created';
-      case 'enrollment_sent':
-        return 'Link Sent';
-      default:
-        return 'Pending';
-    }
+  const getStatusBadge = (status) => {
+    const styles = {
+      completed: { bg: '#d1fae5', color: '#065f46', text: '✓ Completed' },
+      pending: { bg: '#fef3c7', color: '#92400e', text: '⏳ Pending' },
+      not_sent: { bg: '#fee2e2', color: '#991b1b', text: '✉️ Not Sent' }
+    };
+    const style = styles[status] || styles.not_sent;
+    
+    return (
+      <span style={{
+        padding: '6px 12px',
+        borderRadius: '6px',
+        fontSize: '13px',
+        fontWeight: '600',
+        backgroundColor: style.bg,
+        color: style.color,
+        whiteSpace: 'nowrap'
+      }}>
+        {style.text}
+      </span>
+    );
   };
+
+  const filteredApps = applications.filter(app => {
+    if (filter === 'all') return true;
+    const enrollStatus = getEnrollmentStatus(app);
+    if (filter === 'pending') return enrollStatus === 'pending';
+    if (filter === 'completed') return enrollStatus === 'completed';
+    return true;
+  });
 
   if (loading) {
     return (
       <div style={styles.container}>
-        <div style={styles.loading}>Loading applications...</div>
+        <div style={styles.loading}>
+          <div style={styles.spinner}></div>
+          <p>Loading applications...</p>
+        </div>
       </div>
     );
   }
@@ -102,15 +117,15 @@ export default function ResendEnrollmentPage() {
   return (
     <div style={styles.container}>
       <div style={styles.header}>
-        <h1>Resend Enrollment Links</h1>
-        <p>Generate and send magic links for users to complete their enrollment</p>
+        <h1 style={styles.title}>📧 Enrollment Management</h1>
+        <p style={styles.subtitle}>Send and manage enrollment links for applicants</p>
       </div>
 
       {message && (
         <div style={{
           ...styles.message,
-          backgroundColor: message.includes('Error') ? '#fee2e2' : '#d1fae5',
-          color: message.includes('Error') ? '#dc2626' : '#059669'
+          backgroundColor: message.includes('✅') ? '#d1fae5' : '#fee2e2',
+          color: message.includes('✅') ? '#065f46' : '#991b1b'
         }}>
           {message}
         </div>
@@ -118,84 +133,113 @@ export default function ResendEnrollmentPage() {
 
       <div style={styles.stats}>
         <div style={styles.statCard}>
-          <h3>Total Applications</h3>
-          <p>{applications.length}</p>
+          <div style={styles.statNumber}>{applications.length}</div>
+          <div style={styles.statLabel}>Total Applications</div>
         </div>
         <div style={styles.statCard}>
-          <h3>Completed</h3>
-          <p>{applications.filter(app => app.status === 'completed').length}</p>
+          <div style={styles.statNumber}>
+            {applications.filter(app => getEnrollmentStatus(app) === 'completed').length}
+          </div>
+          <div style={styles.statLabel}>Completed</div>
         </div>
         <div style={styles.statCard}>
-          <h3>Pending</h3>
-          <p>{applications.filter(app => app.status === 'pending').length}</p>
+          <div style={styles.statNumber}>
+            {applications.filter(app => getEnrollmentStatus(app) === 'pending').length}
+          </div>
+          <div style={styles.statLabel}>Pending</div>
         </div>
       </div>
 
-      <div style={styles.tableContainer}>
-        <table style={styles.table}>
-          <thead>
-            <tr style={styles.headerRow}>
-              <th style={styles.headerCell}>Name</th>
-              <th style={styles.headerCell}>Email</th>
-              <th style={styles.headerCell}>Application Date</th>
-              <th style={styles.headerCell}>Status</th>
-              <th style={styles.headerCell}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {applications.map((app) => (
-              <tr key={app.id} style={styles.row}>
-                <td style={styles.cell}>
-                  {app.first_name} {app.middle_name ? app.middle_name + ' ' : ''}{app.last_name}
-                </td>
-                <td style={styles.cell}>{app.email}</td>
-                <td style={styles.cell}>
-                  {new Date(app.created_at).toLocaleDateString()}
-                </td>
-                <td style={styles.cell}>
-                  <span style={{
-                    ...styles.statusBadge,
-                    ...getStatusColor(app.status)
-                  }}>
-                    {getStatusText(app.status)}
-                  </span>
-                </td>
-                <td style={styles.cell}>
-                  <button
-                    onClick={() => handleResendEnrollment(app)}
-                    disabled={resendingId === app.id}
-                    onMouseEnter={(e) => {
-                      if (resendingId !== app.id) {
-                        Object.assign(e.target.style, styles.buttonHover);
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (resendingId !== app.id) {
-                        e.target.style.backgroundColor = '#1e40af';
-                        e.target.style.transform = 'translateY(0)';
-                        e.target.style.boxShadow = '0 2px 4px rgba(30, 64, 175, 0.2)';
-                      }
-                    }}
-                    style={{
-                      ...styles.button,
-                      opacity: resendingId === app.id ? 0.6 : 1,
-                      cursor: resendingId === app.id ? 'not-allowed' : 'pointer',
-                      backgroundColor: resendingId === app.id ? '#9ca3af' : '#1e40af'
-                    }}
-                  >
-                    {resendingId === app.id ? '⏳ Sending...' : '📧 Send Link'}
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div style={styles.filterBar}>
+        <button
+          onClick={() => setFilter('all')}
+          style={{
+            ...styles.filterButton,
+            ...(filter === 'all' ? styles.filterButtonActive : {})
+          }}
+        >
+          All
+        </button>
+        <button
+          onClick={() => setFilter('pending')}
+          style={{
+            ...styles.filterButton,
+            ...(filter === 'pending' ? styles.filterButtonActive : {})
+          }}
+        >
+          Pending
+        </button>
+        <button
+          onClick={() => setFilter('completed')}
+          style={{
+            ...styles.filterButton,
+            ...(filter === 'completed' ? styles.filterButtonActive : {})
+          }}
+        >
+          Completed
+        </button>
+      </div>
 
-        {applications.length === 0 && (
-          <div style={styles.noData}>
-            No applications found.
-          </div>
-        )}
+      <div style={styles.tableContainer}>
+        <div style={styles.tableWrapper}>
+          <table style={styles.table}>
+            <thead>
+              <tr style={styles.headerRow}>
+                <th style={styles.headerCell}>User</th>
+                <th style={styles.headerCell}>Email</th>
+                <th style={styles.headerCell}>Application Date</th>
+                <th style={styles.headerCell}>Enrollment Status</th>
+                <th style={styles.headerCell}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredApps.map((app) => (
+                <tr key={app.id} style={styles.row}>
+                  <td style={styles.cell}>
+                    <div style={styles.userName}>
+                      {app.first_name} {app.middle_name ? app.middle_name + ' ' : ''}{app.last_name}
+                    </div>
+                  </td>
+                  <td style={styles.cell}>
+                    <div style={styles.email}>{app.email}</div>
+                  </td>
+                  <td style={styles.cell}>
+                    <div style={styles.date}>
+                      {new Date(app.created_at).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric'
+                      })}
+                    </div>
+                  </td>
+                  <td style={styles.cell}>
+                    {getStatusBadge(getEnrollmentStatus(app))}
+                  </td>
+                  <td style={styles.cell}>
+                    <button
+                      onClick={() => handleResendEnrollment(app)}
+                      disabled={resendingId === app.id}
+                      style={{
+                        ...styles.actionButton,
+                        opacity: resendingId === app.id ? 0.6 : 1,
+                        cursor: resendingId === app.id ? 'not-allowed' : 'pointer'
+                      }}
+                    >
+                      {resendingId === app.id ? '⏳ Sending...' : '📧 Send Link'}
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          {filteredApps.length === 0 && (
+            <div style={styles.noData}>
+              <div style={styles.noDataIcon}>📭</div>
+              <p>No applications found</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -203,10 +247,10 @@ export default function ResendEnrollmentPage() {
 
 const styles = {
   container: {
-    padding: '2rem',
+    padding: '1rem',
     maxWidth: '1400px',
     margin: '0 auto',
-    fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif',
     backgroundColor: '#f8fafc',
     minHeight: '100vh'
   },
@@ -214,84 +258,150 @@ const styles = {
     marginBottom: '2rem',
     textAlign: 'center'
   },
+  title: {
+    fontSize: 'clamp(24px, 5vw, 32px)',
+    fontWeight: '700',
+    color: '#1a365d',
+    marginBottom: '0.5rem'
+  },
+  subtitle: {
+    fontSize: 'clamp(14px, 3vw, 16px)',
+    color: '#64748b'
+  },
   loading: {
     textAlign: 'center',
-    padding: '2rem',
-    fontSize: '18px'
+    padding: '4rem 1rem',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '1rem'
+  },
+  spinner: {
+    width: '40px',
+    height: '40px',
+    border: '4px solid #e2e8f0',
+    borderTop: '4px solid #1a365d',
+    borderRadius: '50%',
+    animation: 'spin 1s linear infinite'
   },
   message: {
     padding: '1rem',
     borderRadius: '8px',
     marginBottom: '1rem',
     textAlign: 'center',
-    fontWeight: '500'
+    fontWeight: '500',
+    fontSize: 'clamp(14px, 3vw, 16px)'
   },
   stats: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
     gap: '1rem',
     marginBottom: '2rem'
   },
   statCard: {
     backgroundColor: 'white',
     padding: '1.5rem',
-    borderRadius: '8px',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+    borderRadius: '12px',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
     textAlign: 'center'
+  },
+  statNumber: {
+    fontSize: 'clamp(28px, 6vw, 36px)',
+    fontWeight: '700',
+    color: '#1a365d',
+    marginBottom: '0.5rem'
+  },
+  statLabel: {
+    fontSize: 'clamp(12px, 3vw, 14px)',
+    color: '#64748b',
+    fontWeight: '500'
+  },
+  filterBar: {
+    display: 'flex',
+    gap: '0.5rem',
+    marginBottom: '1.5rem',
+    flexWrap: 'wrap'
+  },
+  filterButton: {
+    padding: '0.5rem 1rem',
+    borderRadius: '8px',
+    border: '2px solid #e2e8f0',
+    backgroundColor: 'white',
+    color: '#64748b',
+    fontSize: '14px',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'all 0.2s'
+  },
+  filterButtonActive: {
+    backgroundColor: '#1a365d',
+    color: 'white',
+    borderColor: '#1a365d'
   },
   tableContainer: {
     backgroundColor: 'white',
     borderRadius: '12px',
-    boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
     overflow: 'hidden'
+  },
+  tableWrapper: {
+    overflowX: 'auto'
   },
   table: {
     width: '100%',
-    borderCollapse: 'collapse'
+    borderCollapse: 'collapse',
+    minWidth: '600px'
   },
   headerRow: {
-    backgroundColor: '#f8fafc'
+    backgroundColor: '#f8fafc',
+    borderBottom: '2px solid #e2e8f0'
   },
   headerCell: {
     padding: '1rem',
     textAlign: 'left',
     fontWeight: '600',
-    color: '#374151',
-    borderBottom: '2px solid #e5e7eb'
+    color: '#475569',
+    fontSize: 'clamp(12px, 3vw, 14px)',
+    whiteSpace: 'nowrap'
   },
   row: {
-    borderBottom: '1px solid #e5e7eb'
+    borderBottom: '1px solid #e2e8f0',
+    transition: 'background-color 0.2s'
   },
   cell: {
     padding: '1rem',
-    verticalAlign: 'middle'
+    verticalAlign: 'middle',
+    fontSize: 'clamp(13px, 3vw, 14px)'
   },
-  statusBadge: {
-    padding: '4px 12px',
-    borderRadius: '6px',
-    fontSize: '12px',
-    fontWeight: '600'
-  },
-  button: {
-    padding: '10px 20px',
-    backgroundColor: '#1e40af',
-    color: '#ffffff',
-    border: 'none',
-    borderRadius: '8px',
-    fontSize: '14px',
+  userName: {
     fontWeight: '600',
-    transition: 'all 0.2s ease',
-    boxShadow: '0 2px 4px rgba(30, 64, 175, 0.2)',
-    cursor: 'pointer'
+    color: '#1a365d'
   },
-  buttonHover: {
-    backgroundColor: '#1e3a8a',
-    transform: 'translateY(-1px)',
-    boxShadow: '0 4px 6px rgba(30, 64, 175, 0.3)'
+  email: {
+    color: '#64748b'
+  },
+  date: {
+    color: '#64748b',
+    fontSize: 'clamp(12px, 3vw, 13px)'
+  },
+  actionButton: {
+    padding: '0.5rem 1rem',
+    backgroundColor: '#1a365d',
+    color: 'white',
+    border: 'none',
+    borderRadius: '6px',
+    fontSize: 'clamp(12px, 3vw, 14px)',
+    fontWeight: '600',
+    transition: 'all 0.2s',
+    whiteSpace: 'nowrap'
   },
   noData: {
     textAlign: 'center',
-    padding: '2rem',
-    color: '#6b7280'
+    padding: '3rem 1rem',
+    color: '#64748b'
+  },
+  noDataIcon: {
+    fontSize: '48px',
+    marginBottom: '1rem'
   }
 };

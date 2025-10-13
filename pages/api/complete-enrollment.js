@@ -141,12 +141,15 @@ export default async function handler(req, res) {
       .from('profiles')
       .update({ 
         enrollment_completed: true,
+        enrollment_completed_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       })
       .eq('id', authUser.id); // Use authUser.id directly
 
     if (profileUpdateError) {
       console.error('Error updating profile enrollment status:', profileUpdateError);
+    } else {
+      console.log('✅ Profile marked as enrollment_completed with timestamp');
     }
 
 

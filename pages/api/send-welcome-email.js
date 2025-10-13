@@ -60,16 +60,26 @@ export default async function handler(req, res) {
       });
     }
 
-    // Get site URL from environment variable
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
-    if (!siteUrl) {
-      console.error('NEXT_PUBLIC_SITE_URL environment variable is not set');
-      return res.status(500).json({ 
-        error: 'Site URL not configured',
-        message: 'NEXT_PUBLIC_SITE_URL environment variable must be set'
-      });
+    // Generate Supabase magic link for enrollment
+    const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
+      type: 'magiclink',
+      email: email,
+      options: {
+        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/enroll?application_id=${application_id}`,
+        data: {
+          application_id: application_id,
+          first_name: first_name,
+          last_name: last_name
+        }
+      }
+    });
+
+    if (linkError) {
+      console.error('Error generating magic link:', linkError);
+      return res.status(500).json({ error: 'Failed to generate enrollment link' });
     }
-    const enrollLink = `${siteUrl}/enroll?token=${enrollment_token}&application_id=${application_id}`;
+
+    const enrollLink = linkData.properties.action_link;
 
     // Clean up account numbers and types
     const populatedAccountNumbers = account_numbers ? account_numbers.filter(num => num && num.trim() !== '') : [];
@@ -153,6 +163,22 @@ export default async function handler(req, res) {
       </html>
     `;
 
+    // Update enrollment record with magic link
+    const { error: enrollmentUpdateError } = await supabaseAdmin
+      .from('enrollments')
+      .upsert([{
+        email: email.trim().toLowerCase(),
+        application_id: application_id,
+        token: linkData.properties.action_link,
+        is_used: false,
+        click_count: 0,
+        created_at: new Date().toISOString()
+      }], { onConflict: 'email' });
+
+    if (enrollmentUpdateError) {
+      console.error('Error updating enrollment record:', enrollmentUpdateError);
+    }
+
     // Send email
     const mailOptions = {
       from: process.env.SMTP_FROM || process.env.SMTP_USER,
@@ -162,11 +188,12 @@ export default async function handler(req, res) {
     };
 
     const info = await transporter.sendMail(mailOptions);
-    console.log(`Welcome email sent to ${email}: ${info.response}`);
+    console.log(`Welcome email with magic link sent to ${email}: ${info.response}`);
 
     res.status(200).json({
       message: 'Welcome email sent successfully',
-      messageId: info.messageId
+      messageId: info.messageId,
+      enrollmentLink: enrollLink
     });
 
   } catch (error) {
