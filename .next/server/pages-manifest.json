@@ -3,6 +3,7 @@
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
   "/": "pages/index.js",
+  "/enroll": "pages/enroll.js",
   "/admin/resend-enrollment": "pages/admin/resend-enrollment.js",
-  "/enroll": "pages/enroll.js"
+  "/sign-in": "pages/sign-in.js"
 }
