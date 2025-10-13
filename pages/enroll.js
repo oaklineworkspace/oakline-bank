@@ -183,11 +183,19 @@ export default function EnrollPage() {
         return;
       }
 
-      if (enrollment.is_used) {
-        setError('This enrollment link has already been used.');
+      // Check if enrollment is expired (24 hours)
+      const tokenCreatedAt = new Date(enrollment.created_at);
+      const now = new Date();
+      const hoursSinceCreation = (now - tokenCreatedAt) / (1000 * 60 * 60);
+      
+      if (hoursSinceCreation > 24) {
+        setError('This enrollment link has expired. Please request a new enrollment link.');
         setLoading(false);
         return;
       }
+
+      // Note: We removed the is_used check here to allow users to access the page multiple times
+      // The backend will check is_used when they try to submit their password
 
       // Check if application_id matches (if provided in enrollment)
       if (enrollment.application_id && enrollment.application_id !== applicationId) {

@@ -23,11 +23,27 @@ export default async function handler(req, res) {
       .from('enrollments')
       .select('*')
       .eq('token', token)
-      .eq('is_used', false) // Should not be used yet
       .single();
 
     if (enrollmentError || !enrollmentData) {
-      return res.status(404).json({ error: 'Invalid or already used enrollment token' });
+      return res.status(404).json({ error: 'Invalid enrollment token' });
+    }
+
+    // Check if token is already used (password already set)
+    if (enrollmentData.is_used) {
+      return res.status(400).json({ error: 'This enrollment has already been completed. Please sign in using your password at the login page.' });
+    }
+
+    // Check if token is expired (24 hours)
+    const tokenCreatedAt = new Date(enrollmentData.created_at);
+    const now = new Date();
+    const hoursSinceCreation = (now - tokenCreatedAt) / (1000 * 60 * 60);
+    
+    if (hoursSinceCreation > 24) {
+      return res.status(400).json({ 
+        error: 'This enrollment link has expired. Please request a new enrollment link.',
+        expired: true
+      });
     }
 
     // 2️⃣ Get application data
@@ -82,7 +98,21 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Invalid account number selected' });
     }
 
-    // 6️⃣ Create or update Supabase Auth user
+    // 6️⃣ Check if user has already completed enrollment
+    const { data: existingProfile, error: profileCheckError } = await supabaseAdmin
+      .from('profiles')
+      .select('id, enrollment_completed, email')
+      .eq('email', email)
+      .maybeSingle();
+
+    if (existingProfile && existingProfile.enrollment_completed) {
+      return res.status(400).json({ 
+        error: 'This enrollment has already been completed. Please sign in using your password at the login page.',
+        enrollment_completed: true
+      });
+    }
+
+    // 7️⃣ Create or update Supabase Auth user
     let authUser = null;
     const { data: users, error: listError } = await supabaseAdmin.auth.admin.listUsers();
 
@@ -120,7 +150,7 @@ export default async function handler(req, res) {
       authUser = newUser.user;
     }
 
-    // 7️⃣ Mark enrollment as completed and update profile
+    // 8️⃣ Mark enrollment as completed and update profile
     const { error: enrollmentUpdateError } = await supabaseAdmin
       .from('enrollments')
       .update({ 
@@ -153,7 +183,7 @@ export default async function handler(req, res) {
     }
 
 
-    // 8️⃣ Link accounts to the auth user
+    // 9️⃣ Link accounts to the auth user
     const { error: accountError } = await supabaseAdmin
       .from('accounts')
       .update({ 

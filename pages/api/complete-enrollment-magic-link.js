@@ -18,7 +18,51 @@ export default async function handler(req, res) {
   }
 
   try {
-    // 1️⃣ Get application data
+    // 1️⃣ Check if user has already completed enrollment
+    const { data: existingProfile, error: profileCheckError } = await supabaseAdmin
+      .from('profiles')
+      .select('id, enrollment_completed, email')
+      .eq('email', email)
+      .maybeSingle();
+
+    if (existingProfile && existingProfile.enrollment_completed) {
+      return res.status(400).json({ 
+        error: 'This enrollment has already been completed. Please sign in using your password at the login page.',
+        enrollment_completed: true
+      });
+    }
+
+    // 2️⃣ Check enrollment record for expiration
+    const { data: enrollmentData, error: enrollmentError } = await supabaseAdmin
+      .from('enrollments')
+      .select('*')
+      .eq('application_id', application_id)
+      .eq('email', email)
+      .maybeSingle();
+
+    if (enrollmentData) {
+      // Check if enrollment is already used
+      if (enrollmentData.is_used) {
+        return res.status(400).json({ 
+          error: 'This enrollment has already been completed. Please sign in using your password at the login page.',
+          enrollment_completed: true
+        });
+      }
+
+      // Check if enrollment link is expired (24 hours)
+      const tokenCreatedAt = new Date(enrollmentData.created_at);
+      const now = new Date();
+      const hoursSinceCreation = (now - tokenCreatedAt) / (1000 * 60 * 60);
+      
+      if (hoursSinceCreation > 24) {
+        return res.status(400).json({ 
+          error: 'This enrollment link has expired. Please request a new enrollment link.',
+          expired: true
+        });
+      }
+    }
+
+    // 3️⃣ Get application data
     const { data: applicationData, error: applicationError } = await supabaseAdmin
       .from('applications')
       .select('*')
@@ -29,12 +73,12 @@ export default async function handler(req, res) {
       return res.status(404).json({ error: 'Application not found' });
     }
 
-    // 2️⃣ Verify email matches
+    // 4️⃣ Verify email matches
     if (applicationData.email !== email) {
       return res.status(400).json({ error: 'Email verification failed' });
     }
 
-    // 3️⃣ Verify identity - either SSN or ID number based on citizenship
+    // 5️⃣ Verify identity - either SSN or ID number based on citizenship
     if (applicationData.country === 'US') {
       // US citizens - verify SSN
       const cleanSSN = ssn ? ssn.replace(/-/g, '') : '';
@@ -49,7 +93,7 @@ export default async function handler(req, res) {
       }
     }
 
-    // 4️⃣ Verify account number exists for this application
+    // 6️⃣ Verify account number exists for this application
     const { data: applicationAccounts, error: accountsError } = await supabaseAdmin
       .from('accounts')
       .select('account_number, account_type, balance')
@@ -70,7 +114,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Invalid account number selected' });
     }
 
-    // 5️⃣ Update the user's password in Supabase Auth
+    // 7️⃣ Update the user's password in Supabase Auth
     const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
       userId,
       { password: password }
@@ -81,7 +125,7 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Failed to set password' });
     }
 
-    // 6️⃣ Create or update profile record with enrollment_completed = true
+    // 8️⃣ Create or update profile record with enrollment_completed = true
     const profileData = {
       id: userId,
       email: applicationData.email,
@@ -101,7 +145,7 @@ export default async function handler(req, res) {
       console.log('✅ Profile marked as enrollment_completed with timestamp');
     }
 
-    // 7️⃣ Mark enrollment as used (password setup completed)
+    // 9️⃣ Mark enrollment as used (password setup completed)
     const { error: enrollmentUpdateError } = await supabaseAdmin
       .from('enrollments')
       .update({ 
@@ -118,7 +162,7 @@ export default async function handler(req, res) {
       console.log('✅ Enrollment marked as used (is_used = true)');
     }
 
-    // 8️⃣ Link accounts to the auth user
+    // 🔟 Link accounts to the auth user
     const { error: accountError } = await supabaseAdmin
       .from('accounts')
       .update({ 
