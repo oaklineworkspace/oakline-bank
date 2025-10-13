@@ -75,15 +75,10 @@ export default async function handler(req, res) {
       authUser = newUser.user;
     }
 
-    // Get site URL from environment variable
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
-    if (!siteUrl) {
-      console.error('NEXT_PUBLIC_SITE_URL environment variable is not set');
-      return res.status(500).json({ 
-        error: 'Site URL not configured',
-        message: 'NEXT_PUBLIC_SITE_URL environment variable must be set'
-      });
-    }
+    // Get site URL from environment variable with fallback
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://theoaklinebank.com';
+    
+    console.log('Using site URL for redirect:', siteUrl);
 
     // Generate magic link using Supabase Admin API
     const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
