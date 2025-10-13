@@ -56,18 +56,54 @@ export default function EnrollPage() {
         if (result.enrollment_completed) {
           setError('This enrollment has already been completed. Please use the login page.');
           setStep('error');
+          setLoading(false);
           return;
         }
         
         setApplicationInfo(result.application);
         setAccounts(result.accounts || result.account_numbers || []);
         setFormData(prev => ({ ...prev, email: user.email }));
-        setStep('password'); // Go straight to password setup
         setValidToken(true); // Token (magic link) is implicitly valid
-        setLoading(false); // Ensure loading is false
+        setStep('password'); // Go straight to password setup
+        setLoading(false);
       } else {
         console.error('Magic link verification failed:', result);
         console.error('Response status:', response.status);
+        
+        // Don't fail on click limit errors during initial load
+        if (result.error && result.error.includes('expired after 4 uses')) {
+          // This might be a refresh - try to proceed anyway if we have session
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session?.user) {
+            // Try to get application data directly
+            try {
+              const appResponse = await fetch('/api/verify-magic-link-enrollment', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  userId: session.user.id,
+                  email: session.user.email,
+                  applicationId: applicationId,
+                  skipClickCount: true
+                })
+              });
+              
+              const appResult = await appResponse.json();
+              if (appResponse.ok) {
+                setApplicationInfo(appResult.application);
+                setAccounts(appResult.accounts || []);
+                setFormData(prev => ({ ...prev, email: session.user.email }));
+                setValidToken(true);
+                setStep('password');
+                setLoading(false);
+                return;
+              }
+            } catch (retryError) {
+              console.error('Retry failed:', retryError);
+            }
+          }
+        }
+        
         setError(result.error || 'Invalid enrollment link or session expired. Please contact support.');
         setStep('error');
         setLoading(false);
@@ -76,7 +112,6 @@ export default function EnrollPage() {
       console.error('Magic link verification error:', error);
       setError('Error verifying enrollment link. Please try again.');
       setStep('error');
-    } finally {
       setLoading(false);
     }
   };
@@ -218,7 +253,7 @@ export default function EnrollPage() {
           if (userAppId) {
             console.log('User authenticated via magic link with app ID:', userAppId);
             setApplicationId(userAppId);
-            setStep('password'); // Go directly to password setup
+            // Don't set step yet - let verifyMagicLinkUser do it
             await verifyMagicLinkUser(session.user, userAppId);
           } else {
             console.log('No application ID found in session or query');

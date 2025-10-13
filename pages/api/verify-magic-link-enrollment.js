@@ -50,7 +50,7 @@ export default async function handler(req, res) {
       });
     }
 
-    // Check enrollment record and track click
+    // Check enrollment record
     const { data: enrollment, error: enrollmentError } = await supabaseAdmin
       .from('enrollments')
       .select('is_used, click_count')
@@ -58,18 +58,36 @@ export default async function handler(req, res) {
       .eq('email', email)
       .maybeSingle();
 
-    // Increment click count manually (instead of relying on trigger that fires on all updates)
-    if (enrollment) {
-      const newClickCount = (enrollment.click_count || 0) + 1;
+    // If enrollment doesn't exist, create it (this can happen with magic links)
+    if (!enrollment && !enrollmentError) {
+      console.log('Creating enrollment record for magic link user');
+      const { error: createError } = await supabaseAdmin
+        .from('enrollments')
+        .insert([{
+          email: email,
+          application_id: applicationId,
+          is_used: false,
+          click_count: 1,
+          created_at: new Date().toISOString()
+        }]);
+
+      if (createError) {
+        console.error('Error creating enrollment:', createError);
+      }
+    } else if (enrollment) {
+      // Only check and increment if enrollment exists
+      const currentClickCount = enrollment.click_count || 0;
       
-      // Check if this will exceed the limit
-      if (newClickCount > 4) {
+      // Check if already exceeded the limit
+      if (currentClickCount >= 4) {
         return res.status(400).json({ 
           error: 'This enrollment link has expired after 4 uses. Please contact support for a new enrollment link.',
           enrollment_completed: true
         });
       }
 
+      // Increment click count
+      const newClickCount = currentClickCount + 1;
       const { error: updateError } = await supabaseAdmin
         .from('enrollments')
         .update({ 
