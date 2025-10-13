@@ -4,6 +4,5 @@
   "/_document": "pages/_document.js",
   "/": "pages/index.js",
   "/enroll": "pages/enroll.js",
-  "/admin/resend-enrollment": "pages/admin/resend-enrollment.js",
-  "/sign-in": "pages/sign-in.js"
+  "/admin/resend-enrollment": "pages/admin/resend-enrollment.js"
 }
