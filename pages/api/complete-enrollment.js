@@ -1,5 +1,5 @@
 // pages/api/complete-enrollment.js
-import { supabaseAdmin } from '../../lib/supabaseClient';
+import { supabaseAdmin } from '../../lib/supabaseAdmin';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {

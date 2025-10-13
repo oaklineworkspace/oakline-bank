@@ -6,7 +6,7 @@ expertMode = true
 channel = "stable-25_05"
 
 [workflows]
-runButton = "Bank App"
+runButton = "Project"
 
 [[workflows.workflow]]
 name = "Project"
@@ -15,19 +15,7 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Frontend"
-
-[[workflows.workflow]]
-name = "Frontend"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npm run dev -- --hostname 0.0.0.0 --port 5000"
-waitForPort = 5000
-
-[workflows.workflow.metadata]
-outputType = "webview"
+args = "Server"
 
 [[workflows.workflow]]
 name = "Bank App"
@@ -38,6 +26,18 @@ mode = "sequential"
 task = "shell.exec"
 args = "npm run dev -- --hostname 0.0.0.0 --port 3000"
 
+[[workflows.workflow]]
+name = "Server"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run dev"
+waitForPort = 5000
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
 [[ports]]
 localPort = 3000
 externalPort = 3000
@@ -45,6 +45,10 @@ externalPort = 3000
 [[ports]]
 localPort = 5000
 externalPort = 80
+
+[[ports]]
+localPort = 38837
+externalPort = 3001
 
 [deployment]
 deploymentTarget = "autoscale"

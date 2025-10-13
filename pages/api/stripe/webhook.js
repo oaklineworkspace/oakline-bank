@@ -1,5 +1,5 @@
 import Stripe from 'stripe';
-import { supabaseAdmin } from '../../../lib/supabaseClient';
+import { supabaseAdmin } from '../../../lib/supabaseAdmin';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;

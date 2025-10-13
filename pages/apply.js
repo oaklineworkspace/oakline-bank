@@ -608,7 +608,7 @@ export default function Apply() {
     container: {
       minHeight: '100vh',
       background: 'linear-gradient(135deg, #F5F6F8 0%, #e0f2fe 100%)',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+      fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
     },
     header: {
       background: 'linear-gradient(135deg, #1A3E6F 0%, #2A5490 100%)',
@@ -637,8 +637,10 @@ export default function Apply() {
       textDecoration: 'none'
     },
     logoImage: {
-      height: '45px',
-      width: 'auto'
+      height: '50px',
+      width: 'auto',
+      objectFit: 'contain',
+      filter: 'brightness(0) invert(1)'
     },
     bankName: {
       fontSize: '1.5rem',
@@ -756,15 +758,18 @@ export default function Apply() {
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
-      gap: '0.25rem',
-      opacity: 0.6,
-      transition: 'opacity 0.3s ease',
-      fontSize: '0.8rem'
+      gap: '0.5rem',
+      opacity: 0.5,
+      transition: 'all 0.3s ease',
+      fontSize: '0.875rem',
+      color: 'rgba(255, 255, 255, 0.7)',
+      fontWeight: '500'
     },
     progressStepActive: {
       opacity: 1,
       color: '#FFC857',
-      fontWeight: '700'
+      fontWeight: '700',
+      transform: 'scale(1.05)'
     },
     formCard: {
       background: 'white',
@@ -1244,25 +1249,60 @@ export default function Apply() {
             <div style={styles.progressBar}>
               <div style={{
                 ...styles.progressFill,
-                width: currentStep === 1 ? '25%' : currentStep === 2 ? '50%' : currentStep === 3 ? '75%' : '100%'
+                width: currentStep === 1 ? '33%' : currentStep === 2 ? '66%' : '100%'
               }}></div>
             </div>
             <div style={styles.progressSteps}>
               <div style={{...styles.progressStep, ...(currentStep >= 1 ? styles.progressStepActive : {})}}>
-                <span>1</span>
-                <span>Personal Info</span>
+                <div style={{
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '50%',
+                  backgroundColor: currentStep >= 1 ? '#FFC857' : 'rgba(255, 200, 87, 0.3)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontWeight: '700',
+                  fontSize: '18px',
+                  color: currentStep >= 1 ? '#1A3E6F' : 'rgba(255, 255, 255, 0.7)',
+                  border: currentStep >= 1 ? '3px solid #FFC857' : '3px solid rgba(255, 200, 87, 0.3)',
+                  transition: 'all 0.3s ease'
+                }}>1</div>
+                <span style={{fontWeight: currentStep === 1 ? '700' : '500'}}>Personal Info</span>
               </div>
               <div style={{...styles.progressStep, ...(currentStep >= 2 ? styles.progressStepActive : {})}}>
-                <span>2</span>
-                <span>Account Details</span>
+                <div style={{
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '50%',
+                  backgroundColor: currentStep >= 2 ? '#FFC857' : 'rgba(255, 200, 87, 0.3)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontWeight: '700',
+                  fontSize: '18px',
+                  color: currentStep >= 2 ? '#1A3E6F' : 'rgba(255, 255, 255, 0.7)',
+                  border: currentStep >= 2 ? '3px solid #FFC857' : '3px solid rgba(255, 200, 87, 0.3)',
+                  transition: 'all 0.3s ease'
+                }}>2</div>
+                <span style={{fontWeight: currentStep === 2 ? '700' : '500'}}>Address Details</span>
               </div>
               <div style={{...styles.progressStep, ...(currentStep >= 3 ? styles.progressStepActive : {})}}>
-                <span>3</span>
-                <span>Verification</span>
-              </div>
-              <div style={{...styles.progressStep, ...(currentStep >= 4 ? styles.progressStepActive : {})}}>
-                <span>4</span>
-                <span>Complete</span>
+                <div style={{
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '50%',
+                  backgroundColor: currentStep >= 3 ? '#FFC857' : 'rgba(255, 200, 87, 0.3)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontWeight: '700',
+                  fontSize: '18px',
+                  color: currentStep >= 3 ? '#1A3E6F' : 'rgba(255, 255, 255, 0.7)',
+                  border: currentStep >= 3 ? '3px solid #FFC857' : '3px solid rgba(255, 200, 87, 0.3)',
+                  transition: 'all 0.3s ease'
+                }}>3</div>
+                <span style={{fontWeight: currentStep === 3 ? '700' : '500'}}>Review & Submit</span>
               </div>
             </div>
           </div>

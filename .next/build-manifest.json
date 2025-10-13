@@ -16,6 +16,7 @@
       "static/chunks/webpack.js",
       "static/chunks/vendors.js",
       "static/chunks/main.js",
+      "static/chunks/components_LiveChat_js.js",
       "static/chunks/pages/index.js"
     ],
     "/_app": [
@@ -30,17 +31,18 @@
       "static/chunks/main.js",
       "static/chunks/pages/_error.js"
     ],
-    "/zelle": [
+    "/dashboard": [
       "static/chunks/webpack.js",
       "static/chunks/vendors.js",
       "static/chunks/main.js",
-      "static/chunks/pages/zelle.js"
+      "static/chunks/components_LiveChat_js.js",
+      "static/chunks/pages/dashboard.js"
     ],
-    "/zelle-settings": [
+    "/login": [
       "static/chunks/webpack.js",
       "static/chunks/vendors.js",
       "static/chunks/main.js",
-      "static/chunks/pages/zelle-settings.js"
+      "static/chunks/pages/login.js"
     ]
   },
   "ampFirstPages": []

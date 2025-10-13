@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { supabaseAdmin } from '../../lib/supabaseClient';
 
 export default function ResendEnrollmentPage() {
   const [applications, setApplications] = useState([]);
@@ -15,68 +14,15 @@ export default function ResendEnrollmentPage() {
     try {
       setLoading(true);
       
-      // Get all applications with their user status
-      const { data: applicationsData, error: appsError } = await supabaseAdmin
-        .from('applications')
-        .select(`
-          id,
-          email,
-          first_name,
-          middle_name,
-          last_name,
-          created_at,
-          country
-        `)
-        .order('created_at', { ascending: false });
-
-      if (appsError) throw appsError;
-
-      // Get users table to check auth status
-      const { data: usersData, error: usersError } = await supabaseAdmin
-        .from('users')
-        .select('application_id, email, created_at, is_active');
-
-      if (usersError) {
-        console.warn('Users table query failed:', usersError);
-      }
-
-      // Get enrollment records
-      const { data: enrollmentsData, error: enrollError } = await supabaseAdmin
-        .from('enrollments')
-        .select('application_id, email, is_used, created_at');
-
-      if (enrollError) {
-        console.warn('Enrollments table query failed:', enrollError);
-      }
-
-      // Check Supabase Auth users
-      const { data: authUsersData } = await supabaseAdmin.auth.admin.listUsers();
+      // Fetch applications via API endpoint
+      const response = await fetch('/api/admin/get-applications-with-status');
       
-      // Combine data
-      const enrichedApplications = applicationsData.map(app => {
-        const userRecord = usersData?.find(u => u.application_id === app.id);
-        const enrollmentRecord = enrollmentsData?.find(e => e.application_id === app.id || e.email === app.email);
-        const authUser = authUsersData?.users?.find(u => u.email === app.email);
-        
-        let status = 'pending';
-        if (authUser && userRecord?.is_active) {
-          status = 'completed';
-        } else if (authUser) {
-          status = 'auth_created';
-        } else if (enrollmentRecord) {
-          status = 'enrollment_sent';
-        }
-
-        return {
-          ...app,
-          status,
-          user_record: userRecord,
-          enrollment_record: enrollmentRecord,
-          auth_user: authUser
-        };
-      });
-
-      setApplications(enrichedApplications);
+      if (!response.ok) {
+        throw new Error('Failed to fetch applications');
+      }
+      
+      const data = await response.json();
+      setApplications(data.applications || []);
     } catch (error) {
       console.error('Error fetching applications:', error);
       setMessage('Error loading applications: ' + error.message);
@@ -218,13 +164,26 @@ export default function ResendEnrollmentPage() {
                   <button
                     onClick={() => handleResendEnrollment(app)}
                     disabled={resendingId === app.id}
+                    onMouseEnter={(e) => {
+                      if (resendingId !== app.id) {
+                        Object.assign(e.target.style, styles.buttonHover);
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (resendingId !== app.id) {
+                        e.target.style.backgroundColor = '#1e40af';
+                        e.target.style.transform = 'translateY(0)';
+                        e.target.style.boxShadow = '0 2px 4px rgba(30, 64, 175, 0.2)';
+                      }
+                    }}
                     style={{
                       ...styles.button,
-                      opacity: resendingId === app.id ? 0.5 : 1,
-                      cursor: resendingId === app.id ? 'not-allowed' : 'pointer'
+                      opacity: resendingId === app.id ? 0.6 : 1,
+                      cursor: resendingId === app.id ? 'not-allowed' : 'pointer',
+                      backgroundColor: resendingId === app.id ? '#9ca3af' : '#1e40af'
                     }}
                   >
-                    {resendingId === app.id ? 'Sending...' : 'Send Link'}
+                    {resendingId === app.id ? '⏳ Sending...' : '📧 Send Link'}
                   </button>
                 </td>
               </tr>
@@ -247,7 +206,9 @@ const styles = {
     padding: '2rem',
     maxWidth: '1400px',
     margin: '0 auto',
-    fontFamily: 'Arial, sans-serif'
+    fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif',
+    backgroundColor: '#f8fafc',
+    minHeight: '100vh'
   },
   header: {
     marginBottom: '2rem',
@@ -312,14 +273,21 @@ const styles = {
     fontWeight: '600'
   },
   button: {
-    padding: '8px 16px',
+    padding: '10px 20px',
     backgroundColor: '#1e40af',
-    color: 'white',
+    color: '#ffffff',
     border: 'none',
-    borderRadius: '6px',
+    borderRadius: '8px',
     fontSize: '14px',
-    fontWeight: '500',
-    transition: 'background-color 0.2s'
+    fontWeight: '600',
+    transition: 'all 0.2s ease',
+    boxShadow: '0 2px 4px rgba(30, 64, 175, 0.2)',
+    cursor: 'pointer'
+  },
+  buttonHover: {
+    backgroundColor: '#1e3a8a',
+    transform: 'translateY(-1px)',
+    boxShadow: '0 4px 6px rgba(30, 64, 175, 0.3)'
   },
   noData: {
     textAlign: 'center',
