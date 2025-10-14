@@ -329,6 +329,19 @@ export default function Apply() {
         return enumMapping[accountType?.name] || accountType?.name?.toLowerCase().replace(/\s+/g, '_');
       });
 
+      // Check if email already exists
+      const { data: existingApp } = await supabase
+        .from('applications')
+        .select('email')
+        .eq('email', formData.email.trim().toLowerCase())
+        .single();
+
+      if (existingApp) {
+        setErrors({ submit: 'An account with this email already exists. Please try another email or log in.' });
+        setLoading(false);
+        return;
+      }
+
       // Insert application data with all fields
       const { data: applicationData, error: applicationError } = await supabase
         .from('applications')
@@ -423,88 +436,65 @@ export default function Apply() {
 
       const applicationId = applicationData.id;
 
-      // Helper function to check if account number is taken
-      const isAccountNumberTaken = async (num) => {
-        const { data, error } = await supabase
-          .from('accounts')
-          .select('account_number')
-          .eq('account_number', num)
-          .single();
-
-        return !error && data; // Returns true if account number exists
-      };
-
-      // Generate unique random 10-digit account number
-      const generateAccountNumber = async () => {
-        let num;
-        let attempts = 0;
-        const maxAttempts = 100;
-
-        do {
-          // Generate a random 10-digit number (ensuring it doesn't start with 0)
-          num = (Math.floor(Math.random() * 9000000000) + 1000000000).toString();
-          attempts++;
-        } while (await isAccountNumberTaken(num) && attempts < maxAttempts);
-
-        if (attempts === maxAttempts) {
-          throw new Error('Could not generate a unique account number after multiple attempts.');
-        }
-        return num;
+      // Helper function to generate unique account number
+      const generateAccountNumber = () => {
+        // Generate a random 10-digit number (ensuring it doesn't start with 0)
+        return (Math.floor(Math.random() * 9000000000) + 1000000000).toString();
       };
 
       // Create accounts for each selected account type
       const accountNumbers = [];
       const accountTypes = [];
+      const createdAccounts = [];
 
       for (const accountTypeId of formData.accountTypes) {
         const accountType = ACCOUNT_TYPES.find(at => at.id === accountTypeId);
-        const accountNumber = await generateAccountNumber();
+        let accountNumber = generateAccountNumber();
+        
+        // Keep generating until we get a unique one
+        let isUnique = false;
+        let attempts = 0;
+        while (!isUnique && attempts < 100) {
+          const { data: existing } = await supabase
+            .from('accounts')
+            .select('account_number')
+            .eq('account_number', accountNumber)
+            .single();
+          
+          if (!existing) {
+            isUnique = true;
+          } else {
+            accountNumber = generateAccountNumber();
+            attempts++;
+          }
+        }
 
-        const enumMapping = {
-          'Checking Account': 'checking_account',
-          'Savings Account': 'savings_account',
-          'Business Checking': 'business_checking',
-          'Business Savings': 'business_savings',
-          'Student Checking': 'student_checking',
-          'Money Market Account': 'money_market',
-          'Certificate of Deposit (CD)': 'certificate_of_deposit',
-          'Retirement Account (IRA)': 'retirement_ira',
-          'Joint Checking Account': 'joint_checking',
-          'Trust Account': 'trust_account',
-          'Investment Brokerage Account': 'investment_brokerage',
-          'High-Yield Savings Account': 'high_yield_savings',
-          'International Checking': 'international_checking',
-          'Foreign Currency Account': 'foreign_currency',
-          'Cryptocurrency Wallet': 'cryptocurrency_wallet',
-          'Loan Repayment Account': 'loan_repayment',
-          'Mortgage Account': 'mortgage',
-          'Auto Loan Account': 'auto_loan',
-          'Credit Card Account': 'credit_card',
-          'Prepaid Card Account': 'prepaid_card',
-          'Payroll Account': 'payroll_account',
-          'Nonprofit/Charity Account': 'nonprofit_charity',
-          'Escrow Account': 'escrow_account'
-        };
+        if (attempts >= 100) {
+          throw new Error('Could not generate unique account number');
+        }
 
         const dbAccountType = enumMapping[accountType.name] || accountType.name.toLowerCase().replace(/\s+/g, '_');
 
-        const { error: accountError } = await supabase
+        const { data: newAccount, error: accountError } = await supabase
           .from('accounts')
           .insert([{
             application_id: applicationId,
             account_number: accountNumber,
             account_type: dbAccountType,
             balance: 0.00,
-            routing_number: '075915826'
+            routing_number: '075915826',
+            status: 'pending'
           }])
           .select()
           .single();
 
         if (accountError) {
           console.error('Account creation error:', accountError);
+          throw accountError;
         } else {
           accountNumbers.push(accountNumber);
           accountTypes.push(accountType.name);
+          createdAccounts.push(newAccount);
         }
       }
 
@@ -701,13 +691,9 @@ export default function Apply() {
         // Don't fail the entire process for email issues
       }
 
-      // Show success message
+      // Show success screen
       setSubmitSuccess(true);
-
-      // Redirect to success page after a delay
-      setTimeout(() => {
-        router.push('/dashboard');
-      }, 3000);
+      setCurrentStep(4); // Move to success screen
 
     } catch (error) {
       console.error('Application submission error:', error);
@@ -1793,6 +1779,152 @@ export default function Apply() {
                     <div style={styles.errorMessage}>⚠️ {errors.zipCode}</div>
                   )}
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* Step 4: Success Screen */}
+          {currentStep === 4 && submitSuccess && (
+            <div style={{
+              textAlign: 'center',
+              padding: '3rem 2rem',
+              background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)',
+              borderRadius: '20px',
+              animation: 'fadeInScale 0.6s ease'
+            }}>
+              <div style={{
+                fontSize: '80px',
+                marginBottom: '1rem',
+                animation: 'bounce 1s ease'
+              }}>🎉</div>
+              
+              <h2 style={{
+                fontSize: 'clamp(28px, 5vw, 36px)',
+                color: '#065f46',
+                marginBottom: '1rem',
+                fontWeight: '700'
+              }}>
+                Application Submitted Successfully!
+              </h2>
+              
+              <p style={{
+                fontSize: 'clamp(16px, 3vw, 18px)',
+                color: '#047857',
+                marginBottom: '2rem',
+                lineHeight: '1.6'
+              }}>
+                Thank you for choosing Oakline Bank. Your application has been received and is being processed.
+              </p>
+
+              <div style={{
+                backgroundColor: 'white',
+                padding: '2rem',
+                borderRadius: '15px',
+                marginBottom: '2rem',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+              }}>
+                <h3 style={{
+                  fontSize: 'clamp(20px, 4vw, 24px)',
+                  color: '#1e40af',
+                  marginBottom: '1.5rem'
+                }}>📧 What's Next?</h3>
+                
+                <div style={{
+                  textAlign: 'left',
+                  maxWidth: '500px',
+                  margin: '0 auto'
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    marginBottom: '1rem',
+                    gap: '1rem'
+                  }}>
+                    <span style={{ fontSize: '24px' }}>✅</span>
+                    <div>
+                      <strong style={{ color: '#1e40af' }}>Check Your Email</strong>
+                      <p style={{ margin: '0.25rem 0 0 0', color: '#64748b', fontSize: '14px' }}>
+                        We've sent enrollment instructions to <strong>{formData.email}</strong>
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    marginBottom: '1rem',
+                    gap: '1rem'
+                  }}>
+                    <span style={{ fontSize: '24px' }}>🔐</span>
+                    <div>
+                      <strong style={{ color: '#1e40af' }}>Complete Enrollment</strong>
+                      <p style={{ margin: '0.25rem 0 0 0', color: '#64748b', fontSize: '14px' }}>
+                        Click the link in your email to set up your password and activate your account
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: '1rem'
+                  }}>
+                    <span style={{ fontSize: '24px' }}>💳</span>
+                    <div>
+                      <strong style={{ color: '#1e40af' }}>Start Banking</strong>
+                      <p style={{ margin: '0.25rem 0 0 0', color: '#64748b', fontSize: '14px' }}>
+                        Access your accounts and begin your banking journey
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div style={{
+                backgroundColor: '#fef3c7',
+                padding: '1.5rem',
+                borderRadius: '10px',
+                marginBottom: '2rem',
+                border: '2px solid #fbbf24'
+              }}>
+                <p style={{
+                  margin: 0,
+                  color: '#92400e',
+                  fontSize: '14px',
+                  lineHeight: '1.6'
+                }}>
+                  <strong>⏰ Important:</strong> The enrollment link will expire in 24 hours. 
+                  If you don't see the email, please check your spam folder.
+                </p>
+              </div>
+
+              <div style={{
+                display: 'flex',
+                gap: '1rem',
+                justifyContent: 'center',
+                flexWrap: 'wrap'
+              }}>
+                <button
+                  onClick={() => router.push('/')}
+                  style={{
+                    ...styles.button,
+                    ...styles.primaryButton,
+                    padding: '16px 32px'
+                  }}
+                >
+                  🏠 Return to Home
+                </button>
+                
+                <button
+                  onClick={() => router.push('/login')}
+                  style={{
+                    ...styles.button,
+                    ...styles.secondaryButton,
+                    padding: '16px 32px'
+                  }}
+                >
+                  🔑 Go to Login
+                </button>
               </div>
             </div>
           )}

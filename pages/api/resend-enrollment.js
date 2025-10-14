@@ -224,6 +224,14 @@ export default async function handler(req, res) {
       </html>
     `;
 
+    // Create mail options
+    const mailOptions = {
+      from: `"Oakline Bank" <${process.env.SMTP_USER}>`,
+      to: email,
+      subject: 'Complete Your Oakline Bank Enrollment',
+      html: emailHtml
+    };
+
     // Send email
     const info = await transporter.sendMail(mailOptions);
     console.log(`Enrollment magic link sent to ${email}: ${info.response}`);
