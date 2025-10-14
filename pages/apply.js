@@ -393,6 +393,8 @@ export default function Apply() {
       const userId = authResult.user.auth_id;
       console.log('Auth user created successfully:', userId);
 
+      const applicationId = applicationData.id;
+
       // Update application with user_id
       await supabase
         .from('applications')
@@ -404,7 +406,7 @@ export default function Apply() {
         .from('profiles')
         .upsert([{
           id: userId,
-          application_id: applicationData.id,
+          application_id: applicationId,
           email: formData.email.trim().toLowerCase(),
           first_name: formData.firstName.trim(),
           middle_name: formData.middleName.trim() || null,
@@ -433,8 +435,6 @@ export default function Apply() {
       if (profileError) {
         console.error('Error upserting profile:', profileError);
       }
-
-      const applicationId = applicationData.id;
 
       // Helper function to generate unique account number
       const generateAccountNumber = () => {

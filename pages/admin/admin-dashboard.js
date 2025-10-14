@@ -25,45 +25,52 @@ export default function AdminDashboard() {
   const checkAdminAccess = async () => {
     setLoading(true);
     try {
+      // Check local storage first
+      const adminAuth = localStorage.getItem('adminAuthenticated');
+      if (adminAuth === 'true') {
+        setIsAuthenticated(true);
+        fetchStats();
+        setLoading(false);
+        return;
+      }
+
+      // If not in localStorage, check Supabase auth
       const {
         data: { user },
         error: userError
       } = await supabase.auth.getUser();
 
-      if (userError) {
+      if (userError || !user) {
         console.error('Auth error:', userError);
-        router.push('/login');
-        return;
-      }
-
-      if (!user) {
-        // Not logged in yet, just wait
         setLoading(false);
         return;
       }
 
-      // Fetch the profile to check role
+      // Check if user has admin role in profiles or admin_profiles table
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('role')
         .eq('id', user.id)
         .single();
 
-      if (profileError) {
-        console.error('Profile fetch error:', profileError);
-        setError('Failed to verify admin access.');
-        setLoading(false);
-        return;
-      }
+      if (!profileError && profile?.role === 'admin') {
+        setIsAuthenticated(true);
+        localStorage.setItem('adminAuthenticated', 'true');
+        fetchStats();
+      } else {
+        // Try admin_profiles table as fallback
+        const { data: adminProfile } = await supabase
+          .from('admin_profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single();
 
-      if (!profile || profile.role !== 'admin') {
-        // Logged in but not admin
-        router.push('/dashboard');
-        return;
+        if (adminProfile) {
+          setIsAuthenticated(true);
+          localStorage.setItem('adminAuthenticated', 'true');
+          fetchStats();
+        }
       }
-
-      setIsAuthenticated(true);
-      fetchStats(); // Fetch stats only if admin
     } catch (err) {
       console.error('Unexpected error:', err);
       setError('An unexpected error occurred.');
