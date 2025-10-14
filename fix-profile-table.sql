@@ -1,5 +1,5 @@
 
--- Step 1: Add missing columns to profiles table
+-- Step 1: Add missing columns to profiles table (only if they don't exist)
 ALTER TABLE public.profiles
 ADD COLUMN IF NOT EXISTS phone text,
 ADD COLUMN IF NOT EXISTS date_of_birth date,
@@ -9,11 +9,11 @@ ADD COLUMN IF NOT EXISTS city text,
 ADD COLUMN IF NOT EXISTS state text,
 ADD COLUMN IF NOT EXISTS zip_code text,
 ADD COLUMN IF NOT EXISTS mothers_maiden_name text,
-ADD COLUMN IF NOT EXISTS employment_status employment_status_enum,
-ADD COLUMN IF NOT EXISTS annual_income annual_income_enum,
-ADD COLUMN IF NOT EXISTS account_types account_type_enum[];
+ADD COLUMN IF NOT EXISTS employment_status text,
+ADD COLUMN IF NOT EXISTS annual_income text,
+ADD COLUMN IF NOT EXISTS account_types text[];
 
--- Step 2: Update existing profiles with data from applications table
+-- Step 2: Update existing profiles with data from applications table using email match
 UPDATE public.profiles p
 SET 
   first_name = COALESCE(p.first_name, a.first_name),
@@ -39,13 +39,13 @@ SET
   END,
   updated_at = NOW()
 FROM public.applications a
-WHERE p.application_id = a.id;
+WHERE p.email = a.email;
 
--- Step 3: Create a trigger to automatically sync new applications to profiles
+-- Step 3: Create a trigger to automatically sync new applications to profiles using email
 CREATE OR REPLACE FUNCTION sync_application_to_profile()
 RETURNS TRIGGER AS $$
 BEGIN
-  -- Update profile if it exists
+  -- Update profile if it exists (match by email)
   UPDATE public.profiles
   SET
     first_name = NEW.first_name,
@@ -66,7 +66,7 @@ BEGIN
     account_types = NEW.account_types,
     application_status = NEW.application_status,
     updated_at = NOW()
-  WHERE application_id = NEW.id;
+  WHERE email = NEW.email;
   
   RETURN NEW;
 END;
@@ -79,4 +79,4 @@ AFTER INSERT OR UPDATE ON public.applications
 FOR EACH ROW
 EXECUTE FUNCTION sync_application_to_profile();
 
-COMMENT ON TRIGGER sync_application_to_profile_trigger ON public.applications IS 'Automatically syncs application data to profiles table';
+COMMENT ON TRIGGER sync_application_to_profile_trigger ON public.applications IS 'Automatically syncs application data to profiles table using email matching';
