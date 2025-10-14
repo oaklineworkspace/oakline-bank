@@ -3,8 +3,7 @@
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
   "/": "pages/index.js",
-  "/enroll": "pages/enroll.js",
   "/login": "pages/login.js",
-  "/privacy": "pages/privacy.js",
-  "/reset-password": "pages/reset-password.js"
+  "/reset-password": "pages/reset-password.js",
+  "/api/send-reset-otp": "pages/api/send-reset-otp.js"
 }

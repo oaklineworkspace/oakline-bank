@@ -42,12 +42,6 @@
       "static/chunks/main.js",
       "static/chunks/pages/login.js"
     ],
-    "/privacy": [
-      "static/chunks/webpack.js",
-      "static/chunks/vendors.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/privacy.js"
-    ],
     "/reset-password": [
       "static/chunks/webpack.js",
       "static/chunks/vendors.js",
