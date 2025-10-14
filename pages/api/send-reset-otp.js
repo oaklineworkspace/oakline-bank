@@ -15,7 +15,8 @@ export default async function handler(req, res) {
     }
 
     // Check if user exists
-    const { data: user, error: userError } = await supabaseAdmin.auth.admin.getUserByEmail(email);
+    const { data: { users }, error: userError } = await supabaseAdmin.auth.admin.listUsers();
+    const user = users?.find(u => u.email?.toLowerCase() === email.toLowerCase());
 
     if (userError || !user) {
       // Don't reveal if user exists for security

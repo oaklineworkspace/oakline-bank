@@ -50,6 +50,25 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Failed to verify code' });
     }
 
+    // Send Supabase password reset link
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://theoaklinebank.com';
+    const { data: linkData, error: resetError } = await supabaseAdmin.auth.admin.generateLink({
+      type: 'recovery',
+      email: email.toLowerCase(),
+      options: {
+        redirectTo: `${siteUrl}/reset-password`
+      }
+    });
+
+    if (resetError) {
+      console.error('Error generating reset link:', resetError);
+      return res.status(500).json({ error: 'Failed to send reset link' });
+    }
+
+    // Send the reset link via email
+    const { sendPasswordResetLink } = require('../../lib/email');
+    await sendPasswordResetLink(email.toLowerCase(), linkData.properties.action_link);
+
     return res.status(200).json({ 
       message: 'Verification successful',
       verified: true

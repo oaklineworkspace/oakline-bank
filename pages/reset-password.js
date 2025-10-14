@@ -20,13 +20,47 @@ export default function ResetPassword() {
   const [resetToken, setResetToken] = useState('');
 
   useEffect(() => {
-    // Check if user came from email link
-    const { token, type } = router.query;
-    if (token && type === 'recovery') {
-      setResetToken(token);
-      setStep('reset');
+    const handleRecoveryToken = async () => {
+      const { token_hash, type, code } = router.query;
+      
+      // Handle Supabase recovery link
+      if (token_hash && type === 'recovery') {
+        try {
+          const { data, error } = await supabase.auth.verifyOtp({
+            token_hash,
+            type: 'recovery'
+          });
+          
+          if (error) {
+            console.error('Token verification error:', error);
+            setError('Invalid or expired reset link. Please request a new one.');
+            setStep('request');
+          } else {
+            setStep('reset');
+          }
+        } catch (err) {
+          console.error('Recovery error:', err);
+          setError('Error processing reset link. Please try again.');
+          setStep('request');
+        }
+      } else if (code && type === 'recovery') {
+        // Handle email confirmation code
+        try {
+          const { error } = await supabase.auth.exchangeCodeForSession(code);
+          if (error) throw error;
+          setStep('reset');
+        } catch (err) {
+          console.error('Code exchange error:', err);
+          setError('Invalid recovery code. Please request a new reset link.');
+          setStep('request');
+        }
+      }
+    };
+
+    if (router.isReady) {
+      handleRecoveryToken();
     }
-  }, [router.query]);
+  }, [router.isReady, router.query]);
 
   // Password strength checker
   const checkPasswordStrength = (password) => {
@@ -131,8 +165,11 @@ export default function ResetPassword() {
         throw new Error(result.error || 'Invalid verification code');
       }
 
-      setMessage('Verification successful! Please check your email for the password reset link.');
-      setStep('reset');
+      setMessage('Verification successful! We have sent a password reset link to your email. Please check your inbox and click the link to continue.');
+      // Don't change step here - user needs to click email link
+      setTimeout(() => {
+        setMessage('Please check your email and click the password reset link we just sent you.');
+      }, 3000);
     } catch (error) {
       setError(error.message || 'Invalid or expired verification code');
     } finally {
