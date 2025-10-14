@@ -236,18 +236,18 @@ export default async function handler(req, res) {
     const info = await transporter.sendMail(mailOptions);
     console.log(`Enrollment magic link sent to ${email}: ${info.response}`);
 
-    // Update or create enrollment record
+    // Update or create enrollment record - preserve original created_at
     try {
       // First check if enrollment exists
       const { data: existingEnrollment } = await supabaseAdmin
         .from('enrollments')
-        .select('*')
+        .select('id, created_at')
         .eq('email', email)
         .eq('application_id', applicationId)
         .maybeSingle();
 
       if (existingEnrollment) {
-        // Update existing enrollment - reset click count and is_used
+        // Update existing enrollment - keep original created_at for 24-hour expiration
         const { error: updateError } = await supabaseAdmin
           .from('enrollments')
           .update({
@@ -255,14 +255,14 @@ export default async function handler(req, res) {
             click_count: 0,
             token: linkData.properties.action_link,
             updated_at: new Date().toISOString()
+            // DO NOT update created_at - keep original for 24-hour expiration
           })
-          .eq('email', email)
-          .eq('application_id', applicationId);
+          .eq('id', existingEnrollment.id);
 
         if (updateError) {
           console.warn('Failed to update enrollment record:', updateError);
         } else {
-          console.log('✅ Enrollment record reset successfully');
+          console.log('✅ Enrollment record updated - preserving original created_at');
         }
       } else {
         // Create new enrollment
@@ -280,11 +280,11 @@ export default async function handler(req, res) {
         if (insertError) {
           console.warn('Failed to create enrollment record:', insertError);
         } else {
-          console.log('✅ Enrollment record created successfully');
+          console.log('✅ New enrollment record created');
         }
       }
     } catch (enrollmentUpdateError) {
-      console.warn('Error updating enrollment record:', enrollmentUpdateError);
+      console.warn('Error managing enrollment record:', enrollmentUpdateError);
     }
 
     res.status(200).json({

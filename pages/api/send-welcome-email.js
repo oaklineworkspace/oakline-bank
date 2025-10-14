@@ -171,20 +171,45 @@ export default async function handler(req, res) {
       </html>
     `;
 
-    // Update enrollment record with magic link
-    const { error: enrollmentUpdateError } = await supabaseAdmin
+    // Create or update enrollment record - only set created_at for new records
+    const { data: existingEnrollment } = await supabaseAdmin
       .from('enrollments')
-      .upsert([{
-        email: email.trim().toLowerCase(),
-        application_id: application_id,
-        token: linkData.properties.action_link,
-        is_used: false,
-        click_count: 0,
-        created_at: new Date().toISOString()
-      }], { onConflict: 'email' });
+      .select('id, created_at')
+      .eq('email', email.trim().toLowerCase())
+      .eq('application_id', application_id)
+      .maybeSingle();
 
-    if (enrollmentUpdateError) {
-      console.error('Error updating enrollment record:', enrollmentUpdateError);
+    if (existingEnrollment) {
+      // Update existing enrollment - keep original created_at
+      const { error: updateError } = await supabaseAdmin
+        .from('enrollments')
+        .update({
+          token: linkData.properties.action_link,
+          is_used: false,
+          click_count: 0,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', existingEnrollment.id);
+
+      if (updateError) {
+        console.error('Error updating enrollment record:', updateError);
+      }
+    } else {
+      // Create new enrollment record
+      const { error: insertError } = await supabaseAdmin
+        .from('enrollments')
+        .insert([{
+          email: email.trim().toLowerCase(),
+          application_id: application_id,
+          token: linkData.properties.action_link,
+          is_used: false,
+          click_count: 0,
+          created_at: new Date().toISOString()
+        }]);
+
+      if (insertError) {
+        console.error('Error creating enrollment record:', insertError);
+      }
     }
 
     // Send email
