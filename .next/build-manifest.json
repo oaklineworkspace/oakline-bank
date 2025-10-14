@@ -30,11 +30,11 @@
       "static/chunks/main.js",
       "static/chunks/pages/_error.js"
     ],
-    "/admin/approve-accounts": [
+    "/admin/resend-enrollment": [
       "static/chunks/webpack.js",
       "static/chunks/vendors.js",
       "static/chunks/main.js",
-      "static/chunks/pages/admin/approve-accounts.js"
+      "static/chunks/pages/admin/resend-enrollment.js"
     ],
     "/enroll": [
       "static/chunks/webpack.js",
