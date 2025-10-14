@@ -1,39 +1,199 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
+import { useRouter } from 'next/router';
 import Link from 'next/link';
 
 export default function ResetPassword() {
+  const router = useRouter();
+  const [step, setStep] = useState('request'); // 'request', 'verify', 'reset', 'success'
   const [email, setEmail] = useState('');
+  const [otp, setOtp] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
-  const [isSuccess, setIsSuccess] = useState(false);
+  const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState(0);
+  const [resetToken, setResetToken] = useState('');
 
-  const handleSubmit = async (e) => {
+  useEffect(() => {
+    // Check if user came from email link
+    const { token, type } = router.query;
+    if (token && type === 'recovery') {
+      setResetToken(token);
+      setStep('reset');
+    }
+  }, [router.query]);
+
+  // Password strength checker
+  const checkPasswordStrength = (password) => {
+    let strength = 0;
+    if (password.length >= 8) strength++;
+    if (password.length >= 12) strength++;
+    if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+    if (/[0-9]/.test(password)) strength++;
+    if (/[^A-Za-z0-9]/.test(password)) strength++;
+    setPasswordStrength(strength);
+    return strength;
+  };
+
+  const handlePasswordChange = (e) => {
+    const pwd = e.target.value;
+    setNewPassword(pwd);
+    checkPasswordStrength(pwd);
+  };
+
+  const validatePassword = () => {
+    if (newPassword.length < 8) {
+      setError('Password must be at least 8 characters long');
+      return false;
+    }
+    if (!/[A-Z]/.test(newPassword)) {
+      setError('Password must contain at least one uppercase letter');
+      return false;
+    }
+    if (!/[a-z]/.test(newPassword)) {
+      setError('Password must contain at least one lowercase letter');
+      return false;
+    }
+    if (!/[0-9]/.test(newPassword)) {
+      setError('Password must contain at least one number');
+      return false;
+    }
+    if (!/[^A-Za-z0-9]/.test(newPassword)) {
+      setError('Password must contain at least one special character');
+      return false;
+    }
+    if (newPassword !== confirmPassword) {
+      setError('Passwords do not match');
+      return false;
+    }
+    return true;
+  };
+
+  // Step 1: Request password reset
+  const handleRequestReset = async (e) => {
     e.preventDefault();
     setLoading(true);
     setMessage('');
+    setError('');
 
     try {
+      // Send OTP via Supabase
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password?mode=reset`,
+        redirectTo: `${window.location.origin}/reset-password?type=recovery`,
       });
 
       if (error) throw error;
 
-      setIsSuccess(true);
-      setMessage('Password reset instructions have been sent to your email address.');
+      // Also send custom OTP for additional verification
+      const response = await fetch('/api/send-reset-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to send verification code');
+      }
+
+      setMessage('Verification code sent to your email. Please check your inbox.');
+      setStep('verify');
     } catch (error) {
-      setMessage(`Error: ${error.message}`);
-      setIsSuccess(false);
+      setError(error.message || 'Failed to send reset link. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
+  // Step 2: Verify OTP
+  const handleVerifyOTP = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setMessage('');
+    setError('');
+
+    try {
+      const response = await fetch('/api/verify-reset-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, otp }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Invalid verification code');
+      }
+
+      setMessage('Verification successful! Please check your email for the password reset link.');
+      setStep('reset');
+    } catch (error) {
+      setError(error.message || 'Invalid or expired verification code');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Step 3: Reset password
+  const handleResetPassword = async (e) => {
+    e.preventDefault();
+    
+    if (!validatePassword()) {
+      return;
+    }
+
+    setLoading(true);
+    setMessage('');
+    setError('');
+
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword
+      });
+
+      if (error) throw error;
+
+      // Send security notification
+      await fetch('/api/send-password-changed-notification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+
+      setMessage('Password reset successful! Redirecting to login...');
+      setStep('success');
+      
+      setTimeout(() => {
+        router.push('/login');
+      }, 3000);
+    } catch (error) {
+      setError(error.message || 'Failed to reset password. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getPasswordStrengthColor = () => {
+    if (passwordStrength <= 2) return '#ef4444';
+    if (passwordStrength <= 3) return '#f59e0b';
+    return '#10b981';
+  };
+
+  const getPasswordStrengthText = () => {
+    if (passwordStrength <= 2) return 'Weak';
+    if (passwordStrength <= 3) return 'Medium';
+    return 'Strong';
+  };
+
   return (
     <div style={styles.container}>
-      {/* Oakline Bank Header */}
+      {/* Header */}
       <header style={styles.header}>
         <div style={styles.headerContent}>
           <Link href="/" style={styles.logoContainer}>
@@ -57,121 +217,316 @@ export default function ResetPassword() {
           {/* Hero Section */}
           <div style={styles.heroSection}>
             <div style={styles.heroContent}>
-              <h1 style={styles.heroTitle}>Secure Password Recovery</h1>
+              <h1 style={styles.heroTitle}>
+                {step === 'request' && '🔒 Reset Your Password'}
+                {step === 'verify' && '✉️ Verify Your Identity'}
+                {step === 'reset' && '🔑 Create New Password'}
+                {step === 'success' && '✅ Password Reset Complete'}
+              </h1>
               <p style={styles.heroSubtitle}>
-                Reset your password securely with our advanced verification system. 
-                Your account security is our top priority.
+                {step === 'request' && 'Enter your email to receive a secure verification code'}
+                {step === 'verify' && 'Enter the 6-digit code sent to your email'}
+                {step === 'reset' && 'Choose a strong password for your account'}
+                {step === 'success' && 'Your password has been successfully updated'}
               </p>
               
               <div style={styles.securityFeatures}>
                 <div style={styles.feature}>
                   <span style={styles.featureIcon}>🔐</span>
-                  <span>Bank-Level Security</span>
+                  <span>256-bit Encryption</span>
+                </div>
+                <div style={styles.feature}>
+                  <span style={styles.featureIcon}>⏱️</span>
+                  <span>OTP Expires in 15 min</span>
                 </div>
                 <div style={styles.feature}>
                   <span style={styles.featureIcon}>📧</span>
                   <span>Email Verification</span>
                 </div>
-                <div style={styles.feature}>
-                  <span style={styles.featureIcon}>⚡</span>
-                  <span>Instant Reset Link</span>
-                </div>
               </div>
             </div>
           </div>
 
-          {/* Reset Form Section */}
+          {/* Form Section */}
           <div style={styles.resetSection}>
             <div style={styles.resetCard}>
-              <div style={styles.resetHeader}>
-                <div style={styles.cardLogo}>
-                  <img src="/images/logo-primary.png" alt="Oakline Bank" style={styles.cardLogoImg} />
-                </div>
-                <h2 style={styles.resetTitle}>Reset Your Password</h2>
-                <p style={styles.resetSubtitle}>
-                  Enter your email address and we'll send you a secure link to reset your password
-                </p>
-              </div>
-
-              {!isSuccess ? (
-                <form onSubmit={handleSubmit} style={styles.form}>
-                  <div style={styles.inputGroup}>
-                    <label style={styles.label}>Email Address</label>
-                    <input
-                      type="email"
-                      placeholder="Enter your registered email"
-                      required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      style={styles.input}
-                    />
+              {/* Step 1: Request Reset */}
+              {step === 'request' && (
+                <>
+                  <div style={styles.resetHeader}>
+                    <div style={styles.cardLogo}>
+                      <img src="/images/logo-primary.png" alt="Oakline Bank" style={styles.cardLogoImg} />
+                    </div>
+                    <h2 style={styles.resetTitle}>Reset Your Password</h2>
+                    <p style={styles.resetSubtitle}>
+                      Enter your email address and we'll send you a verification code
+                    </p>
                   </div>
 
-                  <button 
-                    type="submit" 
-                    disabled={loading}
-                    style={{
-                      ...styles.resetButton,
-                      backgroundColor: loading ? '#9ca3af' : '#1e40af',
-                      cursor: loading ? 'not-allowed' : 'pointer'
-                    }}
-                  >
-                    {loading ? (
-                      <span style={styles.loadingContent}>
-                        <span style={styles.spinner}></span>
-                        Sending Reset Link...
-                      </span>
-                    ) : (
-                      <>
-                        <span style={styles.buttonIcon}>📧</span>
-                        Send Reset Link
-                      </>
-                    )}
-                  </button>
-                </form>
-              ) : (
+                  <form onSubmit={handleRequestReset} style={styles.form}>
+                    <div style={styles.inputGroup}>
+                      <label style={styles.label}>Email Address</label>
+                      <input
+                        type="email"
+                        placeholder="Enter your registered email"
+                        required
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        style={styles.input}
+                      />
+                    </div>
+
+                    <button 
+                      type="submit" 
+                      disabled={loading}
+                      style={{
+                        ...styles.resetButton,
+                        backgroundColor: loading ? '#9ca3af' : '#1e40af',
+                        cursor: loading ? 'not-allowed' : 'pointer'
+                      }}
+                    >
+                      {loading ? (
+                        <span style={styles.loadingContent}>
+                          <span style={styles.spinner}></span>
+                          Sending Code...
+                        </span>
+                      ) : (
+                        <>
+                          <span style={styles.buttonIcon}>📧</span>
+                          Send Verification Code
+                        </>
+                      )}
+                    </button>
+                  </form>
+                </>
+              )}
+
+              {/* Step 2: Verify OTP */}
+              {step === 'verify' && (
+                <>
+                  <div style={styles.resetHeader}>
+                    <div style={styles.cardLogo}>
+                      <span style={{ fontSize: '3rem' }}>✉️</span>
+                    </div>
+                    <h2 style={styles.resetTitle}>Enter Verification Code</h2>
+                    <p style={styles.resetSubtitle}>
+                      We've sent a 6-digit code to <strong>{email}</strong>
+                    </p>
+                  </div>
+
+                  <form onSubmit={handleVerifyOTP} style={styles.form}>
+                    <div style={styles.inputGroup}>
+                      <label style={styles.label}>Verification Code</label>
+                      <input
+                        type="text"
+                        placeholder="Enter 6-digit code"
+                        required
+                        value={otp}
+                        onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                        style={{ ...styles.input, textAlign: 'center', fontSize: '1.5rem', letterSpacing: '0.5rem' }}
+                        maxLength="6"
+                      />
+                    </div>
+
+                    <button 
+                      type="submit" 
+                      disabled={loading || otp.length !== 6}
+                      style={{
+                        ...styles.resetButton,
+                        backgroundColor: loading || otp.length !== 6 ? '#9ca3af' : '#1e40af',
+                        cursor: loading || otp.length !== 6 ? 'not-allowed' : 'pointer'
+                      }}
+                    >
+                      {loading ? (
+                        <span style={styles.loadingContent}>
+                          <span style={styles.spinner}></span>
+                          Verifying...
+                        </span>
+                      ) : (
+                        'Verify Code'
+                      )}
+                    </button>
+
+                    <div style={{ textAlign: 'center', marginTop: '1rem' }}>
+                      <button
+                        type="button"
+                        onClick={() => setStep('request')}
+                        style={{ ...styles.textButton, color: '#64748b' }}
+                      >
+                        ← Back to email entry
+                      </button>
+                    </div>
+                  </form>
+                </>
+              )}
+
+              {/* Step 3: Reset Password */}
+              {step === 'reset' && (
+                <>
+                  <div style={styles.resetHeader}>
+                    <div style={styles.cardLogo}>
+                      <span style={{ fontSize: '3rem' }}>🔑</span>
+                    </div>
+                    <h2 style={styles.resetTitle}>Create New Password</h2>
+                    <p style={styles.resetSubtitle}>
+                      Choose a strong password to protect your account
+                    </p>
+                  </div>
+
+                  <form onSubmit={handleResetPassword} style={styles.form}>
+                    <div style={styles.inputGroup}>
+                      <label style={styles.label}>New Password</label>
+                      <div style={{ position: 'relative' }}>
+                        <input
+                          type={showPassword ? 'text' : 'password'}
+                          placeholder="Enter new password"
+                          required
+                          value={newPassword}
+                          onChange={handlePasswordChange}
+                          style={{ ...styles.input, paddingRight: '40px' }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          style={styles.eyeButton}
+                        >
+                          {showPassword ? '🙈' : '👁️'}
+                        </button>
+                      </div>
+                      {newPassword && (
+                        <div style={{ marginTop: '0.5rem' }}>
+                          <div style={styles.strengthBar}>
+                            <div style={{
+                              ...styles.strengthFill,
+                              width: `${(passwordStrength / 5) * 100}%`,
+                              backgroundColor: getPasswordStrengthColor()
+                            }}></div>
+                          </div>
+                          <p style={{ fontSize: '0.85rem', color: getPasswordStrengthColor(), marginTop: '0.25rem' }}>
+                            Password Strength: {getPasswordStrengthText()}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    <div style={styles.inputGroup}>
+                      <label style={styles.label}>Confirm Password</label>
+                      <div style={{ position: 'relative' }}>
+                        <input
+                          type={showConfirmPassword ? 'text' : 'password'}
+                          placeholder="Confirm new password"
+                          required
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          style={{ ...styles.input, paddingRight: '40px' }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          style={styles.eyeButton}
+                        >
+                          {showConfirmPassword ? '🙈' : '👁️'}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div style={styles.passwordRequirements}>
+                      <p style={styles.requirementsTitle}>Password must contain:</p>
+                      <ul style={styles.requirementsList}>
+                        <li style={{ color: newPassword.length >= 8 ? '#10b981' : '#6b7280' }}>
+                          {newPassword.length >= 8 ? '✓' : '○'} At least 8 characters
+                        </li>
+                        <li style={{ color: /[A-Z]/.test(newPassword) ? '#10b981' : '#6b7280' }}>
+                          {/[A-Z]/.test(newPassword) ? '✓' : '○'} One uppercase letter
+                        </li>
+                        <li style={{ color: /[a-z]/.test(newPassword) ? '#10b981' : '#6b7280' }}>
+                          {/[a-z]/.test(newPassword) ? '✓' : '○'} One lowercase letter
+                        </li>
+                        <li style={{ color: /[0-9]/.test(newPassword) ? '#10b981' : '#6b7280' }}>
+                          {/[0-9]/.test(newPassword) ? '✓' : '○'} One number
+                        </li>
+                        <li style={{ color: /[^A-Za-z0-9]/.test(newPassword) ? '#10b981' : '#6b7280' }}>
+                          {/[^A-Za-z0-9]/.test(newPassword) ? '✓' : '○'} One special character
+                        </li>
+                      </ul>
+                    </div>
+
+                    <button 
+                      type="submit" 
+                      disabled={loading || passwordStrength < 3}
+                      style={{
+                        ...styles.resetButton,
+                        backgroundColor: loading || passwordStrength < 3 ? '#9ca3af' : '#1e40af',
+                        cursor: loading || passwordStrength < 3 ? 'not-allowed' : 'pointer'
+                      }}
+                    >
+                      {loading ? (
+                        <span style={styles.loadingContent}>
+                          <span style={styles.spinner}></span>
+                          Resetting Password...
+                        </span>
+                      ) : (
+                        'Reset Password'
+                      )}
+                    </button>
+                  </form>
+                </>
+              )}
+
+              {/* Step 4: Success */}
+              {step === 'success' && (
                 <div style={styles.successMessage}>
                   <div style={styles.successIcon}>✅</div>
-                  <h3 style={styles.successTitle}>Reset Link Sent!</h3>
+                  <h3 style={styles.successTitle}>Password Reset Complete!</h3>
                   <p style={styles.successText}>
-                    We've sent password reset instructions to <strong>{email}</strong>
+                    Your password has been successfully updated. You can now sign in with your new password.
                   </p>
                   <p style={styles.successSubtext}>
-                    Please check your email and follow the link to reset your password. 
-                    The link will expire in 24 hours for security.
+                    Redirecting to login page in 3 seconds...
                   </p>
+                  <Link href="/login" style={styles.resetButton}>
+                    Go to Login Now
+                  </Link>
                 </div>
               )}
 
-              {message && !isSuccess && (
-                <div style={styles.errorMessage}>
-                  <span style={styles.errorIcon}>⚠️</span>
+              {message && step !== 'success' && (
+                <div style={styles.successAlert}>
+                  <span style={styles.errorIcon}>✓</span>
                   {message}
                 </div>
               )}
 
-              {/* Help Section */}
-              <div style={styles.helpSection}>
-                <h3 style={styles.helpTitle}>Need Additional Help?</h3>
-                <div style={styles.helpOptions}>
-                  <Link href="/support" style={styles.helpLink}>
-                    💬 Contact Support
-                  </Link>
-                  <Link href="/faq" style={styles.helpLink}>
-                    ❓ View FAQ
-                  </Link>
-                  <a href="tel:+1-800-OAKLINE" style={styles.helpLink}>
-                    📞 Call: 1-800-OAKLINE
-                  </a>
+              {error && (
+                <div style={styles.errorMessage}>
+                  <span style={styles.errorIcon}>⚠️</span>
+                  {error}
                 </div>
-              </div>
+              )}
+
+              {/* Help Section */}
+              {step !== 'success' && (
+                <div style={styles.helpSection}>
+                  <h3 style={styles.helpTitle}>Need Help?</h3>
+                  <div style={styles.helpOptions}>
+                    <Link href="/support" style={styles.helpLink}>
+                      💬 Contact Support
+                    </Link>
+                    <a href="tel:+1-800-OAKLINE" style={styles.helpLink}>
+                      📞 Call: 1-800-OAKLINE
+                    </a>
+                  </div>
+                </div>
+              )}
 
               {/* Back to Login */}
-              <div style={styles.backToLogin}>
-                <Link href="/login" style={styles.backLink}>
-                  ← Back to Sign In
-                </Link>
-              </div>
+              {step !== 'success' && (
+                <div style={styles.backToLogin}>
+                  <Link href="/login" style={styles.backLink}>
+                    ← Back to Sign In
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -386,6 +741,17 @@ const styles = {
     boxSizing: 'border-box',
     outline: 'none'
   },
+  eyeButton: {
+    position: 'absolute',
+    right: '10px',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    fontSize: '1.2rem',
+    padding: '0.5rem'
+  },
   resetButton: {
     width: '100%',
     padding: '1rem',
@@ -401,7 +767,8 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     gap: '0.5rem',
-    marginTop: '0.5rem'
+    marginTop: '0.5rem',
+    textDecoration: 'none'
   },
   loadingContent: {
     display: 'flex',
@@ -419,6 +786,38 @@ const styles = {
   },
   buttonIcon: {
     fontSize: '1rem'
+  },
+  strengthBar: {
+    width: '100%',
+    height: '8px',
+    backgroundColor: '#e2e8f0',
+    borderRadius: '4px',
+    overflow: 'hidden'
+  },
+  strengthFill: {
+    height: '100%',
+    transition: 'all 0.3s ease'
+  },
+  passwordRequirements: {
+    backgroundColor: '#f8fafc',
+    padding: '1rem',
+    borderRadius: '8px',
+    border: '1px solid #e2e8f0'
+  },
+  requirementsTitle: {
+    fontSize: '0.9rem',
+    fontWeight: '600',
+    color: '#374151',
+    marginBottom: '0.5rem'
+  },
+  requirementsList: {
+    listStyle: 'none',
+    padding: 0,
+    margin: 0,
+    fontSize: '0.85rem',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.25rem'
   },
   successMessage: {
     textAlign: 'center',
@@ -443,7 +842,21 @@ const styles = {
   successSubtext: {
     fontSize: '0.9rem',
     color: '#64748b',
-    lineHeight: '1.5'
+    lineHeight: '1.5',
+    marginBottom: '2rem'
+  },
+  successAlert: {
+    marginTop: '1rem',
+    padding: '0.75rem 1rem',
+    backgroundColor: '#d1fae5',
+    border: '1px solid #6ee7b7',
+    borderRadius: '8px',
+    color: '#065f46',
+    fontSize: '0.9rem',
+    fontWeight: '500',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem'
   },
   errorMessage: {
     marginTop: '1rem',
@@ -488,6 +901,14 @@ const styles = {
     textAlign: 'center',
     padding: '0.5rem',
     transition: 'color 0.3s ease'
+  },
+  textButton: {
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    fontSize: '0.9rem',
+    fontWeight: '500',
+    textDecoration: 'none'
   },
   backToLogin: {
     marginTop: '1.5rem',
