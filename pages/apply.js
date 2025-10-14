@@ -297,13 +297,14 @@ export default function Apply() {
       const effectiveState = getEffectiveState();
       const effectiveCity = getEffectiveCity();
 
-      // Insert application data
+      // Insert application data with all fields
       const { data: applicationData, error: applicationError } = await supabase
         .from('applications')
         .insert([{
           first_name: formData.firstName.trim(),
-          middle_name: formData.middleName.trim(), // Added middle name
+          middle_name: formData.middleName.trim() || null,
           last_name: formData.lastName.trim(),
+          mothers_maiden_name: formData.mothersMaidenName.trim() || null,
           email: formData.email.trim().toLowerCase(),
           phone: formData.phone.trim(),
           date_of_birth: formData.dateOfBirth,
@@ -314,6 +315,8 @@ export default function Apply() {
           city: effectiveCity,
           state: effectiveState,
           zip_code: formData.zipCode.trim(),
+          employment_status: formData.employmentStatus,
+          annual_income: formData.annualIncome,
           account_types: formData.accountTypes.map(id => {
             const accountType = ACCOUNT_TYPES.find(at => at.id === id);
             // Convert account type names to enum values expected by database
@@ -344,7 +347,9 @@ export default function Apply() {
             };
             return enumMapping[accountType?.name] || accountType?.name?.toLowerCase().replace(/\s+/g, '_');
           }),
-          agree_to_terms: formData.agreeToTerms
+          agree_to_terms: formData.agreeToTerms,
+          application_status: 'pending',
+          submitted_at: new Date().toISOString()
         }])
         .select()
         .single();
@@ -505,8 +510,9 @@ export default function Apply() {
             application_id: applicationId,
             email: formData.email.trim().toLowerCase(),
             first_name: formData.firstName.trim(),
-            middle_name: formData.middleName.trim(),
+            middle_name: formData.middleName.trim() || null,
             last_name: formData.lastName.trim(),
+            mothers_maiden_name: formData.mothersMaidenName.trim() || null,
             phone: formData.phone.trim(),
             date_of_birth: formData.dateOfBirth,
             country: effectiveCountry,
@@ -516,7 +522,39 @@ export default function Apply() {
             zip_code: formData.zipCode.trim(),
             ssn: effectiveCountry === 'US' ? formData.ssn.trim() : null,
             id_number: effectiveCountry !== 'US' ? formData.idNumber.trim() : null,
-            enrollment_completed: false
+            employment_status: formData.employmentStatus,
+            annual_income: formData.annualIncome,
+            account_types: formData.accountTypes.map(id => {
+              const accountType = ACCOUNT_TYPES.find(at => at.id === id);
+              const enumMapping = {
+                'Checking Account': 'checking_account',
+                'Savings Account': 'savings_account',
+                'Business Checking': 'business_checking',
+                'Business Savings': 'business_savings',
+                'Student Checking': 'student_checking',
+                'Money Market Account': 'money_market',
+                'Certificate of Deposit (CD)': 'certificate_of_deposit',
+                'Retirement Account (IRA)': 'retirement_ira',
+                'Joint Checking Account': 'joint_checking',
+                'Trust Account': 'trust_account',
+                'Investment Brokerage Account': 'investment_brokerage',
+                'High-Yield Savings Account': 'high_yield_savings',
+                'International Checking': 'international_checking',
+                'Foreign Currency Account': 'foreign_currency',
+                'Cryptocurrency Wallet': 'cryptocurrency_wallet',
+                'Loan Repayment Account': 'loan_repayment',
+                'Mortgage Account': 'mortgage',
+                'Auto Loan Account': 'auto_loan',
+                'Credit Card Account': 'credit_card',
+                'Prepaid Card Account': 'prepaid_card',
+                'Payroll Account': 'payroll_account',
+                'Nonprofit/Charity Account': 'nonprofit_charity',
+                'Escrow Account': 'escrow_account'
+              };
+              return enumMapping[accountType?.name] || accountType?.name?.toLowerCase().replace(/\s+/g, '_');
+            }),
+            enrollment_completed: false,
+            application_status: 'pending'
           }])
           .single();
 
@@ -565,12 +603,20 @@ export default function Apply() {
           body: JSON.stringify({
             email: formData.email.trim().toLowerCase(),
             first_name: formData.firstName.trim(),
-            middle_name: formData.middleName.trim(),
+            middle_name: formData.middleName.trim() || '',
             last_name: formData.lastName.trim(),
+            mothers_maiden_name: formData.mothersMaidenName.trim() || '',
+            phone: formData.phone.trim(),
+            address: formData.address.trim(),
+            city: effectiveCity,
+            state: effectiveState,
+            zip_code: formData.zipCode.trim(),
             account_numbers: accountNumbers,
             account_types: accountTypes,
             application_id: applicationId,
             country: effectiveCountry,
+            employment_status: formData.employmentStatus,
+            annual_income: formData.annualIncome,
             enrollment_token: enrollmentToken,
             site_url: siteUrl
           })
@@ -597,12 +643,26 @@ export default function Apply() {
 
     } catch (error) {
       console.error('Application submission error:', error);
-      // Check if the error is due to a duplicate email for enrollments
-      if (error.message.includes('duplicate key value violates unique constraint "enrollments_email_key"')) {
-        setErrors({ submit: 'An account with this email already exists. Please try another email or log in.' });
-      } else {
-        setErrors({ submit: 'Failed to submit application. Please try again.' });
+      
+      // Enhanced error handling with specific messages
+      let errorMessage = 'Failed to submit application. Please try again.';
+      
+      if (error.message) {
+        if (error.message.includes('duplicate key value violates unique constraint "enrollments_email_key"') ||
+            error.message.includes('duplicate key value violates unique constraint "applications_email_key"')) {
+          errorMessage = 'An account with this email already exists. Please try another email or log in.';
+        } else if (error.message.includes('invalid input syntax')) {
+          errorMessage = 'Invalid data format. Please check all fields and try again.';
+        } else if (error.message.includes('foreign key constraint')) {
+          errorMessage = 'Database constraint error. Please contact support.';
+        } else if (error.message.includes('network') || error.message.includes('fetch')) {
+          errorMessage = 'Network error. Please check your connection and try again.';
+        } else {
+          errorMessage = `Error: ${error.message}`;
+        }
       }
+      
+      setErrors({ submit: errorMessage });
     } finally {
       setLoading(false);
     }
