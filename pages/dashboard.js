@@ -1428,10 +1428,10 @@ const styles = {
   },
   cardsSection: {
     background: 'white',
-    borderRadius: '12px',
-    padding: '1.5rem',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-    border: '1px solid #e2e8f0'
+    borderRadius: '16px',
+    padding: '2rem',
+    boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
+    border: '2px solid #e2e8f0'
   },
   cardsGrid: {
     display: 'grid',
@@ -1442,7 +1442,12 @@ const styles = {
   cardContainer: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '1rem'
+    gap: '1rem',
+    backgroundColor: 'white',
+    padding: '1.5rem',
+    borderRadius: '16px',
+    boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
+    border: '2px solid #e2e8f0'
   },
   cardFlipWrapper: {
     perspective: '1000px',
@@ -1595,13 +1600,15 @@ const styles = {
     width: '100%',
     padding: '0.75rem',
     marginTop: '0.5rem',
-    backgroundColor: '#f59e0b',
+    backgroundColor: '#1e40af',
     color: 'white',
     border: 'none',
-    borderRadius: '8px',
-    fontSize: '0.9rem',
+    borderRadius: '12px',
+    fontSize: '1rem',
     fontWeight: '600',
-    cursor: 'pointer'
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    boxShadow: '0 4px 12px rgba(30, 64, 175, 0.3)'
   },
   modalOverlay: {
     position: 'fixed',
@@ -1678,13 +1685,15 @@ const styles = {
   modalConfirmButton: {
     flex: 1,
     padding: '0.75rem',
-    backgroundColor: '#10b981',
+    backgroundColor: '#1e40af',
     color: 'white',
     border: 'none',
-    borderRadius: '8px',
+    borderRadius: '12px',
     fontSize: '1rem',
     fontWeight: '600',
-    cursor: 'pointer'
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    boxShadow: '0 4px 12px rgba(30, 64, 175, 0.3)'
   },
   modalCancelButton: {
     flex: 1,
