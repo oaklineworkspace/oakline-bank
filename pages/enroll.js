@@ -715,12 +715,15 @@ export default function EnrollPage() {
               style={{
                 width: '100%',
                 padding: '12px',
-                backgroundColor: loading ? '#9ca3af' : '#1e40af',
+                background: loading ? '#9ca3af' : 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
                 color: 'white',
                 border: 'none',
                 borderRadius: '6px',
                 fontSize: '16px',
-                cursor: loading ? 'not-allowed' : 'pointer'
+                fontWeight: '600',
+                cursor: loading ? 'not-allowed' : 'pointer',
+                boxShadow: loading ? 'none' : '0 4px 12px rgba(16, 185, 129, 0.3)',
+                transition: 'all 0.3s ease'
               }}
             >
               {loading ? 'Completing Enrollment...' : 'Complete Enrollment'}

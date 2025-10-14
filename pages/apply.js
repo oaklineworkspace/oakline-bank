@@ -1787,144 +1787,273 @@ export default function Apply() {
           {currentStep === 4 && submitSuccess && (
             <div style={{
               textAlign: 'center',
-              padding: '3rem 2rem',
-              background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)',
+              padding: '0',
+              background: 'white',
               borderRadius: '20px',
+              overflow: 'hidden',
               animation: 'fadeInScale 0.6s ease'
             }}>
+              {/* Header Section with Oakline Branding */}
               <div style={{
-                fontSize: '80px',
-                marginBottom: '1rem',
-                animation: 'bounce 1s ease'
-              }}>🎉</div>
-              
-              <h2 style={{
-                fontSize: 'clamp(28px, 5vw, 36px)',
-                color: '#065f46',
-                marginBottom: '1rem',
-                fontWeight: '700'
+                background: 'linear-gradient(135deg, #1A3E6F 0%, #2A5490 100%)',
+                padding: '3rem 2rem',
+                color: 'white'
               }}>
-                Application Submitted Successfully!
-              </h2>
-              
-              <p style={{
-                fontSize: 'clamp(16px, 3vw, 18px)',
-                color: '#047857',
-                marginBottom: '2rem',
-                lineHeight: '1.6'
-              }}>
-                Thank you for choosing Oakline Bank. Your application has been received and is being processed.
-              </p>
-
-              <div style={{
-                backgroundColor: 'white',
-                padding: '2rem',
-                borderRadius: '15px',
-                marginBottom: '2rem',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-              }}>
-                <h3 style={{
-                  fontSize: 'clamp(20px, 4vw, 24px)',
-                  color: '#1e40af',
-                  marginBottom: '1.5rem'
-                }}>📧 What's Next?</h3>
-                
                 <div style={{
-                  textAlign: 'left',
-                  maxWidth: '500px',
-                  margin: '0 auto'
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '1rem',
+                  marginBottom: '1.5rem'
                 }}>
+                  <img src="/images/logo-primary.png" alt="Oakline Bank" style={{
+                    height: '60px',
+                    width: 'auto',
+                    filter: 'brightness(0) invert(1)'
+                  }} />
                   <div style={{
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    marginBottom: '1rem',
-                    gap: '1rem'
+                    fontSize: '2rem',
+                    fontWeight: '700',
+                    letterSpacing: '0.5px'
                   }}>
-                    <span style={{ fontSize: '24px' }}>✅</span>
-                    <div>
-                      <strong style={{ color: '#1e40af' }}>Check Your Email</strong>
-                      <p style={{ margin: '0.25rem 0 0 0', color: '#64748b', fontSize: '14px' }}>
-                        We've sent enrollment instructions to <strong>{formData.email}</strong>
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    marginBottom: '1rem',
-                    gap: '1rem'
-                  }}>
-                    <span style={{ fontSize: '24px' }}>🔐</span>
-                    <div>
-                      <strong style={{ color: '#1e40af' }}>Complete Enrollment</strong>
-                      <p style={{ margin: '0.25rem 0 0 0', color: '#64748b', fontSize: '14px' }}>
-                        Click the link in your email to set up your password and activate your account
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: '1rem'
-                  }}>
-                    <span style={{ fontSize: '24px' }}>💳</span>
-                    <div>
-                      <strong style={{ color: '#1e40af' }}>Start Banking</strong>
-                      <p style={{ margin: '0.25rem 0 0 0', color: '#64748b', fontSize: '14px' }}>
-                        Access your accounts and begin your banking journey
-                      </p>
-                    </div>
+                    Oakline Bank
                   </div>
                 </div>
-              </div>
-
-              <div style={{
-                backgroundColor: '#fef3c7',
-                padding: '1.5rem',
-                borderRadius: '10px',
-                marginBottom: '2rem',
-                border: '2px solid #fbbf24'
-              }}>
-                <p style={{
-                  margin: 0,
-                  color: '#92400e',
-                  fontSize: '14px',
-                  lineHeight: '1.6'
+                
+                <div style={{
+                  fontSize: '80px',
+                  marginBottom: '1rem',
+                  animation: 'bounce 1s ease'
+                }}>✅</div>
+                
+                <h2 style={{
+                  fontSize: 'clamp(28px, 5vw, 36px)',
+                  marginBottom: '1rem',
+                  fontWeight: '700'
                 }}>
-                  <strong>⏰ Important:</strong> The enrollment link will expire in 24 hours. 
-                  If you don't see the email, please check your spam folder.
+                  Application Submitted Successfully!
+                </h2>
+                
+                <p style={{
+                  fontSize: 'clamp(16px, 3vw, 18px)',
+                  marginBottom: '0',
+                  lineHeight: '1.6',
+                  opacity: 0.95
+                }}>
+                  Welcome to the Oakline Bank family
                 </p>
               </div>
 
-              <div style={{
-                display: 'flex',
-                gap: '1rem',
-                justifyContent: 'center',
-                flexWrap: 'wrap'
-              }}>
-                <button
-                  onClick={() => router.push('/')}
-                  style={{
-                    ...styles.button,
-                    ...styles.primaryButton,
-                    padding: '16px 32px'
-                  }}
-                >
-                  🏠 Return to Home
-                </button>
-                
-                <button
-                  onClick={() => router.push('/login')}
-                  style={{
-                    ...styles.button,
-                    ...styles.secondaryButton,
-                    padding: '16px 32px'
-                  }}
-                >
-                  🔑 Go to Login
-                </button>
+              {/* Content Section */}
+              <div style={{ padding: '3rem 2rem' }}>
+                <div style={{
+                  backgroundColor: '#f8fafc',
+                  padding: '2rem',
+                  borderRadius: '15px',
+                  marginBottom: '2rem',
+                  border: '2px solid #e2e8f0'
+                }}>
+                  <h3 style={{
+                    fontSize: 'clamp(20px, 4vw, 24px)',
+                    color: '#1A3E6F',
+                    marginBottom: '1.5rem',
+                    fontWeight: '700'
+                  }}>📧 What Happens Next?</h3>
+                  
+                  <div style={{
+                    textAlign: 'left',
+                    maxWidth: '600px',
+                    margin: '0 auto'
+                  }}>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      marginBottom: '1.5rem',
+                      gap: '1rem',
+                      padding: '1rem',
+                      backgroundColor: 'white',
+                      borderRadius: '12px',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+                    }}>
+                      <div style={{
+                        fontSize: '32px',
+                        backgroundColor: '#FFC857',
+                        borderRadius: '50%',
+                        width: '50px',
+                        height: '50px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0
+                      }}>1</div>
+                      <div>
+                        <strong style={{ color: '#1A3E6F', fontSize: '18px' }}>Check Your Email</strong>
+                        <p style={{ margin: '0.5rem 0 0 0', color: '#64748b', fontSize: '15px', lineHeight: '1.6' }}>
+                          We've sent enrollment instructions to <strong style={{ color: '#1A3E6F' }}>{formData.email}</strong>
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      marginBottom: '1.5rem',
+                      gap: '1rem',
+                      padding: '1rem',
+                      backgroundColor: 'white',
+                      borderRadius: '12px',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+                    }}>
+                      <div style={{
+                        fontSize: '32px',
+                        backgroundColor: '#FFC857',
+                        borderRadius: '50%',
+                        width: '50px',
+                        height: '50px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0
+                      }}>2</div>
+                      <div>
+                        <strong style={{ color: '#1A3E6F', fontSize: '18px' }}>Complete Enrollment</strong>
+                        <p style={{ margin: '0.5rem 0 0 0', color: '#64748b', fontSize: '15px', lineHeight: '1.6' }}>
+                          Click the secure link to set up your password and verify your identity
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: '1rem',
+                      padding: '1rem',
+                      backgroundColor: 'white',
+                      borderRadius: '12px',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+                    }}>
+                      <div style={{
+                        fontSize: '32px',
+                        backgroundColor: '#FFC857',
+                        borderRadius: '50%',
+                        width: '50px',
+                        height: '50px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0
+                      }}>3</div>
+                      <div>
+                        <strong style={{ color: '#1A3E6F', fontSize: '18px' }}>Start Banking</strong>
+                        <p style={{ margin: '0.5rem 0 0 0', color: '#64748b', fontSize: '15px', lineHeight: '1.6' }}>
+                          Access your accounts, apply for debit cards, and enjoy premium banking services
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{
+                  backgroundColor: '#fff7ed',
+                  padding: '1.5rem',
+                  borderRadius: '12px',
+                  marginBottom: '2rem',
+                  border: '2px solid #FFC857',
+                  textAlign: 'left'
+                }}>
+                  <p style={{
+                    margin: 0,
+                    color: '#92400e',
+                    fontSize: '15px',
+                    lineHeight: '1.6'
+                  }}>
+                    <strong>⏰ Important:</strong> Your enrollment link will expire in 24 hours for security purposes. 
+                    If you don't see the email, please check your spam or junk folder.
+                  </p>
+                </div>
+
+                <div style={{
+                  display: 'flex',
+                  gap: '1rem',
+                  justifyContent: 'center',
+                  flexWrap: 'wrap'
+                }}>
+                  <button
+                    onClick={() => router.push('/')}
+                    style={{
+                      padding: '16px 32px',
+                      background: 'linear-gradient(135deg, #1A3E6F 0%, #2A5490 100%)',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '12px',
+                      fontSize: '16px',
+                      fontWeight: '700',
+                      cursor: 'pointer',
+                      boxShadow: '0 6px 20px rgba(26, 62, 111, 0.4)',
+                      transition: 'all 0.3s ease'
+                    }}
+                    onMouseOver={(e) => {
+                      e.target.style.transform = 'translateY(-2px)';
+                      e.target.style.boxShadow = '0 8px 24px rgba(26, 62, 111, 0.5)';
+                    }}
+                    onMouseOut={(e) => {
+                      e.target.style.transform = 'translateY(0)';
+                      e.target.style.boxShadow = '0 6px 20px rgba(26, 62, 111, 0.4)';
+                    }}
+                  >
+                    🏠 Return to Home
+                  </button>
+                  
+                  <button
+                    onClick={() => router.push('/login')}
+                    style={{
+                      padding: '16px 32px',
+                      backgroundColor: 'transparent',
+                      color: '#1A3E6F',
+                      border: '2px solid #1A3E6F',
+                      borderRadius: '12px',
+                      fontSize: '16px',
+                      fontWeight: '700',
+                      cursor: 'pointer',
+                      transition: 'all 0.3s ease'
+                    }}
+                    onMouseOver={(e) => {
+                      e.target.style.backgroundColor = '#1A3E6F';
+                      e.target.style.color = 'white';
+                      e.target.style.transform = 'translateY(-2px)';
+                    }}
+                    onMouseOut={(e) => {
+                      e.target.style.backgroundColor = 'transparent';
+                      e.target.style.color = '#1A3E6F';
+                      e.target.style.transform = 'translateY(0)';
+                    }}
+                  >
+                    🔑 Go to Login
+                  </button>
+                </div>
+
+                <div style={{
+                  marginTop: '2rem',
+                  padding: '1.5rem',
+                  backgroundColor: '#f8fafc',
+                  borderRadius: '12px',
+                  border: '1px solid #e2e8f0'
+                }}>
+                  <p style={{
+                    margin: 0,
+                    color: '#64748b',
+                    fontSize: '14px'
+                  }}>
+                    Need assistance? Contact our support team at{' '}
+                    <a href="tel:1-800-OAKLINE" style={{ color: '#1A3E6F', fontWeight: '600', textDecoration: 'none' }}>
+                      1-800-OAKLINE
+                    </a>
+                    {' '}or email{' '}
+                    <a href="mailto:support@theoaklinebank.com" style={{ color: '#1A3E6F', fontWeight: '600', textDecoration: 'none' }}>
+                      support@theoaklinebank.com
+                    </a>
+                  </p>
+                </div>
               </div>
             </div>
           )}

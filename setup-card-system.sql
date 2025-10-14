@@ -1,4 +1,3 @@
-
 -- Complete Card Transaction System Setup
 
 -- Card Transactions Table
@@ -20,37 +19,21 @@ CREATE INDEX IF NOT EXISTS idx_card_transactions_card_id ON card_transactions(ca
 CREATE INDEX IF NOT EXISTS idx_card_transactions_created_at ON card_transactions(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_card_transactions_status ON card_transactions(status);
 
--- Function to generate card number in XXXX-XXXX-XXXX-XXXX format
+-- Function to generate realistic 16-digit card number (starts with 4 for Visa)
 CREATE OR REPLACE FUNCTION generate_card_number()
-RETURNS VARCHAR(19) AS $$
+RETURNS VARCHAR(16) AS $$
 DECLARE
-    card_number VARCHAR(19);
-    part1 VARCHAR(4);
-    part2 VARCHAR(4);
-    part3 VARCHAR(4);
-    part4 VARCHAR(4);
+    card_number VARCHAR(16);
+    is_unique BOOLEAN := FALSE;
 BEGIN
-    -- Generate 4 random 4-digit parts
-    part1 := LPAD(FLOOR(RANDOM() * 10000)::TEXT, 4, '0');
-    part2 := LPAD(FLOOR(RANDOM() * 10000)::TEXT, 4, '0');
-    part3 := LPAD(FLOOR(RANDOM() * 10000)::TEXT, 4, '0');
-    part4 := LPAD(FLOOR(RANDOM() * 10000)::TEXT, 4, '0');
-    
-    -- Start with 4 for Visa-like cards
-    part1 := '4' || SUBSTRING(part1, 2, 3);
-    
-    card_number := part1 || '-' || part2 || '-' || part3 || '-' || part4;
-    
-    -- Check if card number already exists, regenerate if it does
-    WHILE EXISTS (SELECT 1 FROM cards WHERE card_number = card_number) LOOP
-        part1 := LPAD(FLOOR(RANDOM() * 10000)::TEXT, 4, '0');
-        part2 := LPAD(FLOOR(RANDOM() * 10000)::TEXT, 4, '0');
-        part3 := LPAD(FLOOR(RANDOM() * 10000)::TEXT, 4, '0');
-        part4 := LPAD(FLOOR(RANDOM() * 10000)::TEXT, 4, '0');
-        part1 := '4' || SUBSTRING(part1, 2, 3);
-        card_number := part1 || '-' || part2 || '-' || part3 || '-' || part4;
+    WHILE NOT is_unique LOOP
+        -- Generate Visa card number (starts with 4)
+        card_number := '4' || LPAD(FLOOR(RANDOM() * 1000000000000000)::TEXT, 15, '0');
+
+        -- Check if unique
+        SELECT NOT EXISTS (SELECT 1 FROM cards WHERE cards.card_number = card_number) INTO is_unique;
     END LOOP;
-    
+
     RETURN card_number;
 END;
 $$ LANGUAGE plpgsql;
@@ -246,27 +229,21 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION issue_debit_card(
     p_user_id UUID,
     p_account_id UUID,
-    p_cardholder_name VARCHAR(100),
-    p_daily_limit DECIMAL(10,2) DEFAULT 1000.00,
+    p_cardholder_name VARCHAR(255),
+    p_daily_limit DECIMAL(10,2) DEFAULT 2000.00,
     p_monthly_limit DECIMAL(10,2) DEFAULT 10000.00
 )
 RETURNS JSON AS $$
 DECLARE
-    v_card_id INTEGER;
-    v_card_number VARCHAR(19);
+    v_card_number VARCHAR(16);
     v_cvv VARCHAR(3);
     v_expiry_date VARCHAR(5);
-    v_account_exists BOOLEAN;
-    v_user_exists BOOLEAN;
+    v_card_id INTEGER;
+    v_result JSON;
 BEGIN
     -- Validate that account exists and belongs to user
-    SELECT EXISTS(
-        SELECT 1 FROM accounts a 
-        JOIN auth.users u ON a.user_id = u.id 
-        WHERE a.id = p_account_id AND u.id = p_user_id
-    ) INTO v_account_exists;
-
-    IF NOT v_account_exists THEN
+    -- (Assuming 'accounts' table has a 'user_id' column and 'auth.users' table for user validation)
+    IF NOT EXISTS (SELECT 1 FROM accounts a JOIN auth.users u ON a.user_id = u.id WHERE a.id = p_account_id AND u.id = p_user_id) THEN
         RETURN json_build_object('success', false, 'error', 'Account not found or does not belong to user');
     END IF;
 
@@ -288,7 +265,8 @@ BEGIN
         daily_spent,
         monthly_spent,
         status,
-        is_locked
+        is_locked,
+        card_type -- Added card_type
     )
     VALUES (
         p_user_id, 
@@ -299,14 +277,15 @@ BEGIN
         v_cvv, 
         p_daily_limit, 
         p_monthly_limit,
-        0.00,
-        0.00,
+        0.00, -- Initialize daily_spent
+        0.00, -- Initialize monthly_spent
         'active',
-        false
+        false,
+        'debit' -- Set card_type to debit
     )
     RETURNING id INTO v_card_id;
 
-    -- Log the card issuance
+    -- Log the card issuance (optional, but good practice)
     INSERT INTO audit_logs (user_id, action, table_name, new_data)
     VALUES (
         p_user_id,
@@ -315,8 +294,13 @@ BEGIN
         json_build_object(
             'card_id', v_card_id,
             'account_id', p_account_id,
+            'cardholder_name', p_cardholder_name,
+            'card_number', v_card_number,
+            'cvv', v_cvv,
+            'expiry_date', v_expiry_date,
             'daily_limit', p_daily_limit,
-            'monthly_limit', p_monthly_limit
+            'monthly_limit', p_monthly_limit,
+            'card_type', 'debit'
         )
     );
 
@@ -326,6 +310,9 @@ BEGIN
         'card_number', v_card_number,
         'cvv', v_cvv,
         'expiry_date', v_expiry_date,
+        'cardholder_name', p_cardholder_name,
+        'daily_limit', p_daily_limit,
+        'monthly_limit', p_monthly_limit,
         'message', 'Debit card issued successfully'
     );
 
