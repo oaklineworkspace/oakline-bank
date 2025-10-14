@@ -67,6 +67,12 @@ export default function ResendEnrollmentPage() {
   };
 
   const handleResendEnrollment = async (application) => {
+    // Check if enrollment is already completed
+    if (application.enrollment_completed) {
+      setMessage(`❌ User has completed enrollment. Cannot resend link.`);
+      return;
+    }
+
     setResendingId(application.id);
     setMessage('');
 
@@ -252,14 +258,15 @@ export default function ResendEnrollmentPage() {
                   <td style={styles.cell}>
                     <button
                       onClick={() => handleResendEnrollment(app)}
-                      disabled={resendingId === app.id}
+                      disabled={resendingId === app.id || app.enrollment_completed}
                       style={{
                         ...styles.actionButton,
-                        opacity: resendingId === app.id ? 0.6 : 1,
-                        cursor: resendingId === app.id ? 'not-allowed' : 'pointer'
+                        opacity: (resendingId === app.id || app.enrollment_completed) ? 0.6 : 1,
+                        cursor: (resendingId === app.id || app.enrollment_completed) ? 'not-allowed' : 'pointer',
+                        backgroundColor: app.enrollment_completed ? '#6b7280' : '#1a365d'
                       }}
                     >
-                      {resendingId === app.id ? '⏳ Sending...' : '📧 Send Link'}
+                      {app.enrollment_completed ? '✅ Completed' : resendingId === app.id ? '⏳ Sending...' : '📧 Send Link'}
                     </button>
                   </td>
                 </tr>

@@ -359,16 +359,14 @@ export default function Apply() {
 
       if (applicationError) throw applicationError;
 
-      const applicationId = applicationData.id;
-
       // Create Supabase Auth user first
-      console.log('Creating auth user for application:', applicationId);
+      console.log('Creating auth user for application:', applicationData.id);
       const authResponse = await fetch('/api/create-auth-user', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: formData.email.trim().toLowerCase(),
-          application_id: applicationId
+          application_id: applicationData.id
         })
       });
 
@@ -388,11 +386,12 @@ export default function Apply() {
         .update({ user_id: userId })
         .eq('id', applicationId);
 
-      // Insert into profiles table
+      // Upsert into profiles table with all required fields
       const { error: profileError } = await supabase
         .from('profiles')
-        .insert([{
+        .upsert([{
           id: userId,
+          application_id: applicationData.id,
           email: formData.email.trim().toLowerCase(),
           first_name: formData.firstName.trim(),
           middle_name: formData.middleName.trim() || null,
@@ -412,11 +411,14 @@ export default function Apply() {
           account_types: mappedAccountTypes,
           enrollment_completed: false,
           password_set: false,
-          application_status: 'pending'
-        }]);
+          application_status: 'pending',
+          updated_at: new Date().toISOString()
+        }], {
+          onConflict: 'id'
+        });
 
-      if (profileError && profileError.code !== '23505') {
-        console.error('Error creating profile:', profileError);
+      if (profileError) {
+        console.error('Error upserting profile:', profileError);
       }
 
       const applicationId = applicationData.id;
@@ -520,7 +522,7 @@ export default function Apply() {
         .from('enrollments')
         .select('*')
         .eq('email', formData.email.trim().toLowerCase())
-        .eq('application_id', applicationId)
+        .eq('application_id', applicationData.id)
         .single();
 
       if (existingEnrollment) {
@@ -529,10 +531,12 @@ export default function Apply() {
           .from('enrollments')
           .update({
             token: enrollmentToken,
-            is_used: false
+            is_used: false,
+            user_id: userId,
+            created_at: new Date().toISOString()
           })
           .eq('email', formData.email.trim().toLowerCase())
-          .eq('application_id', applicationId)
+          .eq('application_id', applicationData.id)
           .select()
           .single();
 
@@ -551,7 +555,8 @@ export default function Apply() {
             email: formData.email.trim().toLowerCase(),
             token: enrollmentToken,
             is_used: false,
-            application_id: applicationId
+            application_id: applicationData.id,
+            user_id: userId
           }])
           .select()
           .single();
@@ -561,7 +566,7 @@ export default function Apply() {
           enrollmentError = insertError;
         } else {
           enrollmentRecord = newEnrollmentData;
-          console.log('Created new enrollment record with application_id:', applicationId);
+          console.log('Created new enrollment record with application_id:', applicationData.id);
         }
       }
 

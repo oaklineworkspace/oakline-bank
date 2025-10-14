@@ -1,4 +1,3 @@
-
 import { supabaseAdmin } from '../../lib/supabaseAdmin';
 import nodemailer from 'nodemailer';
 
@@ -10,10 +9,10 @@ export default async function handler(req, res) {
   // Check SMTP configuration
   const requiredEnvVars = ['SMTP_HOST', 'SMTP_PORT', 'SMTP_USER', 'SMTP_PASS'];
   const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
-  
+
   if (missingVars.length > 0) {
     console.error('Missing SMTP environment variables:', missingVars);
-    return res.status(500).json({ 
+    return res.status(500).json({
       error: 'Email service not configured',
       message: `Missing environment variables: ${missingVars.join(', ')}`
     });
@@ -72,7 +71,7 @@ export default async function handler(req, res) {
     if (!authUser) {
       // Create auth user first
       const tempPassword = `temp_${Date.now()}_${Math.random().toString(36).substring(2)}`;
-      
+
       const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
         email: email,
         password: tempPassword,
@@ -95,9 +94,9 @@ export default async function handler(req, res) {
     // Detect site URL dynamically from multiple sources
     const protocol = req.headers['x-forwarded-proto'] || 'http';
     const host = req.headers['x-forwarded-host'] || req.headers.host;
-    
+
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || `${protocol}://${host}`;
-    
+
     console.log('Using site URL for redirect:', siteUrl);
     console.log('Detected from headers - Protocol:', protocol, 'Host:', host);
 
@@ -136,7 +135,7 @@ export default async function handler(req, res) {
       await transporter.verify();
     } catch (smtpError) {
       console.error('SMTP connection failed:', smtpError.message);
-      return res.status(500).json({ 
+      return res.status(500).json({
         error: 'Email service connection failed',
         message: smtpError.message
       });
@@ -226,13 +225,6 @@ export default async function handler(req, res) {
     `;
 
     // Send email
-    const mailOptions = {
-      from: process.env.SMTP_FROM || process.env.SMTP_USER,
-      to: email,
-      subject: "Complete Your Oakline Bank Enrollment - Secure Link",
-      html: emailHtml,
-    };
-
     const info = await transporter.sendMail(mailOptions);
     console.log(`Enrollment magic link sent to ${email}: ${info.response}`);
 
@@ -295,9 +287,9 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error('Error sending enrollment link:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Failed to send enrollment link',
-      message: error.message 
+      message: error.message
     });
   }
 }

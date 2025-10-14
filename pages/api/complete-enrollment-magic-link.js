@@ -1,4 +1,3 @@
-
 import { supabaseAdmin } from '../../lib/supabaseAdmin';
 
 export default async function handler(req, res) {
@@ -53,7 +52,7 @@ export default async function handler(req, res) {
       const tokenCreatedAt = new Date(enrollmentData.created_at);
       const now = new Date();
       const hoursSinceCreation = (now - tokenCreatedAt) / (1000 * 60 * 60);
-      
+
       if (hoursSinceCreation > 24) {
         return res.status(400).json({ 
           error: 'This enrollment link has expired. Please request a new enrollment link.',
@@ -145,24 +144,54 @@ export default async function handler(req, res) {
       console.log('✅ Profile marked as enrollment_completed with timestamp');
     }
 
-    // 9️⃣ Mark enrollment as used (password setup completed)
+    // Mark enrollment as completed
+    const completedAt = new Date().toISOString();
+
     const { error: enrollmentUpdateError } = await supabaseAdmin
       .from('enrollments')
       .update({ 
         is_used: true,
-        updated_at: new Date().toISOString()
+        completed_at: completedAt,
+        selected_account_number: accountNumber
       })
-      .eq('application_id', application_id)
       .eq('email', email);
 
     if (enrollmentUpdateError) {
-      console.error('Error marking enrollment as used:', enrollmentUpdateError);
-      // Don't fail the process for this
-    } else {
-      console.log('✅ Enrollment marked as used (is_used = true)');
+      console.error('Error updating enrollment record:', enrollmentUpdateError);
     }
 
-    // 🔟 Link accounts to the auth user
+    // Update profile with all completion fields
+    const { error: profileUpdateError } = await supabaseAdmin
+      .from('profiles')
+      .update({ 
+        enrollment_completed: true,
+        enrollment_completed_at: completedAt,
+        password_set: true,
+        application_status: 'completed',
+        updated_at: completedAt
+      })
+      .eq('id', userId);
+
+    if (profileUpdateError) {
+      console.error('Error updating profile:', profileUpdateError);
+    }
+
+    // Update application status to completed
+    const { error: applicationUpdateError } = await supabaseAdmin
+      .from('applications')
+      .update({
+        application_status: 'completed',
+        processed_at: completedAt
+      })
+      .eq('id', application_id);
+
+    if (applicationUpdateError) {
+      console.error('Error updating application status:', applicationUpdateError);
+    } else {
+      console.log('✅ Application status updated to completed');
+    }
+
+    // Link accounts to the auth user
     const { error: accountError } = await supabaseAdmin
       .from('accounts')
       .update({ 

@@ -151,11 +151,13 @@ export default async function handler(req, res) {
     }
 
     // 8️⃣ Mark enrollment as completed and update profile
+    const completedAt = new Date().toISOString();
+    
     const { error: enrollmentUpdateError } = await supabaseAdmin
       .from('enrollments')
       .update({ 
         is_used: true,
-        completed_at: new Date().toISOString(),
+        completed_at: completedAt,
         selected_account_number: accountNumber
       })
       .eq('token', token)
@@ -166,20 +168,37 @@ export default async function handler(req, res) {
       // Don't fail the process for this
     }
 
-    // Also update profile to mark enrollment as completed
+    // Update profile to mark enrollment as completed
     const { error: profileUpdateError } = await supabaseAdmin
       .from('profiles')
       .update({ 
         enrollment_completed: true,
-        enrollment_completed_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        enrollment_completed_at: completedAt,
+        password_set: true,
+        application_status: 'completed',
+        updated_at: completedAt
       })
-      .eq('id', authUser.id); // Use authUser.id directly
+      .eq('id', authUser.id);
 
     if (profileUpdateError) {
       console.error('Error updating profile enrollment status:', profileUpdateError);
     } else {
       console.log('✅ Profile marked as enrollment_completed with timestamp');
+    }
+
+    // Update application status to completed
+    const { error: applicationUpdateError } = await supabaseAdmin
+      .from('applications')
+      .update({
+        application_status: 'completed',
+        processed_at: completedAt
+      })
+      .eq('id', application_id);
+
+    if (applicationUpdateError) {
+      console.error('Error updating application status:', applicationUpdateError);
+    } else {
+      console.log('✅ Application status updated to completed');
     }
 
 
