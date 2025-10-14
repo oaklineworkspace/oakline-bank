@@ -297,6 +297,38 @@ export default function Apply() {
       const effectiveState = getEffectiveState();
       const effectiveCity = getEffectiveCity();
 
+      // Create account type enum mapping
+      const enumMapping = {
+        'Checking Account': 'checking_account',
+        'Savings Account': 'savings_account',
+        'Business Checking': 'business_checking',
+        'Business Savings': 'business_savings',
+        'Student Checking': 'student_checking',
+        'Money Market Account': 'money_market',
+        'Certificate of Deposit (CD)': 'certificate_of_deposit',
+        'Retirement Account (IRA)': 'retirement_ira',
+        'Joint Checking Account': 'joint_checking',
+        'Trust Account': 'trust_account',
+        'Investment Brokerage Account': 'investment_brokerage',
+        'High-Yield Savings Account': 'high_yield_savings',
+        'International Checking': 'international_checking',
+        'Foreign Currency Account': 'foreign_currency',
+        'Cryptocurrency Wallet': 'cryptocurrency_wallet',
+        'Loan Repayment Account': 'loan_repayment',
+        'Mortgage Account': 'mortgage',
+        'Auto Loan Account': 'auto_loan',
+        'Credit Card Account': 'credit_card',
+        'Prepaid Card Account': 'prepaid_card',
+        'Payroll Account': 'payroll_account',
+        'Nonprofit/Charity Account': 'nonprofit_charity',
+        'Escrow Account': 'escrow_account'
+      };
+
+      const mappedAccountTypes = formData.accountTypes.map(id => {
+        const accountType = ACCOUNT_TYPES.find(at => at.id === id);
+        return enumMapping[accountType?.name] || accountType?.name?.toLowerCase().replace(/\s+/g, '_');
+      });
+
       // Insert application data with all fields
       const { data: applicationData, error: applicationError } = await supabase
         .from('applications')
@@ -317,36 +349,7 @@ export default function Apply() {
           zip_code: formData.zipCode.trim(),
           employment_status: formData.employmentStatus,
           annual_income: formData.annualIncome,
-          account_types: formData.accountTypes.map(id => {
-            const accountType = ACCOUNT_TYPES.find(at => at.id === id);
-            // Convert account type names to enum values expected by database
-            const enumMapping = {
-              'Checking Account': 'checking_account',
-              'Savings Account': 'savings_account',
-              'Business Checking': 'business_checking',
-              'Business Savings': 'business_savings',
-              'Student Checking': 'student_checking',
-              'Money Market Account': 'money_market',
-              'Certificate of Deposit (CD)': 'certificate_of_deposit',
-              'Retirement Account (IRA)': 'retirement_ira',
-              'Joint Checking Account': 'joint_checking',
-              'Trust Account': 'trust_account',
-              'Investment Brokerage Account': 'investment_brokerage',
-              'High-Yield Savings Account': 'high_yield_savings',
-              'International Checking': 'international_checking',
-              'Foreign Currency Account': 'foreign_currency',
-              'Cryptocurrency Wallet': 'cryptocurrency_wallet',
-              'Loan Repayment Account': 'loan_repayment',
-              'Mortgage Account': 'mortgage',
-              'Auto Loan Account': 'auto_loan',
-              'Credit Card Account': 'credit_card',
-              'Prepaid Card Account': 'prepaid_card',
-              'Payroll Account': 'payroll_account',
-              'Nonprofit/Charity Account': 'nonprofit_charity',
-              'Escrow Account': 'escrow_account'
-            };
-            return enumMapping[accountType?.name] || accountType?.name?.toLowerCase().replace(/\s+/g, '_');
-          }),
+          account_types: mappedAccountTypes,
           agree_to_terms: formData.agreeToTerms,
           application_status: 'pending',
           submitted_at: new Date().toISOString()
@@ -355,6 +358,66 @@ export default function Apply() {
         .single();
 
       if (applicationError) throw applicationError;
+
+      const applicationId = applicationData.id;
+
+      // Create Supabase Auth user first
+      console.log('Creating auth user for application:', applicationId);
+      const authResponse = await fetch('/api/create-auth-user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: formData.email.trim().toLowerCase(),
+          application_id: applicationId
+        })
+      });
+
+      if (!authResponse.ok) {
+        const authError = await authResponse.json();
+        console.error('Failed to create auth user:', authError);
+        throw new Error('Failed to create user account');
+      }
+
+      const authResult = await authResponse.json();
+      const userId = authResult.user.auth_id;
+      console.log('Auth user created successfully:', userId);
+
+      // Update application with user_id
+      await supabase
+        .from('applications')
+        .update({ user_id: userId })
+        .eq('id', applicationId);
+
+      // Insert into profiles table
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert([{
+          id: userId,
+          email: formData.email.trim().toLowerCase(),
+          first_name: formData.firstName.trim(),
+          middle_name: formData.middleName.trim() || null,
+          last_name: formData.lastName.trim(),
+          mothers_maiden_name: formData.mothersMaidenName.trim() || null,
+          phone: formData.phone.trim(),
+          date_of_birth: formData.dateOfBirth,
+          country: effectiveCountry,
+          city: effectiveCity,
+          state: effectiveState,
+          zip_code: formData.zipCode.trim(),
+          address: formData.address.trim(),
+          ssn: effectiveCountry === 'US' ? formData.ssn.trim() : null,
+          id_number: effectiveCountry !== 'US' ? formData.idNumber.trim() : null,
+          employment_status: formData.employmentStatus,
+          annual_income: formData.annualIncome,
+          account_types: mappedAccountTypes,
+          enrollment_completed: false,
+          password_set: false,
+          application_status: 'pending'
+        }]);
+
+      if (profileError && profileError.code !== '23505') {
+        console.error('Error creating profile:', profileError);
+      }
 
       const applicationId = applicationData.id;
 

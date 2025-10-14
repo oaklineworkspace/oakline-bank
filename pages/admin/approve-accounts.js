@@ -101,31 +101,39 @@ export default function ApproveAccounts() {
     }
   };
 
-  const approveAccount = async (accountId, accountNumber) => {
+  const updateAccountStatus = async (accountId, accountNumber, newStatus, actionName) => {
     setProcessing(accountId);
     setError('');
     try {
-      // Update account status to active
+      const updateData = {
+        status: newStatus,
+        updated_at: new Date().toISOString()
+      };
+
       const { error: updateError } = await supabase
         .from('accounts')
-        .update({
-          status: 'active',
-          updated_at: new Date().toISOString()
-        })
+        .update(updateData)
         .eq('id', accountId);
 
       if (updateError) {
         console.error('Update error:', updateError);
-        throw new Error(`Failed to approve account: ${updateError.message}`);
+        throw new Error(`Failed to ${actionName} account: ${updateError.message}`);
       }
 
-      setMessage(`✅ Account ${accountNumber} has been approved successfully!`);
+      const statusEmojis = {
+        active: '✅',
+        suspended: '⏸️',
+        closed: '🔒',
+        rejected: '❌'
+      };
+
+      setMessage(`${statusEmojis[newStatus]} Account ${accountNumber} has been ${actionName} successfully!`);
       setTimeout(() => setMessage(''), 5000);
 
       // Refresh the pending accounts list
       await fetchPendingAccounts();
     } catch (error) {
-      console.error('Error approving account:', error);
+      console.error(`Error ${actionName} account:`, error);
       setError(error.message);
       setTimeout(() => setError(''), 5000);
     } finally {
@@ -133,35 +141,20 @@ export default function ApproveAccounts() {
     }
   };
 
-  const rejectAccount = async (accountId, accountNumber) => {
-    setProcessing(accountId);
-    setError(''); // Clear previous errors
-    try {
-      const { error } = await supabase
-        .from('accounts')
-        .update({
-          status: 'rejected',
-          rejected_at: new Date().toISOString(),
-          rejected_by: user?.id
-        })
-        .eq('id', accountId);
+  const approveAccount = async (accountId, accountNumber) => {
+    await updateAccountStatus(accountId, accountNumber, 'active', 'approved');
+  };
 
-      if (error) {
-        console.error('Error rejecting account:', error);
-        throw new Error(`Failed to reject account: ${error.message}`);
-      } else {
-        setMessage(`Account ${accountNumber} has been rejected successfully!`);
-        setTimeout(() => setMessage(''), 5000);
-        // Remove from pending list
-        setPendingAccounts(prev => prev.filter(acc => acc.id !== accountId));
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      setError(error.message);
-      setTimeout(() => setError(''), 5000);
-    } finally {
-      setProcessing(null);
-    }
+  const suspendAccount = async (accountId, accountNumber) => {
+    await updateAccountStatus(accountId, accountNumber, 'suspended', 'suspended');
+  };
+
+  const closeAccount = async (accountId, accountNumber) => {
+    await updateAccountStatus(accountId, accountNumber, 'closed', 'closed');
+  };
+
+  const rejectAccount = async (accountId, accountNumber) => {
+    await updateAccountStatus(accountId, accountNumber, 'rejected', 'rejected');
   };
 
   if (!isAuthenticated) {
@@ -283,14 +276,28 @@ export default function ApproveAccounts() {
                     disabled={processing === account.id}
                     style={styles.approveButton}
                   >
-                    {processing === account.id ? '⏳ Processing...' : '✅ Approve'}
+                    {processing === account.id ? '⏳' : '✅'} Approve
+                  </button>
+                  <button
+                    onClick={() => suspendAccount(account.id, account.account_number)}
+                    disabled={processing === account.id}
+                    style={styles.suspendButton}
+                  >
+                    {processing === account.id ? '⏳' : '⏸️'} Suspend
+                  </button>
+                  <button
+                    onClick={() => closeAccount(account.id, account.account_number)}
+                    disabled={processing === account.id}
+                    style={styles.closeButton}
+                  >
+                    {processing === account.id ? '⏳' : '🔒'} Close
                   </button>
                   <button
                     onClick={() => rejectAccount(account.id, account.account_number)}
                     disabled={processing === account.id}
                     style={styles.rejectButton}
                   >
-                    {processing === account.id ? '⏳ Processing...' : '❌ Reject'}
+                    {processing === account.id ? '⏳' : '❌'} Reject
                   </button>
                 </div>
               </div>
@@ -645,8 +652,8 @@ const styles = {
   },
   actionButtons: {
     display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    gap: '0.75rem'
+    gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))',
+    gap: '0.5rem'
   },
   approveButton: {
     background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
@@ -659,6 +666,38 @@ const styles = {
     cursor: 'pointer',
     transition: 'all 0.2s ease',
     boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '0.5rem'
+  },
+  suspendButton: {
+    background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+    color: 'white',
+    border: 'none',
+    padding: 'clamp(0.75rem, 3vw, 1rem)',
+    borderRadius: '12px',
+    fontSize: 'clamp(0.875rem, 2.5vw, 1rem)',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+    boxShadow: '0 4px 12px rgba(245, 158, 11, 0.3)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '0.5rem'
+  },
+  closeButton: {
+    background: 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)',
+    color: 'white',
+    border: 'none',
+    padding: 'clamp(0.75rem, 3vw, 1rem)',
+    borderRadius: '12px',
+    fontSize: 'clamp(0.875rem, 2.5vw, 1rem)',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+    boxShadow: '0 4px 12px rgba(107, 114, 128, 0.3)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',

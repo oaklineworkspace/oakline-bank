@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from 'react';
+import { supabase } from '../../lib/supabaseClient';
 
 export default function ResendEnrollmentPage() {
   const [applications, setApplications] = useState([]);
@@ -15,15 +16,48 @@ export default function ResendEnrollmentPage() {
   const fetchApplications = async () => {
     try {
       setLoading(true);
+      setMessage('');
       
-      const response = await fetch('/api/admin/get-applications-with-status');
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch applications');
+      // Fetch applications directly from Supabase
+      const { data: appsData, error: appsError } = await supabase
+        .from('applications')
+        .select('*')
+        .order('submitted_at', { ascending: false });
+
+      if (appsError) {
+        throw appsError;
       }
-      
-      const data = await response.json();
-      setApplications(data.applications || []);
+
+      // Fetch enrollments
+      const { data: enrollmentsData } = await supabase
+        .from('enrollments')
+        .select('*');
+
+      // Fetch profiles to check enrollment status
+      const { data: profilesData } = await supabase
+        .from('profiles')
+        .select('id, email, enrollment_completed');
+
+      // Combine data
+      const enrichedApps = appsData.map(app => {
+        const enrollment = enrollmentsData?.find(e => e.email === app.email);
+        const profile = profilesData?.find(p => p.email === app.email);
+        
+        let status = 'pending';
+        if (profile?.enrollment_completed) {
+          status = 'completed';
+        } else if (enrollment) {
+          status = 'enrollment_sent';
+        }
+        
+        return {
+          ...app,
+          status,
+          enrollment_completed: profile?.enrollment_completed || false
+        };
+      });
+
+      setApplications(enrichedApps);
     } catch (error) {
       console.error('Error fetching applications:', error);
       setMessage('Error loading applications: ' + error.message);

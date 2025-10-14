@@ -82,13 +82,15 @@ export default function AdminDashboard() {
   const fetchStats = async () => {
     setLoading(true);
     try {
-      // Fetch total users from full_profiles
+      // Fetch total users from applications table
       const { data: usersData, error: usersError } = await supabase
-        .from('full_profiles')
-        .select('*', { count: 'exact' })
+        .from('applications')
+        .select('*, profiles(*)')
         .order('submitted_at', { ascending: false });
 
-      if (usersError) console.error('Error fetching users:', usersError);
+      if (usersError) {
+        console.error('Error fetching users:', usersError);
+      }
 
       const users = usersData || [];
 
@@ -117,7 +119,7 @@ export default function AdminDashboard() {
 
       // Recent users
       const recentUsersList = users.slice(0, 5).map(user => ({
-        id: user.user_id,
+        id: user.id,
         name: `${user.first_name || ''} ${user.middle_name ? user.middle_name + ' ' : ''}${user.last_name || ''}`.trim(),
         email: user.email,
         created_at: user.submitted_at,
