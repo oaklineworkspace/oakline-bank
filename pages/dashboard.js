@@ -677,6 +677,15 @@ function DashboardContent() {
                     </span>
                   </div>
 
+                  <div style={styles.cardFeaturesList}>
+                    <div style={styles.cardFeatureItem}>💰 Daily Limit: ${card.daily_limit || '2,000'}</div>
+                    <div style={styles.cardFeatureItem}>📅 Monthly Limit: ${card.monthly_limit || '10,000'}</div>
+                    <div style={styles.cardFeatureItem}>🌍 Global Acceptance</div>
+                    <div style={styles.cardFeatureItem}>🔒 EMV Chip Security</div>
+                    <div style={styles.cardFeatureItem}>📱 Contactless Payments</div>
+                    <div style={styles.cardFeatureItem}>🛡️ Fraud Protection</div>
+                  </div>
+
                   {!card.pin_set && (
                     <button 
                       onClick={() => openPinModal(card.id)}
@@ -1173,14 +1182,14 @@ const styles = {
     overflow: 'visible'
   },
   balanceAmount: {
-    fontSize: 'clamp(1.8rem, 3.5vw, 2.5rem)',
-    fontWeight: 'bold',
+    fontSize: '2.5rem',
+    fontWeight: '600',
     marginBottom: '0.5rem',
-    letterSpacing: '0.5px',
+    letterSpacing: 'normal',
     wordBreak: 'keep-all',
     whiteSpace: 'nowrap',
     overflow: 'visible',
-    fontFamily: '"Courier New", Courier, monospace',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
     display: 'block',
     color: '#1a365d'
   },
@@ -1452,8 +1461,8 @@ const styles = {
   cardFlipWrapper: {
     perspective: '1000px',
     width: '100%',
-    maxWidth: '380px',
-    height: '240px',
+    maxWidth: '337.5px',
+    height: '212.5px',
     position: 'relative',
     transformStyle: 'preserve-3d',
     transition: 'transform 0.6s',
@@ -1595,6 +1604,25 @@ const styles = {
     fontWeight: '600',
     cursor: 'pointer',
     transition: 'all 0.2s'
+  },
+  cardFeaturesList: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(2, 1fr)',
+    gap: '0.5rem',
+    marginTop: '1rem',
+    marginBottom: '1rem',
+    padding: '0.75rem',
+    backgroundColor: 'white',
+    borderRadius: '8px'
+  },
+  cardFeatureItem: {
+    fontSize: '0.85rem',
+    color: '#1e40af',
+    fontWeight: '600',
+    padding: '0.5rem',
+    backgroundColor: '#f0f9ff',
+    borderRadius: '6px',
+    textAlign: 'center'
   },
   setPinButton: {
     width: '100%',

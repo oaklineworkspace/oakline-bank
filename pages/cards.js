@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
@@ -146,17 +145,17 @@ function CardsContent() {
   const handleCardAction = async (cardId, action) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      
+
       const { error } = await supabase
         .from('cards')
-        .update({ 
+        .update({
           is_locked: action === 'lock',
           status: action === 'deactivate' ? 'inactive' : 'active'
         })
         .eq('id', cardId);
 
       if (error) throw error;
-      
+
       await loadUserData();
     } catch (error) {
       console.error('Error updating card:', error);
@@ -225,7 +224,7 @@ function CardsContent() {
                   <h3 style={styles.applicationTitle}>Card Application</h3>
                   <span style={{
                     ...styles.statusBadge,
-                    backgroundColor: app.status === 'pending' ? '#f59e0b' : 
+                    backgroundColor: app.status === 'pending' ? '#f59e0b' :
                                    app.status === 'approved' ? '#10b981' : '#ef4444'
                   }}>
                     {app.status?.toUpperCase()}
@@ -257,7 +256,7 @@ function CardsContent() {
           <div style={styles.cardsGrid}>
             {cards.map((card) => (
               <div key={card.id} style={styles.cardWrapper}>
-                <div 
+                <div
                   style={{
                     ...styles.cardFlipContainer,
                     transform: flippedCards[card.id] ? 'rotateY(180deg)' : 'rotateY(0deg)'
@@ -273,7 +272,7 @@ function CardsContent() {
                       <span style={styles.bankName}>OAKLINE BANK</span>
                       <span style={styles.cardTypeLabel}>{getCardTypeLogo(card.card_type)}</span>
                     </div>
-                    
+
                     <div style={styles.chipSection}>
                       <div style={styles.chip}></div>
                       <div style={styles.contactless}>
@@ -286,7 +285,7 @@ function CardsContent() {
                     </div>
 
                     <div style={styles.cardNumber}>
-                      {visibleCardDetails[card.id] 
+                      {visibleCardDetails[card.id]
                         ? (card.card_number || '**** **** **** ****').replace(/(.{4})/g, '$1 ').trim()
                         : `**** **** **** ${card.card_number?.slice(-4) || '****'}`
                       }
@@ -331,13 +330,13 @@ function CardsContent() {
                 </div>
 
                 <div style={styles.cardControls}>
-                  <button 
+                  <button
                     onClick={() => toggleCardVisibility(card.id)}
                     style={styles.controlButton}
                   >
                     {visibleCardDetails[card.id] ? '👁️ Hide Details' : '👁️ Show Details'}
                   </button>
-                  <button 
+                  <button
                     onClick={() => setFlippedCards(prev => ({ ...prev, [card.id]: !prev[card.id] }))}
                     style={styles.controlButton}
                   >
@@ -346,30 +345,92 @@ function CardsContent() {
                 </div>
 
                 <div style={styles.cardStatus}>
-                  <span style={{
-                    ...styles.badge,
-                    backgroundColor: card.is_locked ? '#ef4444' : '#10b981'
-                  }}>
-                    {card.is_locked ? '🔒 Locked' : '✓ Active'}
-                  </span>
-                  <span style={{
-                    ...styles.badge,
-                    backgroundColor: card.pin_set ? '#10b981' : '#f59e0b'
-                  }}>
-                    {card.pin_set ? '🔐 PIN Set' : '⚠️ PIN Not Set'}
-                  </span>
-                </div>
+                    <span style={{
+                      ...styles.badge,
+                      backgroundColor: card.is_locked ? '#ef4444' : '#10b981'
+                    }}>
+                      {card.is_locked ? '🔒 Locked' : '✓ Active'}
+                    </span>
+                    <span style={{
+                      ...styles.badge,
+                      backgroundColor: card.pin_set ? '#10b981' : '#f59e0b'
+                    }}>
+                      {card.pin_set ? '🔐 PIN Set' : '⚠️ PIN Not Set'}
+                    </span>
+                  </div>
 
-                <div style={styles.actionButtons}>
+                  <div style={styles.comprehensiveFeatures}>
+                    <h4 style={styles.featuresTitle}>Card Features</h4>
+                    <div style={styles.featuresGrid}>
+                      <div style={styles.featureItem}>
+                        <span style={styles.featureIcon}>💰</span>
+                        <div style={styles.featureText}>
+                          <div style={styles.featureLabel}>Daily Limit</div>
+                          <div style={styles.featureValue}>${card.daily_limit || '2,000'}</div>
+                        </div>
+                      </div>
+                      <div style={styles.featureItem}>
+                        <span style={styles.featureIcon}>📅</span>
+                        <div style={styles.featureText}>
+                          <div style={styles.featureLabel}>Monthly Limit</div>
+                          <div style={styles.featureValue}>${card.monthly_limit || '10,000'}</div>
+                        </div>
+                      </div>
+                      <div style={styles.featureItem}>
+                        <span style={styles.featureIcon}>🌍</span>
+                        <div style={styles.featureText}>
+                          <div style={styles.featureLabel}>Acceptance</div>
+                          <div style={styles.featureValue}>Global</div>
+                        </div>
+                      </div>
+                      <div style={styles.featureItem}>
+                        <span style={styles.featureIcon}>🔒</span>
+                        <div style={styles.featureText}>
+                          <div style={styles.featureLabel}>Security</div>
+                          <div style={styles.featureValue}>EMV Chip</div>
+                        </div>
+                      </div>
+                      <div style={styles.featureItem}>
+                        <span style={styles.featureIcon}>📱</span>
+                        <div style={styles.featureText}>
+                          <div style={styles.featureLabel}>Payments</div>
+                          <div style={styles.featureValue}>Contactless</div>
+                        </div>
+                      </div>
+                      <div style={styles.featureItem}>
+                        <span style={styles.featureIcon}>🛡️</span>
+                        <div style={styles.featureText}>
+                          <div style={styles.featureLabel}>Protection</div>
+                          <div style={styles.featureValue}>24/7 Fraud</div>
+                        </div>
+                      </div>
+                      <div style={styles.featureItem}>
+                        <span style={styles.featureIcon}>🔔</span>
+                        <div style={styles.featureText}>
+                          <div style={styles.featureLabel}>Alerts</div>
+                          <div style={styles.featureValue}>Real-time</div>
+                        </div>
+                      </div>
+                      <div style={styles.featureItem}>
+                        <span style={styles.featureIcon}>💳</span>
+                        <div style={styles.featureText}>
+                          <div style={styles.featureLabel}>Type</div>
+                          <div style={styles.featureValue}>{card.card_type?.toUpperCase() || 'DEBIT'}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={styles.actionButtons}>
                   {!card.pin_set && (
-                    <button 
+                    <button
                       onClick={() => openPinModal(card.id)}
                       style={styles.setPinButton}
                     >
                       Set PIN
                     </button>
                   )}
-                  
+
                   <button
                     onClick={() => handleCardAction(card.id, card.is_locked ? 'unlock' : 'lock')}
                     style={{
@@ -754,6 +815,49 @@ const styles = {
     color: 'white',
     fontSize: '0.85rem',
     fontWeight: '600'
+  },
+  comprehensiveFeatures: {
+    marginBottom: '1.5rem',
+    color: '#1e40af',
+    padding: '1rem',
+    background: '#f0f9ff',
+    borderRadius: '12px',
+    border: '1px solid #dbeafe'
+  },
+  featuresTitle: {
+    fontSize: '1.1rem',
+    fontWeight: 'bold',
+    color: '#1e40af',
+    marginBottom: '1rem',
+    textAlign: 'center'
+  },
+  featuresGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+    gap: '1rem'
+  },
+  featureItem: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.75rem'
+  },
+  featureIcon: {
+    fontSize: '1.2rem'
+  },
+  featureText: {
+    flexGrow: 1
+  },
+  featureLabel: {
+    fontSize: '0.75rem',
+    fontWeight: '600',
+    color: '#60a5fa',
+    textTransform: 'uppercase',
+    marginBottom: '2px'
+  },
+  featureValue: {
+    fontSize: '0.9rem',
+    fontWeight: 'bold',
+    color: '#1e40af'
   },
   actionButtons: {
     display: 'flex',
