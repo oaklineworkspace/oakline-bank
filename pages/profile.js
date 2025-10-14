@@ -44,7 +44,7 @@ export default function Profile() {
 
   const fetchUserProfile = async (userId) => {
     try {
-      // Try to get profile from profiles table first
+      // Fetch comprehensive profile data from profiles table
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('*')
@@ -53,17 +53,30 @@ export default function Profile() {
 
       if (profileData) {
         setUserProfile(profileData);
+        setEditData(profileData);
       } else {
-        // If no profile found, try to get from auth metadata
+        // Fallback: try to get user by email if id lookup fails
         const { data: { user: authUser } } = await supabase.auth.getUser();
-        if (authUser?.user_metadata) {
-          setUserProfile({
-            id: authUser.id,
-            email: authUser.email,
-            full_name: authUser.user_metadata.full_name,
-            created_at: authUser.created_at,
-            ...authUser.user_metadata
-          });
+        if (authUser?.email) {
+          const { data: profileByEmail, error: emailError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('email', authUser.email)
+            .single();
+
+          if (profileByEmail) {
+            setUserProfile(profileByEmail);
+            setEditData(profileByEmail);
+          } else if (authUser?.user_metadata) {
+            // Last resort: use auth metadata
+            setUserProfile({
+              id: authUser.id,
+              email: authUser.email,
+              full_name: authUser.user_metadata.full_name,
+              created_at: authUser.created_at,
+              ...authUser.user_metadata
+            });
+          }
         }
       }
     } catch (error) {
@@ -435,12 +448,12 @@ export default function Profile() {
           </form>
         ) : (
           <div style={styles.infoGrid}>
-            {application?.profile_picture && (
+            {userProfile?.profile_picture && (
               <div style={styles.infoItem}>
                 <span style={styles.infoLabel}>Profile Picture</span>
                 <div style={styles.profilePictureDisplay}>
                   <img 
-                    src={application.profile_picture} 
+                    src={userProfile.profile_picture} 
                     alt="Profile" 
                     style={styles.profileImageDisplay}
                   />
@@ -450,48 +463,60 @@ export default function Profile() {
             <div style={styles.infoItem}>
               <span style={styles.infoLabel}>Full Name</span>
               <span style={styles.infoValue}>
-                {application ? `${application.first_name} ${application.last_name}` : 'N/A'}
+                {userProfile ? `${userProfile.first_name || ''} ${userProfile.middle_name ? userProfile.middle_name + ' ' : ''}${userProfile.last_name || ''}`.trim() : application ? `${application.first_name} ${application.last_name}` : 'N/A'}
               </span>
             </div>
             <div style={styles.infoItem}>
               <span style={styles.infoLabel}>Email</span>
-              <span style={styles.infoValue}>{user?.email || 'N/A'}</span>
+              <span style={styles.infoValue}>{userProfile?.email || user?.email || 'N/A'}</span>
             </div>
             <div style={styles.infoItem}>
               <span style={styles.infoLabel}>Phone</span>
-              <span style={styles.infoValue}>{application?.phone || 'N/A'}</span>
+              <span style={styles.infoValue}>{userProfile?.phone || application?.phone || 'N/A'}</span>
             </div>
             <div style={styles.infoItem}>
               <span style={styles.infoLabel}>Date of Birth</span>
-              <span style={styles.infoValue}>{formatDate(application?.date_of_birth)}</span>
+              <span style={styles.infoValue}>{formatDate(userProfile?.date_of_birth || application?.date_of_birth)}</span>
             </div>
             <div style={styles.infoItem}>
               <span style={styles.infoLabel}>Address</span>
               <span style={styles.infoValue}>
-                {application?.address ? 
-                  `${application.address}, ${application.city}, ${application.state} ${application.zip_code}` : 
+                {(userProfile?.address || application?.address) ? 
+                  `${userProfile?.address || application?.address}, ${userProfile?.city || application?.city}, ${userProfile?.state || application?.state} ${userProfile?.zip_code || application?.zip_code}` : 
                   'N/A'
                 }
               </span>
             </div>
             <div style={styles.infoItem}>
               <span style={styles.infoLabel}>Member Since</span>
-              <span style={styles.infoValue}>{formatDate(application?.created_at)}</span>
+              <span style={styles.infoValue}>{formatDate(userProfile?.created_at || application?.created_at)}</span>
             </div>
             <div style={styles.infoItem}>
-              <span style={styles.infoLabel}>Account Status</span>
-              <span style={{...styles.infoValue, color: application?.status === 'approved' ? '#10b981' : '#f59e0b'}}>
-                {application?.status ? application.status.charAt(0).toUpperCase() + application.status.slice(1) : 'Pending'}
+              <span style={styles.infoLabel}>Enrollment Status</span>
+              <span style={{...styles.infoValue, color: userProfile?.enrollment_completed ? '#10b981' : '#f59e0b'}}>
+                {userProfile?.enrollment_completed ? 'Completed' : 'Pending'}
               </span>
             </div>
             <div style={styles.infoItem}>
               <span style={styles.infoLabel}>Country</span>
-              <span style={styles.infoValue}>{application?.country || 'N/A'}</span>
+              <span style={styles.infoValue}>{userProfile?.country || application?.country || 'N/A'}</span>
             </div>
-            {application?.middle_name && (
+            {(userProfile?.middle_name || application?.middle_name) && (
               <div style={styles.infoItem}>
                 <span style={styles.infoLabel}>Middle Name</span>
-                <span style={styles.infoValue}>{application.middle_name}</span>
+                <span style={styles.infoValue}>{userProfile?.middle_name || application?.middle_name}</span>
+              </div>
+            )}
+            {userProfile?.employment_status && (
+              <div style={styles.infoItem}>
+                <span style={styles.infoLabel}>Employment Status</span>
+                <span style={styles.infoValue}>{userProfile.employment_status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
+              </div>
+            )}
+            {userProfile?.annual_income && (
+              <div style={styles.infoItem}>
+                <span style={styles.infoLabel}>Annual Income Range</span>
+                <span style={styles.infoValue}>{userProfile.annual_income.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
               </div>
             )}
           </div>

@@ -18,6 +18,11 @@ function DashboardContent() {
   const [dropdownOpen, setDropdownOpen] = useState({});
   const [cardApplicationStatus, setCardApplicationStatus] = useState(null);
   const [flippedCards, setFlippedCards] = useState({});
+  const [visibleCardDetails, setVisibleCardDetails] = useState({});
+  const [pinModal, setPinModal] = useState({ open: false, cardId: null });
+  const [pinInput, setPinInput] = useState('');
+  const [pinError, setPinError] = useState('');
+  const [pinSuccess, setPinSuccess] = useState('');
   const router = useRouter();
 
   useEffect(() => {
@@ -188,6 +193,90 @@ function DashboardContent() {
     } catch (error) {
       console.error('Error signing out:', error);
     }
+  };
+
+  const toggleCardVisibility = (cardId) => {
+    setVisibleCardDetails(prev => ({
+      ...prev,
+      [cardId]: !prev[cardId]
+    }));
+  };
+
+  const openPinModal = (cardId) => {
+    setPinModal({ open: true, cardId });
+    setPinInput('');
+    setPinError('');
+    setPinSuccess('');
+  };
+
+  const closePinModal = () => {
+    setPinModal({ open: false, cardId: null });
+    setPinInput('');
+    setPinError('');
+    setPinSuccess('');
+  };
+
+  const handleSetPin = async () => {
+    setPinError('');
+    setPinSuccess('');
+
+    if (!/^\d{4,6}$/.test(pinInput)) {
+      setPinError('PIN must be 4-6 digits');
+      return;
+    }
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        setPinError('Please log in to set PIN');
+        return;
+      }
+
+      const response = await fetch('/api/cards/set-pin', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          cardId: pinModal.cardId,
+          pin: pinInput
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setPinSuccess('PIN set successfully!');
+        setTimeout(() => {
+          closePinModal();
+          loadUserData(user.id); // Reload to update PIN status
+        }, 1500);
+      } else {
+        setPinError(data.error || 'Failed to set PIN');
+      }
+    } catch (error) {
+      console.error('Error setting PIN:', error);
+      setPinError('Error setting PIN. Please try again.');
+    }
+  };
+
+  const getCardTypeColor = (cardType) => {
+    const colors = {
+      visa: 'linear-gradient(135deg, #1a1f71 0%, #0f7dc1 100%)',
+      mastercard: 'linear-gradient(135deg, #eb001b 0%, #f79e1b 100%)',
+      amex: 'linear-gradient(135deg, #006fcf 0%, #00a3e0 100%)'
+    };
+    return colors[cardType?.toLowerCase()] || 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)';
+  };
+
+  const getCardTypeLogo = (cardType) => {
+    const logos = {
+      visa: 'VISA',
+      mastercard: 'Mastercard',
+      amex: 'AMEX'
+    };
+    return logos[cardType?.toLowerCase()] || 'CARD';
   };
 
   if (loading) {
@@ -485,17 +574,17 @@ function DashboardContent() {
                       ...styles.cardFlipWrapper,
                       transform: flippedCards[card.id] ? 'rotateY(180deg)' : 'rotateY(0deg)'
                     }}
-                    onClick={() => setFlippedCards(prev => ({ ...prev, [card.id]: !prev[card.id] }))}
                   >
                     {/* Card Front */}
                     <div style={{
                       ...styles.cardFace,
                       ...styles.cardFront,
+                      background: getCardTypeColor(card.card_type),
                       opacity: flippedCards[card.id] ? 0 : 1
                     }}>
                       <div style={styles.cardHeader}>
                         <span style={styles.bankNameCard}>OAKLINE BANK</span>
-                        <span style={styles.cardTypeLabel}>DEBIT</span>
+                        <span style={styles.cardTypeLabel}>{getCardTypeLogo(card.card_type)}</span>
                       </div>
                       
                       <div style={styles.chipSection}>
@@ -510,7 +599,10 @@ function DashboardContent() {
                       </div>
 
                       <div style={styles.cardNumberDisplay}>
-                        {card.card_number ? card.card_number.replace(/(.{4})/g, '$1 ').trim() : '**** **** **** ****'}
+                        {visibleCardDetails[card.id] 
+                          ? (card.card_number ? card.card_number.replace(/(.{4})/g, '$1 ').trim() : '**** **** **** ****')
+                          : `**** **** **** ${card.card_number?.slice(-4) || '****'}`
+                        }
                       </div>
 
                       <div style={styles.cardFooterDetails}>
@@ -526,7 +618,9 @@ function DashboardContent() {
                         </div>
                         <div>
                           <div style={styles.cardLabelSmall}>CVV</div>
-                          <div style={styles.cardValueSmall}>{card.cvv || '***'}</div>
+                          <div style={styles.cardValueSmall}>
+                            {visibleCardDetails[card.id] ? (card.cvv || '***') : '***'}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -535,13 +629,16 @@ function DashboardContent() {
                     <div style={{
                       ...styles.cardFace,
                       ...styles.cardBack,
+                      background: getCardTypeColor(card.card_type),
                       opacity: flippedCards[card.id] ? 1 : 0,
                       transform: 'rotateY(180deg)'
                     }}>
                       <div style={styles.magneticStripe}></div>
                       <div style={styles.cvvSection}>
                         <div style={styles.cvvLabel}>CVV</div>
-                        <div style={styles.cvvBox}>{card.cvv || '***'}</div>
+                        <div style={styles.cvvBox}>
+                          {visibleCardDetails[card.id] ? (card.cvv || '***') : '***'}
+                        </div>
                       </div>
                       <div style={styles.cardBackInfo}>
                         <p style={styles.cardBackText}>For customer service call 1-800-OAKLINE</p>
@@ -550,6 +647,21 @@ function DashboardContent() {
                     </div>
                   </div>
                   
+                  <div style={styles.cardControls}>
+                    <button 
+                      onClick={() => toggleCardVisibility(card.id)}
+                      style={styles.cardControlButton}
+                    >
+                      {visibleCardDetails[card.id] ? '👁️ Hide Details' : '👁️ Show Details'}
+                    </button>
+                    <button 
+                      onClick={() => setFlippedCards(prev => ({ ...prev, [card.id]: !prev[card.id] }))}
+                      style={styles.cardControlButton}
+                    >
+                      🔄 Flip Card
+                    </button>
+                  </div>
+
                   <div style={styles.cardStatus}>
                     <span style={{
                       ...styles.statusBadge,
@@ -557,13 +669,71 @@ function DashboardContent() {
                     }}>
                       {card.is_locked ? '🔒 Locked' : '✓ Active'}
                     </span>
+                    <span style={{
+                      ...styles.statusBadge,
+                      backgroundColor: card.pin_set ? '#10b981' : '#f59e0b'
+                    }}>
+                      {card.pin_set ? '🔐 PIN Set' : '⚠️ PIN Not Set'}
+                    </span>
                   </div>
+
+                  {!card.pin_set && (
+                    <button 
+                      onClick={() => openPinModal(card.id)}
+                      style={styles.setPinButton}
+                    >
+                      Set PIN
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
           </section>
         )}
       </main>
+
+      {/* PIN Modal */}
+      {pinModal.open && (
+        <div style={styles.modalOverlay} onClick={closePinModal}>
+          <div style={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <h3 style={styles.modalTitle}>Set Card PIN</h3>
+            <p style={styles.modalDescription}>
+              Enter a 4-6 digit PIN for your card. This PIN will be required for certain transactions.
+            </p>
+
+            <div style={styles.pinInputGroup}>
+              <label style={styles.pinLabel}>Enter PIN (4-6 digits)</label>
+              <input
+                type="password"
+                maxLength="6"
+                value={pinInput}
+                onChange={(e) => setPinInput(e.target.value.replace(/\D/g, ''))}
+                style={styles.pinInput}
+                placeholder="••••"
+                autoFocus
+              />
+            </div>
+
+            {pinError && (
+              <div style={styles.pinError}>{pinError}</div>
+            )}
+
+            {pinSuccess && (
+              <div style={styles.pinSuccess}>{pinSuccess}</div>
+            )}
+
+            <div style={styles.modalActions}>
+              <button onClick={handleSetPin} style={styles.modalConfirmButton}>
+                Set PIN
+              </button>
+              <button onClick={closePinModal} style={styles.modalCancelButton}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <LiveChat />
     </div>
   );
@@ -1403,5 +1573,128 @@ const styles = {
     color: 'white',
     fontSize: '0.85rem',
     fontWeight: '600'
+  },
+  cardControls: {
+    display: 'flex',
+    gap: '0.5rem',
+    marginTop: '1rem',
+    justifyContent: 'center'
+  },
+  cardControlButton: {
+    padding: '0.5rem 1rem',
+    backgroundColor: '#3b82f6',
+    color: 'white',
+    border: 'none',
+    borderRadius: '6px',
+    fontSize: '0.85rem',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'all 0.2s'
+  },
+  setPinButton: {
+    width: '100%',
+    padding: '0.75rem',
+    marginTop: '0.5rem',
+    backgroundColor: '#f59e0b',
+    color: 'white',
+    border: 'none',
+    borderRadius: '8px',
+    fontSize: '0.9rem',
+    fontWeight: '600',
+    cursor: 'pointer'
+  },
+  modalOverlay: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1000
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    borderRadius: '16px',
+    padding: '2rem',
+    maxWidth: '400px',
+    width: '90%',
+    boxShadow: '0 10px 40px rgba(0,0,0,0.2)'
+  },
+  modalTitle: {
+    fontSize: '1.5rem',
+    fontWeight: 'bold',
+    color: '#1e293b',
+    marginBottom: '0.5rem'
+  },
+  modalDescription: {
+    fontSize: '0.9rem',
+    color: '#64748b',
+    marginBottom: '1.5rem'
+  },
+  pinInputGroup: {
+    marginBottom: '1rem'
+  },
+  pinLabel: {
+    display: 'block',
+    fontSize: '0.875rem',
+    fontWeight: '600',
+    color: '#374151',
+    marginBottom: '0.5rem'
+  },
+  pinInput: {
+    width: '100%',
+    padding: '0.75rem',
+    fontSize: '1.5rem',
+    letterSpacing: '0.5rem',
+    textAlign: 'center',
+    border: '2px solid #e2e8f0',
+    borderRadius: '8px',
+    fontFamily: 'monospace'
+  },
+  pinError: {
+    padding: '0.75rem',
+    backgroundColor: '#fee2e2',
+    color: '#dc2626',
+    borderRadius: '8px',
+    fontSize: '0.875rem',
+    marginBottom: '1rem'
+  },
+  pinSuccess: {
+    padding: '0.75rem',
+    backgroundColor: '#dcfce7',
+    color: '#166534',
+    borderRadius: '8px',
+    fontSize: '0.875rem',
+    marginBottom: '1rem'
+  },
+  modalActions: {
+    display: 'flex',
+    gap: '1rem',
+    marginTop: '1.5rem'
+  },
+  modalConfirmButton: {
+    flex: 1,
+    padding: '0.75rem',
+    backgroundColor: '#10b981',
+    color: 'white',
+    border: 'none',
+    borderRadius: '8px',
+    fontSize: '1rem',
+    fontWeight: '600',
+    cursor: 'pointer'
+  },
+  modalCancelButton: {
+    flex: 1,
+    padding: '0.75rem',
+    backgroundColor: '#6b7280',
+    color: 'white',
+    border: 'none',
+    borderRadius: '8px',
+    fontSize: '1rem',
+    fontWeight: '600',
+    cursor: 'pointer'
   }
 };
