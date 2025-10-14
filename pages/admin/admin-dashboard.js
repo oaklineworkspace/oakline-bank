@@ -6,9 +6,10 @@ import { supabase } from '../../lib/supabaseClient';
 export default function AdminDashboard() {
   const router = useRouter();
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [password, setPassword] = useState('');
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalAccounts: 0,
@@ -19,69 +20,42 @@ export default function AdminDashboard() {
   const [recentUsers, setRecentUsers] = useState([]);
   const [recentTransactions, setRecentTransactions] = useState([]);
 
-  // -------------------
-  // Check Admin Access
-  // -------------------
-  const checkAdminAccess = async () => {
-    setLoading(true);
-    try {
-      // Check local storage first
-      const adminAuth = localStorage.getItem('adminAuthenticated');
-      if (adminAuth === 'true') {
-        setIsAuthenticated(true);
-        fetchStats();
-        setLoading(false);
-        return;
-      }
+  const ADMIN_PASSWORD = 'Chrismorgan23$';
 
-      // If not in localStorage, check Supabase auth
-      const {
-        data: { user },
-        error: userError
-      } = await supabase.auth.getUser();
+  useEffect(() => {
+    const adminAuth = localStorage.getItem('adminAuthenticated');
+    if (adminAuth === 'true') {
+      setIsAuthenticated(true);
+      fetchStats();
+    }
+  }, []);
 
-      if (userError || !user) {
-        console.error('Auth error:', userError);
-        setLoading(false);
-        return;
-      }
-
-      // Check if user has admin role in profiles or admin_profiles table
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .single();
-
-      if (!profileError && profile?.role === 'admin') {
-        setIsAuthenticated(true);
-        localStorage.setItem('adminAuthenticated', 'true');
-        fetchStats();
-      } else {
-        // Try admin_profiles table as fallback
-        const { data: adminProfile } = await supabase
-          .from('admin_profiles')
-          .select('role')
-          .eq('id', user.id)
-          .single();
-
-        if (adminProfile) {
-          setIsAuthenticated(true);
-          localStorage.setItem('adminAuthenticated', 'true');
-          fetchStats();
-        }
-      }
-    } catch (err) {
-      console.error('Unexpected error:', err);
-      setError('An unexpected error occurred.');
-    } finally {
-      setLoading(false);
+  const handleLogin = (e) => {
+    e.preventDefault();
+    if (password === ADMIN_PASSWORD) {
+      setIsAuthenticated(true);
+      localStorage.setItem('adminAuthenticated', 'true');
+      setError('');
+      fetchStats();
+    } else {
+      setError('Invalid password');
     }
   };
 
-  useEffect(() => {
-    checkAdminAccess();
-  }, []);
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    localStorage.removeItem('adminAuthenticated');
+    setPassword('');
+    setStats({
+      totalUsers: 0,
+      totalAccounts: 0,
+      totalTransactions: 0,
+      pendingApplications: 0,
+      totalBalance: 0,
+    });
+    setRecentUsers([]);
+    setRecentTransactions([]);
+  };
 
   // -------------------
   // Fetch Stats & Data
@@ -160,12 +134,43 @@ export default function AdminDashboard() {
   // -------------------
   // Render
   // -------------------
+  if (!isAuthenticated) {
+    return (
+      <div style={styles.loginContainer}>
+        <div style={styles.loginCard}>
+          <h1 style={styles.title}>🏦 Admin Dashboard</h1>
+          <form onSubmit={handleLogin} style={styles.form}>
+            <div style={styles.inputGroup}>
+              <label style={styles.label}>Admin Password</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                style={styles.input}
+                placeholder="Enter admin password"
+                required
+              />
+            </div>
+            {error && <div style={styles.error}>{error}</div>}
+            <button type="submit" style={styles.loginButton}>
+              🔐 Access Dashboard
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
   if (loading) return <div style={{ padding: '50px', textAlign: 'center' }}>Loading...</div>;
-  if (!isAuthenticated) return <div style={{ padding: '50px', textAlign: 'center' }}>Checking access...</div>;
 
   return (
     <div style={{ padding: '20px', minHeight: '100vh', background: '#f0f4f8' }}>
-      <h1>🏦 Admin Dashboard</h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+        <h1>🏦 Admin Dashboard</h1>
+        <button onClick={handleLogout} style={styles.logoutButton}>
+          🚪 Logout
+        </button>
+      </div>
 
       {/* Stats */}
       <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
