@@ -44,11 +44,11 @@ export default function ManageAllUsersPage() {
     setError('');
     
     try {
-      // Fetch all applications
+      // Fetch all applications (use submitted_at instead of created_at)
       const { data: applications, error: appsError } = await supabase
         .from('applications')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('submitted_at', { ascending: false });
 
       if (appsError) throw appsError;
 
@@ -80,9 +80,9 @@ export default function ManageAllUsersPage() {
 
       if (enrollError) throw enrollError;
 
-      // Combine all data
+      // Combine all data (match by email only since application_id doesn't exist in profiles)
       const combinedData = applications.map(app => {
-        const profile = profiles?.find(p => p.email === app.email || p.application_id === app.id);
+        const profile = profiles?.find(p => p.email === app.email);
         const userAccounts = accounts?.filter(a => a.application_id === app.id) || [];
         const enrollment = enrollments?.find(e => e.email === app.email);
         

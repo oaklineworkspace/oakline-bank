@@ -195,7 +195,7 @@ export default async function handler(req, res) {
         console.error('Error updating enrollment record:', updateError);
       }
     } else {
-      // Create new enrollment record
+      // Create new enrollment record (no user_id column in enrollments table)
       const { error: insertError } = await supabaseAdmin
         .from('enrollments')
         .insert([{

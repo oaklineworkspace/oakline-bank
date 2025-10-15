@@ -124,7 +124,7 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Failed to set password' });
     }
 
-    // 8️⃣ Create or update profile record with enrollment_completed = true
+    // 8️⃣ Create or update profile record with enrollment_completed = true (no application_id column in profiles)
     const profileData = {
       id: userId,
       email: applicationData.email,
