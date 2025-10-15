@@ -18,25 +18,40 @@ export default function ResendEnrollmentPage() {
       setLoading(true);
       setMessage('');
       
-      // Fetch applications directly from Supabase
+      // Fetch applications directly from Supabase with better error handling
       const { data: appsData, error: appsError } = await supabase
         .from('applications')
         .select('*')
         .order('submitted_at', { ascending: false });
 
       if (appsError) {
-        throw appsError;
+        console.error('Applications fetch error:', appsError);
+        throw new Error(appsError.message || 'Failed to fetch applications');
       }
 
-      // Fetch enrollments
-      const { data: enrollmentsData } = await supabase
+      if (!appsData || appsData.length === 0) {
+        setApplications([]);
+        setLoading(false);
+        return;
+      }
+
+      // Fetch enrollments with error handling
+      const { data: enrollmentsData, error: enrollError } = await supabase
         .from('enrollments')
         .select('*');
 
-      // Fetch profiles to check enrollment status
-      const { data: profilesData } = await supabase
+      if (enrollError) {
+        console.error('Enrollments fetch error:', enrollError);
+      }
+
+      // Fetch profiles to check enrollment status with error handling
+      const { data: profilesData, error: profileError } = await supabase
         .from('profiles')
         .select('id, email, enrollment_completed');
+
+      if (profileError) {
+        console.error('Profiles fetch error:', profileError);
+      }
 
       // Combine data
       const enrichedApps = appsData.map(app => {
@@ -60,7 +75,7 @@ export default function ResendEnrollmentPage() {
       setApplications(enrichedApps);
     } catch (error) {
       console.error('Error fetching applications:', error);
-      setMessage('Error loading applications: ' + error.message);
+      setMessage('Error loading applications: ' + (error?.message || 'Unknown error occurred'));
     } finally {
       setLoading(false);
     }

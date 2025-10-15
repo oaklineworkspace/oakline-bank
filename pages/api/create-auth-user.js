@@ -70,6 +70,44 @@ export default async function handler(req, res) {
 
         authUser = newUser.user;
         console.log('Auth user created successfully:', authUser.id);
+
+        // Create profile record immediately after auth user creation
+        if (applicationData) {
+          const { error: profileError } = await supabaseAdmin
+            .from('profiles')
+            .upsert([{
+              id: authUser.id,
+              email: userEmail,
+              first_name: applicationData.first_name,
+              middle_name: applicationData.middle_name || null,
+              last_name: applicationData.last_name,
+              phone: applicationData.phone || null,
+              date_of_birth: applicationData.date_of_birth || null,
+              country: applicationData.country || null,
+              city: applicationData.city || null,
+              state: applicationData.state || null,
+              zip_code: applicationData.zip_code || null,
+              address: applicationData.address || null,
+              ssn: applicationData.ssn || null,
+              id_number: applicationData.id_number || null,
+              employment_status: applicationData.employment_status || null,
+              annual_income: applicationData.annual_income || null,
+              mothers_maiden_name: applicationData.mothers_maiden_name || null,
+              account_types: applicationData.account_types || [],
+              enrollment_completed: false,
+              password_set: false,
+              application_status: 'pending'
+            }], {
+              onConflict: 'id'
+            });
+
+          if (profileError) {
+            console.error('Error creating profile:', profileError);
+            // Don't fail the request, profile can be created later
+          } else {
+            console.log('Profile created successfully for user:', authUser.id);
+          }
+        }
         
       } else {
         authUser = existingUser;
