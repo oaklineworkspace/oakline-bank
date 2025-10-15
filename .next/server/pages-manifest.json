@@ -1,8 +1,8 @@
 {
   "/_app": "pages/_app.js",
-  "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/": "pages/index.js",
+  "/_error": "pages/_error.js",
   "/admin/resend-enrollment": "pages/admin/resend-enrollment.js",
-  "/apply": "pages/apply.js"
+  "/enroll": "pages/enroll.js",
+  "/": "pages/index.js"
 }
