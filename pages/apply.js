@@ -419,10 +419,14 @@ export default function Apply() {
         console.log('Auth user created successfully:', userId);
         
         // Update application with user_id
-        await supabase
+        const { error: appUpdateError } = await supabase
           .from('applications')
           .update({ user_id: userId })
           .eq('id', applicationId);
+        
+        if (appUpdateError) {
+          console.error('Error updating application with user_id:', appUpdateError);
+        }
           
       } catch (authError) {
         console.error('Auth user creation error:', authError);
@@ -543,7 +547,7 @@ export default function Apply() {
         .from('enrollments')
         .select('*')
         .eq('email', formData.email.trim().toLowerCase())
-        .eq('application_id', applicationData.id)
+        .eq('application_id', applicationId)
         .single();
 
       if (existingEnrollment) {
@@ -557,7 +561,7 @@ export default function Apply() {
             created_at: new Date().toISOString()
           })
           .eq('email', formData.email.trim().toLowerCase())
-          .eq('application_id', applicationData.id)
+          .eq('application_id', applicationId)
           .select()
           .single();
 
@@ -576,7 +580,7 @@ export default function Apply() {
             email: formData.email.trim().toLowerCase(),
             token: enrollmentToken,
             is_used: false,
-            application_id: applicationData.id,
+            application_id: applicationId,
             user_id: userId
           }])
           .select()
@@ -587,7 +591,7 @@ export default function Apply() {
           enrollmentError = insertError;
         } else {
           enrollmentRecord = newEnrollmentData;
-          console.log('Created new enrollment record with application_id:', applicationData.id);
+          console.log('Created new enrollment record with application_id:', applicationId);
         }
       }
 
@@ -663,6 +667,10 @@ export default function Apply() {
         // Detect current site URL dynamically
         const siteUrl = window.location.origin;
         
+        console.log('Sending welcome email to:', formData.email.trim().toLowerCase());
+        console.log('Application ID:', applicationId);
+        console.log('Enrollment token:', enrollmentToken);
+        
         const emailResponse = await fetch('/api/send-welcome-email', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -688,11 +696,12 @@ export default function Apply() {
           })
         });
 
+        const emailResult = await emailResponse.json();
+        
         if (!emailResponse.ok) {
-          const errorData = await emailResponse.json();
-          console.error('Failed to send welcome email:', errorData.message || errorResponse.statusText);
+          console.error('Failed to send welcome email:', emailResult);
         } else {
-          console.log('Welcome email sent successfully');
+          console.log('Welcome email sent successfully:', emailResult);
         }
       } catch (emailError) {
         console.error('Email sending failed:', emailError);

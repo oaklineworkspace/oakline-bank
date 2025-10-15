@@ -18,19 +18,27 @@ export default function ResendEnrollmentPage() {
       setLoading(true);
       setMessage('');
       
+      console.log('Fetching applications...');
+      
       // Fetch applications directly from Supabase with better error handling
       const { data: appsData, error: appsError } = await supabase
         .from('applications')
         .select('*')
         .order('submitted_at', { ascending: false });
 
+      console.log('Applications data:', appsData);
+      console.log('Applications error:', appsError);
+
       if (appsError) {
         console.error('Applications fetch error:', appsError);
-        throw new Error(appsError.message || 'Failed to fetch applications');
+        setMessage('Error loading applications: ' + appsError.message);
+        setLoading(false);
+        return;
       }
 
       if (!appsData || appsData.length === 0) {
         setApplications([]);
+        setMessage('No applications found');
         setLoading(false);
         return;
       }
@@ -40,6 +48,7 @@ export default function ResendEnrollmentPage() {
         .from('enrollments')
         .select('*');
 
+      console.log('Enrollments data:', enrollmentsData);
       if (enrollError) {
         console.error('Enrollments fetch error:', enrollError);
       }
@@ -49,6 +58,7 @@ export default function ResendEnrollmentPage() {
         .from('profiles')
         .select('id, email, enrollment_completed');
 
+      console.log('Profiles data:', profilesData);
       if (profileError) {
         console.error('Profiles fetch error:', profileError);
       }
@@ -72,6 +82,7 @@ export default function ResendEnrollmentPage() {
         };
       });
 
+      console.log('Enriched applications:', enrichedApps);
       setApplications(enrichedApps);
     } catch (error) {
       console.error('Error fetching applications:', error);
