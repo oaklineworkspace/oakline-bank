@@ -71,41 +71,65 @@ export default async function handler(req, res) {
         authUser = newUser.user;
         console.log('Auth user created successfully:', authUser.id);
 
+        // Wait a moment for auth user to fully propagate
+        await new Promise(resolve => setTimeout(resolve, 500));
+
         // Create profile record immediately after auth user creation
         if (applicationData) {
-          const { error: profileError } = await supabaseAdmin
-            .from('profiles')
-            .upsert([{
-              id: authUser.id,
-              email: userEmail,
-              first_name: applicationData.first_name,
-              middle_name: applicationData.middle_name || null,
-              last_name: applicationData.last_name,
-              phone: applicationData.phone || null,
-              date_of_birth: applicationData.date_of_birth || null,
-              country: applicationData.country || null,
-              city: applicationData.city || null,
-              state: applicationData.state || null,
-              zip_code: applicationData.zip_code || null,
-              address: applicationData.address || null,
-              ssn: applicationData.ssn || null,
-              id_number: applicationData.id_number || null,
-              employment_status: applicationData.employment_status || null,
-              annual_income: applicationData.annual_income || null,
-              mothers_maiden_name: applicationData.mothers_maiden_name || null,
-              account_types: applicationData.account_types || [],
-              enrollment_completed: false,
-              password_set: false,
-              application_status: 'pending'
-            }], {
-              onConflict: 'id'
-            });
+          try {
+            const { error: profileError } = await supabaseAdmin
+              .from('profiles')
+              .insert([{
+                id: authUser.id,
+                application_id: application_id,
+                email: userEmail,
+                first_name: applicationData.first_name,
+                middle_name: applicationData.middle_name || null,
+                last_name: applicationData.last_name,
+                phone: applicationData.phone || null,
+                date_of_birth: applicationData.date_of_birth || null,
+                country: applicationData.country || null,
+                city: applicationData.city || null,
+                state: applicationData.state || null,
+                zip_code: applicationData.zip_code || null,
+                address: applicationData.address || null,
+                ssn: applicationData.ssn || null,
+                id_number: applicationData.id_number || null,
+                employment_status: applicationData.employment_status || null,
+                annual_income: applicationData.annual_income || null,
+                mothers_maiden_name: applicationData.mothers_maiden_name || null,
+                account_types: applicationData.account_types || [],
+                enrollment_completed: false,
+                password_set: false,
+                application_status: 'pending'
+              }]);
 
-          if (profileError) {
-            console.error('Error creating profile:', profileError);
-            // Don't fail the request, profile can be created later
-          } else {
-            console.log('Profile created successfully for user:', authUser.id);
+            if (profileError) {
+              console.error('Error creating profile:', profileError);
+              // If it's a duplicate, try updating instead
+              if (profileError.code === '23505') {
+                const { error: updateError } = await supabaseAdmin
+                  .from('profiles')
+                  .update({
+                    application_id: application_id,
+                    email: userEmail,
+                    first_name: applicationData.first_name,
+                    middle_name: applicationData.middle_name || null,
+                    last_name: applicationData.last_name,
+                    updated_at: new Date().toISOString()
+                  })
+                  .eq('id', authUser.id);
+
+                if (!updateError) {
+                  console.log('Profile updated successfully for user:', authUser.id);
+                }
+              }
+            } else {
+              console.log('Profile created successfully for user:', authUser.id);
+            }
+          } catch (profileErr) {
+            console.error('Profile creation failed:', profileErr);
+            // Continue anyway - profile can be created during enrollment
           }
         }
         

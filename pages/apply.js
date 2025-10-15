@@ -347,24 +347,43 @@ export default function Apply() {
 
       // STEP 2: Create Supabase Auth user FIRST (before any database records)
       console.log('Creating auth user for email:', formData.email.trim().toLowerCase());
-      const authResponse = await fetch('/api/create-auth-user', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: formData.email.trim().toLowerCase(),
-          application_id: tempApplicationId
-        })
-      });
+      let userId = null;
+      let authCreated = false;
 
-      if (!authResponse.ok) {
-        const authError = await authResponse.json();
-        console.error('Failed to create auth user:', authError);
-        throw new Error(authError.error || 'Failed to create user account. Please try again.');
+      try {
+        const authResponse = await fetch('/api/create-auth-user', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: formData.email.trim().toLowerCase(),
+            application_id: tempApplicationId
+          })
+        });
+
+        const authResult = await authResponse.json();
+
+        if (!authResponse.ok) {
+          console.error('Failed to create auth user:', authResult);
+          
+          // Check if user already exists
+          if (authResult.error && authResult.error.includes('already registered')) {
+            setErrors({ submit: 'An account with this email already exists. Please try another email or log in.' });
+            setLoading(false);
+            return;
+          }
+          
+          throw new Error(authResult.error || 'Failed to create user account. Please try again.');
+        }
+
+        userId = authResult.user.auth_id;
+        authCreated = true;
+        console.log('Auth user created successfully:', userId);
+      } catch (authError) {
+        console.error('Auth user creation error:', authError);
+        setErrors({ submit: 'Failed to create user account: ' + authError.message });
+        setLoading(false);
+        return;
       }
-
-      const authResult = await authResponse.json();
-      const userId = authResult.user.auth_id;
-      console.log('Auth user created successfully:', userId);
 
       // STEP 3: Now insert application data with the user_id
       const { data: applicationData, error: applicationError } = await supabase
