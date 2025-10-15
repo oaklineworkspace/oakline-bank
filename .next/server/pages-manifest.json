@@ -2,8 +2,6 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/dashboard": "pages/dashboard.js",
-  "/main-menu": "pages/main-menu.js",
-  "/login": "pages/login.js",
-  "/cards": "pages/cards.js"
+  "/": "pages/index.js",
+  "/admin/resend-enrollment": "pages/admin/resend-enrollment.js"
 }
