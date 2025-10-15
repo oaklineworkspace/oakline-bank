@@ -13,18 +13,23 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Get application data
-    const { data: applicationData, error: applicationError } = await supabaseAdmin
-      .from('applications')
-      .select('*')
-      .eq('id', application_id)
-      .single();
-
-    if (applicationError || !applicationData) {
-      return res.status(404).json({ error: 'Application not found' });
+    // Get application data if it exists
+    let applicationData = null;
+    if (application_id) {
+      const { data, error: applicationError } = await supabaseAdmin
+        .from('applications')
+        .select('*')
+        .eq('id', application_id)
+        .maybeSingle();
+      
+      applicationData = data;
     }
 
-    const userEmail = email || applicationData.email;
+    const userEmail = email || applicationData?.email;
+    
+    if (!userEmail) {
+      return res.status(400).json({ error: 'Email is required' });
+    }
 
     // Check if Supabase Auth user already exists
     let authUser = null;
@@ -48,10 +53,10 @@ export default async function handler(req, res) {
           password: tempPassword,
           email_confirm: true,
           user_metadata: {
-            first_name: applicationData.first_name,
-            last_name: applicationData.last_name,
-            middle_name: applicationData.middle_name,
-            application_id: applicationData.id
+            first_name: applicationData?.first_name || '',
+            last_name: applicationData?.last_name || '',
+            middle_name: applicationData?.middle_name || '',
+            application_id: application_id
           }
         });
 
@@ -81,9 +86,9 @@ export default async function handler(req, res) {
     res.status(200).json({
       message: 'Auth user ready for enrollment',
       user: {
-        id: applicationData.id,
-        email: applicationData.email,
-        name: `${applicationData.first_name} ${applicationData.middle_name ? applicationData.middle_name + ' ' : ''}${applicationData.last_name}`,
+        id: application_id,
+        email: userEmail,
+        name: applicationData ? `${applicationData.first_name} ${applicationData.middle_name ? applicationData.middle_name + ' ' : ''}${applicationData.last_name}` : '',
         auth_id: authUser.id
       }
     });

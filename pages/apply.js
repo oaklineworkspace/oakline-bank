@@ -329,7 +329,7 @@ export default function Apply() {
         return enumMapping[accountType?.name] || accountType?.name?.toLowerCase().replace(/\s+/g, '_');
       });
 
-      // Check if email already exists
+      // Check if email already exists in applications
       const { data: existingApp } = await supabase
         .from('applications')
         .select('email')
@@ -342,10 +342,36 @@ export default function Apply() {
         return;
       }
 
-      // Insert application data with all fields
+      // STEP 1: Create a temporary application ID for auth user creation
+      const tempApplicationId = crypto.randomUUID();
+
+      // STEP 2: Create Supabase Auth user FIRST (before any database records)
+      console.log('Creating auth user for email:', formData.email.trim().toLowerCase());
+      const authResponse = await fetch('/api/create-auth-user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: formData.email.trim().toLowerCase(),
+          application_id: tempApplicationId
+        })
+      });
+
+      if (!authResponse.ok) {
+        const authError = await authResponse.json();
+        console.error('Failed to create auth user:', authError);
+        throw new Error(authError.error || 'Failed to create user account. Please try again.');
+      }
+
+      const authResult = await authResponse.json();
+      const userId = authResult.user.auth_id;
+      console.log('Auth user created successfully:', userId);
+
+      // STEP 3: Now insert application data with the user_id
       const { data: applicationData, error: applicationError } = await supabase
         .from('applications')
         .insert([{
+          id: tempApplicationId,
+          user_id: userId,
           first_name: formData.firstName.trim(),
           middle_name: formData.middleName.trim() || null,
           last_name: formData.lastName.trim(),
@@ -370,7 +396,10 @@ export default function Apply() {
         .select()
         .single();
 
-      if (applicationError) throw applicationError;
+      if (applicationError) {
+        console.error('Application creation error after auth user created:', applicationError);
+        throw new Error('Failed to create application. Please contact support with error: ' + applicationError.message);
+      }
 
       // Create Supabase Auth user first
       console.log('Creating auth user for application:', applicationData.id);
@@ -478,6 +507,7 @@ export default function Apply() {
         const { data: newAccount, error: accountError } = await supabase
           .from('accounts')
           .insert([{
+            user_id: userId,
             application_id: applicationId,
             account_number: accountNumber,
             account_type: dbAccountType,
@@ -625,30 +655,7 @@ export default function Apply() {
         console.log('Profile creation skipped:', profileInsertError.message);
       }
 
-      // Create Supabase Auth user immediately after successful application creation
-      try {
-        console.log('Creating auth user for application:', applicationId);
-        const authResponse = await fetch('/api/create-auth-user', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            token: enrollmentToken,
-            application_id: applicationId
-          })
-        });
-
-        if (!authResponse.ok) {
-          const authError = await authResponse.json();
-          console.error('Failed to create auth user:', authError);
-          // Don't fail the entire process for auth user creation issues
-        } else {
-          const authResult = await authResponse.json();
-          console.log('Auth user created successfully:', authResult);
-        }
-      } catch (authError) {
-        console.error('Auth user creation failed:', authError);
-        // Don't fail the entire process for auth user creation issues
-      }
+      // Auth user was already created earlier in the process
 
       // Send welcome email with enrollment link
       try {
