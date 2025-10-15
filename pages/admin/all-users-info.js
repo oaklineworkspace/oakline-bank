@@ -43,40 +43,38 @@ export default function AllUsersInfoPage() {
   const fetchAllUsersInfo = async () => {
     setLoading(true);
     try {
-      // Fetch all users with their profiles
-      const { data: users, error: usersError } = await supabase.auth.admin.listUsers();
-      
-      if (usersError) throw usersError;
-
-      // Fetch profiles
-      const { data: profiles } = await supabase
+      // Fetch profiles which contain user information
+      const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
-        .select('*');
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (profilesError) throw profilesError;
 
       // Fetch accounts
-      const { data: accounts } = await supabase
+      const { data: accounts, error: accountsError } = await supabase
         .from('accounts')
         .select('*')
         .order('created_at', { ascending: false });
 
+      if (accountsError) throw accountsError;
+
       // Fetch cards
-      const { data: cards } = await supabase
+      const { data: cards, error: cardsError } = await supabase
         .from('cards')
         .select('*')
         .order('created_at', { ascending: false });
 
-      // Combine all data
-      const combinedData = users.users.map(user => {
-        const profile = profiles?.find(p => p.id === user.id) || {};
-        const userAccounts = accounts?.filter(a => a.user_id === user.id) || [];
-        const userCards = userAccounts.flatMap(acc => 
-          cards?.filter(c => c.account_id === acc.id) || []
-        );
+      if (cardsError) throw cardsError;
 
+      // Combine all data
+      const combinedData = profiles.map(profile => {
+        const userAccounts = accounts?.filter(a => a.user_id === profile.id) || [];
+        
         return {
-          user_id: user.id,
-          user_email: user.email,
-          created_at: user.created_at,
+          user_id: profile.id,
+          user_email: profile.email,
+          created_at: profile.created_at,
           ...profile,
           accounts: userAccounts.map(acc => ({
             ...acc,
@@ -88,7 +86,7 @@ export default function AllUsersInfoPage() {
       setUsersData(combinedData);
     } catch (error) {
       console.error('Error fetching users info:', error);
-      setError('Failed to load users data');
+      setError('Failed to load users data: ' + error.message);
     } finally {
       setLoading(false);
     }

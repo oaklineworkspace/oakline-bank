@@ -619,7 +619,7 @@ function DashboardContent() {
                         <div>
                           <div style={styles.cardLabelSmall}>CVV</div>
                           <div style={styles.cardValueSmall}>
-                            {visibleCardDetails[card.id] ? (card.cvv || '***') : '***'}
+                            {visibleCardDetails[card.id] ? (card.cvc || '***') : '***'}
                           </div>
                         </div>
                       </div>
@@ -637,7 +637,7 @@ function DashboardContent() {
                       <div style={styles.cvvSection}>
                         <div style={styles.cvvLabel}>CVV</div>
                         <div style={styles.cvvBox}>
-                          {visibleCardDetails[card.id] ? (card.cvv || '***') : '***'}
+                          {visibleCardDetails[card.id] ? (card.cvc || '***') : '***'}
                         </div>
                       </div>
                       <div style={styles.cardBackInfo}>
@@ -652,13 +652,13 @@ function DashboardContent() {
                       onClick={() => toggleCardVisibility(card.id)}
                       style={styles.cardControlButton}
                     >
-                      {visibleCardDetails[card.id] ? '👁️ Hide Details' : '👁️ Show Details'}
+                      {visibleCardDetails[card.id] ? '👁️ Hide' : '👁️ Show'}
                     </button>
                     <button 
                       onClick={() => setFlippedCards(prev => ({ ...prev, [card.id]: !prev[card.id] }))}
                       style={styles.cardControlButton}
                     >
-                      🔄 Flip Card
+                      🔄 Flip
                     </button>
                   </div>
 
@@ -673,17 +673,19 @@ function DashboardContent() {
                       ...styles.statusBadge,
                       backgroundColor: card.pin_set ? '#10b981' : '#f59e0b'
                     }}>
-                      {card.pin_set ? '🔐 PIN Set' : '⚠️ PIN Not Set'}
+                      {card.pin_set ? '🔐 PIN Set' : '⚠️ Set PIN'}
                     </span>
                   </div>
 
-                  <div style={styles.cardFeaturesList}>
-                    <div style={styles.cardFeatureItem}>💰 Daily Limit: ${card.daily_limit || '2,000'}</div>
-                    <div style={styles.cardFeatureItem}>📅 Monthly Limit: ${card.monthly_limit || '10,000'}</div>
-                    <div style={styles.cardFeatureItem}>🌍 Global Acceptance</div>
-                    <div style={styles.cardFeatureItem}>🔒 EMV Chip Security</div>
-                    <div style={styles.cardFeatureItem}>📱 Contactless Payments</div>
-                    <div style={styles.cardFeatureItem}>🛡️ Fraud Protection</div>
+                  <div style={styles.cardInfoGrid}>
+                    <div style={styles.cardInfoItem}>
+                      <span style={styles.cardInfoLabel}>Daily Limit</span>
+                      <span style={styles.cardInfoValue}>${card.daily_limit || '2,000'}</span>
+                    </div>
+                    <div style={styles.cardInfoItem}>
+                      <span style={styles.cardInfoLabel}>Monthly Limit</span>
+                      <span style={styles.cardInfoValue}>${card.monthly_limit || '10,000'}</span>
+                    </div>
                   </div>
 
                   {!card.pin_set && (
@@ -1521,12 +1523,15 @@ const styles = {
     opacity: 0.8
   },
   cardNumberDisplay: {
-    fontSize: '1.4rem',
+    fontSize: '1.3rem',
     fontWeight: 'bold',
-    letterSpacing: '3px',
+    letterSpacing: '2px',
     fontFamily: 'monospace',
     textAlign: 'center',
-    margin: '0.5rem 0'
+    margin: '0.5rem 0',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis'
   },
   cardFooterDetails: {
     display: 'flex',
@@ -1605,24 +1610,31 @@ const styles = {
     cursor: 'pointer',
     transition: 'all 0.2s'
   },
-  cardFeaturesList: {
+  cardInfoGrid: {
     display: 'grid',
     gridTemplateColumns: 'repeat(2, 1fr)',
-    gap: '0.5rem',
+    gap: '0.75rem',
     marginTop: '1rem',
-    marginBottom: '1rem',
-    padding: '0.75rem',
-    backgroundColor: 'white',
-    borderRadius: '8px'
+    marginBottom: '1rem'
   },
-  cardFeatureItem: {
-    fontSize: '0.85rem',
+  cardInfoItem: {
+    display: 'flex',
+    flexDirection: 'column',
+    padding: '0.75rem',
+    backgroundColor: '#f8fafc',
+    borderRadius: '8px',
+    border: '1px solid #e2e8f0'
+  },
+  cardInfoLabel: {
+    fontSize: '0.75rem',
+    color: '#64748b',
+    marginBottom: '0.25rem',
+    fontWeight: '500'
+  },
+  cardInfoValue: {
+    fontSize: '1rem',
     color: '#1e40af',
-    fontWeight: '600',
-    padding: '0.5rem',
-    backgroundColor: '#f0f9ff',
-    borderRadius: '6px',
-    textAlign: 'center'
+    fontWeight: '700'
   },
   setPinButton: {
     width: '100%',
