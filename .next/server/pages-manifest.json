@@ -2,7 +2,7 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/apply": "pages/apply.js",
   "/": "pages/index.js",
+  "/apply": "pages/apply.js",
   "/admin/resend-enrollment": "pages/admin/resend-enrollment.js"
 }
