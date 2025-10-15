@@ -342,13 +342,61 @@ export default function Apply() {
         return;
       }
 
-      // STEP 1: Create a temporary application ID for auth user creation
-      const tempApplicationId = crypto.randomUUID();
+      // STEP 1: First insert the application to get the application ID
+      let applicationId = null;
+      
+      try {
+        const { data: applicationData, error: applicationError } = await supabase
+          .from('applications')
+          .insert([{
+            first_name: formData.firstName.trim(),
+            middle_name: formData.middleName.trim() || null,
+            last_name: formData.lastName.trim(),
+            mothers_maiden_name: formData.mothersMaidenName.trim() || null,
+            email: formData.email.trim().toLowerCase(),
+            phone: formData.phone.trim(),
+            date_of_birth: formData.dateOfBirth,
+            country: effectiveCountry,
+            ssn: effectiveCountry === 'US' ? formData.ssn.trim() : null,
+            id_number: effectiveCountry !== 'US' ? formData.idNumber.trim() : null,
+            address: formData.address.trim(),
+            city: effectiveCity,
+            state: effectiveState,
+            zip_code: formData.zipCode.trim(),
+            employment_status: formData.employmentStatus,
+            annual_income: formData.annualIncome,
+            account_types: mappedAccountTypes,
+            agree_to_terms: formData.agreeToTerms,
+            application_status: 'pending',
+            submitted_at: new Date().toISOString()
+          }])
+          .select()
+          .single();
 
-      // STEP 2: Create Supabase Auth user FIRST (before any database records)
+        if (applicationError) {
+          console.error('Application creation error:', applicationError);
+          
+          if (applicationError.code === '23505') {
+            setErrors({ submit: 'An account with this email already exists. Please try another email or log in.' });
+            setLoading(false);
+            return;
+          }
+          
+          throw new Error('Failed to create application: ' + applicationError.message);
+        }
+
+        applicationId = applicationData.id;
+        console.log('Application created successfully:', applicationId);
+      } catch (appError) {
+        console.error('Application creation failed:', appError);
+        setErrors({ submit: appError.message || 'Failed to create application. Please try again.' });
+        setLoading(false);
+        return;
+      }
+
+      // STEP 2: Create Supabase Auth user
       console.log('Creating auth user for email:', formData.email.trim().toLowerCase());
       let userId = null;
-      let authCreated = false;
 
       try {
         const authResponse = await fetch('/api/create-auth-user', {
@@ -356,7 +404,7 @@ export default function Apply() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             email: formData.email.trim().toLowerCase(),
-            application_id: tempApplicationId
+            application_id: applicationId
           })
         });
 
@@ -364,20 +412,18 @@ export default function Apply() {
 
         if (!authResponse.ok) {
           console.error('Failed to create auth user:', authResult);
-          
-          // Check if user already exists
-          if (authResult.error && authResult.error.includes('already registered')) {
-            setErrors({ submit: 'An account with this email already exists. Please try another email or log in.' });
-            setLoading(false);
-            return;
-          }
-          
-          throw new Error(authResult.error || 'Failed to create user account. Please try again.');
+          throw new Error(authResult.error || 'Failed to create user account');
         }
 
         userId = authResult.user.auth_id;
-        authCreated = true;
         console.log('Auth user created successfully:', userId);
+        
+        // Update application with user_id
+        await supabase
+          .from('applications')
+          .update({ user_id: userId })
+          .eq('id', applicationId);
+          
       } catch (authError) {
         console.error('Auth user creation error:', authError);
         setErrors({ submit: 'Failed to create user account: ' + authError.message });
@@ -385,44 +431,7 @@ export default function Apply() {
         return;
       }
 
-      // STEP 3: Now insert application data with the user_id
-      const { data: applicationData, error: applicationError } = await supabase
-        .from('applications')
-        .insert([{
-          id: tempApplicationId,
-          user_id: userId,
-          first_name: formData.firstName.trim(),
-          middle_name: formData.middleName.trim() || null,
-          last_name: formData.lastName.trim(),
-          mothers_maiden_name: formData.mothersMaidenName.trim() || null,
-          email: formData.email.trim().toLowerCase(),
-          phone: formData.phone.trim(),
-          date_of_birth: formData.dateOfBirth,
-          country: effectiveCountry,
-          ssn: effectiveCountry === 'US' ? formData.ssn.trim() : null,
-          id_number: effectiveCountry !== 'US' ? formData.idNumber.trim() : null,
-          address: formData.address.trim(),
-          city: effectiveCity,
-          state: effectiveState,
-          zip_code: formData.zipCode.trim(),
-          employment_status: formData.employmentStatus,
-          annual_income: formData.annualIncome,
-          account_types: mappedAccountTypes,
-          agree_to_terms: formData.agreeToTerms,
-          application_status: 'pending',
-          submitted_at: new Date().toISOString()
-        }])
-        .select()
-        .single();
-
-      if (applicationError) {
-        console.error('Application creation error after auth user created:', applicationError);
-        throw new Error('Failed to create application. Please contact support with error: ' + applicationError.message);
-      }
-
-      const applicationId = applicationData.id;
-
-      // Upsert into profiles table with all required fields
+      // STEP 3: Create profile for the user (will be completed during enrollment)
       const { error: profileError } = await supabase
         .from('profiles')
         .upsert([{
