@@ -30,11 +30,17 @@
       "static/chunks/main.js",
       "static/chunks/pages/_error.js"
     ],
-    "/admin/resend-enrollment": [
+    "/apply": [
       "static/chunks/webpack.js",
       "static/chunks/vendors.js",
       "static/chunks/main.js",
-      "static/chunks/pages/admin/resend-enrollment.js"
+      "static/chunks/pages/apply.js"
+    ],
+    "/privacy": [
+      "static/chunks/webpack.js",
+      "static/chunks/vendors.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/privacy.js"
     ]
   },
   "ampFirstPages": []

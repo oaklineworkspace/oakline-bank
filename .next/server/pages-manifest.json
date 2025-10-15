@@ -4,5 +4,6 @@
   "/_document": "pages/_document.js",
   "/": "pages/index.js",
   "/apply": "pages/apply.js",
-  "/admin/resend-enrollment": "pages/admin/resend-enrollment.js"
+  "/privacy": "pages/privacy.js",
+  "/api/create-auth-user": "pages/api/create-auth-user.js"
 }
