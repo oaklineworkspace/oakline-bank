@@ -114,6 +114,9 @@ export default async function handler(req, res) {
       }
     });
 
+    console.log('Magic link generated:', linkData ? 'Success' : 'Failed');
+    console.log('Redirect URL:', `${siteUrl}/enroll?application_id=${applicationId}`);
+
     if (linkError) {
       console.error('Error generating magic link:', linkError);
       return res.status(500).json({ error: 'Failed to generate enrollment link' });

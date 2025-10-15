@@ -662,37 +662,24 @@ export default function Apply() {
 
       // Auth user was already created earlier in the process
 
-      // Send welcome email with enrollment link
+      // Send welcome email with enrollment link using resend-enrollment API
       try {
         // Detect current site URL dynamically
         const siteUrl = window.location.origin;
         
         console.log('Sending welcome email to:', formData.email.trim().toLowerCase());
         console.log('Application ID:', applicationId);
-        console.log('Enrollment token:', enrollmentToken);
         
-        const emailResponse = await fetch('/api/send-welcome-email', {
+        const emailResponse = await fetch('/api/resend-enrollment', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
+            applicationId: applicationId,
             email: formData.email.trim().toLowerCase(),
-            first_name: formData.firstName.trim(),
-            middle_name: formData.middleName.trim() || '',
-            last_name: formData.lastName.trim(),
-            mothers_maiden_name: formData.mothersMaidenName.trim() || '',
-            phone: formData.phone.trim(),
-            address: formData.address.trim(),
-            city: effectiveCity,
-            state: effectiveState,
-            zip_code: formData.zipCode.trim(),
-            account_numbers: accountNumbers,
-            account_types: accountTypes,
-            application_id: applicationId,
-            country: effectiveCountry,
-            employment_status: formData.employmentStatus,
-            annual_income: formData.annualIncome,
-            enrollment_token: enrollmentToken,
-            site_url: siteUrl
+            firstName: formData.firstName.trim(),
+            middleName: formData.middleName.trim() || '',
+            lastName: formData.lastName.trim(),
+            country: effectiveCountry
           })
         });
 
@@ -700,12 +687,15 @@ export default function Apply() {
         
         if (!emailResponse.ok) {
           console.error('Failed to send welcome email:', emailResult);
+          // Log error but don't fail the application
+          console.warn('⚠️ Email failed but application was successful');
         } else {
-          console.log('Welcome email sent successfully:', emailResult);
+          console.log('✅ Welcome email sent successfully:', emailResult);
         }
       } catch (emailError) {
-        console.error('Email sending failed:', emailError);
+        console.error('Email sending error:', emailError);
         // Don't fail the entire process for email issues
+        console.warn('⚠️ Email error but application was successful');
       }
 
       // Show success screen
