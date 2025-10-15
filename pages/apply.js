@@ -401,34 +401,7 @@ export default function Apply() {
         throw new Error('Failed to create application. Please contact support with error: ' + applicationError.message);
       }
 
-      // Create Supabase Auth user first
-      console.log('Creating auth user for application:', applicationData.id);
-      const authResponse = await fetch('/api/create-auth-user', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: formData.email.trim().toLowerCase(),
-          application_id: applicationData.id
-        })
-      });
-
-      if (!authResponse.ok) {
-        const authError = await authResponse.json();
-        console.error('Failed to create auth user:', authError);
-        throw new Error('Failed to create user account');
-      }
-
-      const authResult = await authResponse.json();
-      const userId = authResult.user.auth_id;
-      console.log('Auth user created successfully:', userId);
-
       const applicationId = applicationData.id;
-
-      // Update application with user_id
-      await supabase
-        .from('applications')
-        .update({ user_id: userId })
-        .eq('id', applicationId);
 
       // Upsert into profiles table with all required fields
       const { error: profileError } = await supabase

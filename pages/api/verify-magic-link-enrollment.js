@@ -92,12 +92,20 @@ export default async function handler(req, res) {
 
     const accountNumbers = accounts?.filter(acc => acc.account_number).map(acc => acc.account_number) || [];
 
+    // Ensure we have valid application data
+    if (!applicationData) {
+      return res.status(404).json({ 
+        error: 'Application not found. Please contact support.',
+        application_id: applicationId
+      });
+    }
+
     res.status(200).json({
       message: 'Magic link verification successful',
       application: applicationData,
       accounts: accounts || [],
       account_numbers: accountNumbers,
-      enrollment_completed: false,
+      enrollment_completed: existingProfile?.enrollment_completed || false,
       user: {
         id: authUser.user.id,
         email: authUser.user.email

@@ -31,7 +31,7 @@ export default function EnrollPage() {
     // Check if we've already verified this session
     const sessionKey = `enrollment_verified_${applicationId}_${user.email}`;
     const alreadyVerified = sessionStorage.getItem(sessionKey);
-    
+
     if (alreadyVerified || verificationInProgress) {
       console.log('Already verified or verification in progress, skipping...');
       const cachedData = sessionStorage.getItem(`enrollment_data_${applicationId}`);
@@ -53,7 +53,7 @@ export default function EnrollPage() {
     }
 
     setVerificationInProgress(true);
-    
+
     if (window.enrollmentTimeout) {
       clearTimeout(window.enrollmentTimeout);
       window.enrollmentTimeout = null;
@@ -79,7 +79,7 @@ export default function EnrollPage() {
 
       if (response.ok) {
         console.log('Magic link verification successful');
-        
+
         // Check if enrollment is already completed
         if (result.enrollment_completed) {
           setError('This enrollment has already been completed. Please use the login page.');
@@ -88,14 +88,14 @@ export default function EnrollPage() {
           setVerificationInProgress(false);
           return;
         }
-        
+
         // Cache the verification data
         sessionStorage.setItem(sessionKey, 'true');
         sessionStorage.setItem(`enrollment_data_${applicationId}`, JSON.stringify({
           application: result.application,
           accounts: result.accounts || result.account_numbers || []
         }));
-        
+
         setApplicationInfo(result.application);
         setAccounts(result.accounts || result.account_numbers || []);
         setFormData(prev => ({ ...prev, email: user.email }));
@@ -106,7 +106,7 @@ export default function EnrollPage() {
       } else {
         console.error('Magic link verification failed:', result);
         console.error('Response status:', response.status);
-        
+
         // Don't fail on click limit errors during initial load
         if (result.error && result.error.includes('expired after 4 uses')) {
           // This might be a refresh - try to proceed anyway if we have session
@@ -124,7 +124,7 @@ export default function EnrollPage() {
                   skipClickCount: true
                 })
               });
-              
+
               const appResult = await appResponse.json();
               if (appResponse.ok) {
                 setApplicationInfo(appResult.application);
@@ -140,11 +140,11 @@ export default function EnrollPage() {
             }
           }
         }
-        
+
         setError(result.error || 'Invalid enrollment link or session expired. Please contact support.');
         setStep('error');
         setLoading(false);
-        setVerificationInProgress(false);
+        setVerificationVerificationInProgress(false);
       }
     } catch (error) {
       console.error('Magic link verification error:', error);
@@ -187,7 +187,7 @@ export default function EnrollPage() {
       const tokenCreatedAt = new Date(enrollment.created_at);
       const now = new Date();
       const hoursSinceCreation = (now - tokenCreatedAt) / (1000 * 60 * 60);
-      
+
       if (hoursSinceCreation > 24) {
         setError('This enrollment link has expired. Please request a new enrollment link.');
         setLoading(false);
@@ -296,7 +296,7 @@ export default function EnrollPage() {
         // Check if user is authenticated (from magic link)
         if (session?.user) {
           const userAppId = session.user.user_metadata?.application_id || application_id;
-          
+
           if (userAppId) {
             console.log('User authenticated via magic link with app ID:', userAppId);
             setApplicationId(userAppId);
@@ -343,19 +343,19 @@ export default function EnrollPage() {
   const handleRequestNewLink = async () => {
     setRequestingNewLink(true);
     setError('');
-    
+
     // Get email from various possible sources
     const userEmail = formData.email || applicationInfo?.email || router.query.email;
-    
+
     if (!userEmail) {
       setError('Unable to determine your email address. Please contact support directly.');
       setRequestingNewLink(false);
       return;
     }
-    
+
     // Detect current site URL
     const siteUrl = window.location.origin;
-    
+
     try {
       const response = await fetch('/api/request-enrollment-link', {
         method: 'POST',
