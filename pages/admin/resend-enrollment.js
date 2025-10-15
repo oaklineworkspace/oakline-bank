@@ -245,11 +245,11 @@ export default function ResendEnrollmentPage() {
                   </td>
                   <td style={styles.cell}>
                     <div style={styles.date}>
-                      {new Date(app.created_at).toLocaleDateString('en-US', {
+                      {app.created_at ? new Date(app.created_at).toLocaleDateString('en-US', {
                         month: 'short',
                         day: 'numeric',
                         year: 'numeric'
-                      })}
+                      }) : 'N/A'}
                     </div>
                   </td>
                   <td style={styles.cell}>
