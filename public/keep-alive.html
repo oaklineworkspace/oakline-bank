@@ -1,0 +1,123 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Keep Alive - Oakline Bank</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .status {
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 5px;
+      font-weight: bold;
+    }
+    .active {
+      background: #d1fae5;
+      color: #059669;
+    }
+    .log {
+      background: #f3f4f6;
+      padding: 10px;
+      border-radius: 5px;
+      max-height: 200px;
+      overflow-y: auto;
+      font-size: 12px;
+      font-family: monospace;
+    }
+    .log-entry {
+      padding: 3px 0;
+      border-bottom: 1px solid #e5e7eb;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🟢 Keep Alive Service</h1>
+    <p>This page keeps your Oakline Bank server awake by pinging it every 4 minutes.</p>
+    
+    <div class="status active" id="status">
+      ✓ Active - Server is being kept awake
+    </div>
+
+    <div>
+      <strong>Last Ping:</strong> <span id="lastPing">Initializing...</span><br>
+      <strong>Next Ping:</strong> <span id="nextPing">4 minutes</span><br>
+      <strong>Total Pings:</strong> <span id="pingCount">0</span>
+    </div>
+
+    <h3>Activity Log</h3>
+    <div class="log" id="log"></div>
+  </div>
+
+  <script>
+    let pingCount = 0;
+    const PING_INTERVAL = 4 * 60 * 1000; // 4 minutes in milliseconds
+    let nextPingTime;
+
+    function addLog(message) {
+      const log = document.getElementById('log');
+      const entry = document.createElement('div');
+      entry.className = 'log-entry';
+      entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      log.insertBefore(entry, log.firstChild);
+      
+      // Keep only last 20 entries
+      while (log.children.length > 20) {
+        log.removeChild(log.lastChild);
+      }
+    }
+
+    function updateNextPingDisplay() {
+      const now = Date.now();
+      const remaining = Math.max(0, nextPingTime - now);
+      const minutes = Math.floor(remaining / 60000);
+      const seconds = Math.floor((remaining % 60000) / 1000);
+      document.getElementById('nextPing').textContent = `${minutes}m ${seconds}s`;
+    }
+
+    async function pingServer() {
+      try {
+        const response = await fetch('/api/ping');
+        const data = await response.json();
+        
+        pingCount++;
+        document.getElementById('pingCount').textContent = pingCount;
+        document.getElementById('lastPing').textContent = new Date().toLocaleTimeString();
+        
+        addLog(`✓ Ping successful - ${data.message}`);
+        
+        // Schedule next ping
+        nextPingTime = Date.now() + PING_INTERVAL;
+        setTimeout(pingServer, PING_INTERVAL);
+        
+      } catch (error) {
+        addLog(`✗ Ping failed: ${error.message}`);
+        // Retry after 30 seconds on error
+        nextPingTime = Date.now() + 30000;
+        setTimeout(pingServer, 30000);
+      }
+    }
+
+    // Start pinging immediately
+    addLog('Keep-alive service started');
+    pingServer();
+
+    // Update countdown every second
+    setInterval(updateNextPingDisplay, 1000);
+  </script>
+</body>
+</html>
