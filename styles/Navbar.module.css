@@ -6,7 +6,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 1rem 2rem;
-  background-color: #003366;
+  background-color: var(--primary-navy);
   color: white;
 }
 
@@ -35,7 +35,7 @@
   top: 100%;
   left: 0;
   background: white;
-  color: #003366;
+  color: var(--primary-navy);
   padding: 0.5rem 0;
   border-radius: 0.5rem;
   display: flex;
@@ -63,6 +63,6 @@
 }
 
 .signup {
-  background: #ffcc00;
-  color: #003366;
+  background: var(--accent-gold);
+  color: var(--primary-navy);
 }

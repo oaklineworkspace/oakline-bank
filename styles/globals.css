@@ -1,14 +1,3 @@
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-
 /* Professional Banking Website - Mobile First */
 * {
   box-sizing: border-box;
@@ -472,8 +461,32 @@ p {
 
 /* Focus styles for accessibility */
 button:focus, a:focus, input:focus {
-  outline: 2px solid var(--secondary-blue);
+  outline: 2px solid var(--primary-navy);
   outline-offset: 2px;
+}
+
+/* Login page specific styles */
+.login-page {
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+}
+
+.login-input:focus {
+  border-color: #1A3E6F;
+  box-shadow: 0 0 0 3px rgba(26, 62, 111, 0.1);
+}
+
+.login-button:hover {
+  background-color: #2A5490;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(26, 62, 111, 0.4);
+}
+
+.password-toggle:hover {
+  color: #1A3E6F;
+}
+
+.quick-link:hover {
+  background-color: rgba(26, 62, 111, 0.05);
 }
 
 /* Print styles */
