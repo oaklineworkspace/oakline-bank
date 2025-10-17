@@ -30,10 +30,10 @@ export default function HeroSection() {
             </div>
           </div>
           <div style={styles.cta}>
-            <Link href="/apply" style={styles.primaryBtn}>
-              Open Account
+            <Link href="/enroll" style={styles.primaryBtn}>
+              Enroll Now
             </Link>
-            <Link href="/login" style={styles.secondaryBtn}>
+            <Link href="/sign-in" style={styles.secondaryBtn}>
               Sign In
             </Link>
           </div>
@@ -91,11 +91,11 @@ const styles = {
     fontSize: 'clamp(32px, 5vw, 56px)',
     fontWeight: '700',
     lineHeight: '1.2',
-    color: '#1e293b',
+    color: 'var(--primary-text)',
     marginBottom: '24px',
   },
   highlight: {
-    background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
+    background: 'linear-gradient(135deg, var(--primary-navy) 0%, var(--secondary-navy) 100%)',
     WebkitBackgroundClip: 'text',
     WebkitTextFillColor: 'transparent',
     backgroundClip: 'text',
@@ -103,7 +103,7 @@ const styles = {
   subtitle: {
     fontSize: '20px',
     lineHeight: '1.6',
-    color: '#64748b',
+    color: 'var(--secondary-text)',
     marginBottom: '40px',
     maxWidth: '500px',
   },
@@ -120,12 +120,12 @@ const styles = {
   statNumber: {
     fontSize: '28px',
     fontWeight: '700',
-    color: '#1e40af',
+    color: 'var(--primary-navy)',
     lineHeight: '1',
   },
   statLabel: {
     fontSize: '14px',
-    color: '#64748b',
+    color: 'var(--secondary-text)',
     fontWeight: '500',
   },
   cta: {
@@ -134,7 +134,7 @@ const styles = {
     alignItems: 'center',
   },
   primaryBtn: {
-    background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
+    background: 'linear-gradient(135deg, var(--primary-navy) 0%, var(--secondary-navy) 100%)',
     color: 'white',
     padding: '16px 32px',
     borderRadius: '12px',
@@ -146,13 +146,13 @@ const styles = {
   },
   secondaryBtn: {
     background: 'transparent',
-    color: '#1e40af',
+    color: 'var(--primary-navy)',
     padding: '16px 32px',
     borderRadius: '12px',
     fontSize: '16px',
     fontWeight: '600',
     textDecoration: 'none',
-    border: '2px solid #1e40af',
+    border: '2px solid var(--primary-navy)',
     transition: 'all 0.3s ease',
   },
   imageContainer: {

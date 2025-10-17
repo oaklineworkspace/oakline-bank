@@ -44,8 +44,12 @@ export default function Navbar({ links }) {
       </ul>
 
       <div className={styles.authButtons}>
-        <button className={styles.login}>Login</button>
-        <button className={styles.signup}>Sign Up</button>
+        <Link href="/sign-in">
+          <button className={styles.login}>Sign In</button>
+        </Link>
+        <Link href="/enroll">
+          <button className={styles.signup}>Enroll</button>
+        </Link>
       </div>
     </nav>
   );

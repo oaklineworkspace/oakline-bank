@@ -11,22 +11,22 @@ export default function Hero() {
       image: '/images/hero-mobile-transactions.jpg.PNG',
       title: 'Banking Made Simple',
       subtitle: 'Experience the future of banking with our mobile-first platform',
-      cta: 'Start Banking Today',
-      link: '/apply'
+      cta: 'Enroll Today',
+      link: '/enroll'
     },
     {
       image: '/images/hero-debit-card-1.jpg.PNG',
       title: 'Premium Debit Cards',
       subtitle: 'Secure, convenient, and rewarding payment solutions',
       cta: 'Get Your Card',
-      link: '/apply'
+      link: '/enroll'
     },
     {
       image: '/images/hero-pos.jpg.PNG',
       title: 'Business Solutions',
       subtitle: 'Comprehensive banking services for growing businesses',
-      cta: 'Learn More',
-      link: '/apply'
+      cta: 'Enroll Now',
+      link: '/enroll'
     }
   ];
 
@@ -58,7 +58,7 @@ export default function Hero() {
               <Link href={heroSlides[currentSlide].link} style={styles.primaryCTA}>
                 {heroSlides[currentSlide].cta}
               </Link>
-              <Link href="/login" style={styles.secondaryCTA}>
+              <Link href="/sign-in" style={styles.secondaryCTA}>
                 Sign In
               </Link>
             </div>

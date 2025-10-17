@@ -102,7 +102,7 @@ export default function Header() {
       <nav style={styles.nav}>
         <div style={styles.navContainer}>
           <Link href="/" style={styles.logoContainer}>
-            <img src="/images/logo-primary.png.jpg" alt="Oakline Bank Logo" style={styles.logo} />
+            <img src="/images/logo-primary.png" alt="Oakline Bank Logo" style={styles.logo} />
             <span style={styles.bankName}>Oakline Bank</span>
           </Link>
 
@@ -203,7 +203,7 @@ export default function Header() {
         {mobileMenuOpen && (
           <div style={styles.mobileMenu}>
             <Link href="/apply" style={styles.mobileLink}>Apply Now</Link>
-            <Link href="/login" style={styles.mobileLink}>Sign In</Link>
+            <Link href="/sign-in" style={styles.mobileLink}>Sign In</Link>
             <Link href="/dashboard" style={styles.mobileLink}>Online Banking</Link>
             <Link href="/loans" style={styles.mobileLink}>Loans</Link>
             <Link href="/investments" style={styles.mobileLink}>Investments</Link>

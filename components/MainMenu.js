@@ -171,7 +171,7 @@ export default function MainMenu({ user }) {
         <div style={styles.navContainer}>
           {/* Logo */}
           <Link href="/" style={styles.logoContainer}>
-            <img src="/images/logo-primary.png.jpg" alt="Oakline Bank" style={styles.logo} />
+            <img src="/images/logo-primary.png" alt="Oakline Bank" style={styles.logo} />
             <div style={styles.brandInfo}>
               <span style={styles.brandName}>Oakline Bank</span>
               <span style={styles.brandTagline}>Your Financial Partner</span>
@@ -264,11 +264,11 @@ export default function MainMenu({ user }) {
               </>
             ) : (
               <>
-                <Link href="/apply" style={styles.applyButton}>
+                <Link href="/enroll" style={styles.applyButton}>
                   <span style={styles.actionIcon}>🚀</span>
-                  Apply Now
+                  Enroll Now
                 </Link>
-                <Link href="/login" style={styles.loginButton}>
+                <Link href="/sign-in" style={styles.loginButton}>
                   <span style={styles.actionIcon}>👤</span>
                   Sign In
                 </Link>
@@ -315,11 +315,11 @@ export default function MainMenu({ user }) {
                 </div>
               ) : (
                 <div style={styles.mobileActions}>
-                  <Link href="/apply" style={styles.mobileApplyButton}>
+                  <Link href="/enroll" style={styles.mobileApplyButton}>
                     <span style={styles.actionIcon}>🚀</span>
-                    Apply Now
+                    Enroll Now
                   </Link>
-                  <Link href="/login" style={styles.mobileLoginButton}>
+                  <Link href="/sign-in" style={styles.mobileLoginButton}>
                     <span style={styles.actionIcon}>👤</span>
                     Sign In
                   </Link>

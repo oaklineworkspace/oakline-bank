@@ -77,7 +77,7 @@ export default function Footer() {
           {/* Company Info */}
           <div style={styles.companySection}>
             <Link href="/" style={styles.logoContainer}>
-              <img src="/images/logo-primary.png.jpg" alt="Oakline Bank Logo" style={styles.logo} />
+              <img src="/images/Oakline_Bank_logo_design_c1b04ae0.png" alt="Oakline Bank Logo" style={styles.logo} />
               <span style={styles.companyName}>Oakline Bank</span>
             </Link>
             <p style={styles.companyDescription}>
@@ -163,7 +163,7 @@ export default function Footer() {
           <div style={styles.footerSection}>
             <h4 style={styles.sectionTitle}>Digital Banking</h4>
             <ul style={styles.linkList}>
-              <li><Link href="/login" style={styles.footerLink}>Online Banking</Link></li>
+              <li><Link href="/sign-in" style={styles.footerLink}>Online Banking</Link></li>
               <li><Link href="/transfer" style={styles.footerLink}>Wire Transfers</Link></li>
               <li><Link href="/bill-pay" style={styles.footerLink}>Bill Pay Service</Link></li>
               <li><Link href="/cards" style={styles.footerLink}>Card Management</Link></li>
