@@ -23,6 +23,7 @@ export default function Home() {
   const [isVisible, setIsVisible] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [activeDropdown, setActiveDropdown] = useState(null);
+  const [showBankingDropdown, setShowBankingDropdown] = useState(false);
 
   useEffect(() => {
     // Get initial session and set up auth listener
@@ -115,33 +116,70 @@ export default function Home() {
     };
   }, []);
 
+  const premiumFeatures = [
+    // Core Banking Services
+    { name: 'Online Banking', href: '/dashboard', icon: '💻', desc: 'Digital banking platform', color: '#0EA5E9', section: 'core' },
+    { name: 'Mobile Banking', href: '/apply', icon: '📱', desc: 'Banking on the go', color: '#10B981', section: 'core' },
+    { name: 'Account Types', href: '/account-types', icon: '🏦', desc: '23 account options', color: '#3B82F6', section: 'core' },
+    { name: 'Money Transfer', href: '/transfer', icon: '💸', desc: 'Send & receive funds', color: '#059669', section: 'core' },
+    { name: 'Bill Pay', href: '/bill-pay', icon: '🧾', desc: 'Automated payments', color: '#F59E0B', section: 'core' },
+    { name: 'Zelle Payments', href: '/zelle', icon: '⚡', desc: 'Instant transfers', color: '#6B21A8', section: 'core' },
+    { name: 'Mobile Deposit', href: '/deposit-real', icon: '📸', desc: 'Deposit checks instantly', color: '#14B8A6', section: 'core' },
+    { name: 'ATM Network', href: '/atm', icon: '🏧', desc: '24/7 cash access', color: '#8B5CF6', section: 'core' },
+    { name: 'Debit & Credit Cards', href: '/cards', icon: '💳', desc: 'Manage your cards', color: '#EC4899', section: 'core' },
+    { name: 'Transaction History', href: '/transactions', icon: '📜', desc: 'View all transactions', color: '#64748B', section: 'core' },
+    { name: 'Statements', href: '/dashboard', icon: '📄', desc: 'Download statements', color: '#0891B2', section: 'core' },
+    { name: 'Branch Locator', href: '/branch-locator', icon: '📍', desc: 'Find nearest branch', color: '#DC2626', section: 'core' },
+
+    // Premium & Advanced Services
+    { name: 'Investment Portfolio', href: '/investments', icon: '📈', desc: 'High-yield investments', color: '#10B981', section: 'premium' },
+    { name: 'Crypto Trading', href: '/crypto', icon: '₿', desc: 'Digital asset trading', color: '#F59E0B', section: 'premium' },
+    { name: 'Home Loans', href: '/loans', icon: '🏠', desc: 'Mortgage solutions', color: '#3B82F6', section: 'premium' },
+    { name: 'Personal Loans', href: '/loans', icon: '💰', desc: 'Competitive rates', color: '#059669', section: 'premium' },
+    { name: 'Business Banking', href: '/account-types', icon: '🏢', desc: 'Commercial services', color: '#EF4444', section: 'premium' },
+    { name: 'Wealth Management', href: '/investments', icon: '💎', desc: 'Private banking', color: '#8B5CF6', section: 'premium' },
+    { name: 'Financial Advisory', href: '/financial-advisory', icon: '🎯', desc: 'Expert consultation', color: '#06B6D4', section: 'premium' },
+    { name: 'International Banking', href: '/internationalization', icon: '🌍', desc: 'Global services', color: '#84CC16', section: 'premium' },
+    { name: 'Trust Services', href: '/about', icon: '🛡️', desc: 'Estate planning', color: '#F97316', section: 'premium' },
+    { name: 'Credit Reports', href: '/credit-report', icon: '📊', desc: 'Monitor your credit', color: '#7C3AED', section: 'premium' },
+    { name: 'Rewards Program', href: '/rewards', icon: '🎁', desc: 'Earn & redeem rewards', color: '#F43F5E', section: 'premium' },
+    { name: 'Market News', href: '/market-news', icon: '📰', desc: 'Financial insights', color: '#0EA5E9', section: 'premium' },
+    { name: 'Financial Education', href: '/financial-education', icon: '📚', desc: 'Learning resources', color: '#10B981', section: 'premium' },
+    { name: 'Calculators', href: '/calculators', icon: '🧮', desc: 'Financial planning tools', color: '#F59E0B', section: 'premium' },
+    { name: 'Current Rates', href: '/current-rates', icon: '📈', desc: 'Interest & exchange rates', color: '#6366F1', section: 'premium' },
+    { name: 'Security Center', href: '/security', icon: '🔒', desc: 'Account protection', color: '#EF4444', section: 'premium' }
+  ];
+
+  const coreFeatures = premiumFeatures.filter(f => f.section === 'core');
+  const premiumServices = premiumFeatures.filter(f => f.section === 'premium');
+
   const bankingImages = [
     {
       src: '/images/Mobile_banking_user_experience_576bb7a3.png',
       title: 'Mobile Banking Excellence',
       subtitle: 'Complete banking control right in your pocket with our award-winning app',
       icon: '📱',
-      gradient: 'linear-gradient(135deg, rgba(26, 54, 93, 0.3) 0%, rgba(26, 54, 93, 0.4) 100%)'
+      gradient: 'linear-gradient(135deg, rgba(30, 64, 175, 0.15) 0%, rgba(30, 64, 175, 0.25) 100%)'
     },
     {
       src: '/images/Bank_hall_business_discussion_72f98bbe.png',
       title: 'Expert Financial Consultation',
       subtitle: 'Professional advice from certified banking specialists in our modern branches',
       icon: '💼',
-      gradient: 'linear-gradient(135deg, rgba(26, 54, 93, 0.3) 0%, rgba(26, 54, 93, 0.4) 100%)'
+      gradient: 'linear-gradient(135deg, rgba(30, 64, 175, 0.15) 0%, rgba(30, 64, 175, 0.25) 100%)'
     },
     {
       src: '/images/Modern_bank_lobby_interior_d535acc7.png',
       title: 'Modern Banking Facilities',
       subtitle: 'Experience premium banking in our state-of-the-art branch locations',
       icon: '🏦',
-      gradient: 'linear-gradient(135deg, rgba(26, 54, 93, 0.3) 0%, rgba(26, 54, 93, 0.4) 100%)'
+      gradient: 'linear-gradient(135deg, rgba(30, 64, 175, 0.15) 0%, rgba(30, 64, 175, 0.25) 100%)'
     }
   ];
 
   const bankingFeatures = [
     {
-      image: '/images/realistic-banking-professionals.svg',
+      image: '/images/Professional_banking_team_36e79456.png',
       title: 'Professional Banking Team',
       description: 'Work with our experienced banking professionals who provide personalized financial guidance and support.',
       features: ['Dedicated Relationship Managers', 'Expert Financial Advice', 'Personalized Service', '24/7 Professional Support'],
@@ -149,7 +187,7 @@ export default function Home() {
       color: '#3b82f6'
     },
     {
-      image: '/images/real-mobile-banking-users.svg',
+      image: '/images/Mobile_banking_user_d80a1b31.png',
       title: 'Award-Winning Mobile App',
       description: 'Experience banking reimagined with our state-of-the-art mobile application used by thousands of satisfied customers.',
       features: ['Mobile Check Deposit', 'Instant Transfers', 'Bill Pay & Scheduling', 'Real-time Notifications'],
@@ -165,7 +203,7 @@ export default function Home() {
       color: '#f59e0b'
     },
     {
-      image: '/images/realistic-debit-card-2.svg',
+      image: '/images/premium-debit-card.svg',
       title: 'Secure Card Technology',
       description: 'Bank with confidence using our advanced chip technology and multi-layer security features.',
       features: ['EMV Chip Technology', '24/7 Fraud Monitoring', 'Instant Lock/Unlock', 'Zero Liability Protection'],
@@ -173,7 +211,7 @@ export default function Home() {
       color: '#8b5cf6'
     },
     {
-      image: '/images/woman-laptop-banking.svg',
+      image: '/images/Mobile_banking_user_experience_576bb7a3.png',
       title: 'Digital Banking Excellence',
       description: 'Experience seamless online banking with our comprehensive digital platform designed for modern life.',
       features: ['Easy Account Management', 'Seamless Fund Transfers', 'Personalized Dashboard', '24/7 Online Access'],
@@ -189,7 +227,7 @@ export default function Home() {
       color: '#1d4ed8'
     },
     {
-      image: '/images/loan-approval-celebration-1.svg',
+      image: '/images/Loan_approval_celebration_a079ff82.png',
       title: 'Instant Loan Approvals',
       description: 'Get quick access to funds with our streamlined and efficient loan application and approval process.',
       features: ['Fast Online Applications', 'Competitive Interest Rates', 'Flexible Repayment Options', 'Pre-qualification Tools'],
@@ -197,7 +235,7 @@ export default function Home() {
       color: '#059669'
     },
     {
-      image: '/images/Mobile_banking_user_experience_576bb7a3.png',
+      image: '/images/Bank_consultation_meeting_3eeb5e91.png',
       title: 'Superior User Experience',
       description: 'Navigate your finances with ease through our intuitive and award-winning banking platform.',
       features: ['Intuitive Interface', 'Quick Navigation', 'Smart Features', 'User-Friendly Design'],
@@ -205,7 +243,7 @@ export default function Home() {
       color: '#f59e0b'
     },
     {
-      image: '/images/business-loan-approved.svg',
+      image: '/images/Small_business_loan_approval_6e0d9c2c.png',
       title: 'Business Banking Solutions',
       description: 'Comprehensive banking solutions designed specifically for small businesses and entrepreneurs.',
       features: ['Business Checking Accounts', 'Merchant Services', 'Small Business Loans', 'Payroll Solutions'],
@@ -213,7 +251,7 @@ export default function Home() {
       color: '#dc2626'
     },
     {
-      image: '/images/Global_currency_exchange_7f8b1e6c.png',
+      image: '/images/Global_currency_exchange_b687ec53.png',
       title: 'Global Currency Exchange',
       description: 'Manage your international finances with competitive exchange rates and global transaction capabilities.',
       features: ['Multi-Currency Accounts', 'Preferential Exchange Rates', 'International Wire Transfers', 'Global ATM Network Access'],
@@ -221,20 +259,12 @@ export default function Home() {
       color: '#06b6d4'
     },
     {
-      image: '/images/Student_loan_savings_plan_203a1d8a.png',
+      image: '/images/Student_banking_services_ee1b5d89.png',
       title: 'Student Banking Solutions',
       description: 'Specialized accounts and resources designed to help students manage their finances effectively.',
       features: ['No-Fee Student Checking', 'Financial Literacy Workshops', 'Overdraft Protection Options', 'Student Credit Building'],
       icon: '🎓',
       color: '#8b5cf6'
-    },
-    {
-      image: '/images/Small_business_loan_approval_6e0d9c2c.png',
-      title: 'Small Business Services',
-      description: 'Tailored banking solutions to support the growth and success of your small business.',
-      features: ['Business Checking Accounts', 'Merchant Services', 'Small Business Loans', 'Payroll Solutions'],
-      icon: '🏢',
-      color: '#10b981'
     },
     {
       image: '/images/Senior_citizen_banking_benefits_b7e0c6b1.png',
@@ -245,7 +275,7 @@ export default function Home() {
       color: '#374151'
     },
     {
-      image: '/images/Health_savings_account_hsa_f1e4a0a0.png',
+      image: '/images/Digital_investment_dashboard_36d35f19.png',
       title: 'Health Savings Accounts (HSA)',
       description: 'Tax-advantaged savings accounts to help you manage healthcare expenses.',
       features: ['Triple Tax Advantage', 'Investment Options', 'Tax-Free Withdrawals for Medical Costs', 'Portable Accounts'],
@@ -323,7 +353,7 @@ export default function Home() {
           <div style={styles.topHeaderRow}>
             {/* Logo Section */}
             <Link href="/" style={styles.logoSection}>
-              <img src="/images/logo-primary.png" alt="Oakline Bank" style={styles.headerLogo} />
+              <img src="/images/Oakline_Bank_logo_design_c1b04ae0.png" alt="Oakline Bank" style={styles.headerLogo} />
               <div style={styles.brandSection}>
                 <span style={styles.bankName}>Oakline Bank</span>
                 <span style={styles.bankTagline}>Your Financial Partner</span>
@@ -333,331 +363,127 @@ export default function Home() {
             {/* Scrolling Welcome Message */}
             <div style={styles.scrollingWelcomeContainer}>
               <div style={styles.scrollingWelcomeText}>
-                🎉 Welcome to Oakline Bank - Your trusted financial partner since 1995 • 💳 Explore all 23 account types with detailed benefits • 🏦 Join over 500,000+ satisfied customers • 📱 Award-winning mobile app • 🔒 FDIC Insured up to $250,000 • 🌟 Rated #1 Customer Service
+                Welcome to Oakline Bank - Your trusted financial partner since 1995 • Explore all 23 account types with detailed benefits • Join over 500,000+ satisfied customers • Award-winning mobile app • FDIC Insured up to $250,000 • Rated #1 Customer Service
               </div>
             </div>
           </div>
 
-          {/* Mobile-Responsive Navigation Dropdowns Row */}
-          <div style={styles.mobileNavigationRow}>
-            {/* Banking Services Dropdown */}
-            <div style={styles.mobileNavigationDropdown}>
-              <button
-                style={styles.mobileMenuButton}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setActiveDropdown(activeDropdown === 'banking' ? null : 'banking');
-                }}
-              >
-                <div style={styles.mobileHamburgerLines}>
-                  <span style={styles.mobileHamburgerLine}></span>
-                  <span style={styles.mobileHamburgerLine}></span>
-                  <span style={styles.mobileHamburgerLine}></span>
-                </div>
-                <span style={styles.mobileMenuText}>Banking</span>
-              </button>
+          {/* Banking+ Dropdown Button - Centered */}
+          <div style={styles.bankingPlusContainer}>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowBankingDropdown(!showBankingDropdown);
+              }}
+              style={styles.bankingPlusButton}
+            >
+              <div style={styles.bankingPlusIconLines}>
+                <div style={styles.iconLine}></div>
+                <div style={styles.iconLine}></div>
+                <div style={styles.iconLine}></div>
+              </div>
+              <span style={styles.bankingPlusText}>Banking+</span>
+            </button>
 
-              {activeDropdown === 'banking' && (
-                <>
-                  <div
-                    style={styles.dropdownBackdrop}
-                    onClick={() => setActiveDropdown(null)}
-                  ></div>
-                  <div style={styles.bankingDropdownMenuCentered}>
-                    <div style={styles.professionalDropdownHeader}>
-                      <h3 style={styles.professionalDropdownTitle}>Banking Services</h3>
-                      <p style={styles.professionalDropdownSubtitle}>Comprehensive financial solutions for your needs</p>
-                    </div>
+            {showBankingDropdown && (
+              <>
+                <div 
+                  style={styles.dropdownBackdrop} 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowBankingDropdown(false);
+                  }}
+                ></div>
+                <div style={styles.bankingDropdown} onClick={(e) => e.stopPropagation()}>
+                  <div style={styles.bankingDropdownHeader}>
+                    <h4 style={styles.bankingDropdownTitle}>Complete Banking Solutions</h4>
+                    <p style={styles.bankingDropdownSubtitle}>Access all your banking services in one place</p>
+                  </div>
 
-                    <div style={styles.professionalDropdownGrid}>
-                      <div style={styles.professionalDropdownSection}>
-                        <div style={styles.professionalSectionHeader}>
-                          <div style={styles.professionalSectionIcon}>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                              <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
-                              <line x1="1" y1="10" x2="23" y2="10"/>
-                            </svg>
-                          </div>
-                          <h4 style={styles.professionalSectionTitle}>Account Services</h4>
-                        </div>
-                        <div style={styles.professionalLinksList}>
-                          <Link href="/account-types" style={styles.professionalDropdownLink} onClick={() => setActiveDropdown(null)}>
-                            <div style={styles.professionalLinkContent}>
-                              <div style={styles.professionalLinkTitle}>All Account Types</div>
-                              <div style={styles.professionalLinkDesc}>Explore our complete range of 23 account options</div>
-                            </div>
-                            <div style={styles.professionalLinkArrow}>→</div>
-                          </Link>
-                          <Link href="/apply" style={styles.professionalDropdownLink} onClick={() => setActiveDropdown(null)}>
-                            <div style={styles.professionalLinkContent}>
-                              <div style={styles.professionalLinkTitle}>Open New Account</div>
-                              <div style={styles.professionalLinkDesc}>Start your banking journey with us</div>
-                            </div>
-                            <div style={styles.professionalLinkArrow}>→</div>
-                          </Link>
-                          <Link href="/cards" style={styles.professionalDropdownLink} onClick={() => setActiveDropdown(null)}>
-                            <div style={styles.professionalLinkContent}>
-                              <div style={styles.professionalLinkTitle}>Debit & Credit Cards</div>
-                              <div style={styles.professionalLinkDesc}>Premium cards with advanced security</div>
-                            </div>
-                            <div style={styles.professionalLinkArrow}>→</div>
-                          </Link>
-                        </div>
+                  <div style={styles.bankingTwoColumnGrid}>
+                    {/* Core Banking Services Section */}
+                    <div style={styles.bankingSection}>
+                      <div style={styles.bankingSectionHeader}>
+                        <span style={styles.bankingSectionIcon}>🏦</span>
+                        <h5 style={styles.bankingSectionTitle}>Core Banking</h5>
                       </div>
-
-                      <div style={styles.professionalDropdownSection}>
-                        <div style={styles.professionalSectionHeader}>
-                          <div style={styles.professionalSectionIcon}>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                              <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                              <polyline points="9,22 9,12 15,12 15,22"/>
-                            </svg>
-                          </div>
-                          <h4 style={styles.professionalSectionTitle}>Lending Services</h4>
-                        </div>
-                        <div style={styles.professionalLinksList}>
-                          <Link href="/loans" style={styles.professionalDropdownLink} onClick={() => setActiveDropdown(null)}>
-                            <div style={styles.professionalLinkContent}>
-                              <div style={styles.professionalLinkTitle}>Home Mortgages</div>
-                              <div style={styles.professionalLinkDesc}>Competitive rates for home purchases</div>
+                      <div style={styles.bankingFeaturesGrid}>
+                        {coreFeatures.map((feature) => (
+                          <Link
+                            key={feature.name}
+                            href={feature.href}
+                            onClick={() => setShowBankingDropdown(false)}
+                            style={styles.bankingFeatureItem}
+                          >
+                            <div style={{
+                              ...styles.bankingFeatureIcon,
+                              backgroundColor: `${feature.color}15`,
+                              border: `1px solid ${feature.color}30`
+                            }}>
+                              {feature.icon}
                             </div>
-                            <div style={styles.professionalLinkArrow}>→</div>
-                          </Link>
-                          <Link href="/loans" style={styles.professionalDropdownLink} onClick={() => setActiveDropdown(null)}>
-                            <div style={styles.professionalLinkContent}>
-                              <div style={styles.professionalLinkTitle}>Auto Financing</div>
-                              <div style={styles.professionalLinkDesc}>Quick approval for vehicle purchases</div>
+                            <div style={styles.bankingFeatureContent}>
+                              <div style={styles.bankingFeatureName}>{feature.name}</div>
+                              <div style={styles.bankingFeatureDesc}>{feature.desc}</div>
                             </div>
-                            <div style={styles.professionalLinkArrow}>→</div>
+                            <div style={{ ...styles.bankingFeatureArrow, color: feature.color }}>→</div>
                           </Link>
-                          <Link href="/loans" style={styles.professionalDropdownLink} onClick={() => setActiveDropdown(null)}>
-                            <div style={styles.professionalLinkContent}>
-                              <div style={styles.professionalLinkTitle}>Personal Loans</div>
-                              <div style={styles.professionalLinkDesc}>Flexible terms up to $50,000</div>
-                            </div>
-                            <div style={styles.professionalLinkArrow}>→</div>
-                          </Link>
-                        </div>
-                      </div>
-
-                      <div style={styles.professionalDropdownSection}>
-                        <div style={styles.professionalSectionHeader}>
-                          <div style={styles.professionalSectionIcon}>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                              <line x1="12" y1="1" x2="12" y2="23"/>
-                              <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                            </svg>
-                          </div>
-                          <h4 style={styles.professionalSectionTitle}>Investment Solutions</h4>
-                        </div>
-                        <div style={styles.professionalLinksList}>
-                          <Link href="/investments" style={styles.professionalDropdownLink} onClick={() => setActiveDropdown(null)}>
-                            <div style={styles.professionalLinkContent}>
-                              <div style={styles.professionalLinkTitle}>Portfolio Management</div>
-                              <div style={styles.professionalLinkDesc}>Professional investment advisory</div>
-                            </div>
-                            <div style={styles.professionalLinkArrow}>→</div>
-                          </Link>
-                          <Link href="/investments" style={styles.professionalDropdownLink} onClick={() => setActiveDropdown(null)}>
-                            <div style={styles.professionalLinkContent}>
-                              <div style={styles.professionalLinkTitle}>Retirement Planning</div>
-                              <div style={styles.professionalLinkDesc}>IRA, 401(k), and pension options</div>
-                            </div>
-                            <div style={styles.professionalLinkArrow}>→</div>
-                          </Link>
-                          <Link href="/crypto" style={styles.professionalDropdownLink} onClick={() => setActiveDropdown(null)}>
-                            <div style={styles.professionalLinkContent}>
-                              <div style={styles.professionalLinkTitle}>Digital Assets</div>
-                              <div style={styles.professionalLinkDesc}>Cryptocurrency trading platform</div>
-                            </div>
-                            <div style={styles.professionalLinkArrow}>→</div>
-                          </Link>
-                        </div>
+                        ))}
                       </div>
                     </div>
 
-                    <div style={styles.professionalDropdownFooter}>
-                      <div style={styles.professionalFooterContent}>
-                        <div style={styles.professionalFooterText}>
-                          <h5 style={styles.professionalFooterTitle}>Need assistance?</h5>
-                          <p style={styles.professionalFooterDesc}>Our banking specialists are available 24/7</p>
-                        </div>
-                        <div style={styles.professionalFooterActions}>
-                          <Link href="/apply" style={styles.professionalPrimaryButton} onClick={() => setActiveDropdown(null)}>
-                            Open Account
+                    {/* Premium & Advanced Services Section */}
+                    <div style={styles.bankingSection}>
+                      <div style={styles.bankingSectionHeader}>
+                        <span style={styles.bankingSectionIcon}>⭐</span>
+                        <h5 style={styles.bankingSectionTitle}>Premium Services</h5>
+                      </div>
+                      <div style={styles.bankingFeaturesGrid}>
+                        {premiumServices.map((feature) => (
+                          <Link
+                            key={feature.name}
+                            href={feature.href}
+                            onClick={() => setShowBankingDropdown(false)}
+                            style={styles.bankingFeatureItem}
+                          >
+                            <div style={{
+                              ...styles.bankingFeatureIcon,
+                              backgroundColor: `${feature.color}15`,
+                              border: `1px solid ${feature.color}30`
+                            }}>
+                              {feature.icon}
+                            </div>
+                            <div style={styles.bankingFeatureContent}>
+                              <div style={styles.bankingFeatureName}>{feature.name}</div>
+                              <div style={styles.bankingFeatureDesc}>{feature.desc}</div>
+                            </div>
+                            <div style={{ ...styles.bankingFeatureArrow, color: feature.color }}>→</div>
                           </Link>
-                          <Link href="/support" style={styles.professionalSecondaryButton} onClick={() => setActiveDropdown(null)}>
-                            Contact Us
-                          </Link>
-                        </div>
+                        ))}
                       </div>
                     </div>
                   </div>
-                </>
-              )}
-            </div>
 
-            {/* Digital Services Dropdown */}
-            <div style={styles.mobileNavigationDropdown}>
-              <button
-                style={styles.mobileMenuButton}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setActiveDropdown(activeDropdown === 'digital' ? null : 'digital');
-                }}
-              >
-                <div style={styles.mobileHamburgerLines}>
-                  <span style={styles.mobileHamburgerLine}></span>
-                  <span style={styles.mobileHamburgerLine}></span>
-                  <span style={styles.mobileHamburgerLine}></span>
-                </div>
-                <span style={styles.mobileMenuText}>Digital</span>
-              </button>
-
-              {activeDropdown === 'digital' && (
-                <>
-                  <div
-                    style={styles.dropdownBackdrop}
-                    onClick={() => setActiveDropdown(null)}
-                  ></div>
-                  <div style={styles.bankingDropdownMenuCentered}>
-                    <div style={styles.professionalDropdownHeader}>
-                      <h3 style={styles.professionalDropdownTitle}>Digital Banking</h3>
-                      <p style={styles.professionalDropdownSubtitle}>Advanced digital tools for modern banking</p>
-                    </div>
-
-                    <div style={styles.professionalDropdownGrid}>
-                      <div style={styles.professionalDropdownSection}>
-                        <div style={styles.professionalSectionHeader}>
-                          <div style={styles.professionalSectionIcon}>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
-                              <line x1="8" y1="21" x2="16" y2="21"/>
-                              <line x1="12" y1="17" x2="12" y2="21"/>
-                            </svg>
-                          </div>
-                          <h4 style={styles.professionalSectionTitle}>Online Services</h4>
-                        </div>
-                        <div style={styles.professionalLinksList}>
-                          <Link href={user ? "/dashboard" : "/login"} style={styles.professionalDropdownLink} onClick={() => setActiveDropdown(null)}>
-                            <div style={styles.professionalLinkContent}>
-                              <div style={styles.professionalLinkTitle}>Online Banking Portal</div>
-                              <div style={styles.professionalLinkDesc}>Complete account management platform</div>
-                            </div>
-                            <div style={styles.professionalLinkArrow}>→</div>
-                          </Link>
-                          <Link href={user ? "/transfer" : "/login"} style={styles.professionalDropdownLink} onClick={() => setActiveDropdown(null)}>
-                            <div style={styles.professionalLinkContent}>
-                              <div style={styles.professionalLinkTitle}>Wire Transfers</div>
-                              <div style={styles.professionalLinkDesc}>Secure domestic and international transfers</div>
-                            </div>
-                            <div style={styles.professionalLinkArrow}>→</div>
-                          </Link>
-                          <Link href={user ? "/bill-pay" : "/login"} style={styles.professionalDropdownLink} onClick={() => setActiveDropdown(null)}>
-                            <div style={styles.professionalLinkContent}>
-                              <div style={styles.professionalLinkTitle}>Bill Pay Services</div>
-                              <div style={styles.professionalLinkDesc}>Automated bill payment solutions</div>
-                            </div>
-                            <div style={styles.professionalLinkArrow}>→</div>
-                          </Link>
-                        </div>
-                      </div>
-
-                      <div style={styles.professionalDropdownSection}>
-                        <div style={styles.professionalSectionHeader}>
-                          <div style={styles.professionalSectionIcon}>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                              <path d="M9 12l2 2 4-4"/>
-                              <path d="M21 12c-1 0-3-1-3-3s2-3 3-3 3 1 3 3-2 3-3 3"/>
-                              <path d="M13 12h3"/>
-                              <path d="M8 12H5"/>
-                            </svg>
-                          </div>
-                          <h4 style={styles.professionalSectionTitle}>Security Center</h4>
-                        </div>
-                        <div style={styles.professionalLinksList}>
-                          <Link href={user ? "/security" : "/login"} style={styles.professionalDropdownLink} onClick={() => setActiveDropdown(null)}>
-                            <div style={styles.professionalLinkContent}>
-                              <div style={styles.professionalLinkTitle}>Account Security</div>
-                              <div style={styles.professionalLinkDesc}>Advanced security settings and monitoring</div>
-                            </div>
-                            <div style={styles.professionalLinkArrow}>→</div>
-                          </Link>
-                          <Link href={user ? "/notifications" : "/login"} style={styles.professionalDropdownLink} onClick={() => setActiveDropdown(null)}>
-                            <div style={styles.professionalLinkContent}>
-                              <div style={styles.professionalLinkTitle}>Smart Alerts</div>
-                              <div style={styles.professionalLinkDesc}>Real-time account notifications</div>
-                            </div>
-                            <div style={styles.professionalLinkArrow}>→</div>
-                          </Link>
-                          <Link href={user ? "/deposit-real" : "/login"} style={styles.professionalDropdownLink} onClick={() => setActiveDropdown(null)}>
-                            <div style={styles.professionalLinkContent}>
-                              <div style={styles.professionalLinkTitle}>Mobile Deposit</div>
-                              <div style={styles.professionalLinkDesc}>Instant check deposits via mobile app</div>
-                            </div>
-                            <div style={styles.professionalLinkArrow}>→</div>
-                          </Link>
-                        </div>
-                      </div>
-
-                      <div style={styles.professionalDropdownSection}>
-                        <div style={styles.professionalSectionHeader}>
-                          <div style={styles.professionalSectionIcon}>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                              <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
-                              <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
-                            </svg>
-                          </div>
-                          <h4 style={styles.professionalSectionTitle}>Resources</h4>
-                        </div>
-                        <div style={styles.professionalLinksList}>
-                          <Link href="/financial-education" style={styles.professionalDropdownLink} onClick={() => setActiveDropdown(null)}>
-                            <div style={styles.professionalLinkContent}>
-                              <div style={styles.professionalLinkTitle}>Financial Education</div>
-                              <div style={styles.professionalLinkDesc}>Comprehensive learning resources</div>
-                            </div>
-                            <div style={styles.professionalLinkArrow}>→</div>
-                          </Link>
-                          <Link href="/calculators" style={styles.professionalDropdownLink} onClick={() => setActiveDropdown(null)}>
-                            <div style={styles.professionalLinkContent}>
-                              <div style={styles.professionalLinkTitle}>Financial Calculators</div>
-                              <div style={styles.professionalLinkDesc}>Planning and analysis tools</div>
-                            </div>
-                            <div style={styles.professionalLinkArrow}>→</div>
-                          </Link>
-                          <Link href="/current-rates" style={styles.professionalDropdownLink} onClick={() => setActiveDropdown(null)}>
-                            <div style={styles.professionalLinkContent}>
-                              <div style={styles.professionalLinkTitle}>Current Rates</div>
-                              <div style={styles.professionalLinkDesc}>Live interest rates and market data</div>
-                            </div>
-                            <div style={styles.professionalLinkArrow}>→</div>
-                          </Link>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div style={styles.professionalDropdownFooter}>
-                      <div style={styles.professionalFooterContent}>
-                        <div style={styles.professionalFooterText}>
-                          <h5 style={styles.professionalFooterTitle}>Ready to get started?</h5>
-                          <p style={styles.professionalFooterDesc}>Access your accounts or get personalized assistance</p>
-                        </div>
-                        <div style={styles.professionalFooterActions}>
-                          <Link href={user ? "/dashboard" : "/login"} style={styles.professionalPrimaryButton} onClick={() => setActiveDropdown(null)}>
-                            {user ? "Dashboard" : "Sign In"}
-                          </Link>
-                          <Link href="/support" style={styles.professionalSecondaryButton} onClick={() => setActiveDropdown(null)}>
-                            Get Help
-                          </Link>
-                        </div>
-                      </div>
-                    </div>
+                  <div style={styles.bankingDropdownFooter}>
+                    <Link 
+                      href="/account-types"
+                      onClick={() => setShowBankingDropdown(false)}
+                      style={styles.viewAllServicesButton}
+                    >
+                      Explore All Banking Services
+                    </Link>
+                    <Link 
+                      href="/support"
+                      onClick={() => setShowBankingDropdown(false)}
+                      style={styles.viewAllServicesButtonSecondary}
+                    >
+                      Contact Support
+                    </Link>
                   </div>
-                </>
-              )}
-            </div>
+                </div>
+              </>
+            )}
           </div>
-
 
         </div>
       </header>
@@ -690,6 +516,7 @@ export default function Home() {
                     }
                   }}
                 />
+                <div style={styles.heroOverlay}></div>
               </div>
             ))}
           </div>
@@ -697,16 +524,6 @@ export default function Home() {
             ...styles.heroContent,
             ...(isVisible.hero ? styles.heroAnimated : {})
           }}>
-            <h1 style={styles.heroTitle}>{bankingImages[currentSlide].title}</h1>
-            <p style={styles.heroSubtitle}>{bankingImages[currentSlide].subtitle}</p>
-
-            {/* Routing Number Display */}
-            <div style={styles.routingNumberCard}>
-              <div style={styles.routingLabel}>Oakline Bank Routing Number</div>
-              <div style={styles.routingNumber}>075915826</div>
-              <div style={styles.routingNote}>Use this for wire transfers, direct deposits, and ACH transactions</div>
-            </div>
-
             <div style={styles.heroButtons}>
               {user ? (
                 <>
@@ -725,11 +542,7 @@ export default function Home() {
                     <span style={styles.buttonIcon}>🚀</span>
                     Start Banking Today
                   </Link>
-                  <Link href="/enroll" style={styles.enrollButton}>
-                    <span style={styles.buttonIcon}>📝</span>
-                    Enroll Now
-                  </Link>
-                  <Link href="/login" style={styles.secondaryButton}>
+                  <Link href="/sign-in" style={styles.secondaryButton}>
                     <span style={styles.buttonIcon}>👤</span>
                     Sign In
                   </Link>
@@ -753,121 +566,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Enhanced Banking Features Showcase with Advanced Animations */}
-      <section style={styles.featuresShowcase} id="features-showcase" data-animate>
-        <div style={styles.container}>
-          <div style={{
-            ...styles.sectionHeader,
-            ...(isVisible['features-showcase'] ? styles.staggeredFadeIn : {})
-          }}>
-            <h2 style={styles.sectionTitle}>Why Choose Oakline Bank</h2>
-            <p style={styles.sectionSubtitle}>
-              Discover the premium features that make us your trusted financial partner
-            </p>
-            <div style={styles.titleUnderline}></div>
-          </div>
 
-          <div style={styles.featureShowcaseContainer}>
-            <div style={styles.featureContent}>
-              <div style={styles.featureImageContainer}>
-                <img
-                  src={bankingFeatures[currentFeatureSlide].image}
-                  alt={bankingFeatures[currentFeatureSlide].title}
-                  style={styles.featureImage}
-                  onError={(e) => {
-                    console.warn('Image failed to load:', bankingFeatures[currentFeatureSlide].image);
-                    try {
-                      e.target.style.display = 'none';
-                      const container = e.target.parentNode;
-                      if (container && !container.querySelector('.image-fallback')) {
-                        const fallback = document.createElement('div');
-                        fallback.className = 'image-fallback';
-                        fallback.style.cssText = 'height: 300px; background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%); display: flex; align-items: center; justify-content: center; border-radius: 12px; color: #666; font-size: 2rem; border: 2px dashed #ccc;';
-                        fallback.innerHTML = '<div style="text-align: center;"><div style="font-size: 3rem; margin-bottom: 0.5rem;">📷</div><div style="font-size: 0.9rem; color: #888;">Image not available</div></div>';
-                        container.appendChild(fallback);
-                      }
-                    } catch (error) {
-                      console.error('Image fallback error:', error);
-                    }
-                  }}
-                />
-                <div style={styles.featureImageOverlay}>
-                  <div style={{
-                    ...styles.featureBadge,
-                    backgroundColor: bankingFeatures[currentFeatureSlide].color
-                  }}>
-                    <span style={styles.badgeIcon}>{bankingFeatures[currentFeatureSlide].icon}</span>
-                    <span>Premium Service</span>
-                  </div>
-                </div>
-              </div>
-
-              <div style={{
-                ...styles.featureInfo,
-                ...(isVisible['features-showcase'] ? styles.slideInFromRight : {})
-              }}>
-                <h3 style={styles.featureTitle}>{bankingFeatures[currentFeatureSlide].title}</h3>
-                <p style={styles.featureDescription}>{bankingFeatures[currentFeatureSlide].description}</p>
-
-                <div style={styles.featuresList}>
-                  {bankingFeatures[currentFeatureSlide].features.map((feature, index) => (
-                    <div key={index} style={{
-                      ...styles.featureItem,
-                      ...(isVisible['features-showcase'] ? {
-                        ...styles.bounceInLeft,
-                        animationDelay: `${index * 0.1}s`
-                      } : {})
-                    }}>
-                      <span style={{
-                        ...styles.featureIcon,
-                        backgroundColor: bankingFeatures[currentFeatureSlide].color
-                      }}>✓</span>
-                      <span style={styles.featureText}>{feature}</span>
-                    </div>
-                  ))}
-                </div>
-
-                <div style={styles.featureActions}>
-                  {user ? (
-                    <Link href="/dashboard" style={{
-                      ...styles.featureButton,
-                      backgroundColor: bankingFeatures[currentFeatureSlide].color
-                    }}>
-                      Access Now
-                    </Link>
-                  ) : (
-                    <Link href="/apply" style={{
-                      ...styles.featureButton,
-                      backgroundColor: bankingFeatures[currentFeatureSlide].color
-                    }}>
-                      Get Started
-                    </Link>
-                  )}
-                  <Link href="/account-types" style={styles.featureButtonSecondary}>
-                    Learn More
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div style={styles.featureIndicators}>
-            {bankingFeatures.map((_, index) => (
-              <button
-                key={index}
-                style={{
-                  ...styles.featureIndicator,
-                  ...(currentFeatureSlide === index ? {
-                    ...styles.featureIndicatorActive,
-                    backgroundColor: bankingFeatures[currentFeatureSlide].color
-                  } : {})
-                }}
-                onClick={() => setCurrentFeatureSlide(index)}
-              />
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* Account Types Banner Section */}
       <section style={styles.accountTypesBanner} id="account-types" data-animate>
@@ -884,7 +583,7 @@ export default function Home() {
               {!user && (
                 <span style={styles.loginPrompt}>
                   <br />
-                  <Link href="/login" style={styles.loginLink}>
+                  <Link href="/sign-in" style={styles.loginLink}>
                     🔓 Sign in to unlock all 23 premium account types
                   </Link>
                 </span>
@@ -896,8 +595,8 @@ export default function Home() {
           <div style={styles.accountBannerContainer}>
             <div style={styles.accountBannerImage}>
               <img
-                src="/images/realistic-banking-professionals.svg"
-                alt="Professional Banking Team - Account Types Available"
+                src="/images/bank-discussion.png"
+                alt="Banking Discussion - Account Types Available"
                 style={styles.bannerImage}
                 onError={(e) => {
                   e.target.style.display = 'none';
@@ -956,7 +655,7 @@ export default function Home() {
                     Apply Now
                   </Link>
                 ) : (
-                  <Link href="/login" style={styles.signInButton}>
+                  <Link href="/sign-in" style={styles.signInButton}>
                     <span style={styles.buttonIcon}>👤</span>
                     Sign In to Apply
                   </Link>
@@ -967,101 +666,151 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Professional Banking Section */}
-      <section style={styles.professionalFeaturesSection} id="professional-features" data-animate>
+
+
+      {/* New Banking Image Section */}
+      <section style={styles.newBankingImageSection} id="banking-image" data-animate>
         <div style={styles.container}>
           <div style={{
             ...styles.sectionHeader,
-            ...(isVisible['professional-features'] ? styles.fadeInUp : {})
+            ...(isVisible['banking-image'] ? styles.fadeInUp : {})
           }}>
-            <h2 style={styles.sectionTitle}>Why Choose Oakline Bank?</h2>
+            <h2 style={styles.sectionTitle}>Modern Banking Experience</h2>
             <p style={styles.sectionSubtitle}>
-              Experience the future of banking with cutting-edge technology and personalized service
+              Experience the future of banking with our state-of-the-art facilities and services
             </p>
             <div style={styles.titleUnderline}></div>
           </div>
 
-          <div style={styles.featuresGrid}>
-            {[
-              {
-                icon: '🔒',
-                title: 'Bank-Level Security',
-                description: 'Advanced encryption and multi-factor authentication protect your financial data.',
-                metric: '256-bit SSL',
-                color: '#1a365d'
-              },
-              {
-                icon: '⚡',
-                title: 'Instant Transfers',
-                description: 'Send money instantly to anyone, anywhere with our real-time payment system.',
-                metric: '< 1 second',
-                color: '#059669'
-              },
-              {
-                icon: '📱',
-                title: 'Mobile-First Banking',
-                description: 'Full banking functionality in your pocket with our award-winning mobile app.',
-                metric: '4.9★ Rating',
-                color: '#d97706'
-              },
-              {
-                icon: '💼',
-                title: 'Business Solutions',
-                description: 'Comprehensive business banking tools for entrepreneurs and corporations.',
-                metric: '50K+ Businesses',
-                color: '#1a365d'
-              },
-              {
-                icon: '🌍',
-                title: 'Global Reach',
-                description: 'Access your account from anywhere in the world with 24/7 customer support.',
-                metric: '190+ Countries',
-                color: '#059669'
-              },
-              {
-                icon: '📊',
-                title: 'Smart Analytics',
-                description: 'AI-powered insights to help you track spending and achieve financial goals.',
-                metric: 'Real-time Data',
-                color: '#d97706'
-              }
-            ].map((feature, index) => (
-              <div
-                key={index}
-                style={{
-                  ...styles.professionalFeatureCard,
-                  ...(isVisible['professional-features'] ? {
-                    ...styles.slideInFromBottom,
-                    animationDelay: `${index * 0.1}s`
-                  } : {})
+          <div style={styles.newBankingImageGrid}>
+            <div style={styles.newBankingImageContainer}>
+              <img
+                src="/images/image_1760199157530.jpeg"
+                alt="Modern Banking Experience"
+                style={styles.newBankingImage}
+                onError={(e) => {
+                  e.target.style.display = 'none';
                 }}
-              >
-                <div style={{...styles.featureIconBadge, backgroundColor: feature.color}}>
-                  <span style={styles.featureIconLarge}>{feature.icon}</span>
+              />
+            </div>
+
+            <div style={styles.newBankingImageContent}>
+              <h3 style={styles.newBankingImageTitle}>Your Complete Banking Solution</h3>
+              <p style={styles.newBankingImageDescription}>
+                Discover a comprehensive range of banking services designed to meet all your financial needs. 
+                From everyday transactions to long-term investments, we provide innovative solutions backed by 
+                exceptional customer service.
+              </p>
+
+              <div style={styles.newBankingImageFeatures}>
+                <div style={styles.newBankingImageFeature}>
+                  <span style={styles.newBankingImageFeatureIcon}>✓</span>
+                  <span>Advanced Digital Platform</span>
                 </div>
-                <h3 style={styles.professionalFeatureTitle}>{feature.title}</h3>
-                <p style={styles.professionalFeatureDesc}>{feature.description}</p>
-                <div style={{...styles.featureMetric, borderColor: feature.color}}>
-                  <span style={{...styles.metricText, color: feature.color}}>{feature.metric}</span>
+                <div style={styles.newBankingImageFeature}>
+                  <span style={styles.newBankingImageFeatureIcon}>✓</span>
+                  <span>Personalized Financial Services</span>
+                </div>
+                <div style={styles.newBankingImageFeature}>
+                  <span style={styles.newBankingImageFeatureIcon}>✓</span>
+                  <span>Secure and Reliable Banking</span>
+                </div>
+                <div style={styles.newBankingImageFeature}>
+                  <span style={styles.newBankingImageFeatureIcon}>✓</span>
+                  <span>24/7 Customer Support</span>
                 </div>
               </div>
-            ))}
+
+              <div style={styles.newBankingImageActions}>
+                <Link href="/apply" style={styles.newBankingImageButtonPrimary}>
+                  <span style={styles.buttonIcon}>🚀</span>
+                  Get Started
+                </Link>
+                <Link href="/about" style={styles.newBankingImageButtonSecondary}>
+                  <span style={styles.buttonIcon}>ℹ️</span>
+                  Learn More
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Professional Banking Cards Section */}
+      <section style={styles.professionalCardsSection} id="professional-cards" data-animate>
+        <div style={styles.container}>
+          <div style={{
+            ...styles.sectionHeader,
+            ...(isVisible['professional-cards'] ? styles.fadeInUp : {})
+          }}>
+            <h2 style={styles.sectionTitle}>Professional Banking Cards</h2>
+            <p style={styles.sectionSubtitle}>
+              Discover our comprehensive range of premium banking cards designed for every financial need
+            </p>
+            <div style={styles.titleUnderline}></div>
           </div>
 
-          <div style={styles.enrollmentSection}>
-            <div style={styles.enrollmentCard}>
-              <h3 style={styles.enrollmentTitle}>Ready to Experience Modern Banking?</h3>
-              <p style={styles.enrollmentSubtitle}>
-                Join over 500,000 satisfied customers who trust Oakline Bank for their financial needs
+          <div style={styles.professionalCardsGrid}>
+            <div style={styles.professionalCardsImageContainer}>
+              <img
+                src="/images/Professional_bank_cards_e0d28d7c.png"
+                alt="Professional Banking Cards Collection"
+                style={styles.professionalCardsImage}
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                }}
+              />
+              <div style={styles.professionalCardsBadge}>
+                <span style={styles.badgeIcon}>💳</span>
+                <span>Premium Cards</span>
+              </div>
+            </div>
+
+            <div style={styles.professionalCardsContent}>
+              <h3 style={styles.professionalCardsTitle}>Complete Card Solutions</h3>
+              <p style={styles.professionalCardsDescription}>
+                From everyday debit cards to premium credit cards, we offer a complete suite of banking cards with advanced features, security, and rewards tailored to your lifestyle.
               </p>
-              <div style={styles.enrollmentButtons}>
-                <Link href="/apply" style={styles.enrollmentButtonPrimary}>
-                  <span style={styles.buttonIcon}>🚀</span>
-                  Open Account Today
+
+              <div style={styles.professionalCardsFeatures}>
+                <div style={styles.professionalCardsFeature}>
+                  <span style={styles.professionalCardsFeatureIcon}>🛡️</span>
+                  <div>
+                    <h4 style={styles.professionalCardsFeatureTitle}>Advanced Security</h4>
+                    <p style={styles.professionalCardsFeatureDesc}>EMV chip, contactless technology, and fraud protection</p>
+                  </div>
+                </div>
+                <div style={styles.professionalCardsFeature}>
+                  <span style={styles.professionalCardsFeatureIcon}>🎁</span>
+                  <div>
+                    <h4 style={styles.professionalCardsFeatureTitle}>Rewards Program</h4>
+                    <p style={styles.professionalCardsFeatureDesc}>Earn cashback and points on every purchase</p>
+                  </div>
+                </div>
+                <div style={styles.professionalCardsFeature}>
+                  <span style={styles.professionalCardsFeatureIcon}>🌍</span>
+                  <div>
+                    <h4 style={styles.professionalCardsFeatureTitle}>Global Acceptance</h4>
+                    <p style={styles.professionalCardsFeatureDesc}>Use your cards worldwide with no foreign transaction fees</p>
+                  </div>
+                </div>
+                <div style={styles.professionalCardsFeature}>
+                  <span style={styles.professionalCardsFeatureIcon}>📲</span>
+                  <div>
+                    <h4 style={styles.professionalCardsFeatureTitle}>Digital Wallet Ready</h4>
+                    <p style={styles.professionalCardsFeatureDesc}>Apple Pay, Google Pay, and Samsung Pay compatible</p>
+                  </div>
+                </div>
+              </div>
+
+              <div style={styles.professionalCardsActions}>
+                <Link href="/cards" style={styles.professionalCardsButtonPrimary}>
+                  <span style={styles.buttonIcon}>💳</span>
+                  Explore All Cards
                 </Link>
-                <Link href="/support" style={styles.enrollmentButtonSecondary}>
-                  <span style={styles.buttonIcon}>💬</span>
-                  Contact Us
+                <Link href="/apply" style={styles.professionalCardsButtonSecondary}>
+                  <span style={styles.buttonIcon}>📝</span>
+                  Apply Now
                 </Link>
               </div>
             </div>
@@ -1124,25 +873,25 @@ export default function Home() {
             <div style={styles.debitCardItem}>
               <div style={styles.debitCardImageContainer}>
                 <img
-                  src="/images/realistic-debit-card-2.svg"
-                  alt="Secure Debit Card"
+                  src="/images/premium-debit-card.svg"
+                  alt="Premium Debit Card"
                   style={styles.debitCardImage}
                 />
                 <div style={styles.debitCardBadge}>
-                  <span style={styles.badgeIcon}>🔒</span>
-                  <span>Secure</span>
+                  <span style={styles.badgeIcon}>💎</span>
+                  <span>Premium</span>
                 </div>
               </div>
               <div style={styles.debitCardContent}>
-                <h3 style={styles.debitCardTitle}>Secure Card Technology</h3>
+                <h3 style={styles.debitCardTitle}>Premium Debit Card</h3>
                 <p style={styles.debitCardDescription}>
-                  Advanced chip technology and multi-layer security features protect your money and personal information.
+                  Experience luxury banking with our exclusive premium debit card featuring gold accents and elite benefits.
                 </p>
                 <div style={styles.debitCardFeatures}>
-                  <div style={styles.featureTag}>EMV Chip Technology</div>
-                  <div style={styles.featureTag}>24/7 Fraud Monitoring</div>
-                  <div style={styles.featureTag}>Instant Lock/Unlock</div>
-                  <div style={styles.featureTag}>Zero Liability Protection</div>
+                  <div style={styles.featureTag}>Premium Member Benefits</div>
+                  <div style={styles.featureTag}>Gold Card Design</div>
+                  <div style={styles.featureTag}>Concierge Service</div>
+                  <div style={styles.featureTag}>Priority Support</div>
                 </div>
                 {user ? (
                   <Link href="/cards" style={styles.debitCardButton}>
@@ -1178,120 +927,217 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Services Section */}
-      <ServicesSection />
 
-      {/* Banking Success Stories Section - Simplified without problematic images */}
-      <section style={styles.bankingSuccessSection} id="banking-success" data-animate>
+
+
+
+      {/* Professional Banking Services Section */}
+      <section style={styles.professionalServicesSection} id="professional-services" data-animate>
         <div style={styles.container}>
           <div style={{
             ...styles.sectionHeader,
-            ...(isVisible['banking-success'] ? styles.fadeInUp : {})
+            ...(isVisible['professional-services'] ? styles.fadeInUp : {})
           }}>
-            <h2 style={styles.sectionTitle}>Why Customers Choose Oakline Bank</h2>
+            <h2 style={styles.sectionTitle}>Professional Banking Services</h2>
             <p style={styles.sectionSubtitle}>
-              Experience the difference with our professional banking services
+              Comprehensive financial solutions designed for your success with personalized service and expert guidance
             </p>
+            <div style={styles.titleUnderline}></div>
           </div>
 
-          <div style={styles.successGrid}>
-            <div style={styles.successCard}>
-              <div style={styles.successIconContainer}>
-                <span style={styles.successIcon}>👨‍💼</span>
-              </div>
-              <div style={styles.successContent}>
-                <h3 style={styles.successTitle}>Expert Financial Guidance</h3>
-                <p style={styles.successDescription}>
-                  Our dedicated team of banking professionals provides personalized
-                  financial advice to help you make informed decisions about your money.
-                </p>
-                <div style={styles.successDetails}>
-                  <span style={styles.successAmount}>Professional Advisors</span>
-                  <span style={styles.successRate}>Personalized Service</span>
+          <div style={styles.professionalServicesGrid}>
+            <div style={styles.professionalServiceCard}>
+              <div style={styles.serviceImageContainer}>
+                <img
+                  src="/images/Professional_banking_team_36e79456.png"
+                  alt="Professional Banking Team"
+                  style={styles.serviceImage}
+                />
+                <div style={styles.serviceBadge}>
+                  <span style={styles.badgeIcon}>👥</span>
+                  <span>Expert Team</span>
                 </div>
+              </div>
+              <div style={styles.serviceContent}>
+                <h3 style={styles.serviceTitle}>Expert Banking Professionals</h3>
+                <p style={styles.serviceDescription}>
+                  Our certified banking professionals provide personalized financial guidance and comprehensive solutions tailored to your unique needs and goals.
+                </p>
+                <div style={styles.serviceFeatures}>
+                  <div style={styles.serviceFeature}>✓ Certified Financial Advisors</div>
+                  <div style={styles.serviceFeature}>✓ Personalized Consultation</div>
+                  <div style={styles.serviceFeature}>✓ 24/7 Professional Support</div>
+                  <div style={styles.serviceFeature}>✓ Strategic Financial Planning</div>
+                </div>
+                <Link href="/financial-advisory" style={styles.serviceButton}>
+                  <span style={styles.buttonIcon}>💼</span>
+                  Schedule Consultation
+                </Link>
               </div>
             </div>
 
-            <div style={styles.successCard}>
-              <div style={styles.successIconContainer}>
-                <span style={styles.successIcon}>📱</span>
-              </div>
-              <div style={styles.successContent}>
-                <h3 style={styles.successTitle}>Award-Winning Mobile Banking</h3>
-                <p style={styles.successDescription}>
-                  Our customers love the convenience of managing their finances
-                  on-the-go with our award-winning mobile banking platform.
-                </p>
-                <div style={styles.successDetails}>
-                  <span style={styles.successFeature}>Mobile Banking</span>
-                  <span style={styles.successFeature}>24/7 Access</span>
+            <div style={styles.professionalServiceCard}>
+              <div style={styles.serviceImageContainer}>
+                <img
+                  src="/images/Digital_investment_dashboard_36d35f19.png"
+                  alt="Digital Investment Dashboard"
+                  style={styles.serviceImage}
+                />
+                <div style={styles.serviceBadge}>
+                  <span style={styles.badgeIcon}>📊</span>
+                  <span>Investment Tools</span>
                 </div>
               </div>
-            </div>
-
-            <div style={styles.successCard}>
-              <div style={styles.successIconContainer}>
-                <span style={styles.successIcon}>💳</span>
-              </div>
-              <div style={styles.successContent}>
-                <h3 style={styles.successTitle}>Premium Banking Products</h3>
-                <p style={styles.successDescription}>
-                  Access your money anywhere with our premium debit cards featuring
-                  contactless payments and advanced security technology.
+              <div style={styles.serviceContent}>
+                <h3 style={styles.serviceTitle}>Advanced Investment Platform</h3>
+                <p style={styles.serviceDescription}>
+                  Access sophisticated investment tools and real-time market data through our advanced digital platform designed for serious investors.
                 </p>
-                <div style={styles.successDetails}>
-                  <span style={styles.successSavings}>Contactless Pay</span>
-                  <span style={styles.successGoal}>Secure Technology</span>
+                <div style={styles.serviceFeatures}>
+                  <div style={styles.serviceFeature}>✓ Real-time Market Data</div>
+                  <div style={styles.serviceFeature}>✓ Portfolio Analytics</div>
+                  <div style={styles.serviceFeature}>✓ Advanced Trading Tools</div>
+                  <div style={styles.serviceFeature}>✓ Investment Research</div>
                 </div>
+                <Link href="/investments" style={styles.serviceButton}>
+                  <span style={styles.buttonIcon}>📈</span>
+                  Explore Investments
+                </Link>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Professional Banking Consultation Section */}
+      {/* Student Banking Solutions Section */}
+      <section style={styles.studentBankingSection} id="student-banking" data-animate>
+        <div style={styles.container}>
+          <div style={{
+            ...styles.sectionHeader,
+            ...(isVisible['student-banking'] ? styles.fadeInUp : {})
+          }}>
+            <h2 style={styles.sectionTitle}>Student Banking Solutions</h2>
+            <p style={styles.sectionSubtitle}>
+              Specialized banking services and financial education designed to support students throughout their academic journey
+            </p>
+            <div style={styles.titleUnderline}></div>
+          </div>
+
+          <div style={styles.studentBankingGrid}>
+            <div style={styles.studentBankingContent}>
+              <h3 style={styles.studentBankingTitle}>Banking Made Simple for Students</h3>
+              <p style={styles.studentBankingDescription}>
+                Start your financial journey with confidence. Our student banking solutions offer no-fee accounts, financial literacy resources, and tools designed specifically for students.
+              </p>
+
+              <div style={styles.studentBankingFeatures}>
+                <div style={styles.studentFeature}>
+                  <span style={styles.studentFeatureIcon}>🎓</span>
+                  <div>
+                    <h4 style={styles.studentFeatureTitle}>Student Checking Account</h4>
+                    <p style={styles.studentFeatureDesc}>No monthly fees, free online banking, and mobile check deposit</p>
+                  </div>
+                </div>
+                <div style={styles.studentFeature}>
+                  <span style={styles.studentFeatureIcon}>💡</span>
+                  <div>
+                    <h4 style={styles.studentFeatureTitle}>Financial Education</h4>
+                    <p style={styles.studentFeatureDesc}>Free workshops and resources to build financial literacy</p>
+                  </div>
+                </div>
+                <div style={styles.studentFeature}>
+                  <span style={styles.studentFeatureIcon}>🏦</span>
+                  <div>
+                    <h4 style={styles.studentFeatureTitle}>Student Savings Plans</h4>
+                    <p style={styles.studentFeatureDesc}>High-yield savings accounts with goal-setting tools</p>
+                  </div>
+                </div>
+              </div>
+
+              <div style={styles.studentBankingActions}>
+                <Link href="/apply" style={styles.studentButtonPrimary}>
+                  <span style={styles.buttonIcon}>🚀</span>
+                  Open Student Account
+                </Link>
+                <Link href="/financial-education" style={styles.studentButtonSecondary}>
+                  <span style={styles.buttonIcon}>📚</span>
+                  Financial Resources
+                </Link>
+              </div>
+            </div>
+
+            <div style={styles.studentBankingImageContainer}>
+              <img
+                src="/images/Student_banking_services_ee1b5d89.png"
+                alt="Student Banking Services"
+                style={styles.studentBankingImage}
+              />
+              <div style={styles.studentBankingBadge}>
+                <span style={styles.badgeIcon}>🎓</span>
+                <span>Student Focused</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Professional Banking Hall Discussion Section */}
       <section style={styles.consultationSection} id="consultation" data-animate>
         <div style={styles.container}>
+          <div style={{
+            ...styles.sectionHeader,
+            ...(isVisible['consultation'] ? styles.fadeInUp : {})
+          }}>
+            <h2 style={styles.sectionTitle}>Professional Banking Consultation</h2>
+            <p style={styles.sectionSubtitle}>
+              Experience world-class banking service with our dedicated professionals in modern banking facilities
+            </p>
+            <div style={styles.titleUnderline}></div>
+          </div>
+
           <div style={styles.consultationGrid}>
             <div style={styles.consultationImageSide}>
               <img
-                src="/images/woman-laptop-banking.svg"
-                alt="Professional Banking Consultation"
+                src="/images/Bank_hall_business_discussion_72f98bbe.png"
+                alt="Professional Banking Hall Discussion"
                 style={styles.consultationImage}
+                onError={(e) => {
+                  e.target.src = "/images/Banking_executive_team_meeting_c758f3ec.png";
+                }}
               />
             </div>
             <div style={styles.consultationContent}>
-              <h2 style={styles.consultationTitle}>Personal Banking Solutions</h2>
+              <h3 style={styles.consultationTitle}>Expert Financial Guidance</h3>
               <p style={styles.consultationSubtitle}>
-                Experience personalized banking with dedicated relationship managers who understand your unique financial needs.
+                Meet with our certified banking professionals in our state-of-the-art facilities. Get personalized advice and solutions tailored to your financial goals.
               </p>
               <div style={styles.consultationFeatures}>
                 <div style={styles.consultationFeature}>
-                  <span style={styles.consultationFeatureIcon}>👨‍💼</span>
+                  <span style={styles.consultationFeatureIcon}>👥</span>
                   <div>
-                    <h4 style={styles.consultationFeatureTitle}>Dedicated Relationship Manager</h4>
-                    <p style={styles.consultationFeatureDesc}>Your personal banking expert available 24/7</p>
+                    <h4 style={styles.consultationFeatureTitle}>Professional Banking Team</h4>
+                    <p style={styles.consultationFeatureDesc}>Certified financial experts with decades of experience</p>
                   </div>
                 </div>
                 <div style={styles.consultationFeature}>
-                  <span style={styles.consultationFeatureIcon}>📊</span>
+                  <span style={styles.consultationFeatureIcon}>🏦</span>
                   <div>
-                    <h4 style={styles.consultationFeatureTitle}>Financial Planning</h4>
-                    <p style={styles.consultationFeatureDesc}>Comprehensive financial strategies tailored to your goals</p>
+                    <h4 style={styles.consultationFeatureTitle}>Modern Banking Facilities</h4>
+                    <p style={styles.consultationFeatureDesc}>Premium locations designed for your comfort and privacy</p>
                   </div>
                 </div>
                 <div style={styles.consultationFeature}>
-                  <span style={styles.consultationFeatureIcon}>🔒</span>
+                  <span style={styles.consultationFeatureIcon}>🎯</span>
                   <div>
-                    <h4 style={styles.consultationFeatureTitle}>Premium Security</h4>
-                    <p style={styles.consultationFeatureDesc}>Advanced protection for your financial information</p>
+                    <h4 style={styles.consultationFeatureTitle}>Personalized Solutions</h4>
+                    <p style={styles.consultationFeatureDesc}>Custom financial strategies for your unique needs</p>
                   </div>
                 </div>
               </div>
               <div style={styles.consultationActions}>
                 <Link href="/apply" style={styles.consultationButtonPrimary}>
-                  <span style={styles.buttonIcon}>🚀</span>
-                  Schedule Consultation
+                  <span style={styles.buttonIcon}>📅</span>
+                  Schedule Meeting
                 </Link>
                 <Link href="/support" style={styles.consultationButtonSecondary}>
                   <span style={styles.buttonIcon}>💬</span>
@@ -1303,10 +1149,64 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Enhanced Loan Section with Better Imagery */}
-      <Suspense fallback={<div style={styles.loadingComponent}>Loading...</div>}>
-        <LoanApprovalSection />
-      </Suspense>
+      {/* Banking Executive Team Section */}
+      <section style={styles.executiveSection} id="executive-team" data-animate>
+        <div style={styles.container}>
+          <div style={styles.executiveGrid}>
+            <div style={styles.executiveContent}>
+              <h2 style={styles.executiveTitle}>Leadership Excellence</h2>
+              <p style={styles.executiveSubtitle}>
+                Our experienced leadership team brings together decades of banking expertise to guide your financial journey with proven strategies and innovative solutions.
+              </p>
+              <div style={styles.executiveFeatures}>
+                <div style={styles.executiveFeature}>
+                  <span style={styles.executiveFeatureIcon}>👨‍💼</span>
+                  <div>
+                    <h4 style={styles.executiveFeatureTitle}>Executive Leadership</h4>
+                    <p style={styles.executiveFeatureDesc}>Senior executives with proven track records in banking excellence</p>
+                  </div>
+                </div>
+                <div style={styles.executiveFeature}>
+                  <span style={styles.executiveFeatureIcon}>📈</span>
+                  <div>
+                    <h4 style={styles.executiveFeatureTitle}>Strategic Vision</h4>
+                    <p style={styles.executiveFeatureDesc}>Forward-thinking approach to modern banking challenges</p>
+                  </div>
+                </div>
+                <div style={styles.executiveFeature}>
+                  <span style={styles.executiveFeatureIcon}>🤝</span>
+                  <div>
+                    <h4 style={styles.executiveFeatureTitle}>Client Commitment</h4>
+                    <p style={styles.executiveFeatureDesc}>Dedicated to delivering exceptional customer experiences</p>
+                  </div>
+                </div>
+              </div>
+              <div style={styles.executiveActions}>
+                <Link href="/about" style={styles.executiveButtonPrimary}>
+                  <span style={styles.buttonIcon}>👥</span>
+                  Meet Our Team
+                </Link>
+                <Link href="/financial-advisory" style={styles.executiveButtonSecondary}>
+                  <span style={styles.buttonIcon}>💼</span>
+                  Advisory Services
+                </Link>
+              </div>
+            </div>
+            <div style={styles.executiveImageSide}>
+              <img
+                src="/images/Banking_executive_team_meeting_c758f3ec.png"
+                alt="Banking Executive Team Meeting"
+                style={styles.executiveImage}
+                onError={(e) => {
+                  e.target.src = "/images/Professional_banking_team_36e79456.png";
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+
 
       {/* Testimonials Section */}
       <Suspense fallback={<div style={styles.loadingComponent}>Loading testimonials...</div>}>
@@ -1371,6 +1271,314 @@ export default function Home() {
 
 
 
+      {/* Modern Banking Facility Section */}
+      <section style={styles.facilitySection} id="modern-facility" data-animate>
+        <div style={styles.container}>
+          <div style={{
+            ...styles.sectionHeader,
+            ...(isVisible['modern-facility'] ? styles.fadeInUp : {})
+          }}>
+            <h2 style={styles.sectionTitle}>State-of-the-Art Banking Facilities</h2>
+            <p style={styles.sectionSubtitle}>
+              Experience banking in our modern, secure, and comfortable branch locations designed for your convenience
+            </p>
+            <div style={styles.titleUnderline}></div>
+          </div>
+
+          <div style={styles.facilityGrid}>
+            <div style={styles.facilityImageContainer}>
+              <img
+                src="/images/Modern_bank_lobby_interior_d535acc7.png"
+                alt="Modern Bank Lobby Interior"
+                style={styles.facilityImage}
+                onError={(e) => {
+                  e.target.src = "/images/Modern_bank_lobby_interior_27efc3bf.png";
+                }}
+              />
+              <div style={styles.facilityOverlay}>
+                <div style={styles.facilityBadge}>
+                  <span style={styles.facilityBadgeIcon}>🏆</span>
+                  <span>Award-Winning Design</span>
+                </div>
+              </div>
+            </div>
+
+            <div style={styles.facilityContent}>
+              <h3 style={styles.facilityTitle}>Premium Banking Environment</h3>
+              <p style={styles.facilityDescription}>
+                Our modern branches combine cutting-edge technology with elegant design to create a premium banking experience. Every location is designed with your comfort, privacy, and security in mind.
+              </p>
+
+              <div style={styles.facilityFeatures}>
+                <div style={styles.facilityFeature}>
+                  <span style={styles.facilityFeatureIcon}>🔒</span>
+                  <div>
+                    <h4 style={styles.facilityFeatureTitle}>Advanced Security</h4>
+                    <p style={styles.facilityFeatureDesc}>Multi-layer security systems protect your transactions</p>
+                  </div>
+                </div>
+                <div style={styles.facilityFeature}>
+                  <span style={styles.facilityFeatureIcon}>💺</span>
+                  <div>
+                    <h4 style={styles.facilityFeatureTitle}>Comfortable Environment</h4>
+                    <p style={styles.facilityFeatureDesc}>Luxurious seating and private consultation areas</p>
+                  </div>
+                </div>
+                <div style={styles.facilityFeature}>
+                  <span style={styles.facilityFeatureIcon}>📱</span>
+                  <div>
+                    <h4 style={styles.facilityFeatureTitle}>Digital Integration</h4>
+                    <p style={styles.facilityFeatureDesc}>Seamless blend of digital and personal banking</p>
+                  </div>
+                </div>
+              </div>
+
+              <div style={styles.facilityActions}>
+                <Link href="/branch-locator" style={styles.facilityButtonPrimary}>
+                  <span style={styles.buttonIcon}>📍</span>
+                  Find Nearest Branch
+                </Link>
+                <Link href="/apply" style={styles.facilityButtonSecondary}>
+                  <span style={styles.buttonIcon}>📅</span>
+                  Schedule Visit
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Mobile Banking Excellence Section */}
+      <section style={styles.mobileBankingSection} id="mobile-banking" data-animate>
+        <div style={styles.container}>
+          <div style={{
+            ...styles.sectionHeader,
+            ...(isVisible['mobile-banking'] ? styles.fadeInUp : {})
+          }}>
+            <h2 style={styles.sectionTitle}>Award-Winning Mobile Banking</h2>
+            <p style={styles.sectionSubtitle}>
+              Bank anywhere, anytime with our powerful mobile app featuring cutting-edge technology
+            </p>
+            <div style={styles.titleUnderline}></div>
+          </div>
+
+          <div style={styles.mobileBankingGrid}>
+            <div style={styles.mobileBankingImageContainer}>
+              <img
+                src="/images/Mobile_banking_user_d80a1b31.png"
+                alt="Mobile Banking Excellence"
+                style={styles.mobileBankingImage}
+                onError={(e) => {
+                  e.target.src = '/images/Mobile_banking_user_experience_576bb7a3.png';
+                }}
+              />
+              <div style={styles.mobileBankingBadge}>
+                <span style={styles.badgeIcon}>📱</span>
+                <span>Mobile First</span>
+              </div>
+            </div>
+
+            <div style={styles.mobileBankingContent}>
+              <h3 style={styles.mobileBankingTitle}>Complete Control in Your Pocket</h3>
+              <p style={styles.mobileBankingDescription}>
+                Experience the future of banking with our award-winning mobile app. Manage all your accounts, 
+                transfer funds, pay bills, and access financial insights - all from your smartphone.
+              </p>
+
+              <div style={styles.mobileBankingFeatures}>
+                <div style={styles.mobileBankingFeature}>
+                  <span style={styles.mobileBankingFeatureIcon}>⚡</span>
+                  <div>
+                    <h4 style={styles.mobileBankingFeatureTitle}>Instant Transfers</h4>
+                    <p style={styles.mobileBankingFeatureDesc}>Send money in seconds with Zelle and instant transfers</p>
+                  </div>
+                </div>
+                <div style={styles.mobileBankingFeature}>
+                  <span style={styles.mobileBankingFeatureIcon}>📸</span>
+                  <div>
+                    <h4 style={styles.mobileBankingFeatureTitle}>Mobile Check Deposit</h4>
+                    <p style={styles.mobileBankingFeatureDesc}>Deposit checks instantly by taking a photo</p>
+                  </div>
+                </div>
+                <div style={styles.mobileBankingFeature}>
+                  <span style={styles.mobileBankingFeatureIcon}>🔔</span>
+                  <div>
+                    <h4 style={styles.mobileBankingFeatureTitle}>Real-time Alerts</h4>
+                    <p style={styles.mobileBankingFeatureDesc}>Stay informed with instant transaction notifications</p>
+                  </div>
+                </div>
+                <div style={styles.mobileBankingFeature}>
+                  <span style={styles.mobileBankingFeatureIcon}>🔐</span>
+                  <div>
+                    <h4 style={styles.mobileBankingFeatureTitle}>Biometric Security</h4>
+                    <p style={styles.mobileBankingFeatureDesc}>Face ID and fingerprint authentication for secure access</p>
+                  </div>
+                </div>
+              </div>
+
+              <div style={styles.mobileBankingActions}>
+                <Link href="/apply" style={styles.mobileBankingButtonPrimary}>
+                  <span style={styles.buttonIcon}>📲</span>
+                  Download App
+                </Link>
+                <Link href="/account-types" style={styles.mobileBankingButtonSecondary}>
+                  <span style={styles.buttonIcon}>ℹ️</span>
+                  Learn More
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ATM Services Section */}
+      <section style={styles.atmSection} id="atm-services" data-animate>
+        <div style={styles.container}>
+          <div style={{
+            ...styles.sectionHeader,
+            ...(isVisible['atm-services'] ? styles.fadeInUp : {})
+          }}>
+            <h2 style={styles.sectionTitle}>Convenient ATM Access</h2>
+            <p style={styles.sectionSubtitle}>
+              Access your money 24/7 with our extensive ATM network and advanced transaction capabilities
+            </p>
+            <div style={styles.titleUnderline}></div>
+          </div>
+
+          <div style={styles.atmGrid}>
+            <div style={styles.atmImageContainer}>
+              <img
+                src="/images/Modern_bank_lobby_interior_27efc3bf.png"
+                alt="Modern Bank Lobby - ATM Services"
+                style={styles.atmImage}
+                onError={(e) => {
+                  e.target.src = "/images/Modern_bank_lobby_interior_d535acc7.png";
+                }}
+              />
+              <div style={styles.atmBadge}>
+                <span style={styles.badgeIcon}>🏧</span>
+                <span>24/7 Access</span>
+              </div>
+            </div>
+
+            <div style={styles.atmContent}>
+              <h3 style={styles.atmTitle}>Advanced ATM Services</h3>
+              <p style={styles.atmDescription}>
+                Experience modern banking with our state-of-the-art ATM network featuring advanced security, 
+                multiple transaction types, and convenient locations nationwide.
+              </p>
+
+              <div style={styles.atmFeatures}>
+                <div style={styles.atmFeature}>
+                  <span style={styles.atmFeatureIcon}>💰</span>
+                  <div>
+                    <h4 style={styles.atmFeatureTitle}>Cash Withdrawals</h4>
+                    <p style={styles.atmFeatureDesc}>Quick and secure cash access anytime</p>
+                  </div>
+                </div>
+                <div style={styles.atmFeature}>
+                  <span style={styles.atmFeatureIcon}>📄</span>
+                  <div>
+                    <h4 style={styles.atmFeatureTitle}>Balance Inquiries</h4>
+                    <p style={styles.atmFeatureDesc}>Check your account balance instantly</p>
+                  </div>
+                </div>
+                <div style={styles.atmFeature}>
+                  <span style={styles.atmFeatureIcon}>📱</span>
+                  <div>
+                    <h4 style={styles.atmFeatureTitle}>Cardless Transactions</h4>
+                    <p style={styles.atmFeatureDesc}>Access using your mobile app</p>
+                  </div>
+                </div>
+              </div>
+
+              <div style={styles.atmActions}>
+                <Link href="/atm" style={styles.atmButtonPrimary}>
+                  <span style={styles.buttonIcon}>🗺️</span>
+                  Find ATM Locations
+                </Link>
+                <Link href="/cards" style={styles.atmButtonSecondary}>
+                  <span style={styles.buttonIcon}>💳</span>
+                  Get Debit Card
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Loan Approval Banner Section */}
+      <section style={styles.loanBannerSection} id="loan-banner" data-animate>
+        <div style={styles.container}>
+          <div style={{
+            ...styles.sectionHeader,
+            ...(isVisible['loan-banner'] ? styles.fadeInUp : {})
+          }}>
+            <h2 style={styles.sectionTitle}>Fast Loan Approvals</h2>
+            <p style={styles.sectionSubtitle}>
+              Get approved for loans quickly with our streamlined application process and competitive rates
+            </p>
+            <div style={styles.titleUnderline}></div>
+          </div>
+
+          <div style={styles.loanBannerGrid}>
+            <div style={styles.loanBannerContent}>
+              <h3 style={styles.loanBannerTitle}>Quick & Easy Loan Process</h3>
+              <p style={styles.loanBannerDescription}>
+                Experience fast loan approvals with our digital-first approach. Whether you need a personal loan, 
+                auto financing, or a mortgage, we make the process simple and transparent.
+              </p>
+
+              <div style={styles.loanBannerFeatures}>
+                <div style={styles.loanBannerFeature}>
+                  <span style={styles.loanBannerFeatureIcon}>⚡</span>
+                  <div>
+                    <h4 style={styles.loanBannerFeatureTitle}>Fast Approval</h4>
+                    <p style={styles.loanBannerFeatureDesc}>Get approved in as little as 24 hours</p>
+                  </div>
+                </div>
+                <div style={styles.loanBannerFeature}>
+                  <span style={styles.loanBannerFeatureIcon}>💰</span>
+                  <div>
+                    <h4 style={styles.loanBannerFeatureTitle}>Competitive Rates</h4>
+                    <p style={styles.loanBannerFeatureDesc}>Best rates in the market</p>
+                  </div>
+                </div>
+                <div style={styles.loanBannerFeature}>
+                  <span style={styles.loanBannerFeatureIcon}>📱</span>
+                  <div>
+                    <h4 style={styles.loanBannerFeatureTitle}>Digital Process</h4>
+                    <p style={styles.loanBannerFeatureDesc}>Apply online from anywhere</p>
+                  </div>
+                </div>
+              </div>
+
+              <div style={styles.loanBannerActions}>
+                <Link href="/loans" style={styles.loanBannerButtonPrimary}>
+                  <span style={styles.buttonIcon}>🚀</span>
+                  Apply for Loan
+                </Link>
+                <Link href="/calculators" style={styles.loanBannerButtonSecondary}>
+                  <span style={styles.buttonIcon}>🧮</span>
+                  Loan Calculator
+                </Link>
+              </div>
+            </div>
+
+            <div style={styles.loanBannerImageContainer}>
+              <img
+                src="/images/Loan_approval_celebration_a079ff82.png"
+                alt="Loan Approval Success"
+                style={styles.loanBannerImage}
+                onError={(e) => {
+                  e.target.src = '/images/Loan_approval_celebration_banner_919a886f.png';
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Enhanced Final CTA */}
       <div id="final-cta" data-animate style={{
         ...(isVisible['final-cta'] ? styles.pulseGlow : {})
@@ -1393,13 +1601,6 @@ export default function Home() {
       <LiveChat />
 
       <Footer />
-
-      {/* Keep-alive iframe - hidden but active */}
-      <iframe 
-        src="/keep-alive.html" 
-        style={{ display: 'none' }} 
-        title="Keep Alive Service"
-      />
     </div>
   );
 }
@@ -1408,7 +1609,7 @@ const styles = {
   // Main Header Styles
   mainHeader: {
     backgroundColor: '#1A3E6F',
-    borderBottom: '3px solid #FFC857',
+    borderBottom: 'none',
     boxShadow: '0 4px 12px rgba(26, 62, 111, 0.2)',
     position: 'sticky',
     top: 0,
@@ -1549,6 +1750,228 @@ const styles = {
     minWidth: '100px',
     justifyContent: 'center'
   },
+
+  // Banking+ Dropdown Styles
+  bankingPlusContainer: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+    marginTop: '0.5rem',
+    position: 'relative'
+  },
+  bankingPlusButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.75rem',
+    padding: '0.75rem 2rem',
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    color: '#ffffff',
+    border: '2px solid rgba(255, 255, 255, 0.3)',
+    borderRadius: '12px',
+    fontSize: '0.95rem',
+    fontWeight: '700',
+    cursor: 'pointer',
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+    position: 'relative',
+    overflow: 'hidden',
+    backdropFilter: 'blur(10px)'
+  },
+  bankingPlusIconLines: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '3px',
+    width: '18px'
+  },
+  iconLine: {
+    width: '100%',
+    height: '2px',
+    backgroundColor: '#ffffff',
+    borderRadius: '1px',
+    transition: 'all 0.3s ease'
+  },
+  bankingPlusText: {
+    fontSize: '0.95rem',
+    fontWeight: '700',
+    color: '#ffffff'
+  },
+  bankingDropdown: {
+    position: 'absolute',
+    top: 'calc(100% + 0.75rem)',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    backgroundColor: 'white',
+    borderRadius: '20px',
+    boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
+    border: '1px solid #e2e8f0',
+    padding: '1.5rem',
+    width: '420px',
+    maxWidth: '90vw',
+    zIndex: 10001,
+    maxHeight: '75vh',
+    overflowY: 'auto',
+    overflowX: 'hidden'
+  },
+  bankingDropdownHeader: {
+    textAlign: 'center',
+    marginBottom: '1.5rem',
+    paddingBottom: '1rem',
+    borderBottom: '2px solid #e2e8f0',
+    position: 'sticky',
+    top: '-1.5rem',
+    backgroundColor: 'white',
+    zIndex: 1,
+    marginTop: '-1.5rem',
+    marginLeft: '-1.5rem',
+    marginRight: '-1.5rem',
+    paddingLeft: '1.5rem',
+    paddingRight: '1.5rem',
+    paddingTop: '1.5rem'
+  },
+  bankingDropdownTitle: {
+    fontSize: '1.25rem',
+    fontWeight: '700',
+    color: '#1e293b',
+    margin: '0 0 0.5rem 0'
+  },
+  bankingDropdownSubtitle: {
+    fontSize: '0.875rem',
+    color: '#64748b',
+    margin: 0
+  },
+  bankingTwoColumnGrid: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1.5rem',
+    marginBottom: '1.5rem'
+  },
+  bankingSection: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.75rem'
+  },
+  bankingSectionHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.75rem',
+    paddingBottom: '0.75rem',
+    borderBottom: '2px solid #e2e8f0',
+    position: 'sticky',
+    top: '85px',
+    backgroundColor: 'white',
+    zIndex: 1,
+    marginLeft: '-1.5rem',
+    marginRight: '-1.5rem',
+    paddingLeft: '1.5rem',
+    paddingRight: '1.5rem'
+  },
+  bankingSectionIcon: {
+    fontSize: '1.5rem'
+  },
+  bankingSectionTitle: {
+    fontSize: '1rem',
+    fontWeight: '700',
+    color: '#1e293b',
+    margin: 0
+  },
+  bankingFeaturesGrid: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.5rem'
+  },
+  bankingFeatureItem: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.75rem',
+    padding: '0.875rem',
+    borderRadius: '10px',
+    backgroundColor: '#f8fafc',
+    border: '1px solid #e2e8f0',
+    textDecoration: 'none',
+    color: '#1e293b',
+    transition: 'all 0.3s ease',
+    cursor: 'pointer'
+  },
+  bankingFeatureIcon: {
+    fontSize: '1.1rem',
+    width: '36px',
+    height: '36px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: '8px',
+    flexShrink: 0
+  },
+  bankingFeatureContent: {
+    flex: 1,
+    minWidth: 0
+  },
+  bankingFeatureName: {
+    fontSize: '0.875rem',
+    fontWeight: '600',
+    color: '#1e293b',
+    marginBottom: '0.2rem',
+    lineHeight: '1.3'
+  },
+  bankingFeatureDesc: {
+    fontSize: '0.75rem',
+    color: '#64748b',
+    lineHeight: '1.3'
+  },
+  bankingFeatureArrow: {
+    fontSize: '0.875rem',
+    fontWeight: 'bold',
+    flexShrink: 0
+  },
+  bankingDropdownFooter: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.75rem',
+    paddingTop: '1rem',
+    borderTop: '2px solid #e2e8f0',
+    marginTop: '1.5rem',
+    position: 'sticky',
+    bottom: '-1.5rem',
+    backgroundColor: 'white',
+    marginLeft: '-1.5rem',
+    marginRight: '-1.5rem',
+    paddingLeft: '1.5rem',
+    paddingRight: '1.5rem',
+    paddingBottom: '1.5rem',
+    marginBottom: '-1.5rem'
+  },
+  viewAllServicesButton: {
+    display: 'block',
+    width: '100%',
+    padding: '0.875rem 1.5rem',
+    background: 'linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%)',
+    color: 'white',
+    textDecoration: 'none',
+    borderRadius: '12px',
+    fontSize: '0.875rem',
+    fontWeight: '600',
+    transition: 'all 0.3s ease',
+    boxShadow: '0 4px 12px rgba(30, 64, 175, 0.3)',
+    cursor: 'pointer',
+    textAlign: 'center'
+  },
+  viewAllServicesButtonSecondary: {
+    display: 'block',
+    width: '100%',
+    padding: '0.875rem 1.5rem',
+    backgroundColor: 'transparent',
+    color: '#1e40af',
+    textDecoration: 'none',
+    borderRadius: '12px',
+    fontSize: '0.875rem',
+    fontWeight: '600',
+    transition: 'all 0.3s ease',
+    border: '2px solid #1e40af',
+    cursor: 'pointer',
+    textAlign: 'center'
+  },
+
   navigationDropdown: {
     position: 'relative',
     zIndex: 10
@@ -1743,7 +2166,7 @@ const styles = {
     alignItems: 'center',
     gap: '0.5rem',
     padding: '0.75rem 1.25rem',
-    backgroundColor: 'transparent',
+    background: 'transparent',
     color: '#1a365d',
     textDecoration: 'none',
     borderRadius: '8px',
@@ -1979,8 +2402,9 @@ const styles = {
     height: 'clamp(400px, 56vh, 560px)',
     overflow: 'hidden',
     width: '100%',
-    background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
+    background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
     padding: '2rem 1rem',
+    border: 'none'
   },
   heroParallax: {
     position: 'relative',
@@ -2013,7 +2437,7 @@ const styles = {
     transition: 'all 1.2s ease-in-out',
     transform: 'scale(1.05)',
     animation: 'heroImageFloat 20s ease-in-out infinite',
-    filter: 'grayscale(10%) brightness(1.1) opacity(0.8)'
+    filter: 'grayscale(5%) brightness(1.3) contrast(1.1) opacity(0.9)'
   },
   heroOverlay: {
     position: 'absolute',
@@ -2021,8 +2445,8 @@ const styles = {
     left: 0,
     right: 0,
     bottom: 0,
-    background: 'linear-gradient(135deg, rgba(26, 54, 93, 0.7) 0%, rgba(26, 54, 93, 0.8) 100%)',
-    opacity: 1
+    background: 'linear-gradient(135deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.3) 100%)',
+    zIndex: 1
   },
   heroContent: {
     position: 'absolute',
@@ -2097,39 +2521,7 @@ const styles = {
     transition: 'all 0.3s ease'
   },
 
-  // Routing Number Card
-  routingNumberCard: {
-    backgroundColor: 'rgba(255,255,255,0.15)',
-    backdropFilter: 'blur(10px)',
-    border: '1px solid rgba(255,255,255,0.2)',
-    borderRadius: '16px',
-    padding: '1.5rem',
-    marginBottom: '2rem',
-    maxWidth: '400px',
-    margin: '0 auto 2rem',
-    animation: 'routingCardGlow 3s ease-in-out infinite'
-  },
-  routingLabel: {
-    fontSize: '0.9rem',
-    fontWeight: '600',
-    opacity: 0.9,
-    marginBottom: '0.5rem',
-    textTransform: 'uppercase',
-    letterSpacing: '0.5px'
-  },
-  routingNumber: {
-    fontSize: 'clamp(1.5rem, 4vw, 2rem)',
-    fontWeight: '900',
-    fontFamily: 'monospace',
-    letterSpacing: '2px',
-    marginBottom: '0.5rem',
-    textShadow: '2px 2px 4px rgba(0,0,0,0.3)'
-  },
-  routingNote: {
-    fontSize: '0.8rem',
-    opacity: 0.8,
-    lineHeight: '1.4'
-  },
+
 
   heroButtons: {
     display: 'flex',
@@ -2147,23 +2539,6 @@ const styles = {
     fontSize: 'clamp(0.9rem, 2vw, 1.1rem)',
     fontWeight: '700',
     boxShadow: '0 8px 24px rgba(14, 165, 233, 0.4)',
-    transition: 'all 0.3s ease',
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '0.5rem',
-    border: 'none',
-    transform: 'translateY(0)',
-    animation: 'buttonPulse 2s ease-in-out infinite'
-  },
-  enrollButton: {
-    background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
-    color: 'white',
-    textDecoration: 'none',
-    padding: 'clamp(1rem, 2vw, 1.3rem) clamp(1.5rem, 4vw, 2.5rem)',
-    borderRadius: '12px',
-    fontSize: 'clamp(0.9rem, 2vw, 1.1rem)',
-    fontWeight: '700',
-    boxShadow: '0 8px 24px rgba(5, 150, 105, 0.4)',
     transition: 'all 0.3s ease',
     display: 'inline-flex',
     alignItems: 'center',
@@ -2411,7 +2786,7 @@ const styles = {
   // Account Types Banner Section
   accountTypesBanner: {
     padding: 'clamp(4rem, 8vw, 6rem) 0',
-    backgroundColor: '#ffffff',
+    background: '#ffffff',
     width: '100%',
     position: 'relative'
   },
@@ -2546,7 +2921,7 @@ const styles = {
     fontSize: '1rem',
     fontWeight: '700',
     transition: 'all 0.3s ease',
-    boxShadow: '0 6px 20px rgba(14, 165, 233, 0.4)'
+    boxShadow: '0 6px 20px rgba(30, 64, 175, 0.4)'
   },
   applyNowButton: {
     display: 'inline-flex',
@@ -2583,6 +2958,233 @@ const styles = {
     background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
     width: '100%',
     position: 'relative'
+  },
+
+  // Professional Services Section
+  professionalServicesSection: {
+    padding: 'clamp(4rem, 8vw, 6rem) 0',
+    background: '#ffffff',
+    width: '100%'
+  },
+  professionalServicesGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 500px), 1fr))',
+    gap: '3rem',
+    marginTop: '3rem'
+  },
+  professionalServiceCard: {
+    backgroundColor: '#f8fafc',
+    borderRadius: '20px',
+    overflow: 'hidden',
+    boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
+    border: '2px solid #e2e8f0',
+    transition: 'all 0.4s ease',
+    position: 'relative'
+  },
+  serviceImageContainer: {
+    position: 'relative',
+    height: '280px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+    borderRadius: '20px'
+  },
+  serviceImage: {
+    width: '90%',
+    height: 'auto',
+    maxHeight: '250px',
+    objectFit: 'contain',
+    filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.3))'
+  },
+  serviceBadge: {
+    position: 'absolute',
+    top: '20px',
+    right: '20px',
+    background: 'rgba(255,255,255,0.95)',
+    color: '#1e40af',
+    padding: '8px 16px',
+    borderRadius: '20px',
+    fontSize: '0.85rem',
+    fontWeight: '700',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+  },
+  serviceContent: {
+    padding: '2.5rem'
+  },
+  serviceTitle: {
+    fontSize: 'clamp(1.5rem, 3vw, 1.8rem)',
+    fontWeight: '800',
+    color: '#1e293b',
+    marginBottom: '1rem'
+  },
+  serviceDescription: {
+    fontSize: '1.1rem',
+    color: '#64748b',
+    lineHeight: '1.6',
+    marginBottom: '2rem'
+  },
+  serviceFeatures: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.75rem',
+    marginBottom: '2rem'
+  },
+  serviceFeature: {
+    color: '#059669',
+    fontSize: '0.95rem',
+    fontWeight: '600',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem'
+  },
+  serviceButton: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.8rem',
+    padding: '1rem 2rem',
+    background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
+    color: 'white',
+    textDecoration: 'none',
+    borderRadius: '12px',
+    fontSize: '1rem',
+    fontWeight: '700',
+    transition: 'all 0.3s ease',
+    boxShadow: '0 6px 20px rgba(30, 64, 175, 0.3)'
+  },
+
+  // Student Banking Section
+  studentBankingSection: {
+    padding: 'clamp(4rem, 8vw, 6rem) 0',
+    backgroundColor: '#f8fafc',
+    width: '100%'
+  },
+  studentBankingGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 400px), 1fr))',
+    gap: '3rem',
+    alignItems: 'center',
+    marginTop: '3rem'
+  },
+  studentBankingContent: {
+    padding: '1rem'
+  },
+  studentBankingTitle: {
+    fontSize: 'clamp(1.8rem, 3.5vw, 2.5rem)',
+    fontWeight: '900',
+    color: '#1e293b',
+    marginBottom: '1.5rem',
+    letterSpacing: '-0.01em'
+  },
+  studentBankingDescription: {
+    fontSize: 'clamp(1rem, 2.2vw, 1.15rem)',
+    color: '#64748b',
+    marginBottom: '2rem',
+    lineHeight: '1.7',
+    fontWeight: '400'
+  },
+  studentBankingFeatures: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1.5rem',
+    marginBottom: '2.5rem'
+  },
+  studentFeature: {
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: '1rem'
+  },
+  studentFeatureIcon: {
+    fontSize: '1.5rem',
+    width: '50px',
+    height: '50px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: 'linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%)',
+    color: 'white',
+    borderRadius: '50%',
+    flexShrink: 0,
+    boxShadow: '0 4px 12px rgba(139, 92, 246, 0.3)'
+  },
+  studentFeatureTitle: {
+    fontSize: '1.1rem',
+    fontWeight: '700',
+    color: '#1e293b',
+    marginBottom: '0.5rem'
+  },
+  studentFeatureDesc: {
+    fontSize: '0.95rem',
+    color: '#64748b',
+    lineHeight: '1.5'
+  },
+  studentBankingActions: {
+    display: 'flex',
+    gap: '1rem',
+    flexWrap: 'wrap'
+  },
+  studentButtonPrimary: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.8rem',
+    padding: '1rem 2rem',
+    background: 'linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%)',
+    color: 'white',
+    textDecoration: 'none',
+    borderRadius: '12px',
+    fontSize: '1rem',
+    fontWeight: '700',
+    transition: 'all 0.3s ease',
+    boxShadow: '0 6px 20px rgba(139, 92, 246, 0.4)'
+  },
+  studentButtonSecondary: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.8rem',
+    padding: '1rem 2rem',
+    backgroundColor: 'transparent',
+    color: '#8b5cf6',
+    textDecoration: 'none',
+    borderRadius: '12px',
+    fontSize: '1rem',
+    fontWeight: '700',
+    border: '2px solid #8b5cf6',
+    transition: 'all 0.3s ease'
+  },
+  studentBankingImageContainer: {
+    position: 'relative',
+    borderRadius: '20px',
+    overflow: 'hidden',
+    padding: '2rem',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    boxShadow: '0 15px 40px rgba(0, 0, 0, 0.1)'
+  },
+  studentBankingImage: {
+    width: '90%',
+    height: 'auto',
+    maxHeight: '350px',
+    objectFit: 'contain',
+    filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.2))'
+  },
+  studentBankingBadge: {
+    position: 'absolute',
+    top: '20px',
+    right: '20px',
+    background: 'rgba(255,255,255,0.95)',
+    color: '#8b5cf6',
+    padding: '10px 16px',
+    borderRadius: '12px',
+    fontSize: '0.85rem',
+    fontWeight: '700',
+    boxShadow: '0 6px 16px rgba(0,0,0,0.15)',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px'
   },
   featuresGrid: {
     display: 'grid',
@@ -2915,6 +3517,232 @@ const styles = {
     cursor: 'pointer'
   },
 
+  // New Banking Image Section
+  newBankingImageSection: {
+    padding: 'clamp(4rem, 8vw, 6rem) 0',
+    backgroundColor: '#ffffff',
+    width: '100%'
+  },
+  newBankingImageGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 450px), 1fr))',
+    gap: '3rem',
+    alignItems: 'center',
+    marginTop: '3rem'
+  },
+  newBankingImageContainer: {
+    position: 'relative',
+    borderRadius: '24px',
+    overflow: 'hidden',
+    boxShadow: '0 15px 40px rgba(30, 64, 175, 0.2)'
+  },
+  newBankingImage: {
+    width: '100%',
+    height: '400px',
+    objectFit: 'cover',
+    transition: 'transform 0.3s ease'
+  },
+  newBankingImageContent: {
+    padding: '1rem'
+  },
+  newBankingImageTitle: {
+    fontSize: 'clamp(1.8rem, 3.5vw, 2.5rem)',
+    fontWeight: '900',
+    color: '#1e293b',
+    marginBottom: '1.5rem',
+    letterSpacing: '-0.01em'
+  },
+  newBankingImageDescription: {
+    fontSize: 'clamp(1rem, 2.2vw, 1.15rem)',
+    color: '#64748b',
+    marginBottom: '2rem',
+    lineHeight: '1.7',
+    fontWeight: '400'
+  },
+  newBankingImageFeatures: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1rem',
+    marginBottom: '2.5rem'
+  },
+  newBankingImageFeature: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.75rem',
+    fontSize: '1rem',
+    color: '#1e293b',
+    fontWeight: '500'
+  },
+  newBankingImageFeatureIcon: {
+    fontSize: '1.2rem',
+    color: '#059669',
+    fontWeight: 'bold'
+  },
+  newBankingImageActions: {
+    display: 'flex',
+    gap: '1rem',
+    flexWrap: 'wrap'
+  },
+  newBankingImageButtonPrimary: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.8rem',
+    padding: '1rem 2rem',
+    background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+    color: 'white',
+    textDecoration: 'none',
+    borderRadius: '12px',
+    fontSize: '1rem',
+    fontWeight: '700',
+    transition: 'all 0.3s ease',
+    boxShadow: '0 6px 20px rgba(5, 150, 105, 0.4)'
+  },
+  newBankingImageButtonSecondary: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.8rem',
+    padding: '1rem 2rem',
+    backgroundColor: 'transparent',
+    color: '#059669',
+    textDecoration: 'none',
+    borderRadius: '12px',
+    fontSize: '1rem',
+    fontWeight: '700',
+    border: '2px solid #059669',
+    transition: 'all 0.3s ease'
+  },
+
+  // Professional Banking Cards Section
+  professionalCardsSection: {
+    padding: 'clamp(4rem, 8vw, 6rem) 0',
+    backgroundColor: '#f8fafc',
+    width: '100%'
+  },
+  professionalCardsGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 450px), 1fr))',
+    gap: '3rem',
+    alignItems: 'center',
+    marginTop: '3rem'
+  },
+  professionalCardsImageContainer: {
+    position: 'relative',
+    borderRadius: '24px',
+    overflow: 'hidden',
+    padding: '2.5rem',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    boxShadow: '0 15px 40px rgba(30, 64, 175, 0.2)'
+  },
+  professionalCardsImage: {
+    width: '100%',
+    height: 'auto',
+    maxHeight: '400px',
+    objectFit: 'contain',
+    filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.3))'
+  },
+  professionalCardsBadge: {
+    position: 'absolute',
+    top: '20px',
+    right: '20px',
+    background: 'rgba(255,255,255,0.95)',
+    color: '#1e40af',
+    padding: '10px 16px',
+    borderRadius: '12px',
+    fontSize: '0.85rem',
+    fontWeight: '700',
+    boxShadow: '0 6px 16px rgba(0,0,0,0.15)',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px'
+  },
+  professionalCardsContent: {
+    padding: '1rem'
+  },
+  professionalCardsTitle: {
+    fontSize: 'clamp(1.8rem, 3.5vw, 2.5rem)',
+    fontWeight: '900',
+    color: '#1e293b',
+    marginBottom: '1.5rem',
+    letterSpacing: '-0.01em'
+  },
+  professionalCardsDescription: {
+    fontSize: 'clamp(1rem, 2.2vw, 1.15rem)',
+    color: '#64748b',
+    marginBottom: '2rem',
+    lineHeight: '1.7',
+    fontWeight: '400'
+  },
+  professionalCardsFeatures: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1.5rem',
+    marginBottom: '2.5rem'
+  },
+  professionalCardsFeature: {
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: '1rem'
+  },
+  professionalCardsFeatureIcon: {
+    fontSize: '1.5rem',
+    width: '50px',
+    height: '50px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
+    color: 'white',
+    borderRadius: '50%',
+    flexShrink: 0,
+    boxShadow: '0 4px 12px rgba(30, 64, 175, 0.3)'
+  },
+  professionalCardsFeatureTitle: {
+    fontSize: '1.1rem',
+    fontWeight: '700',
+    color: '#1e293b',
+    marginBottom: '0.5rem'
+  },
+  professionalCardsFeatureDesc: {
+    fontSize: '0.95rem',
+    color: '#64748b',
+    lineHeight: '1.5'
+  },
+  professionalCardsActions: {
+    display: 'flex',
+    gap: '1rem',
+    flexWrap: 'wrap'
+  },
+  professionalCardsButtonPrimary: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.8rem',
+    padding: '1rem 2rem',
+    background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
+    color: 'white',
+    textDecoration: 'none',
+    borderRadius: '12px',
+    fontSize: '1rem',
+    fontWeight: '700',
+    transition: 'all 0.3s ease',
+    boxShadow: '0 6px 20px rgba(30, 64, 175, 0.4)'
+  },
+  professionalCardsButtonSecondary: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.8rem',
+    padding: '1rem 2rem',
+    backgroundColor: 'transparent',
+    color: '#1e40af',
+    textDecoration: 'none',
+    borderRadius: '12px',
+    fontSize: '1rem',
+    fontWeight: '700',
+    border: '2px solid #1e40af',
+    transition: 'all 0.3s ease'
+  },
+
   // Debit Card Showcase Section
   debitCardShowcase: {
     padding: 'clamp(4rem, 8vw, 6rem) 0',
@@ -2940,11 +3768,12 @@ const styles = {
   debitCardImageContainer: {
     position: 'relative',
     height: '224px',
-    background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    overflow: 'hidden'
+    overflow: 'hidden',
+    borderRadius: '20px',
+    boxShadow: '0 10px 30px rgba(0,0,0,0.08)'
   },
   debitCardImage: {
     width: '90%',
@@ -2964,10 +3793,10 @@ const styles = {
     borderRadius: '20px',
     fontSize: '0.85rem',
     fontWeight: '700',
+    boxShadow: '0 6px 16px rgba(0,0,0,0.15)',
     display: 'flex',
     alignItems: 'center',
-    gap: '6px',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+    gap: '6px'
   },
   debitCardContent: {
     padding: '2.5rem'
@@ -3012,7 +3841,7 @@ const styles = {
     fontSize: '1rem',
     fontWeight: '700',
     transition: 'all 0.3s ease',
-    boxShadow: '0 6px 20px rgba(30, 64, 175, 0.3)'
+    boxShadow: '0 6px 20px rgba(30, 64, 175, 0.4)'
   },
   debitCardCTA: {
     textAlign: 'center',
@@ -3069,116 +3898,128 @@ const styles = {
     transition: 'all 0.3s ease'
   },
 
-  // Banking Success Stories Section
-  bankingSuccessSection: {
-    padding: 'clamp(4rem, 8vw, 6rem) 0',
-    backgroundColor: '#f8fafc',
-    width: '100%',
-    position: 'relative'
-  },
-  successGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 350px), 1fr))',
-    gap: '2rem',
-    marginBottom: '2rem'
-  },
-  successCard: {
-    backgroundColor: 'white',
-    borderRadius: '20px',
-    overflow: 'hidden',
-    boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
-    border: '2px solid #e2e8f0',
-    transition: 'all 0.4s ease',
-    position: 'relative',
-    transform: 'translateY(0)'
-  },
-  successIconContainer: {
-    width: '70px',
-    height: '70px',
-    borderRadius: '50%',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: '1rem',
-    background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
-    color: 'white',
-    fontSize: '2rem',
-    boxShadow: '0 6px 20px rgba(5, 150, 105, 0.3)',
-    margin: '0 auto 1.5rem'
-  },
-  successIcon: {
-    position: 'relative',
-    top: '3px'
-  },
-  successContent: {
-    padding: '2rem'
-  },
-  successTitle: {
-    fontSize: '1.3rem',
-    fontWeight: '800',
-    color: '#1e293b',
-    marginBottom: '1rem'
-  },
-  successDescription: {
-    fontSize: '1rem',
-    color: '#64748b',
-    lineHeight: '1.6',
-    marginBottom: '1.5rem',
-    fontStyle: 'italic'
-  },
-  successDetails: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-    gap: '0.5rem'
-  },
-  successAmount: {
-    fontSize: '1.1rem',
-    fontWeight: '700',
-    color: '#059669',
-    backgroundColor: '#ecfdf5',
-    padding: '6px 12px',
-    borderRadius: '20px'
-  },
-  successRate: {
-    fontSize: '0.9rem',
-    fontWeight: '600',
-    color: '#1e40af',
-    backgroundColor: '#dbeafe',
-    padding: '6px 12px',
-    borderRadius: '20px'
-  },
-  successFeature: {
-    fontSize: '0.9rem',
-    fontWeight: '600',
-    color: '#059669',
-    backgroundColor: '#ecfdf5',
-    padding: '6px 12px',
-    borderRadius: '20px'
-  },
-  successSavings: {
-    fontSize: '0.9rem',
-    fontWeight: '600',
-    color: '#059669',
-    backgroundColor: '#ecfdf5',
-    padding: '6px 12px',
-    borderRadius: '20px'
-  },
-  successGoal: {
-    fontSize: '0.9rem',
-    fontWeight: '600',
-    color: '#1e40af',
-    backgroundColor: '#dbeafe',
-    padding: '6px 12px',
-    borderRadius: '20px'
-  },
+
 
   // Professional Banking Consultation Section
   consultationSection: {
     padding: 'clamp(4rem, 8vw, 6rem) 0',
     backgroundColor: 'white',
     width: '100%'
+  },
+
+  // Banking Executive Team Section
+  executiveSection: {
+    padding: 'clamp(4rem, 8vw, 6rem) 0',
+    backgroundColor: '#f8fafc',
+    width: '100%'
+  },
+  executiveGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 400px), 1fr))',
+    gap: '3rem',
+    alignItems: 'center'
+  },
+  executiveContent: {
+    padding: '1rem'
+  },
+  executiveTitle: {
+    fontSize: 'clamp(2rem, 4vw, 2.5rem)',
+    fontWeight: '900',
+    color: '#1e293b',
+    marginBottom: '1rem',
+    letterSpacing: '-0.01em'
+  },
+  executiveSubtitle: {
+    fontSize: '1.1rem',
+    color: '#64748b',
+    marginBottom: '2rem',
+    lineHeight: '1.6'
+  },
+  executiveFeatures: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1.5rem',
+    marginBottom: '2.5rem'
+  },
+  executiveFeature: {
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: '1rem'
+  },
+  executiveFeatureIcon: {
+    fontSize: '1.5rem',
+    width: '50px',
+    height: '50px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
+    color: 'white',
+    borderRadius: '50%',
+    flexShrink: 0,
+    boxShadow: '0 4px 12px rgba(30, 64, 175, 0.3)'
+  },
+  executiveFeatureTitle: {
+    fontSize: '1.1rem',
+    fontWeight: '700',
+    color: '#1e293b',
+    marginBottom: '0.5rem'
+  },
+  executiveFeatureDesc: {
+    fontSize: '0.95rem',
+    color: '#64748b',
+    lineHeight: '1.5'
+  },
+  executiveActions: {
+    display: 'flex',
+    gap: '1rem',
+    flexWrap: 'wrap'
+  },
+  executiveButtonPrimary: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.8rem',
+    padding: '1rem 2rem',
+    background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
+    color: 'white',
+    textDecoration: 'none',
+    borderRadius: '12px',
+    fontSize: '1rem',
+    fontWeight: '700',
+    transition: 'all 0.3s ease',
+    boxShadow: '0 6px 20px rgba(30, 64, 175, 0.4)'
+  },
+  executiveButtonSecondary: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.8rem',
+    padding: '1rem 2rem',
+    backgroundColor: 'transparent',
+    color: '#1e40af',
+    textDecoration: 'none',
+    borderRadius: '12px',
+    fontSize: '1rem',
+    fontWeight: '700',
+    border: '2px solid #1e40af',
+    transition: 'all 0.3s ease'
+  },
+  executiveImageSide: {
+    position: 'relative',
+    borderRadius: '20px',
+    overflow: 'hidden',
+    padding: '2rem',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    boxShadow: '0 15px 40px rgba(0, 0, 0, 0.1)'
+  },
+  executiveImage: {
+    width: '100%',
+    height: 'auto',
+    maxHeight: '400px',
+    objectFit: 'cover',
+    borderRadius: '12px',
+    filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.2))'
   },
   consultationGrid: {
     display: 'grid',
@@ -3190,11 +4031,11 @@ const styles = {
     position: 'relative',
     borderRadius: '20px',
     overflow: 'hidden',
-    background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
     padding: '2rem',
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    boxShadow: '0 15px 40px rgba(0, 0, 0, 0.1)'
   },
   consultationImage: {
     width: '90%',
@@ -3325,22 +4166,119 @@ const styles = {
     position: 'relative',
     zIndex: 10
   },
+  modernDropdownButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.6rem',
+    padding: '0.7rem 1.2rem',
+    background: 'white',
+    border: '2px solid white',
+    borderRadius: '10px',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    backdropFilter: 'blur(10px)',
+    color: '#1A3E6F',
+    fontSize: '0.9rem',
+    fontWeight: '600',
+    minWidth: '120px',
+    justifyContent: 'center',
+    boxShadow: '0 4px 12px rgba(255,255,255,0.3)'
+  },
+  modernDropdownText: {
+    fontSize: '0.9rem',
+    fontWeight: '600',
+    color: '#1A3E6F'
+  },
+  downloadDropdownButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.6rem',
+    padding: '0.7rem 1.2rem',
+    background: 'white',
+    border: '2px solid white',
+    borderRadius: '10px',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    backdropFilter: 'blur(10px)',
+    color: '#1A3E6F',
+    fontSize: '0.9rem',
+    fontWeight: '600',
+    minWidth: '140px',
+    justifyContent: 'center',
+    boxShadow: '0 4px 12px rgba(255,255,255,0.3)'
+  },
+  downloadDropdownMenu: {
+    position: 'fixed',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    backgroundColor: 'white',
+    borderRadius: '16px',
+    boxShadow: '0 15px 30px rgba(26, 54, 93, 0.2)',
+    border: '2px solid #059669',
+    padding: '1.5rem',
+    minWidth: '320px',
+    maxWidth: '85vw',
+    maxHeight: '70vh',
+    overflowY: 'auto',
+    zIndex: 10000,
+    animation: 'dropdownSlideIn 0.4s ease-out',
+    backdropFilter: 'blur(15px)',
+    background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.95) 100%)'
+  },
+  downloadOption: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.75rem',
+    padding: '0.875rem 1rem',
+    borderRadius: '8px',
+    backgroundColor: 'white',
+    border: 'none',
+    textDecoration: 'none',
+    transition: 'all 0.2s ease',
+    cursor: 'pointer',
+    marginBottom: '0.5rem'
+  },
+  downloadIcon: {
+    fontSize: '1.3rem',
+    width: '40px',
+    height: '40px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)',
+    color: 'white',
+    borderRadius: '8px',
+    flexShrink: 0
+  },
+  downloadTitle: {
+    fontSize: '0.95rem',
+    fontWeight: '600',
+    color: '#1e293b',
+    marginBottom: '0.2rem'
+  },
+  downloadDesc: {
+    fontSize: '0.8rem',
+    color: '#64748b',
+    fontWeight: '400'
+  },
   mobileMenuButton: {
     display: 'flex',
     alignItems: 'center',
     gap: '0.4rem',
     padding: '0.5rem 0.8rem',
-    backgroundColor: 'rgba(255,255,255,0.15)',
-    border: '1px solid rgba(255, 255, 255, 0.3)',
+    background: 'white',
+    border: '1px solid #e2e8f0',
     borderRadius: '8px',
     cursor: 'pointer',
     transition: 'all 0.3s ease',
     backdropFilter: 'blur(10px)',
-    color: 'white',
+    color: '#1A3E6F',
     fontSize: '0.8rem',
-    fontWeight: '600',
+    fontWeight: '400',
     minWidth: '80px',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
   },
   mobileHamburgerLines: {
     display: 'flex',
@@ -3351,14 +4289,14 @@ const styles = {
   mobileHamburgerLine: {
     width: '100%',
     height: '1.5px',
-    backgroundColor: 'white',
+    backgroundColor: '#1A3E6F',
     borderRadius: '1px',
     transition: 'all 0.3s ease'
   },
   mobileMenuText: {
     fontSize: '0.8rem',
     fontWeight: '600',
-    color: 'white'
+    color: '#1A3E6F'
   },
 
   // Professional Dropdown Styles
@@ -3428,8 +4366,8 @@ const styles = {
     justifyContent: 'space-between',
     padding: '0.875rem 1rem',
     borderRadius: '8px',
-    backgroundColor: '#ffffff',
-    border: '1px solid #f1f5f9',
+    backgroundColor: 'white',
+    border: 'none',
     textDecoration: 'none',
     transition: 'all 0.2s ease',
     cursor: 'pointer',
@@ -3443,7 +4381,7 @@ const styles = {
   },
   professionalLinkTitle: {
     fontSize: '0.95rem',
-    fontWeight: '600',
+    fontWeight: '400',
     color: '#1e293b',
     lineHeight: '1.3'
   },
@@ -3495,7 +4433,7 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     padding: '0.75rem 1.5rem',
-    backgroundColor: '#1e40af',
+    background: '#1e40af',
     color: 'white',
     textDecoration: 'none',
     borderRadius: '8px',
@@ -3511,7 +4449,7 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     padding: '0.75rem 1.5rem',
-    backgroundColor: 'transparent',
+    background: 'transparent',
     color: '#374151',
     textDecoration: 'none',
     borderRadius: '8px',
@@ -3539,7 +4477,7 @@ const styles = {
     borderRadius: '16px',
     padding: '1.5rem',
     border: '2px solid #e2e8f0',
-    transition: 'all 0.3s ease',
+    transition:'all 0.3s ease',
     cursor: 'pointer',
     display: 'flex',
     flexDirection: 'column',
@@ -3687,6 +4625,530 @@ const styles = {
     lineHeight: '1.5'
   },
 
+  // Modern Banking Facility Section
+  facilitySection: {
+    padding: 'clamp(4rem, 8vw, 6rem) 0',
+    backgroundColor: '#ffffff',
+    width: '100%',
+    position: 'relative'
+  },
+  facilityGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 450px), 1fr))',
+    gap: '3rem',
+    alignItems: 'center',
+    marginTop: '3rem'
+  },
+  facilityImageContainer: {
+    position: 'relative',
+    borderRadius: '24px',
+    overflow: 'hidden',
+    boxShadow: '0 15px 40px rgba(30, 64, 175, 0.2)'
+  },
+  facilityImage: {
+    width: '100%',
+    height: '400px',
+    objectFit: 'cover',
+    transition: 'transform 0.3s ease'
+  },
+  facilityOverlay: {
+    position: 'absolute',
+    top: '20px',
+    right: '20px'
+  },
+  facilityBadge: {
+    background: 'rgba(255,255,255,0.95)',
+    color: '#1e40af',
+    padding: '10px 16px',
+    borderRadius: '12px',
+    fontSize: '0.85rem',
+    fontWeight: '700',
+    boxShadow: '0 6px 16px rgba(0,0,0,0.15)',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+    backdropFilter: 'blur(10px)'
+  },
+  facilityBadgeIcon: {
+    fontSize: '1rem'
+  },
+  facilityContent: {
+    padding: '1rem'
+  },
+  facilityTitle: {
+    fontSize: 'clamp(1.8rem, 3.5vw, 2.5rem)',
+    fontWeight: '900',
+    color: '#1e293b',
+    marginBottom: '1.5rem',
+    letterSpacing: '-0.01em'
+  },
+  facilityDescription: {
+    fontSize: 'clamp(1rem, 2.2vw, 1.15rem)',
+    color: '#64748b',
+    marginBottom: '2rem',
+    lineHeight: '1.7',
+    fontWeight: '400'
+  },
+  facilityFeatures: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1.5rem',
+    marginBottom: '2.5rem'
+  },
+  facilityFeature: {
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: '1rem'
+  },
+  facilityFeatureIcon: {
+    fontSize: '1.5rem',
+    width: '50px',
+    height: '50px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: 'linear-gradient(135deg, #059669 0%, #0891b2 100%)',
+    color: 'white',
+    borderRadius: '50%',
+    flexShrink: 0,
+    boxShadow: '0 4px 12px rgba(5, 150, 105, 0.3)'
+  },
+  facilityFeatureTitle: {
+    fontSize: '1.1rem',
+    fontWeight: '700',
+    color: '#1e293b',
+    marginBottom: '0.5rem'
+  },
+  facilityFeatureDesc: {
+    fontSize: '0.95rem',
+    color: '#64748b',
+    lineHeight: '1.5'
+  },
+  facilityActions: {
+    display: 'flex',
+    gap: '1rem',
+    flexWrap: 'wrap'
+  },
+  facilityButtonPrimary: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.8rem',
+    padding: '1rem 2rem',
+    background: 'linear-gradient(135deg, #059669 0%, #0891b2 100%)',
+    color: 'white',
+    textDecoration: 'none',
+    borderRadius: '12px',
+    fontSize: '1rem',
+    fontWeight: '700',
+    transition: 'all 0.3s ease',
+    boxShadow: '0 6px 20px rgba(5, 150, 105, 0.4)'
+  },
+  facilityButtonSecondary: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.8rem',
+    padding: '1rem 2rem',
+    backgroundColor: 'transparent',
+    color: '#059669',
+    textDecoration: 'none',
+    borderRadius: '12px',
+    fontSize: '1rem',
+    fontWeight: '700',
+    border: '2px solid #059669',
+    transition: 'all 0.3s ease'
+  },
+
+  // Mobile Banking Excellence Section
+  mobileBankingSection: {
+    padding: 'clamp(4rem, 8vw, 6rem) 0',
+    backgroundColor: '#f8fafc',
+    width: '100%'
+  },
+  mobileBankingGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 400px), 1fr))',
+    gap: '3rem',
+    alignItems: 'center',
+    marginTop: '3rem'
+  },
+  mobileBankingImageContainer: {
+    position: 'relative',
+    borderRadius: '20px',
+    overflow: 'hidden',
+    padding: '2rem',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    boxShadow: '0 15px 40px rgba(0, 0, 0, 0.1)'
+  },
+  mobileBankingImage: {
+    width: '90%',
+    height: 'auto',
+    maxHeight: '400px',
+    objectFit: 'contain',
+    filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.2))'
+  },
+  mobileBankingBadge: {
+    position: 'absolute',
+    top: '20px',
+    right: '20px',
+    background: 'rgba(255,255,255,0.95)',
+    color: '#1e40af',
+    padding: '10px 16px',
+    borderRadius: '12px',
+    fontSize: '0.85rem',
+    fontWeight: '700',
+    boxShadow: '0 6px 16px rgba(0,0,0,0.15)',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+    backdropFilter: 'blur(10px)'
+  },
+  mobileBankingContent: {
+    padding: '1rem'
+  },
+  mobileBankingTitle: {
+    fontSize: 'clamp(1.8rem, 3.5vw, 2.5rem)',
+    fontWeight: '900',
+    color: '#1e293b',
+    marginBottom: '1.5rem',
+    letterSpacing: '-0.01em'
+  },
+  mobileBankingDescription: {
+    fontSize: 'clamp(1rem, 2.2vw, 1.15rem)',
+    color: '#64748b',
+    marginBottom: '2rem',
+    lineHeight: '1.7',
+    fontWeight: '400'
+  },
+  mobileBankingFeatures: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1.5rem',
+    marginBottom: '2.5rem'
+  },
+  mobileBankingFeature: {
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: '1rem'
+  },
+  mobileBankingFeatureIcon: {
+    fontSize: '1.5rem',
+    width: '50px',
+    height: '50px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
+    color: 'white',
+    borderRadius: '50%',
+    flexShrink: 0,
+    boxShadow: '0 4px 12px rgba(30, 64, 175, 0.3)'
+  },
+  mobileBankingFeatureTitle: {
+    fontSize: '1.1rem',
+    fontWeight: '700',
+    color: '#1e293b',
+    marginBottom: '0.5rem'
+  },
+  mobileBankingFeatureDesc: {
+    fontSize: '0.95rem',
+    color: '#64748b',
+    lineHeight: '1.5'
+  },
+  mobileBankingActions: {
+    display: 'flex',
+    gap: '1rem',
+    flexWrap: 'wrap'
+  },
+  mobileBankingButtonPrimary: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.8rem',
+    padding: '1rem 2rem',
+    background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
+    color: 'white',
+    textDecoration: 'none',
+    borderRadius: '12px',
+    fontSize: '1rem',
+    fontWeight: '700',
+    transition: 'all 0.3s ease',
+    boxShadow: '0 6px 20px rgba(30, 64, 175, 0.4)'
+  },
+  mobileBankingButtonSecondary: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.8rem',
+    padding: '1rem 2rem',
+    backgroundColor: 'transparent',
+    color: '#1e40af',
+    textDecoration: 'none',
+    borderRadius: '12px',
+    fontSize: '1rem',
+    fontWeight: '700',
+    border: '2px solid #1e40af',
+    transition: 'all 0.3s ease'
+  },
+
+  // ATM Services Section Styles
+  atmSection: {
+    padding: 'clamp(4rem, 8vw, 6rem) 0',
+    backgroundColor: '#ffffff',
+    width: '100%'
+  },
+  atmGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 400px), 1fr))',
+    gap: '3rem',
+    alignItems: 'center',
+    marginTop: '3rem'
+  },
+  atmImageContainer: {
+    position: 'relative',
+    borderRadius: '20px',
+    overflow: 'hidden',
+    padding: '2rem',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    boxShadow: '0 15px 40px rgba(0, 0, 0, 0.1)'
+  },
+  atmImage: {
+    width: '90%',
+    height: 'auto',
+    maxHeight: '350px',
+    objectFit: 'contain',
+    filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.2))'
+  },
+  atmBadge: {
+    position: 'absolute',
+    top: '20px',
+    right: '20px',
+    background: 'rgba(255,255,255,0.95)',
+    color: '#1e40af',
+    padding: '10px 16px',
+    borderRadius: '12px',
+    fontSize: '0.85rem',
+    fontWeight: '700',
+    boxShadow: '0 6px 16px rgba(0,0,0,0.15)',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+    backdropFilter: 'blur(10px)'
+  },
+  atmContent: {
+    padding: '1rem'
+  },
+  atmTitle: {
+    fontSize: 'clamp(1.8rem, 3.5vw, 2.5rem)',
+    fontWeight: '900',
+    color: '#1e293b',
+    marginBottom: '1.5rem',
+    letterSpacing: '-0.01em'
+  },
+  atmDescription: {
+    fontSize: 'clamp(1rem, 2.2vw, 1.15rem)',
+    color: '#64748b',
+    marginBottom: '2rem',
+    lineHeight: '1.7',
+    fontWeight: '400'
+  },
+  atmFeatures: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1.5rem',
+    marginBottom: '2.5rem'
+  },
+  atmFeature: {
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: '1rem'
+  },
+  atmFeatureIcon: {
+    fontSize: '1.5rem',
+    width: '50px',
+    height: '50px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: 'linear-gradient(135deg, #059669 0%, #0891b2 100%)',
+    color: 'white',
+    borderRadius: '50%',
+    flexShrink: 0,
+    boxShadow: '0 4px 12px rgba(5, 150, 105, 0.3)'
+  },
+  atmFeatureTitle: {
+    fontSize: '1.1rem',
+    fontWeight: '700',
+    color: '#1e293b',
+    marginBottom: '0.5rem'
+  },
+  atmFeatureDesc: {
+    fontSize: '0.95rem',
+    color: '#64748b',
+    lineHeight: '1.5'
+  },
+  atmActions: {
+    display: 'flex',
+    gap: '1rem',
+    flexWrap: 'wrap'
+  },
+  atmButtonPrimary: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.8rem',
+    padding: '1rem 2rem',
+    background: 'linear-gradient(135deg, #059669 0%, #0891b2 100%)',
+    color: 'white',
+    textDecoration: 'none',
+    borderRadius: '12px',
+    fontSize: '1rem',
+    fontWeight: '700',
+    transition: 'all 0.3s ease',
+    boxShadow: '0 6px 20px rgba(5, 150, 105, 0.4)'
+  },
+  atmButtonSecondary: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.8rem',
+    padding: '1rem 2rem',
+    backgroundColor: 'transparent',
+    color: '#059669',
+    textDecoration: 'none',
+    borderRadius: '12px',
+    fontSize: '1rem',
+    fontWeight: '700',
+    border: '2px solid #059669',
+    transition: 'all 0.3s ease'
+  },
+
+  // Loan Approval Banner Section
+  loanBannerSection: {
+    padding: 'clamp(4rem, 8vw, 6rem) 0',
+    backgroundColor: '#ffffff',
+    width: '100%'
+  },
+  loanBannerGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 400px), 1fr))',
+    gap: '3rem',
+    alignItems: 'center',
+    marginTop: '3rem'
+  },
+  loanBannerContent: {
+    padding: '1rem'
+  },
+  loanBannerTitle: {
+    fontSize: 'clamp(1.8rem, 3.5vw, 2.5rem)',
+    fontWeight: '900',
+    color: '#1e293b',
+    marginBottom: '1.5rem',
+    letterSpacing: '-0.01em'
+  },
+  loanBannerDescription: {
+    fontSize: 'clamp(1rem, 2.2vw, 1.15rem)',
+    color: '#64748b',
+    marginBottom: '2rem',
+    lineHeight: '1.7',
+    fontWeight: '400'
+  },
+  loanBannerFeatures: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1.5rem',
+    marginBottom: '2.5rem'
+  },
+  loanBannerFeature: {
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: '1rem'
+  },
+  loanBannerFeatureIcon: {
+    fontSize: '1.5rem',
+    width: '50px',
+    height: '50px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: 'linear-gradient(135deg, #059669 0%, #0891b2 100%)',
+    color: 'white',
+    borderRadius: '50%',
+    flexShrink: 0,
+    boxShadow: '0 4px 12px rgba(5, 150, 105, 0.3)'
+  },
+  loanBannerFeatureTitle: {
+    fontSize: '1.1rem',
+    fontWeight: '700',
+    color: '#1e293b',
+    marginBottom: '0.5rem'
+  },
+  loanBannerFeatureDesc: {
+    fontSize: '0.95rem',
+    color: '#64748b',
+    lineHeight: '1.5'
+  },
+  loanBannerActions: {
+    display: 'flex',
+    gap: '1rem',
+    flexWrap: 'wrap'
+  },
+  loanBannerButtonPrimary: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.8rem',
+    padding: '1rem 2rem',
+    background: 'linear-gradient(135deg, #059669 0%, #0891b2 100%)',
+    color: 'white',
+    textDecoration: 'none',
+    borderRadius: '12px',
+    fontSize: '1rem',
+    fontWeight: '700',
+    transition: 'all 0.3s ease',
+    boxShadow: '0 6px 20px rgba(5, 150, 105, 0.4)'
+  },
+  loanBannerButtonSecondary: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.8rem',
+    padding: '1rem 2rem',
+    backgroundColor: 'transparent',
+    color: '#059669',
+    textDecoration: 'none',
+    borderRadius: '12px',
+    fontSize: '1rem',
+    fontWeight: '700',
+    border: '2px solid #059669',
+    transition: 'all 0.3s ease'
+  },
+  loanBannerImageContainer: {
+    position: 'relative',
+    borderRadius: '24px',
+    overflow: 'hidden',
+    boxShadow: '0 15px 40px rgba(30, 64, 175, 0.2)'
+  },
+  loanBannerImage: {
+    width: '100%',
+    height: '400px',
+    objectFit: 'cover',
+    transition: 'transform 0.3s ease'
+  },
+  loanBannerBadge: {
+    position: 'absolute',
+    top: '20px',
+    right: '20px',
+    background: 'rgba(255,255,255,0.95)',
+    color: '#059669',
+    padding: '10px 16px',
+    borderRadius: '12px',
+    fontSize: '0.85rem',
+    fontWeight: '700',
+    boxShadow: '0 6px 16px rgba(0,0,0,0.15)',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+    backdropFilter: 'blur(10px)'
+  },
+
   // CTA Button Styles
   ctaButton: {
     display: 'inline-flex',
@@ -3744,13 +5206,21 @@ const styles = {
 
   // Add CSS animations to the document
   // These should be defined in the global scope or loaded via a CSS file.
-  // For demonstration purposes, we include them here.
-  // NOTE: In a real React application, it's better to use a CSS-in-JS solution
-  // that handles dynamic keyframe creation or import a CSS file.
+  // For example, using styled-components:
+  // const SpinKeyframes = keyframes\`
+  //   0% { transform: rotate(0deg); }
+  //   100% { transform: rotate(360deg); }
+  // \`;
+  //
+  // const ProgressBarKeyframes = keyframes\`
+  //   0% { transform: translateX(-100%); }
+  //   50% { transform: translateX(0%); }
+  //   100% { transform: translateX(100%); }
+  // \`;
 };
 
-// Add hover effects for dropdown items
-if (typeof document !== 'undefined') {
+// Add hover effects for dropdown items  
+if (typeof window !== 'undefined') {
   const existingStyle = document.querySelector('#dropdown-styles');
   if (!existingStyle) {
     const dropdownStyles = document.createElement('style');
@@ -3980,6 +5450,24 @@ if (typeof document !== 'undefined') {
       color: #1f2937 !important;
     }
 
+    /* Download dropdown hover effects */
+    a[style*="downloadOption"]:hover {
+      background-color: #f8fafc !important;
+      transform: translateY(-2px) !important;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    /* Professional cards hover effects */
+    .professionalCardsButtonPrimary:hover {
+      transform: translateY(-3px) !important;
+      box-shadow: 0 15px 35px rgba(30, 64, 175, 0.6) !important;
+    }
+
+    .professionalCardsButtonSecondary:hover {
+      background-color: rgba(30, 64, 175, 0.1) !important;
+      transform: translateY(-3px) !important;
+    }
+
     /* Mobile dropdown positioning */
     @media (max-width: 768px) {
       .dropdownMenu {
@@ -4032,6 +5520,25 @@ if (typeof document !== 'undefined') {
 
     .announcementLink:hover {
       background-color: rgba(5, 150, 105, 0.2);
+    }
+
+    /* New section hover effects */
+    .facilityImage:hover {
+      transform: scale(1.05);
+    }
+
+    .executiveImage:hover {
+      transform: scale(1.02);
+    }
+
+    .facilityButtonPrimary:hover, .executiveButtonPrimary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 35px rgba(5, 150, 105, 0.6);
+    }
+
+    .facilityButtonSecondary:hover, .executiveButtonSecondary:hover {
+      background-color: rgba(5, 150, 105, 0.1);
+      transform: translateY(-3px);
     }
   `;
   document.head.appendChild(styleSheet);
