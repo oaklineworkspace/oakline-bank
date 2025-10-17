@@ -1,8 +1,0 @@
-
-<svg width="400" height="300" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
-  <rect width="400" height="300" fill="#f1f5f9"/>
-  <circle cx="200" cy="120" r="40" fill="#e2e8f0"/>
-  <path d="M160 120 L240 120 M200 80 L200 160" stroke="#cbd5e1" stroke-width="2" fill="none"/>
-  <text x="200" y="220" text-anchor="middle" fill="#64748b" font-family="Arial, sans-serif" font-size="14">Customer Photo</text>
-  <text x="200" y="240" text-anchor="middle" fill="#94a3b8" font-family="Arial, sans-serif" font-size="12">Testimonial Image</text>
-</svg>
