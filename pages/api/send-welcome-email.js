@@ -12,7 +12,7 @@ export default async function handler(req, res) {
 
   if (missingVars.length > 0) {
     console.error('Missing SMTP environment variables:', missingVars);
-    return res.status(500).json({ 
+    return res.status(500).json({
       error: 'Email service not configured',
       message: `Missing environment variables: ${missingVars.join(', ')}`
     });
@@ -37,11 +37,18 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    // Determine site URL dynamically
-    const protocol = req.headers['x-forwarded-proto'] || 'http';
-    const host = req.headers['x-forwarded-host'] || req.headers.host;
-    const detectedSiteUrl = site_url || process.env.NEXT_PUBLIC_SITE_URL || `${protocol}://${host}`;
-    
+    // Use Replit URL from environment variable
+    const detectedSiteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+
+    // Validate that we have a valid site URL for enrollment redirects
+    if (!detectedSiteUrl) {
+      console.error('Cannot send enrollment email: NEXT_PUBLIC_SITE_URL environment variable is not set.');
+      return res.status(500).json({
+        error: 'Server configuration error: Site URL not configured. Please set NEXT_PUBLIC_SITE_URL environment variable.',
+        configRequired: 'NEXT_PUBLIC_SITE_URL'
+      });
+    }
+
     console.log('Using site URL for enrollment:', detectedSiteUrl);
 
     // SMTP transporter
@@ -62,7 +69,7 @@ export default async function handler(req, res) {
       console.log('SMTP connection verified successfully');
     } catch (smtpError) {
       console.error('SMTP connection failed:', smtpError.message);
-      return res.status(500).json({ 
+      return res.status(500).json({
         error: 'Email service connection failed',
         message: smtpError.message
       });
@@ -195,7 +202,7 @@ export default async function handler(req, res) {
         console.error('Error updating enrollment record:', updateError);
       }
     } else {
-      // Create new enrollment record (no user_id column in enrollments table)
+      // Create new enrollment record
       const { error: insertError } = await supabaseAdmin
         .from('enrollments')
         .insert([{
@@ -203,8 +210,7 @@ export default async function handler(req, res) {
           application_id: application_id,
           token: linkData.properties.action_link,
           is_used: false,
-          click_count: 0,
-          created_at: new Date().toISOString()
+          click_count: 0
         }]);
 
       if (insertError) {
@@ -231,9 +237,9 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error('Error sending welcome email:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Failed to send welcome email',
-      message: error.message 
+      message: error.message
     });
   }
 }
