@@ -1,11 +1,9 @@
-
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { supabase } from '../../lib/supabaseClient';
+import { supabaseAdmin } from '../../lib/supabaseAdmin';
+import AdminAuth from '../../components/AdminAuth';
 
 export default function AdminBalance() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [users, setUsers] = useState([]);
   const [accounts, setAccounts] = useState([]);
@@ -17,53 +15,51 @@ export default function AdminBalance() {
   const [operation, setOperation] = useState('set'); // 'set', 'add', 'subtract'
   const router = useRouter();
 
-  const ADMIN_PASSWORD = 'Chrismorgan23$';
-
   useEffect(() => {
-    const adminAuth = localStorage.getItem('adminAuthenticated');
-    if (adminAuth === 'true') {
-      setIsAuthenticated(true);
-      fetchData();
-    }
+    fetchData();
   }, []);
-
-  const handleLogin = (e) => {
-    e.preventDefault();
-    if (password === ADMIN_PASSWORD) {
-      setIsAuthenticated(true);
-      localStorage.setItem('adminAuthenticated', 'true');
-      setError('');
-      fetchData();
-    } else {
-      setError('Invalid password');
-    }
-  };
 
   const fetchData = async () => {
     setLoading(true);
+    setError('');
     try {
-      // Fetch users from applications
-      const { data: applicationsData, error: appError } = await supabase
+      // Fetch applications with user data
+      const { data: applicationsData, error: appError } = await supabaseAdmin
         .from('applications')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('submitted_at', { ascending: false });
 
-      if (!appError && applicationsData) {
-        setUsers(applicationsData);
+      if (appError) {
+        console.error('Error fetching applications:', appError);
+        throw new Error('Failed to fetch applications: ' + appError.message);
       }
 
-      // Fetch all accounts
-      const { data: accountsData, error: accountsError } = await supabase
+      setUsers(applicationsData || []);
+
+      // Fetch all accounts with application data
+      const { data: accountsData, error: accountsError } = await supabaseAdmin
         .from('accounts')
-        .select('*')
+        .select(`
+          *,
+          applications!accounts_application_id_fkey(
+            id,
+            first_name,
+            last_name,
+            email,
+            user_id
+          )
+        `)
         .order('created_at', { ascending: false });
 
-      if (!accountsError && accountsData) {
-        setAccounts(accountsData);
+      if (accountsError) {
+        console.error('Error fetching accounts:', accountsError);
+        throw new Error('Failed to fetch accounts: ' + accountsError.message);
       }
+
+      setAccounts(accountsData || []);
     } catch (error) {
       console.error('Error fetching data:', error);
-      setError('Failed to fetch data');
+      setError(error.message);
     } finally {
       setLoading(false);
     }
@@ -73,12 +69,12 @@ export default function AdminBalance() {
     const userId = e.target.value;
     setSelectedUser(userId);
     setSelectedAccount('');
-    
+
     // Filter accounts for selected user
     const userAccounts = accounts.filter(acc => 
       acc.application_id === userId || acc.user_id === userId
     );
-    
+
     if (userAccounts.length === 1) {
       setSelectedAccount(userAccounts[0].id);
     }
@@ -97,7 +93,7 @@ export default function AdminBalance() {
 
     try {
       // Get current account with user info
-      const { data: currentAccount, error: fetchError } = await supabase
+      const { data: currentAccount, error: fetchError } = await supabaseAdmin
         .from('accounts')
         .select('balance, account_number, account_type, application_id')
         .eq('id', selectedAccount)
@@ -124,7 +120,7 @@ export default function AdminBalance() {
       }
 
       // Update balance in accounts table
-      const { error: updateError } = await supabase
+      const { error: updateError } = await supabaseAdmin
         .from('accounts')
         .update({ 
           balance: newBalance.toFixed(2),
@@ -136,7 +132,7 @@ export default function AdminBalance() {
 
       // Create transaction record
       const transactionAmount = operation === 'set' ? newBalance : Math.abs(amount);
-      const { error: transactionError } = await supabase
+      const { error: transactionError } = await supabaseAdmin
         .from('transactions')
         .insert({
           account_id: selectedAccount,
@@ -189,34 +185,44 @@ export default function AdminBalance() {
     );
   };
 
-  if (!isAuthenticated) {
-    return (
-      <div style={styles.loginContainer}>
-        <div style={styles.loginCard}>
-          <h1 style={styles.title}>🏦 Admin Balance Management</h1>
-          <form onSubmit={handleLogin} style={styles.form}>
-            <div style={styles.inputGroup}>
-              <label style={styles.label}>Admin Password</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                style={styles.input}
-                placeholder="Enter admin password"
-                required
-              />
-            </div>
-            {error && <div style={styles.error}>{error}</div>}
-            <button type="submit" style={styles.loginButton}>
-              🔐 Access Balance Management
-            </button>
-          </form>
-        </div>
-      </div>
-    );
-  }
+  // Function to handle manual balance updates via API
+  const handleUpdateBalance = async (accountId) => {
+    const newBalance = prompt('Enter new balance:');
+    if (!newBalance || isNaN(newBalance)) {
+      alert('Invalid balance amount');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/admin/manual-transaction', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          accountId: accountId,
+          amount: parseFloat(newBalance),
+          type: 'balance_update',
+          description: 'Admin balance update'
+        })
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to update balance');
+      }
+
+      alert('Balance updated successfully!');
+      fetchData(); // Refresh data after successful update
+    } catch (error) {
+      console.error('Error updating balance:', error);
+      alert('Failed to update balance: ' + error.message);
+    }
+  };
+
+  
 
   return (
+    <AdminAuth>
     <div style={styles.container}>
       <div style={styles.header}>
         <h1 style={styles.title}>💰 Admin Balance Management</h1>
@@ -331,7 +337,39 @@ export default function AdminBalance() {
           </div>
         </div>
       </div>
+
+      {/* Display all accounts with an option to manually update balance */}
+      <div style={styles.card}>
+        <h2 style={styles.cardTitle}>All Accounts</h2>
+        <div style={styles.accountList}>
+          {accounts.map(account => (
+            <div key={account.id} style={styles.accountItem}>
+              <div style={styles.accountDetails}>
+                <span style={styles.accountName}>
+                  {account.applications?.first_name || 'N/A'} {account.applications?.last_name || 'N/A'}
+                </span>
+                <span style={styles.accountEmail}>{account.applications?.email || 'N/A'}</span>
+                <span style={styles.accountType}>{account.account_type} - ****{account.account_number?.slice(-4)}</span>
+              </div>
+              <div style={styles.accountBalanceContainer}>
+                <span style={styles.accountBalance}>
+                  ${parseFloat(account.balance || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </span>
+                <button 
+                  onClick={() => handleUpdateBalance(account.id)}
+                  style={styles.updateButton}
+                  disabled={loading}
+                >
+                  Update Balance
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
+  
+    </AdminAuth>
   );
 }
 
@@ -489,5 +527,57 @@ const styles = {
     fontSize: '12px',
     color: '#64748b',
     fontWeight: '500'
+  },
+  accountList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '16px'
+  },
+  accountItem: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '16px',
+    background: '#f8fafc',
+    borderRadius: '8px',
+    border: '1px solid #eee'
+  },
+  accountDetails: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '4px'
+  },
+  accountName: {
+    fontSize: '16px',
+    fontWeight: '600',
+    color: '#1e3a8a'
+  },
+  accountEmail: {
+    fontSize: '13px',
+    color: '#64748b'
+  },
+  accountType: {
+    fontSize: '14px',
+    fontWeight: '500',
+    color: '#374151'
+  },
+  accountBalanceContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px'
+  },
+  accountBalance: {
+    fontSize: '16px',
+    fontWeight: 'bold',
+    color: '#15803d'
+  },
+  updateButton: {
+    background: '#1e3a8a',
+    color: 'white',
+    border: 'none',
+    padding: '8px 12px',
+    borderRadius: '6px',
+    fontSize: '12px',
+    cursor: 'pointer'
   }
 };

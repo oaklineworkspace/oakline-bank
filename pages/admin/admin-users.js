@@ -1,10 +1,10 @@
+
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import { supabase } from '../../lib/supabaseClient';
+import AdminAuth from '../../components/AdminAuth';
 
 export default function AdminUsers() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -12,13 +12,7 @@ export default function AdminUsers() {
   const router = useRouter();
 
   useEffect(() => {
-    const adminAuth = localStorage.getItem('adminAuthenticated');
-    if (adminAuth === 'true') {
-      setIsAuthenticated(true);
-      fetchUsers();
-    } else {
-      router.push('/admin/admin-dashboard');
-    }
+    fetchUsers();
   }, []);
 
   const fetchUsers = async () => {
@@ -26,47 +20,34 @@ export default function AdminUsers() {
       setLoading(true);
       setError('');
 
-      const { data, error } = await supabase
-        .from('profiles')
-        .select(`
-          id,
-          email,
-          full_name,
-          role,
-          created_at,
-          updated_at,
-          phone,
-          address,
-          date_of_birth
-        `)
-        .order('created_at', { ascending: false });
+      // Fetch users from API
+      const usersResponse = await fetch('/api/admin/get-users');
+      const usersResult = await usersResponse.json();
 
-      if (error) {
-        console.error('Supabase error:', error);
-        throw new Error(`Database error: ${error.message}`);
+      if (!usersResponse.ok) {
+        throw new Error(usersResult.error || 'Failed to fetch users');
       }
 
-      const usersData = data || [];
-      setUsers(usersData);
-      setFilteredUsers(usersData);
+      const usersData = usersResult.users || [];
 
-      // Also fetch accounts for each user
-      if (usersData.length > 0) {
-        const userIds = usersData.map(user => user.id);
-        const { data: accountsData } = await supabase
-          .from('accounts')
-          .select('user_id, account_number, account_type, balance, status')
-          .in('user_id', userIds);
+      // Fetch accounts from API
+      const accountsResponse = await fetch('/api/admin/get-accounts');
+      const accountsResult = await accountsResponse.json();
 
-        // Map accounts to users
-        const usersWithAccounts = usersData.map(user => ({
-          ...user,
-          accounts: accountsData?.filter(acc => acc.user_id === user.id) || []
-        }));
-
-        setUsers(usersWithAccounts);
-        setFilteredUsers(usersWithAccounts);
+      if (!accountsResponse.ok) {
+        throw new Error(accountsResult.error || 'Failed to fetch accounts');
       }
+
+      const accountsData = accountsResult.accounts || [];
+
+      // Map accounts to users
+      const usersWithAccounts = usersData.map(user => ({
+        ...user,
+        accounts: accountsData.filter(acc => acc.user_id === user.id) || []
+      }));
+
+      setUsers(usersWithAccounts);
+      setFilteredUsers(usersWithAccounts);
     } catch (error) {
       console.error('Error fetching users:', error);
       setError(`Failed to fetch users: ${error.message}`);
@@ -80,39 +61,53 @@ export default function AdminUsers() {
       return;
     }
     try {
-      const { error } = await supabase.from('profiles').delete().eq('id', userId);
-      if (error) throw error;
+      const response = await fetch('/api/admin/delete-user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId })
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to delete user');
+      }
+
       setUsers(users.filter(user => user.id !== userId));
       setFilteredUsers(filteredUsers.filter(user => user.id !== userId));
       setError('');
     } catch (error) {
       console.error('Error deleting user:', error);
-      setError('Failed to delete user.');
+      setError('Failed to delete user: ' + error.message);
     }
   };
 
   const handleStatusChange = async (userId, newStatus) => {
     try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ status: newStatus })
-        .eq('id', userId);
-      if (error) throw error;
+      const response = await fetch('/api/admin/update-account-status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, status: newStatus })
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to update status');
+      }
+
       setUsers(users.map(user => (user.id === userId ? { ...user, status: newStatus } : user)));
       setFilteredUsers(filteredUsers.map(user => (user.id === userId ? { ...user, status: newStatus } : user)));
       setError('');
     } catch (error) {
       console.error('Error updating user status:', error);
-      setError('Failed to update user status.');
+      setError('Failed to update user status: ' + error.message);
     }
   };
 
-  if (!isAuthenticated) {
-    return <div>Redirecting to admin login...</div>;
-  }
-
   return (
-    <div style={styles.container}>
+    <AdminAuth>
+      <div style={styles.container}>
       <div style={styles.header}>
         <h1 style={styles.title}>👥 User Management</h1>
         <Link href="/admin/admin-dashboard" style={styles.backButton}>
@@ -151,14 +146,14 @@ export default function AdminUsers() {
               <tbody>
                 {filteredUsers.map((user) => (
                   <tr key={user.id} style={styles.tableRow}>
-                    <td style={styles.tableCell}>{user.full_name || 'N/A'}</td>
+                    <td style={styles.tableCell}>{user.name || user.full_name || 'N/A'}</td>
                     <td style={styles.tableCell}>{user.email || 'N/A'}</td>
                     <td style={styles.tableCell}>{user.accounts?.length || 0}</td>
                     <td style={styles.tableCell}>
-                      ${(user.accounts?.reduce((sum, acc) => sum + (acc.balance || 0), 0)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '$0.00'}
+                      ${(user.accounts?.reduce((sum, acc) => sum + (parseFloat(acc.balance) || 0), 0) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </td>
                     <td style={styles.tableCell}>
-                      <span style={user.status === 'Active' ? styles.activeStatus : styles.suspendedStatus}>
+                      <span style={user.status === 'Active' || user.status === 'active' ? styles.activeStatus : styles.suspendedStatus}>
                         {user.status || 'Unknown'}
                       </span>
                     </td>
@@ -177,6 +172,7 @@ export default function AdminUsers() {
         )}
       </div>
     </div>
+    </AdminAuth>
   );
 }
 
