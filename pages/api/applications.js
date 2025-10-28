@@ -1,42 +1,59 @@
+import { supabaseAdmin } from '../../lib/supabaseAdmin';
 
-export default function handler(req, res) {
-  if (req.method === 'POST') {
-    try {
-      const applicationData = req.body;
-      
-      // Validate required fields
-      const requiredFields = ['firstName', 'lastName', 'email', 'phone', 'dob', 'ssnOrId', 'country', 'state', 'city', 'address', 'zipCode', 'selectedAccountTypes'];
-      const missingFields = requiredFields.filter(field => !applicationData[field]);
-      
-      if (missingFields.length > 0) {
-        return res.status(400).json({ 
-          error: `Missing required fields: ${missingFields.join(', ')}` 
-        });
-      }
-      
-      // Generate application ID
-      const applicationId = `APP-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      
-      console.log('Application received:', {
-        id: applicationId,
-        email: applicationData.email,
-        name: `${applicationData.firstName} ${applicationData.lastName}`,
-        accountTypes: applicationData.selectedAccountTypes
-      });
-      
-      res.status(200).json({ 
-        id: applicationId, 
-        message: 'Application submitted successfully',
-        email: applicationData.email
-      });
-    } catch (error) {
-      console.error('Application processing error:', error);
-      res.status(500).json({ 
-        error: 'Internal server error' 
-      });
+export default async function handler(req, res) {
+  if (req.method !== 'GET') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  try {
+    // Fetch applications
+    const { data: applicationsData, error: applicationsError } = await supabaseAdmin
+      .from('applications')
+      .select('*')
+      .order('submitted_at', { ascending: false });
+
+    if (applicationsError) {
+      console.error('Error fetching applications:', applicationsError);
+      throw applicationsError;
     }
-  } else {
-    res.setHeader('Allow', ['POST']);
-    res.status(405).end(`Method ${req.method} Not Allowed`);
+
+    // Fetch enrollments separately
+    const { data: enrollmentsData, error: enrollmentsError } = await supabaseAdmin
+      .from('enrollments')
+      .select('application_id, email, is_used');
+
+    if (enrollmentsError) {
+      console.error('Error fetching enrollments:', enrollmentsError);
+    }
+
+    // Fetch auth users to check password_set
+    const { data: authUsersData, error: authError } = await supabaseAdmin.auth.admin.listUsers();
+
+    if (authError) {
+      console.error('Error fetching auth users:', authError);
+    }
+
+    // Combine the data
+    const enrichedApplications = applicationsData.map(app => {
+      const enrollment = enrollmentsData?.find(e => e.application_id === app.id || e.email === app.email);
+      const authUser = authUsersData?.users?.find(u => u.email === app.email);
+
+      return {
+        ...app,
+        enrollment_completed: enrollment?.is_used || false,
+        password_set: authUser ? true : false
+      };
+    });
+
+    res.status(200).json({
+      applications: enrichedApplications || []
+    });
+
+  } catch (error) {
+    console.error('Error fetching applications:', error);
+    res.status(500).json({
+      error: 'Failed to fetch applications',
+      details: error.message
+    });
   }
 }
