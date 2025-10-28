@@ -1,4 +1,4 @@
-import { useState, useEffect, memo, lazy, Suspense } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { supabase } from '../lib/supabaseClient';
 import MainMenu from '../components/MainMenu';
@@ -8,12 +8,12 @@ import ServicesSection from '../components/ServicesSection';
 import FeaturesSection from '../components/FeaturesSection';
 import Footer from '../components/Footer';
 import LiveChat from '../components/LiveChat';
-
-// Lazy load heavy components
-const Testimonials = lazy(() => import('../components/Testimonials'));
-const TestimonialsSection = lazy(() => import('../components/TestimonialsSection'));
-const LoanApprovalSection = lazy(() => import('../components/LoanApprovalSection'));
-const CTA = lazy(() => import('../components/CTA'));
+import Testimonials from '../components/Testimonials';
+import TestimonialsSection from '../components/TestimonialsSection';
+import LoanApprovalSection from '../components/LoanApprovalSection';
+import CTA from '../components/CTA';
+import AdminNavDropdown from '../components/AdminNavDropdown';
+import AdminFooter from '../components/AdminFooter';
 
 export default function Home() {
   const [user, setUser] = useState(null);
@@ -23,9 +23,9 @@ export default function Home() {
   const [isVisible, setIsVisible] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [activeDropdown, setActiveDropdown] = useState(null);
-  const [showBankingDropdown, setShowBankingDropdown] = useState(false);
 
   useEffect(() => {
+
     // Get initial session and set up auth listener
     const getInitialSession = async () => {
       const { data: { session }, error } = await supabase.auth.getSession();
@@ -368,122 +368,12 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Banking+ Dropdown Button - Centered */}
-          <div style={styles.bankingPlusContainer}>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowBankingDropdown(!showBankingDropdown);
-              }}
-              style={styles.bankingPlusButton}
-            >
-              <div style={styles.bankingPlusIconLines}>
-                <div style={styles.iconLine}></div>
-                <div style={styles.iconLine}></div>
-                <div style={styles.iconLine}></div>
-              </div>
-              <span style={styles.bankingPlusText}>Banking+</span>
-            </button>
-
-            {showBankingDropdown && (
-              <>
-                <div 
-                  style={styles.dropdownBackdrop} 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowBankingDropdown(false);
-                  }}
-                ></div>
-                <div style={styles.bankingDropdown} onClick={(e) => e.stopPropagation()}>
-                  <div style={styles.bankingDropdownHeader}>
-                    <h4 style={styles.bankingDropdownTitle}>Complete Banking Solutions</h4>
-                    <p style={styles.bankingDropdownSubtitle}>Access all your banking services in one place</p>
-                  </div>
-
-                  <div style={styles.bankingTwoColumnGrid}>
-                    {/* Core Banking Services Section */}
-                    <div style={styles.bankingSection}>
-                      <div style={styles.bankingSectionHeader}>
-                        <span style={styles.bankingSectionIcon}>🏦</span>
-                        <h5 style={styles.bankingSectionTitle}>Core Banking</h5>
-                      </div>
-                      <div style={styles.bankingFeaturesGrid}>
-                        {coreFeatures.map((feature) => (
-                          <Link
-                            key={feature.name}
-                            href={feature.href}
-                            onClick={() => setShowBankingDropdown(false)}
-                            style={styles.bankingFeatureItem}
-                          >
-                            <div style={{
-                              ...styles.bankingFeatureIcon,
-                              backgroundColor: `${feature.color}15`,
-                              border: `1px solid ${feature.color}30`
-                            }}>
-                              {feature.icon}
-                            </div>
-                            <div style={styles.bankingFeatureContent}>
-                              <div style={styles.bankingFeatureName}>{feature.name}</div>
-                              <div style={styles.bankingFeatureDesc}>{feature.desc}</div>
-                            </div>
-                            <div style={{ ...styles.bankingFeatureArrow, color: feature.color }}>→</div>
-                          </Link>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Premium & Advanced Services Section */}
-                    <div style={styles.bankingSection}>
-                      <div style={styles.bankingSectionHeader}>
-                        <span style={styles.bankingSectionIcon}>⭐</span>
-                        <h5 style={styles.bankingSectionTitle}>Premium Services</h5>
-                      </div>
-                      <div style={styles.bankingFeaturesGrid}>
-                        {premiumServices.map((feature) => (
-                          <Link
-                            key={feature.name}
-                            href={feature.href}
-                            onClick={() => setShowBankingDropdown(false)}
-                            style={styles.bankingFeatureItem}
-                          >
-                            <div style={{
-                              ...styles.bankingFeatureIcon,
-                              backgroundColor: `${feature.color}15`,
-                              border: `1px solid ${feature.color}30`
-                            }}>
-                              {feature.icon}
-                            </div>
-                            <div style={styles.bankingFeatureContent}>
-                              <div style={styles.bankingFeatureName}>{feature.name}</div>
-                              <div style={styles.bankingFeatureDesc}>{feature.desc}</div>
-                            </div>
-                            <div style={{ ...styles.bankingFeatureArrow, color: feature.color }}>→</div>
-                          </Link>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div style={styles.bankingDropdownFooter}>
-                    <Link 
-                      href="/account-types"
-                      onClick={() => setShowBankingDropdown(false)}
-                      style={styles.viewAllServicesButton}
-                    >
-                      Explore All Banking Services
-                    </Link>
-                    <Link 
-                      href="/support"
-                      onClick={() => setShowBankingDropdown(false)}
-                      style={styles.viewAllServicesButtonSecondary}
-                    >
-                      Contact Support
-                    </Link>
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
+          {/* Comprehensive Admin Dropdown Button - Mobile Friendly Row */}
+          {user && (
+            <div style={styles.adminDropdownRow}>
+              <AdminNavDropdown />
+            </div>
+          )}
 
         </div>
       </header>
@@ -685,8 +575,8 @@ export default function Home() {
           <div style={styles.newBankingImageGrid}>
             <div style={styles.newBankingImageContainer}>
               <img
-                src="/images/oakline-bank-branded-1.jpeg"
-                alt="Oakline Bank Modern Banking Experience"
+                src="/images/image_1760199157530.jpeg"
+                alt="Modern Banking Experience"
                 style={styles.newBankingImage}
                 onError={(e) => {
                   e.target.style.display = 'none';
@@ -857,7 +747,7 @@ export default function Home() {
                   <div style={styles.featureTag}>Mobile Card Controls</div>
                 </div>
                 {user ? (
-                  <Link href="/cards" style={{...styles.debitCardButton, backgroundColor: undefined}}>
+                  <Link href="/cards" style={styles.debitCardButton}>
                     <span style={styles.buttonIcon}>⚡</span>
                     Apply for Card
                   </Link>
@@ -894,7 +784,7 @@ export default function Home() {
                   <div style={styles.featureTag}>Priority Support</div>
                 </div>
                 {user ? (
-                  <Link href="/cards" style={{...styles.debitCardButton, backgroundColor: undefined}}>
+                  <Link href="/cards" style={styles.debitCardButton}>
                     <span style={styles.buttonIcon}>⚡</span>
                     Apply for Card
                   </Link>
@@ -1209,9 +1099,7 @@ export default function Home() {
 
 
       {/* Testimonials Section */}
-      <Suspense fallback={<div style={styles.loadingComponent}>Loading testimonials...</div>}>
-        <TestimonialsSection />
-      </Suspense>
+      <Testimonials />
 
 
 
@@ -1583,24 +1471,25 @@ export default function Home() {
       <div id="final-cta" data-animate style={{
         ...(isVisible['final-cta'] ? styles.pulseGlow : {})
       }}>
-        <Suspense fallback={<div style={styles.loadingComponent}>Loading...</div>}>
-          <CTA
-            title={user ? "Ready to Expand Your Banking?" : "Ready to Start Your Financial Journey?"}
-            subtitle={user ?
-              "Access premium banking services and explore all account options." :
-              "Join over 500,000 customers who trust Oakline Bank. Open your account today."
-            }
-            buttonText={user ? "View Account Types" : "Open Account Now"}
-            buttonLink={user ? "/account-types" : "/apply"}
-            variant="primary"
-          />
-        </Suspense>
+        <CTA
+          title={user ? "Ready to Expand Your Banking?" : "Ready to Start Your Financial Journey?"}
+          subtitle={user ?
+            "Access premium banking services and explore all account options." :
+            "Join over 500,000 customers who trust Oakline Bank. Open your account today."
+          }
+          buttonText={user ? "View Account Types" : "Open Account Now"}
+          buttonLink={user ? "/account-types" : "/apply"}
+          variant="primary"
+        />
       </div>
 
       {/* Live Chat Component */}
       <LiveChat />
 
       <Footer />
+
+      {/* Admin Footer - Sticky Bottom Navigation */}
+      {user && <AdminFooter />}
     </div>
   );
 }
@@ -2148,7 +2037,7 @@ const styles = {
   bankingDropdownButton: {
     display: 'inline-flex',
     alignItems: 'center',
-    justifyContent: 'center',
+    gap: '0.5rem',
     padding: '0.75rem 1.25rem',
     background: 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)',
     color: 'white',
@@ -2156,15 +2045,15 @@ const styles = {
     borderRadius: '8px',
     fontSize: '0.9rem',
     fontWeight: '700',
+    boxShadow: '0 4px 12px rgba(14, 165, 233, 0.3)',
     transition: 'all 0.3s ease',
     flex: 1,
-    minWidth: '120px',
-    boxShadow: '0 4px 12px rgba(14, 165, 233, 0.3)'
+    justifyContent: 'center'
   },
   bankingDropdownSecondaryButton: {
     display: 'inline-flex',
     alignItems: 'center',
-    justifyContent: 'center',
+    gap: '0.5rem',
     padding: '0.75rem 1.25rem',
     background: 'transparent',
     color: '#1a365d',
@@ -2175,7 +2064,7 @@ const styles = {
     border: '2px solid #1a365d',
     transition: 'all 0.3s ease',
     flex: 1,
-    minWidth: '120px'
+    justifyContent: 'center'
   },
   featuresGrid: {
     display: 'grid',
@@ -3539,8 +3428,7 @@ const styles = {
   newBankingImage: {
     width: '100%',
     height: '400px',
-    objectFit: 'contain',
-    objectPosition: 'center',
+    objectFit: 'cover',
     transition: 'transform 0.3s ease'
   },
   newBankingImageContent: {
@@ -4150,6 +4038,15 @@ const styles = {
     fontWeight: '500',
     letterSpacing: '0.5px'
   },
+  adminDropdownRow: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+    padding: '0.75rem 1rem',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderTop: '1px solid rgba(255, 255, 255, 0.1)'
+  },
 
   // Mobile Navigation Row Styles
   mobileNavigationRow: {
@@ -4470,6 +4367,93 @@ const styles = {
     fontSize: '1.2rem',
     color: '#64748b',
     fontWeight: '500'
+  },
+
+  // Login Page Styles
+  loginContainer: {
+    minHeight: '100vh',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)',
+    padding: '20px'
+  },
+  loginCard: {
+    background: 'white',
+    padding: '40px',
+    borderRadius: '16px',
+    boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
+    width: '100%',
+    maxWidth: '400px'
+  },
+  loginTitle: {
+    fontSize: '28px',
+    fontWeight: 'bold',
+    color: '#1e3c72',
+    margin: '0 0 10px 0',
+    textAlign: 'center'
+  },
+  loginSubtitle: {
+    fontSize: '14px',
+    color: '#666',
+    margin: '0 0 30px 0',
+    textAlign: 'center'
+  },
+  loginForm: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '20px'
+  },
+  inputGroup: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px'
+  },
+  label: {
+    fontSize: '14px',
+    fontWeight: '500',
+    color: '#333'
+  },
+  input: {
+    padding: '12px',
+    border: '2px solid #e0e0e0',
+    borderRadius: '8px',
+    fontSize: '16px',
+    transition: 'border-color 0.3s ease'
+  },
+  errorMessage: {
+    color: '#dc3545',
+    fontSize: '14px',
+    textAlign: 'center',
+    padding: '10px',
+    backgroundColor: '#fee2e2',
+    borderRadius: '8px'
+  },
+  loginButton: {
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    color: 'white',
+    border: 'none',
+    padding: '12px 24px',
+    borderRadius: '8px',
+    fontSize: '16px',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease'
+  },
+  logoutButtonHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    padding: '0.75rem 1.5rem',
+    background: '#dc3545',
+    color: 'white',
+    border: 'none',
+    borderRadius: '12px',
+    fontSize: '0.9rem',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    marginLeft: '1rem'
   },
 
   // Account Card styles
@@ -4831,7 +4815,7 @@ const styles = {
   mobileBankingFeature: {
     display: 'flex',
     alignItems: 'flex-start',
-    gap: '1rem'
+    gap: '0.75rem'
   },
   mobileBankingFeatureIcon: {
     fontSize: '1.5rem',
@@ -5205,20 +5189,7 @@ const styles = {
     width: '100%'
   },
 
-  // Add CSS animations to the document
-  // These should be defined in the global scope or loaded via a CSS file.
-  // For example, using styled-components:
-  // const SpinKeyframes = keyframes\`
-  //   0% { transform: rotate(0deg); }
-  //   100% { transform: rotate(360deg); }
-  // \`;
-  //
-  // const ProgressBarKeyframes = keyframes\`
-  //   0% { transform: translateX(-100%); }
-  //   50% { transform: translateX(0%); }
-  //   100% { transform: translateX(100%); }
-  // \`;
-};
+  };
 
 // Add hover effects for dropdown items  
 if (typeof window !== 'undefined') {
@@ -5389,6 +5360,8 @@ if (typeof document !== 'undefined') {
       0% { transform: translateX(-20px); opacity: 0; }
       60% { transform: translateX(5px); opacity: 0.8; }
       100% { transform: translateX(0); opacity: 1; }
+    }
+
     @keyframes flipInY {
       0% { transform: scale(0.8) rotateY(90deg); opacity: 0; }
       50% { transform: scale(0.9) rotateY(0deg); opacity: 0.5; }
@@ -5538,6 +5511,17 @@ if (typeof document !== 'undefined') {
     .facilityButtonSecondary:hover, .executiveButtonSecondary:hover {
       background-color: rgba(5, 150, 105, 0.1);
       transform: translateY(-3px);
+    }
+
+    @keyframes slideInUp {
+      from {
+        transform: translateY(100px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
     }
   `;
   document.head.appendChild(styleSheet);
