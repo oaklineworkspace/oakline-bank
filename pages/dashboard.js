@@ -18,11 +18,7 @@ function DashboardContent() {
   const [dropdownOpen, setDropdownOpen] = useState({});
   const [cardApplicationStatus, setCardApplicationStatus] = useState(null);
   const [flippedCards, setFlippedCards] = useState({});
-  const [visibleCardDetails, setVisibleCardDetails] = useState({});
-  const [pinModal, setPinModal] = useState({ open: false, cardId: null });
-  const [pinInput, setPinInput] = useState('');
-  const [pinError, setPinError] = useState('');
-  const [pinSuccess, setPinSuccess] = useState('');
+  const [showCardDetails, setShowCardDetails] = useState({});
   const router = useRouter();
 
   useEffect(() => {
@@ -34,15 +30,27 @@ function DashboardContent() {
   const loadUserData = async (userId) => {
     setLoading(true);
     try {
-      // Fetch user profile
-      const { data: profile } = await supabase
-        .from('applications')
+      // Fetch user profile from profiles table for real user data
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
         .select('*')
-        .eq('email', user.email)
+        .eq('id', userId)
         .single();
 
-      if (profile) {
-        setUserProfile(profile);
+      if (!profileError && profileData) {
+        setUserProfile(profileData);
+      } else {
+        // Fallback to applications table if profiles table doesn't have the data
+        const { data: profiles } = await supabase
+          .from('applications')
+          .select('*')
+          .eq('email', user.email)
+          .order('created_at', { ascending: false });
+
+        if (profiles && profiles.length > 0) {
+          const approvedProfile = profiles.find(p => p.application_status === 'approved' || p.application_status === 'completed');
+          setUserProfile(approvedProfile || profiles[0]);
+        }
       }
 
       // Fetch accounts - use single query method to avoid duplicates
@@ -82,15 +90,30 @@ function DashboardContent() {
 
       setAccounts(accountsData || []);
 
-      // Fetch transactions
-      const { data: transactionsData } = await supabase
-        .from('transactions')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false })
-        .limit(5);
+      // Fetch transactions - get by account_id for more accurate results
+      let transactionsData = [];
 
-      setTransactions(transactionsData || []);
+      if (accountsData && accountsData.length > 0) {
+        const accountIds = accountsData.map(acc => acc.id);
+        const { data: txData, error: txError } = await supabase
+          .from('transactions')
+          .select(`
+            *,
+            accounts:account_id (
+              account_number,
+              account_type
+            )
+          `)
+          .in('account_id', accountIds)
+          .order('created_at', { ascending: false })
+          .limit(10);
+
+        if (!txError) {
+          transactionsData = txData || [];
+        }
+      }
+
+      setTransactions(transactionsData);
 
       // Fetch user cards
       const { data: cardsData } = await supabase
@@ -158,11 +181,18 @@ function DashboardContent() {
   };
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    const date = new Date(dateString);
+    const dateStr = date.toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
       year: 'numeric'
     });
+    const timeStr = date.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+    return `${dateStr} – ${timeStr}`;
   };
 
   const getTotalBalance = () => {
@@ -195,90 +225,6 @@ function DashboardContent() {
     }
   };
 
-  const toggleCardVisibility = (cardId) => {
-    setVisibleCardDetails(prev => ({
-      ...prev,
-      [cardId]: !prev[cardId]
-    }));
-  };
-
-  const openPinModal = (cardId) => {
-    setPinModal({ open: true, cardId });
-    setPinInput('');
-    setPinError('');
-    setPinSuccess('');
-  };
-
-  const closePinModal = () => {
-    setPinModal({ open: false, cardId: null });
-    setPinInput('');
-    setPinError('');
-    setPinSuccess('');
-  };
-
-  const handleSetPin = async () => {
-    setPinError('');
-    setPinSuccess('');
-
-    if (!/^\d{4,6}$/.test(pinInput)) {
-      setPinError('PIN must be 4-6 digits');
-      return;
-    }
-
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        setPinError('Please log in to set PIN');
-        return;
-      }
-
-      const response = await fetch('/api/cards/set-pin', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          cardId: pinModal.cardId,
-          pin: pinInput
-        })
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setPinSuccess('PIN set successfully!');
-        setTimeout(() => {
-          closePinModal();
-          loadUserData(user.id); // Reload to update PIN status
-        }, 1500);
-      } else {
-        setPinError(data.error || 'Failed to set PIN');
-      }
-    } catch (error) {
-      console.error('Error setting PIN:', error);
-      setPinError('Error setting PIN. Please try again.');
-    }
-  };
-
-  const getCardTypeColor = (cardType) => {
-    const colors = {
-      visa: 'linear-gradient(135deg, #1a1f71 0%, #0f7dc1 100%)',
-      mastercard: 'linear-gradient(135deg, #eb001b 0%, #f79e1b 100%)',
-      amex: 'linear-gradient(135deg, #006fcf 0%, #00a3e0 100%)'
-    };
-    return colors[cardType?.toLowerCase()] || 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)';
-  };
-
-  const getCardTypeLogo = (cardType) => {
-    const logos = {
-      visa: 'VISA',
-      mastercard: 'Mastercard',
-      amex: 'AMEX'
-    };
-    return logos[cardType?.toLowerCase()] || 'CARD';
-  };
-
   if (loading) {
     return (
       <div style={styles.loadingContainer}>
@@ -288,7 +234,7 @@ function DashboardContent() {
     );
   }
 
-  // Add hover effects for dropdown items
+  // Add hover effects for dropdown items and dashboard elements
   if (typeof document !== 'undefined') {
     const existingStyle = document.querySelector('#dropdown-styles');
     if (!existingStyle) {
@@ -304,6 +250,76 @@ function DashboardContent() {
       .nav-button:hover {
         background-color: rgba(255, 255, 255, 0.2) !important;
         transform: translateY(-2px);
+      }
+
+      /* Professional Dashboard Hover Effects */
+      @media (hover: hover) {
+        div[style*="accountItem"]:hover,
+        div[style*="background: rgb(248, 250, 252)"]:hover {
+          transform: translateY(-2px) !important;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.12) !important;
+          background: #ffffff !important;
+          border-color: #cbd5e1 !important;
+        }
+
+        div[style*="transactionItem"]:hover {
+          transform: translateX(4px) !important;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.12) !important;
+          background: #ffffff !important;
+        }
+
+        div[style*="primaryBalanceCard"]:hover {
+          box-shadow: 0 8px 24px rgba(0,0,0,0.15) !important;
+          transform: translateY(-2px) !important;
+        }
+
+        a[style*="standardActionButton"]:hover,
+        button[style*="standardActionButton"]:hover {
+          transform: translateY(-2px) !important;
+          box-shadow: 0 6px 20px rgba(26, 54, 93, 0.3) !important;
+          background-color: #2c5282 !important;
+        }
+
+        a[style*="quickAction"]:hover {
+          transform: translateY(-2px) !important;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+          border-color: #1e40af !important;
+          background: #ffffff !important;
+        }
+
+        a[style*="viewAllLink"]:hover {
+          text-decoration: underline !important;
+          color: #1e3a8a !important;
+        }
+      }
+
+      /* Mobile Optimizations */
+      @media (max-width: 768px) {
+        div[style*="padding: 2.5rem"] {
+          padding: 1.5rem !important;
+        }
+
+        div[style*="padding: 2rem"] {
+          padding: 1.25rem !important;
+        }
+
+        div[style*="fontSize: 1.7rem"] {
+          font-size: 1.4rem !important;
+        }
+
+        div[style*="fontSize: 2.5rem"] {
+          font-size: 1.8rem !important;
+        }
+      }
+
+      @media (max-width: 480px) {
+        div[style*="padding: 1.5rem"] {
+          padding: 1rem !important;
+        }
+
+        div[style*="gap: 1.5rem"] {
+          gap: 1rem !important;
+        }
       }
     `;
       document.head.appendChild(dropdownStyles);
@@ -402,6 +418,14 @@ function DashboardContent() {
               <div style={styles.userInfo}>
                 <span style={styles.welcomeText}>Welcome back</span>
                 <span style={styles.userName}>{getUserDisplayName()}</span>
+                {userProfile && (
+                  <span style={{
+                    ...styles.accountStatus,
+                    color: userProfile.application_status === 'approved' || userProfile.application_status === 'completed' ? '#10b981' : '#f59e0b'
+                  }}>
+                    {userProfile.application_status === 'approved' || userProfile.application_status === 'completed' ? '✓ Verified' : `Status: ${userProfile.application_status || 'Pending'}`}
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -486,27 +510,111 @@ function DashboardContent() {
 
           <div style={styles.transactionsList}>
             {transactions.length > 0 ? (
-              transactions.map(transaction => (
-                <div key={transaction.id} style={styles.transactionItem}>
-                  <div style={styles.transactionIcon}>
-                    {(transaction.amount || 0) >= 0 ? '📥' : '📤'}
+              transactions.map(transaction => {
+                const txType = (transaction.transaction_type || '').toLowerCase();
+                const txDescription = (transaction.description || '').toLowerCase();
+                const amount = parseFloat(transaction.amount) || 0;
+
+                // Determine transaction category and colors
+                // Always use the actual amount to determine the sign
+                const isCredit = amount >= 0;
+                let transactionColor = '#6b7280';
+                let bgColor = '#f3f4f6';
+                let transactionIcon = '📄';
+                let txLabel = 'Transaction';
+
+                // REVERSAL - Gray
+                if (txType.includes('reversal') || txDescription.includes('reversal') || txDescription.includes('reversed')) {
+                  transactionColor = '#6b7280';
+                  bgColor = '#f3f4f6';
+                  transactionIcon = '↩️';
+                  txLabel = 'Reversal';
+                }
+                // BONUS / INTEREST - Blue/Gold
+                else if (txType.includes('bonus') || txType.includes('reward') || txType.includes('interest') || txType.includes('cashback') || txDescription.includes('bonus') || txDescription.includes('reward')) {
+                  transactionColor = '#3b82f6';
+                  bgColor = '#dbeafe';
+                  transactionIcon = '🎁';
+                  txLabel = txType.includes('interest') ? 'Interest' : txType.includes('cashback') ? 'Cashback' : txType.includes('reward') ? 'Reward' : 'Bonus';
+                }
+                // PENDING - Orange/Yellow
+                else if (txType.includes('pending') || txDescription.includes('pending') || transaction.status === 'pending') {
+                  transactionColor = '#f59e0b';
+                  bgColor = '#fef3c7';
+                  transactionIcon = '⏳';
+                  txLabel = 'Pending';
+                }
+                // DEBIT (outgoing) - Red - Check specific debit keywords BEFORE generic "credit" check
+                else if (txType.includes('debit') || txType.includes('withdrawal') || txType.includes('purchase') || txType.includes('payment') || txType.includes('bill_payment') || txType.includes('fee') || txType.includes('transfer_out')) {
+                  transactionColor = '#ef4444';
+                  bgColor = '#fee2e2';
+                  transactionIcon = '💳';
+                  txLabel = txType.includes('withdrawal') ? 'Withdrawal' : txType.includes('purchase') ? 'Purchase' : txType.includes('payment') || txType.includes('bill_payment') ? 'Payment' : txType.includes('fee') ? 'Fee' : 'Debit';
+                }
+                // CREDIT (incoming) - Green - Check after debit keywords
+                else if (txType.includes('deposit') || txType.includes('credit') || txType.includes('refund') || txType.includes('transfer_in')) {
+                  transactionColor = '#10b981';
+                  bgColor = '#d1fae5';
+                  transactionIcon = '💰';
+                  txLabel = txType.includes('deposit') ? 'Deposit' : txType.includes('refund') ? 'Refund' : txType.includes('transfer_in') ? 'Transfer In' : 'Credit';
+                }
+                // TRANSFER (could be either)
+                else if (txType.includes('transfer')) {
+                  transactionColor = isCredit ? '#10b981' : '#ef4444';
+                  bgColor = isCredit ? '#d1fae5' : '#fee2e2';
+                  transactionIcon = '🔄';
+                  txLabel = isCredit ? 'Transfer In' : 'Transfer Out';
+                }
+                // Default - use amount to determine color
+                else {
+                  transactionColor = isCredit ? '#10b981' : '#ef4444';
+                  bgColor = isCredit ? '#d1fae5' : '#fee2e2';
+                  transactionIcon = isCredit ? '💰' : '💳';
+                  txLabel = isCredit ? 'Credit' : 'Debit';
+                }
+
+                return (
+                  <div key={transaction.id} style={styles.transactionItem}>
+                    <div style={{ 
+                      ...styles.transactionIcon, 
+                      backgroundColor: bgColor,
+                      color: transactionColor,
+                      border: `2px solid ${transactionColor}`
+                    }}>
+                      {transactionIcon}
+                    </div>
+                    <div style={styles.transactionDetails}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                        <span style={styles.transactionDescription}>
+                          {transaction.description || transaction.transaction_type?.replace(/_/g, ' ').toUpperCase() || 'Transaction'}
+                        </span>
+                        <span style={{ 
+                          ...styles.transactionTypeBadge,
+                          backgroundColor: bgColor,
+                          color: transactionColor,
+                          border: `1px solid ${transactionColor}`
+                        }}>
+                          {txLabel}
+                        </span>
+                      </div>
+                      <span style={styles.transactionDate}>
+                        {formatDate(transaction.created_at)}
+                        {transaction.accounts?.account_number && 
+                          ` • ****${transaction.accounts.account_number.slice(-4)}`
+                        }
+                      </span>
+                    </div>
+                    <div style={{
+                      ...styles.transactionAmount,
+                      color: transactionColor,
+                      fontWeight: 'bold'
+                    }}>
+                      {isCredit ? '+' : '-'}
+                      {formatCurrency(Math.abs(amount))}
+                    </div>
                   </div>
-                  <div style={styles.transactionDetails}>
-                    <span style={styles.transactionDescription}>
-                      {transaction.description || 'Transaction'}
-                    </span>
-                    <span style={styles.transactionDate}>
-                      {formatDate(transaction.created_at)}
-                    </span>
-                  </div>
-                  <div style={{
-                    ...styles.transactionAmount,
-                    color: (transaction.amount || 0) >= 0 ? '#2e7d32' : '#d32f2f'
-                  }}>
-                    {(transaction.amount || 0) >= 0 ? '+' : ''}{formatCurrency(transaction.amount || 0)}
-                  </div>
-                </div>
-              ))
+                );
+              })
             ) : (
               <div style={styles.emptyState}>
                 <span style={styles.emptyIcon}>📭</span>
@@ -556,7 +664,7 @@ function DashboardContent() {
           </div>
         </section>
 
-        
+
 
         {/* My Cards Section */}
         {cards.length > 0 && (
@@ -574,19 +682,21 @@ function DashboardContent() {
                       ...styles.cardFlipWrapper,
                       transform: flippedCards[card.id] ? 'rotateY(180deg)' : 'rotateY(0deg)'
                     }}
+                    onClick={() => setFlippedCards(prev => ({ ...prev, [card.id]: !prev[card.id] }))}
                   >
                     {/* Card Front */}
                     <div style={{
                       ...styles.cardFace,
                       ...styles.cardFront,
-                      background: getCardTypeColor(card.card_type),
                       opacity: flippedCards[card.id] ? 0 : 1
                     }}>
                       <div style={styles.cardHeader}>
                         <span style={styles.bankNameCard}>OAKLINE BANK</span>
-                        <span style={styles.cardTypeLabel}>{getCardTypeLogo(card.card_type)}</span>
+                        <span style={styles.cardTypeLabel}>
+                          {card.card_brand ? card.card_brand.toUpperCase() : (card.card_type || 'DEBIT').toUpperCase()}
+                        </span>
                       </div>
-                      
+
                       <div style={styles.chipSection}>
                         <div style={styles.chip}></div>
                         <div style={styles.contactless}>
@@ -599,27 +709,27 @@ function DashboardContent() {
                       </div>
 
                       <div style={styles.cardNumberDisplay}>
-                        {visibleCardDetails[card.id] 
-                          ? (card.card_number ? card.card_number.replace(/(.{4})/g, '$1 ').trim() : '**** **** **** ****')
-                          : `**** **** **** ${card.card_number?.slice(-4) || '****'}`
+                        {showCardDetails[card.id] 
+                          ? (card.card_number ? card.card_number.replace(/(\d{4})(?=\d)/g, '$1 ') : '**** **** **** ****')
+                          : '**** **** **** ****'
                         }
                       </div>
 
                       <div style={styles.cardFooterDetails}>
-                        <div>
+                        <div style={{ flex: 1 }}>
                           <div style={styles.cardLabelSmall}>CARDHOLDER</div>
                           <div style={styles.cardValueSmall}>
-                            {userProfile ? `${userProfile.first_name?.toUpperCase() || ''} ${userProfile.last_name?.toUpperCase() || ''}`.trim() : card.cardholder_name || 'CARDHOLDER NAME'}
+                            {(card.cardholder_name || (userProfile ? `${userProfile.first_name || ''} ${userProfile.last_name || ''}`.trim() : user?.email?.split('@')[0] || 'CARDHOLDER')).toUpperCase()}
                           </div>
                         </div>
-                        <div>
+                        <div style={{ marginRight: '1.5rem' }}>
                           <div style={styles.cardLabelSmall}>EXPIRES</div>
                           <div style={styles.cardValueSmall}>{card.expiry_date || 'MM/YY'}</div>
                         </div>
                         <div>
                           <div style={styles.cardLabelSmall}>CVV</div>
                           <div style={styles.cardValueSmall}>
-                            {visibleCardDetails[card.id] ? (card.cvc || '***') : '***'}
+                            {showCardDetails[card.id] ? (card.cvv || card.cvc || '***') : '***'}
                           </div>
                         </div>
                       </div>
@@ -629,7 +739,6 @@ function DashboardContent() {
                     <div style={{
                       ...styles.cardFace,
                       ...styles.cardBack,
-                      background: getCardTypeColor(card.card_type),
                       opacity: flippedCards[card.id] ? 1 : 0,
                       transform: 'rotateY(180deg)'
                     }}>
@@ -637,7 +746,7 @@ function DashboardContent() {
                       <div style={styles.cvvSection}>
                         <div style={styles.cvvLabel}>CVV</div>
                         <div style={styles.cvvBox}>
-                          {visibleCardDetails[card.id] ? (card.cvc || '***') : '***'}
+                          {showCardDetails[card.id] ? (card.cvv || card.cvc || '***') : '***'}
                         </div>
                       </div>
                       <div style={styles.cardBackInfo}>
@@ -645,21 +754,6 @@ function DashboardContent() {
                         <p style={styles.cardBackText}>This card is property of Oakline Bank</p>
                       </div>
                     </div>
-                  </div>
-                  
-                  <div style={styles.cardControls}>
-                    <button 
-                      onClick={() => toggleCardVisibility(card.id)}
-                      style={styles.cardControlButton}
-                    >
-                      {visibleCardDetails[card.id] ? '👁️ Hide' : '👁️ Show'}
-                    </button>
-                    <button 
-                      onClick={() => setFlippedCards(prev => ({ ...prev, [card.id]: !prev[card.id] }))}
-                      style={styles.cardControlButton}
-                    >
-                      🔄 Flip
-                    </button>
                   </div>
 
                   <div style={styles.cardStatus}>
@@ -669,82 +763,22 @@ function DashboardContent() {
                     }}>
                       {card.is_locked ? '🔒 Locked' : '✓ Active'}
                     </span>
-                    <span style={{
-                      ...styles.statusBadge,
-                      backgroundColor: card.pin_set ? '#10b981' : '#f59e0b'
-                    }}>
-                      {card.pin_set ? '🔐 PIN Set' : '⚠️ Set PIN'}
-                    </span>
-                  </div>
-
-                  <div style={styles.cardInfoGrid}>
-                    <div style={styles.cardInfoItem}>
-                      <span style={styles.cardInfoLabel}>Daily Limit</span>
-                      <span style={styles.cardInfoValue}>${card.daily_limit || '2,000'}</span>
-                    </div>
-                    <div style={styles.cardInfoItem}>
-                      <span style={styles.cardInfoLabel}>Monthly Limit</span>
-                      <span style={styles.cardInfoValue}>${card.monthly_limit || '10,000'}</span>
-                    </div>
-                  </div>
-
-                  {!card.pin_set && (
-                    <button 
-                      onClick={() => openPinModal(card.id)}
-                      style={styles.setPinButton}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowCardDetails(prev => ({ ...prev, [card.id]: !prev[card.id] }));
+                      }}
+                      style={styles.cardDetailsToggleButton}
                     >
-                      Set PIN
+                      {showCardDetails[card.id] ? '👁️ Hide Card Details' : '👁️ Show Card Details'}
                     </button>
-                  )}
+                  </div>
                 </div>
               ))}
             </div>
           </section>
         )}
       </main>
-
-      {/* PIN Modal */}
-      {pinModal.open && (
-        <div style={styles.modalOverlay} onClick={closePinModal}>
-          <div style={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-            <h3 style={styles.modalTitle}>Set Card PIN</h3>
-            <p style={styles.modalDescription}>
-              Enter a 4-6 digit PIN for your card. This PIN will be required for certain transactions.
-            </p>
-
-            <div style={styles.pinInputGroup}>
-              <label style={styles.pinLabel}>Enter PIN (4-6 digits)</label>
-              <input
-                type="password"
-                maxLength="6"
-                value={pinInput}
-                onChange={(e) => setPinInput(e.target.value.replace(/\D/g, ''))}
-                style={styles.pinInput}
-                placeholder="••••"
-                autoFocus
-              />
-            </div>
-
-            {pinError && (
-              <div style={styles.pinError}>{pinError}</div>
-            )}
-
-            {pinSuccess && (
-              <div style={styles.pinSuccess}>{pinSuccess}</div>
-            )}
-
-            <div style={styles.modalActions}>
-              <button onClick={handleSetPin} style={styles.modalConfirmButton}>
-                Set PIN
-              </button>
-              <button onClick={closePinModal} style={styles.modalCancelButton}>
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       <LiveChat />
     </div>
   );
@@ -955,6 +989,11 @@ const styles = {
     fontWeight: '600',
     color: 'white'
   },
+  accountStatus: {
+    fontSize: '0.75rem',
+    fontWeight: '600',
+    marginTop: '0.25rem'
+  },
 
   logoutButton: {
     display: 'flex',
@@ -1146,11 +1185,12 @@ const styles = {
     borderRadius: '16px',
     padding: '2rem',
     color: '#1a365d',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
     border: '1px solid #e2e8f0',
     position: 'relative',
     overflow: 'hidden',
-    minWidth: '320px'
+    minWidth: '320px',
+    transition: 'all 0.3s ease',
   },
   balanceCardHeader: {
     display: 'flex',
@@ -1184,14 +1224,14 @@ const styles = {
     overflow: 'visible'
   },
   balanceAmount: {
-    fontSize: '2.5rem',
-    fontWeight: '600',
+    fontSize: 'clamp(1.8rem, 3.5vw, 2.5rem)',
+    fontWeight: 'bold',
     marginBottom: '0.5rem',
-    letterSpacing: 'normal',
+    letterSpacing: '0.5px',
     wordBreak: 'keep-all',
     whiteSpace: 'nowrap',
     overflow: 'visible',
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    fontFamily: '"Courier New", Courier, monospace',
     display: 'block',
     color: '#1a365d'
   },
@@ -1330,7 +1370,10 @@ const styles = {
     padding: '1rem',
     background: '#f8fafc',
     borderRadius: '8px',
-    border: '1px solid #e2e8f0'
+    border: '1px solid #e2e8f0',
+    transition: 'all 0.3s ease',
+    cursor: 'pointer',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
   },
   accountInfo: {
     display: 'flex',
@@ -1382,13 +1425,22 @@ const styles = {
     padding: '1rem',
     background: '#f8fafc',
     borderRadius: '8px',
-    border: '1px solid #e2e8f0'
+    border: '1px solid #e2e8f0',
+    transition: 'all 0.3s ease',
+    cursor: 'pointer',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
   },
   transactionIcon: {
     fontSize: '1.2rem',
     padding: '0.5rem',
-    background: '#eff6ff',
-    borderRadius: '6px'
+    borderRadius: '6px',
+    color: 'white',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '40px',
+    height: '40px',
+    flexShrink: 0
   },
   transactionDetails: {
     flex: 1,
@@ -1439,10 +1491,10 @@ const styles = {
   },
   cardsSection: {
     background: 'white',
-    borderRadius: '16px',
-    padding: '2rem',
-    boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
-    border: '2px solid #e2e8f0'
+    borderRadius: '12px',
+    padding: '1.5rem',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+    border: '1px solid #e2e8f0'
   },
   cardsGrid: {
     display: 'grid',
@@ -1453,18 +1505,13 @@ const styles = {
   cardContainer: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '1rem',
-    backgroundColor: 'white',
-    padding: '1.5rem',
-    borderRadius: '16px',
-    boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
-    border: '2px solid #e2e8f0'
+    gap: '1rem'
   },
   cardFlipWrapper: {
     perspective: '1000px',
     width: '100%',
-    maxWidth: '337.5px',
-    height: '212.5px',
+    maxWidth: '380px',
+    height: '240px',
     position: 'relative',
     transformStyle: 'preserve-3d',
     transition: 'transform 0.6s',
@@ -1478,7 +1525,6 @@ const styles = {
     backfaceVisibility: 'hidden',
     borderRadius: '16px',
     padding: '1.5rem',
-    background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #1e3a8a 100%)',
     color: 'white',
     display: 'flex',
     flexDirection: 'column',
@@ -1487,7 +1533,8 @@ const styles = {
     transition: 'opacity 0.3s'
   },
   cardFront: {
-    zIndex: 2
+    zIndex: 2,
+    background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #1e3a8a 100%)',
   },
   cardBack: {
     background: 'linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%)'
@@ -1523,28 +1570,33 @@ const styles = {
     opacity: 0.8
   },
   cardNumberDisplay: {
-    fontSize: '1.3rem',
-    fontWeight: 'bold',
-    letterSpacing: '2px',
-    fontFamily: 'monospace',
+    fontSize: '1.4rem',
+    fontWeight: '600',
+    letterSpacing: '3px',
+    fontFamily: '"Courier New", Courier, monospace',
     textAlign: 'center',
-    margin: '0.5rem 0',
+    margin: '1rem 0',
     whiteSpace: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis'
+    color: 'white',
+    textShadow: '0 1px 2px rgba(0,0,0,0.1)'
   },
   cardFooterDetails: {
     display: 'flex',
-    justifyContent: 'space-between'
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+    gap: '0.5rem'
   },
   cardLabelSmall: {
-    fontSize: '0.7rem',
-    opacity: 0.8,
-    marginBottom: '4px'
+    fontSize: '0.65rem',
+    opacity: 0.85,
+    marginBottom: '4px',
+    letterSpacing: '0.5px',
+    fontWeight: '500'
   },
   cardValueSmall: {
-    fontSize: '0.9rem',
-    fontWeight: 'bold'
+    fontSize: '0.95rem',
+    fontWeight: '700',
+    letterSpacing: '0.5px'
   },
   magneticStripe: {
     width: '100%',
@@ -1583,7 +1635,9 @@ const styles = {
   },
   cardStatus: {
     display: 'flex',
-    justifyContent: 'center',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '0.75rem',
     marginTop: '0.5rem'
   },
   statusBadge: {
@@ -1593,157 +1647,30 @@ const styles = {
     fontSize: '0.85rem',
     fontWeight: '600'
   },
-  cardControls: {
-    display: 'flex',
-    gap: '0.5rem',
-    marginTop: '1rem',
-    justifyContent: 'center'
-  },
-  cardControlButton: {
-    padding: '0.5rem 1rem',
-    backgroundColor: '#3b82f6',
+  cardDetailsToggleButton: {
+    background: '#1e40af',
     color: 'white',
     border: 'none',
-    borderRadius: '6px',
+    borderRadius: '8px',
+    padding: '0.6rem 1.2rem',
+    cursor: 'pointer',
     fontSize: '0.85rem',
     fontWeight: '600',
-    cursor: 'pointer',
-    transition: 'all 0.2s'
-  },
-  cardInfoGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(2, 1fr)',
-    gap: '0.75rem',
-    marginTop: '1rem',
-    marginBottom: '1rem'
-  },
-  cardInfoItem: {
-    display: 'flex',
-    flexDirection: 'column',
-    padding: '0.75rem',
-    backgroundColor: '#f8fafc',
-    borderRadius: '8px',
-    border: '1px solid #e2e8f0'
-  },
-  cardInfoLabel: {
-    fontSize: '0.75rem',
-    color: '#64748b',
-    marginBottom: '0.25rem',
-    fontWeight: '500'
-  },
-  cardInfoValue: {
-    fontSize: '1rem',
-    color: '#1e40af',
-    fontWeight: '700'
-  },
-  setPinButton: {
-    width: '100%',
-    padding: '0.75rem',
-    marginTop: '0.5rem',
-    backgroundColor: '#1e40af',
-    color: 'white',
-    border: 'none',
-    borderRadius: '12px',
-    fontSize: '1rem',
-    fontWeight: '600',
-    cursor: 'pointer',
-    transition: 'all 0.3s ease',
-    boxShadow: '0 4px 12px rgba(30, 64, 175, 0.3)'
-  },
-  modalOverlay: {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    transition: 'all 0.2s',
     display: 'flex',
     alignItems: 'center',
+    gap: '0.4rem',
+    boxShadow: '0 2px 4px rgba(30, 64, 175, 0.2)',
     justifyContent: 'center',
-    zIndex: 1000
-  },
-  modalContent: {
-    backgroundColor: 'white',
-    borderRadius: '16px',
-    padding: '2rem',
-    maxWidth: '400px',
-    width: '90%',
-    boxShadow: '0 10px 40px rgba(0,0,0,0.2)'
-  },
-  modalTitle: {
-    fontSize: '1.5rem',
-    fontWeight: 'bold',
-    color: '#1e293b',
-    marginBottom: '0.5rem'
-  },
-  modalDescription: {
-    fontSize: '0.9rem',
-    color: '#64748b',
-    marginBottom: '1.5rem'
-  },
-  pinInputGroup: {
-    marginBottom: '1rem'
-  },
-  pinLabel: {
-    display: 'block',
-    fontSize: '0.875rem',
-    fontWeight: '600',
-    color: '#374151',
-    marginBottom: '0.5rem'
-  },
-  pinInput: {
     width: '100%',
-    padding: '0.75rem',
-    fontSize: '1.5rem',
-    letterSpacing: '0.5rem',
-    textAlign: 'center',
-    border: '2px solid #e2e8f0',
-    borderRadius: '8px',
-    fontFamily: 'monospace'
+    maxWidth: '200px'
   },
-  pinError: {
-    padding: '0.75rem',
-    backgroundColor: '#fee2e2',
-    color: '#dc2626',
-    borderRadius: '8px',
-    fontSize: '0.875rem',
-    marginBottom: '1rem'
-  },
-  pinSuccess: {
-    padding: '0.75rem',
-    backgroundColor: '#dcfce7',
-    color: '#166534',
-    borderRadius: '8px',
-    fontSize: '0.875rem',
-    marginBottom: '1rem'
-  },
-  modalActions: {
-    display: 'flex',
-    gap: '1rem',
-    marginTop: '1.5rem'
-  },
-  modalConfirmButton: {
-    flex: 1,
-    padding: '0.75rem',
-    backgroundColor: '#1e40af',
-    color: 'white',
-    border: 'none',
+  transactionTypeBadge: {
+    fontSize: '0.7rem',
+    fontWeight: '700',
+    padding: '0.15rem 0.5rem',
     borderRadius: '12px',
-    fontSize: '1rem',
-    fontWeight: '600',
-    cursor: 'pointer',
-    transition: 'all 0.3s ease',
-    boxShadow: '0 4px 12px rgba(30, 64, 175, 0.3)'
-  },
-  modalCancelButton: {
-    flex: 1,
-    padding: '0.75rem',
-    backgroundColor: '#6b7280',
-    color: 'white',
-    border: 'none',
-    borderRadius: '8px',
-    fontSize: '1rem',
-    fontWeight: '600',
-    cursor: 'pointer'
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px'
   }
 };

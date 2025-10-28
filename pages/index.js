@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo, lazy, Suspense } from 'react';
 import Link from 'next/link';
 import { supabase } from '../lib/supabaseClient';
 import MainMenu from '../components/MainMenu';
@@ -8,12 +8,12 @@ import ServicesSection from '../components/ServicesSection';
 import FeaturesSection from '../components/FeaturesSection';
 import Footer from '../components/Footer';
 import LiveChat from '../components/LiveChat';
-import Testimonials from '../components/Testimonials';
-import TestimonialsSection from '../components/TestimonialsSection';
-import LoanApprovalSection from '../components/LoanApprovalSection';
-import CTA from '../components/CTA';
-import AdminNavDropdown from '../components/AdminNavDropdown';
-import AdminFooter from '../components/AdminFooter';
+
+// Lazy load heavy components
+const Testimonials = lazy(() => import('../components/Testimonials'));
+const TestimonialsSection = lazy(() => import('../components/TestimonialsSection'));
+const LoanApprovalSection = lazy(() => import('../components/LoanApprovalSection'));
+const CTA = lazy(() => import('../components/CTA'));
 
 export default function Home() {
   const [user, setUser] = useState(null);
@@ -23,9 +23,9 @@ export default function Home() {
   const [isVisible, setIsVisible] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [activeDropdown, setActiveDropdown] = useState(null);
+  const [showBankingDropdown, setShowBankingDropdown] = useState(false);
 
   useEffect(() => {
-
     // Get initial session and set up auth listener
     const getInitialSession = async () => {
       const { data: { session }, error } = await supabase.auth.getSession();
@@ -118,36 +118,36 @@ export default function Home() {
 
   const premiumFeatures = [
     // Core Banking Services
-    { name: 'Online Banking', href: '/dashboard', icon: '💻', desc: 'Digital banking platform', color: '#0EA5E9', section: 'core' },
-    { name: 'Mobile Banking', href: '/apply', icon: '📱', desc: 'Banking on the go', color: '#10B981', section: 'core' },
+    { name: 'Online Banking', href: user ? '/dashboard' : '/login', icon: '💻', desc: 'Digital banking platform', color: '#0EA5E9', section: 'core' },
+    { name: 'Mobile Banking', href: user ? '/dashboard' : '/apply', icon: '📱', desc: 'Banking on the go', color: '#10B981', section: 'core' },
     { name: 'Account Types', href: '/account-types', icon: '🏦', desc: '23 account options', color: '#3B82F6', section: 'core' },
-    { name: 'Money Transfer', href: '/transfer', icon: '💸', desc: 'Send & receive funds', color: '#059669', section: 'core' },
-    { name: 'Bill Pay', href: '/bill-pay', icon: '🧾', desc: 'Automated payments', color: '#F59E0B', section: 'core' },
-    { name: 'Zelle Payments', href: '/zelle', icon: '⚡', desc: 'Instant transfers', color: '#6B21A8', section: 'core' },
-    { name: 'Mobile Deposit', href: '/deposit-real', icon: '📸', desc: 'Deposit checks instantly', color: '#14B8A6', section: 'core' },
+    { name: 'Money Transfer', href: user ? '/transfer' : '/login', icon: '💸', desc: 'Send & receive funds', color: '#059669', section: 'core' },
+    { name: 'Bill Pay', href: user ? '/bill-pay' : '/login', icon: '🧾', desc: 'Automated payments', color: '#F59E0B', section: 'core' },
+    { name: 'Zelle Payments', href: user ? '/zelle' : '/login', icon: '⚡', desc: 'Instant transfers', color: '#6B21A8', section: 'core' },
+    { name: 'Mobile Deposit', href: user ? '/deposit' : '/login', icon: '📸', desc: 'Deposit checks instantly', color: '#14B8A6', section: 'core' },
     { name: 'ATM Network', href: '/atm', icon: '🏧', desc: '24/7 cash access', color: '#8B5CF6', section: 'core' },
-    { name: 'Debit & Credit Cards', href: '/cards', icon: '💳', desc: 'Manage your cards', color: '#EC4899', section: 'core' },
-    { name: 'Transaction History', href: '/transactions', icon: '📜', desc: 'View all transactions', color: '#64748B', section: 'core' },
-    { name: 'Statements', href: '/dashboard', icon: '📄', desc: 'Download statements', color: '#0891B2', section: 'core' },
+    { name: 'Debit & Credit Cards', href: user ? '/cards' : '/login', icon: '💳', desc: 'Manage your cards', color: '#EC4899', section: 'core' },
+    { name: 'Transaction History', href: user ? '/transactions' : '/login', icon: '📜', desc: 'View all transactions', color: '#64748B', section: 'core' },
+    { name: 'Statements', href: user ? '/dashboard' : '/login', icon: '📄', desc: 'Download statements', color: '#0891B2', section: 'core' },
     { name: 'Branch Locator', href: '/branch-locator', icon: '📍', desc: 'Find nearest branch', color: '#DC2626', section: 'core' },
 
     // Premium & Advanced Services
-    { name: 'Investment Portfolio', href: '/investments', icon: '📈', desc: 'High-yield investments', color: '#10B981', section: 'premium' },
-    { name: 'Crypto Trading', href: '/crypto', icon: '₿', desc: 'Digital asset trading', color: '#F59E0B', section: 'premium' },
+    { name: 'Investment Portfolio', href: user ? '/investments' : '/login', icon: '📈', desc: 'High-yield investments', color: '#10B981', section: 'premium' },
+    { name: 'Crypto Trading', href: user ? '/crypto' : '/login', icon: '₿', desc: 'Digital asset trading', color: '#F59E0B', section: 'premium' },
     { name: 'Home Loans', href: '/loans', icon: '🏠', desc: 'Mortgage solutions', color: '#3B82F6', section: 'premium' },
     { name: 'Personal Loans', href: '/loans', icon: '💰', desc: 'Competitive rates', color: '#059669', section: 'premium' },
     { name: 'Business Banking', href: '/account-types', icon: '🏢', desc: 'Commercial services', color: '#EF4444', section: 'premium' },
-    { name: 'Wealth Management', href: '/investments', icon: '💎', desc: 'Private banking', color: '#8B5CF6', section: 'premium' },
+    { name: 'Wealth Management', href: user ? '/investments' : '/login', icon: '💎', desc: 'Private banking', color: '#8B5CF6', section: 'premium' },
     { name: 'Financial Advisory', href: '/financial-advisory', icon: '🎯', desc: 'Expert consultation', color: '#06B6D4', section: 'premium' },
     { name: 'International Banking', href: '/internationalization', icon: '🌍', desc: 'Global services', color: '#84CC16', section: 'premium' },
     { name: 'Trust Services', href: '/about', icon: '🛡️', desc: 'Estate planning', color: '#F97316', section: 'premium' },
-    { name: 'Credit Reports', href: '/credit-report', icon: '📊', desc: 'Monitor your credit', color: '#7C3AED', section: 'premium' },
-    { name: 'Rewards Program', href: '/rewards', icon: '🎁', desc: 'Earn & redeem rewards', color: '#F43F5E', section: 'premium' },
+    { name: 'Credit Reports', href: user ? '/credit-report' : '/login', icon: '📊', desc: 'Monitor your credit', color: '#7C3AED', section: 'premium' },
+    { name: 'Rewards Program', href: user ? '/rewards' : '/login', icon: '🎁', desc: 'Earn & redeem rewards', color: '#F43F5E', section: 'premium' },
     { name: 'Market News', href: '/market-news', icon: '📰', desc: 'Financial insights', color: '#0EA5E9', section: 'premium' },
     { name: 'Financial Education', href: '/financial-education', icon: '📚', desc: 'Learning resources', color: '#10B981', section: 'premium' },
     { name: 'Calculators', href: '/calculators', icon: '🧮', desc: 'Financial planning tools', color: '#F59E0B', section: 'premium' },
     { name: 'Current Rates', href: '/current-rates', icon: '📈', desc: 'Interest & exchange rates', color: '#6366F1', section: 'premium' },
-    { name: 'Security Center', href: '/security', icon: '🔒', desc: 'Account protection', color: '#EF4444', section: 'premium' }
+    { name: 'Security Center', href: user ? '/security' : '/login', icon: '🔒', desc: 'Account protection', color: '#EF4444', section: 'premium' }
   ];
 
   const coreFeatures = premiumFeatures.filter(f => f.section === 'core');
@@ -363,17 +363,127 @@ export default function Home() {
             {/* Scrolling Welcome Message */}
             <div style={styles.scrollingWelcomeContainer}>
               <div style={styles.scrollingWelcomeText}>
-                Welcome to Oakline Bank - Your trusted financial partner since 1995 • Explore all 23 account types with detailed benefits • Join over 500,000+ satisfied customers • Award-winning mobile app • FDIC Insured up to $250,000 • Rated #1 Customer Service
+                Welcome to Oakline Bank - Your trusted financial partner since 1995 • Explore all 23 account types with detailed benefits • Join over 500,000+ satisfied customers • Award-winning mobile app • FDIC Insured up to $500,000 • Rated #1 Customer Service
               </div>
             </div>
           </div>
 
-          {/* Comprehensive Admin Dropdown Button - Mobile Friendly Row */}
-          {user && (
-            <div style={styles.adminDropdownRow}>
-              <AdminNavDropdown />
-            </div>
-          )}
+          {/* Banking+ Dropdown Button - Centered */}
+          <div style={styles.bankingPlusContainer}>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowBankingDropdown(!showBankingDropdown);
+              }}
+              style={styles.bankingPlusButton}
+            >
+              <div style={styles.bankingPlusIconLines}>
+                <div style={styles.iconLine}></div>
+                <div style={styles.iconLine}></div>
+                <div style={styles.iconLine}></div>
+              </div>
+              <span style={styles.bankingPlusText}>Banking+</span>
+            </button>
+
+            {showBankingDropdown && (
+              <>
+                <div
+                  style={styles.dropdownBackdrop}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowBankingDropdown(false);
+                  }}
+                ></div>
+                <div style={styles.bankingDropdown} onClick={(e) => e.stopPropagation()}>
+                  <div style={styles.bankingDropdownHeader}>
+                    <h4 style={styles.bankingDropdownTitle}>Complete Banking Solutions</h4>
+                    <p style={styles.bankingDropdownSubtitle}>Access all your banking services in one place</p>
+                  </div>
+
+                  <div style={styles.bankingTwoColumnGrid}>
+                    {/* Core Banking Services Section */}
+                    <div style={styles.bankingSection}>
+                      <div style={styles.bankingSectionHeader}>
+                        <span style={styles.bankingSectionIcon}>🏦</span>
+                        <h5 style={styles.bankingSectionTitle}>Core Banking</h5>
+                      </div>
+                      <div style={styles.bankingFeaturesGrid}>
+                        {coreFeatures.map((feature) => (
+                          <Link
+                            key={feature.name}
+                            href={feature.href}
+                            onClick={() => setShowBankingDropdown(false)}
+                            style={styles.bankingFeatureItem}
+                          >
+                            <div style={{
+                              ...styles.bankingFeatureIcon,
+                              backgroundColor: `${feature.color}15`,
+                              border: `1px solid ${feature.color}30`
+                            }}>
+                              {feature.icon}
+                            </div>
+                            <div style={styles.bankingFeatureContent}>
+                              <div style={styles.bankingFeatureName}>{feature.name}</div>
+                              <div style={styles.bankingFeatureDesc}>{feature.desc}</div>
+                            </div>
+                            <div style={{ ...styles.bankingFeatureArrow, color: feature.color }}>→</div>
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Premium & Advanced Services Section */}
+                    <div style={styles.bankingSection}>
+                      <div style={styles.bankingSectionHeader}>
+                        <span style={styles.bankingSectionIcon}>⭐</span>
+                        <h5 style={styles.bankingSectionTitle}>Premium Services</h5>
+                      </div>
+                      <div style={styles.bankingFeaturesGrid}>
+                        {premiumServices.map((feature) => (
+                          <Link
+                            key={feature.name}
+                            href={feature.href}
+                            onClick={() => setShowBankingDropdown(false)}
+                            style={styles.bankingFeatureItem}
+                          >
+                            <div style={{
+                              ...styles.bankingFeatureIcon,
+                              backgroundColor: `${feature.color}15`,
+                              border: `1px solid ${feature.color}30`
+                            }}>
+                              {feature.icon}
+                            </div>
+                            <div style={styles.bankingFeatureContent}>
+                              <div style={styles.bankingFeatureName}>{feature.name}</div>
+                              <div style={styles.bankingFeatureDesc}>{feature.desc}</div>
+                            </div>
+                            <div style={{ ...styles.bankingFeatureArrow, color: feature.color }}>→</div>
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={styles.bankingDropdownFooter}>
+                    <Link
+                      href="/account-types"
+                      onClick={() => setShowBankingDropdown(false)}
+                      style={styles.viewAllServicesButton}
+                    >
+                      Explore All Banking Services
+                    </Link>
+                    <Link
+                      href="/support"
+                      onClick={() => setShowBankingDropdown(false)}
+                      style={styles.viewAllServicesButtonSecondary}
+                    >
+                      Contact Support
+                    </Link>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
 
         </div>
       </header>
@@ -414,31 +524,7 @@ export default function Home() {
             ...styles.heroContent,
             ...(isVisible.hero ? styles.heroAnimated : {})
           }}>
-            <div style={styles.heroButtons}>
-              {user ? (
-                <>
-                  <Link href="/dashboard" style={styles.heroButton}>
-                    <span style={styles.buttonIcon}>📊</span>
-                    Go to Dashboard
-                  </Link>
-                  <Link href="/account-types" style={styles.secondaryButton}>
-                    <span style={styles.buttonIcon}>🔍</span>
-                    Explore All Accounts
-                  </Link>
-                </>
-              ) : (
-                <>
-                  <Link href="/apply" style={styles.heroButton}>
-                    <span style={styles.buttonIcon}>🚀</span>
-                    Start Banking Today
-                  </Link>
-                  <Link href="/sign-in" style={styles.secondaryButton}>
-                    <span style={styles.buttonIcon}>👤</span>
-                    Sign In
-                  </Link>
-                </>
-              )}
-            </div>
+            {/* Hero buttons removed as requested */}
           </div>
 
           <div style={styles.slideIndicators}>
@@ -575,8 +661,8 @@ export default function Home() {
           <div style={styles.newBankingImageGrid}>
             <div style={styles.newBankingImageContainer}>
               <img
-                src="/images/image_1760199157530.jpeg"
-                alt="Modern Banking Experience"
+                src="/images/oakline-bank-branded-1.jpeg"
+                alt="Oakline Bank Modern Banking Experience"
                 style={styles.newBankingImage}
                 onError={(e) => {
                   e.target.style.display = 'none';
@@ -587,8 +673,8 @@ export default function Home() {
             <div style={styles.newBankingImageContent}>
               <h3 style={styles.newBankingImageTitle}>Your Complete Banking Solution</h3>
               <p style={styles.newBankingImageDescription}>
-                Discover a comprehensive range of banking services designed to meet all your financial needs. 
-                From everyday transactions to long-term investments, we provide innovative solutions backed by 
+                Discover a comprehensive range of banking services designed to meet all your financial needs.
+                From everyday transactions to long-term investments, we provide innovative solutions backed by
                 exceptional customer service.
               </p>
 
@@ -747,7 +833,7 @@ export default function Home() {
                   <div style={styles.featureTag}>Mobile Card Controls</div>
                 </div>
                 {user ? (
-                  <Link href="/cards" style={styles.debitCardButton}>
+                  <Link href="/cards" style={{...styles.debitCardButton, backgroundColor: undefined}}>
                     <span style={styles.buttonIcon}>⚡</span>
                     Apply for Card
                   </Link>
@@ -784,7 +870,7 @@ export default function Home() {
                   <div style={styles.featureTag}>Priority Support</div>
                 </div>
                 {user ? (
-                  <Link href="/cards" style={styles.debitCardButton}>
+                  <Link href="/cards" style={{...styles.debitCardButton, backgroundColor: undefined}}>
                     <span style={styles.buttonIcon}>⚡</span>
                     Apply for Card
                   </Link>
@@ -1098,11 +1184,6 @@ export default function Home() {
 
 
 
-      {/* Testimonials Section */}
-      <Testimonials />
-
-
-
       {/* Account Types Discovery Section */}
       <section style={styles.accountTypesDiscovery} id="account-types-discovery" data-animate>
         <div style={styles.container}>
@@ -1269,7 +1350,7 @@ export default function Home() {
             <div style={styles.mobileBankingContent}>
               <h3 style={styles.mobileBankingTitle}>Complete Control in Your Pocket</h3>
               <p style={styles.mobileBankingDescription}>
-                Experience the future of banking with our award-winning mobile app. Manage all your accounts, 
+                Experience the future of banking with our award-winning mobile app. Manage all your accounts,
                 transfer funds, pay bills, and access financial insights - all from your smartphone.
               </p>
 
@@ -1352,7 +1433,7 @@ export default function Home() {
             <div style={styles.atmContent}>
               <h3 style={styles.atmTitle}>Advanced ATM Services</h3>
               <p style={styles.atmDescription}>
-                Experience modern banking with our state-of-the-art ATM network featuring advanced security, 
+                Experience modern banking with our state-of-the-art ATM network featuring advanced security,
                 multiple transaction types, and convenient locations nationwide.
               </p>
 
@@ -1413,7 +1494,7 @@ export default function Home() {
             <div style={styles.loanBannerContent}>
               <h3 style={styles.loanBannerTitle}>Quick & Easy Loan Process</h3>
               <p style={styles.loanBannerDescription}>
-                Experience fast loan approvals with our digital-first approach. Whether you need a personal loan, 
+                Experience fast loan approvals with our digital-first approach. Whether you need a personal loan,
                 auto financing, or a mortgage, we make the process simple and transparent.
               </p>
 
@@ -1467,29 +1548,130 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Testimonials Section */}
+      <Suspense fallback={<div style={styles.loadingComponent}>Loading testimonials...</div>}>
+        <TestimonialsSection />
+      </Suspense>
+
+      {/* Request Enrollment Link Section - Only for non-authenticated users */}
+      {!user && (
+        <section style={styles.requestEnrollmentSection} id="request-enrollment" data-animate>
+          <div style={styles.container}>
+            <div style={{
+              ...styles.sectionHeader,
+              ...(isVisible['request-enrollment'] ? styles.fadeInUp : {})
+            }}>
+              <h2 style={styles.sectionTitle}>Already Applied?</h2>
+              <p style={styles.sectionSubtitle}>
+                Request a new enrollment link to complete your account setup
+              </p>
+              <div style={styles.titleUnderline}></div>
+            </div>
+
+            <div style={styles.requestEnrollmentCard}>
+              <div style={styles.requestEnrollmentIcon}>📧</div>
+              <h3 style={styles.requestEnrollmentTitle}>Get Your Enrollment Link</h3>
+              <p style={styles.requestEnrollmentDescription}>
+                If you've already submitted an application but haven't completed enrollment,
+                request a new enrollment link below. We'll send it to the email address you used during application.
+              </p>
+
+              <div style={styles.requestEnrollmentForm}>
+                <input
+                  type="email"
+                  placeholder="Enter your email address"
+                  id="request-email-input"
+                  style={styles.requestEnrollmentInput}
+                />
+                <button
+                  onClick={async () => {
+                    const emailInput = document.getElementById('request-email-input');
+                    const messageDiv = document.getElementById('request-message');
+                    const email = emailInput.value.trim();
+
+                    if (!email) {
+                      messageDiv.textContent = '❌ Please enter your email address';
+                      messageDiv.style.color = '#dc2626';
+                      return;
+                    }
+
+                    try {
+                      messageDiv.textContent = '⏳ Sending enrollment link...';
+                      messageDiv.style.color = '#64748b';
+
+                      const response = await fetch('/api/user-request-enrollment', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email })
+                      });
+
+                      const result = await response.json();
+
+                      if (response.ok) {
+                        messageDiv.textContent = '✅ ' + result.message;
+                        messageDiv.style.color = '#059669';
+                        emailInput.value = '';
+                      } else {
+                        messageDiv.textContent = '❌ ' + (result.error || 'Failed to send enrollment link');
+                        messageDiv.style.color = '#dc2626';
+                      }
+                    } catch (error) {
+                      console.error('Error requesting enrollment link:', error);
+                      messageDiv.textContent = '❌ An error occurred. Please try again.';
+                      messageDiv.style.color = '#dc2626';
+                    }
+                  }}
+                  style={styles.requestEnrollmentButton}
+                  onMouseEnter={(e) => {
+                    e.target.style.transform = 'translateY(-2px)';
+                    e.target.style.boxShadow = '0 8px 20px rgba(30, 64, 175, 0.4)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.transform = 'translateY(0)';
+                    e.target.style.boxShadow = '0 4px 12px rgba(30, 64, 175, 0.3)';
+                  }}
+                >
+                  <span style={{ fontSize: '16px' }}>📧</span>
+                  Request Enrollment Link
+                </button>
+                <div id="request-message" style={styles.requestEnrollmentMessage}></div>
+              </div>
+
+              <div style={styles.requestEnrollmentHelp}>
+                <p style={styles.requestEnrollmentHelpText}>
+                  <strong>Need help?</strong> Contact our support team at{' '}
+                  <a href="mailto:support@theoaklinebank.com" style={styles.requestEnrollmentHelpLink}>
+                    support@theoaklinebank.com
+                  </a>
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Enhanced Final CTA */}
       <div id="final-cta" data-animate style={{
         ...(isVisible['final-cta'] ? styles.pulseGlow : {})
       }}>
-        <CTA
-          title={user ? "Ready to Expand Your Banking?" : "Ready to Start Your Financial Journey?"}
-          subtitle={user ?
-            "Access premium banking services and explore all account options." :
-            "Join over 500,000 customers who trust Oakline Bank. Open your account today."
-          }
-          buttonText={user ? "View Account Types" : "Open Account Now"}
-          buttonLink={user ? "/account-types" : "/apply"}
-          variant="primary"
-        />
+        <Suspense fallback={<div style={styles.loadingComponent}>Loading...</div>}>
+          <CTA
+            title={user ? "Ready to Expand Your Banking?" : "Ready to Start Your Financial Journey?"}
+            subtitle={user ?
+              "Access premium banking services and explore all account options." :
+              "Join over 500,000 customers who trust Oakline Bank. Open your account today."
+            }
+            buttonText={user ? "View Account Types" : "Open Account Now"}
+            buttonLink={user ? "/account-types" : "/apply"}
+            variant="primary"
+          />
+        </Suspense>
       </div>
 
       {/* Live Chat Component */}
       <LiveChat />
 
       <Footer />
-
-      {/* Admin Footer - Sticky Bottom Navigation */}
-      {user && <AdminFooter />}
     </div>
   );
 }
@@ -2037,7 +2219,7 @@ const styles = {
   bankingDropdownButton: {
     display: 'inline-flex',
     alignItems: 'center',
-    gap: '0.5rem',
+    justifyContent: 'center',
     padding: '0.75rem 1.25rem',
     background: 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)',
     color: 'white',
@@ -2045,15 +2227,15 @@ const styles = {
     borderRadius: '8px',
     fontSize: '0.9rem',
     fontWeight: '700',
-    boxShadow: '0 4px 12px rgba(14, 165, 233, 0.3)',
     transition: 'all 0.3s ease',
     flex: 1,
-    justifyContent: 'center'
+    minWidth: '120px',
+    boxShadow: '0 4px 12px rgba(14, 165, 233, 0.3)'
   },
   bankingDropdownSecondaryButton: {
     display: 'inline-flex',
     alignItems: 'center',
-    gap: '0.5rem',
+    justifyContent: 'center',
     padding: '0.75rem 1.25rem',
     background: 'transparent',
     color: '#1a365d',
@@ -2064,7 +2246,7 @@ const styles = {
     border: '2px solid #1a365d',
     transition: 'all 0.3s ease',
     flex: 1,
-    justifyContent: 'center'
+    minWidth: '120px'
   },
   featuresGrid: {
     display: 'grid',
@@ -3171,30 +3353,30 @@ const styles = {
   enrollmentButtonPrimary: {
     display: 'inline-flex',
     alignItems: 'center',
-    gap: '0.8rem',
+    gap: '0.75rem',
     padding: 'clamp(1rem, 2.5vw, 1.3rem) clamp(1.5rem, 4vw, 2.5rem)',
     background: 'linear-gradient(135deg, #1e40af 0%, #0ea5e9 100%)',
     color: 'white',
     textDecoration: 'none',
     borderRadius: '12px',
+    fontWeight: '600',
     fontSize: 'clamp(1rem, 2.2vw, 1.1rem)',
-    fontWeight: '800',
-    boxShadow: '0 8px 25px rgba(30, 64, 175, 0.3)',
-    transition: 'all 0.3s ease',
     border: 'none',
-    transform: 'translateY(0)'
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    boxShadow: '0 4px 20px rgba(30, 64, 175, 0.3)'
   },
   enrollmentButtonSecondary: {
     display: 'inline-flex',
     alignItems: 'center',
-    gap: '0.8rem',
+    gap: '0.75rem',
     padding: 'clamp(1rem, 2.5vw, 1.3rem) clamp(1.5rem, 4vw, 2.5rem)',
     backgroundColor: 'transparent',
     color: '#1a365d',
     textDecoration: 'none',
     borderRadius: '12px',
+    fontWeight: '600',
     fontSize: 'clamp(1rem, 2.2vw, 1.1rem)',
-    fontWeight: '700',
     border: '2px solid #1a365d',
     transition: 'all 0.3s ease'
   },
@@ -3289,8 +3471,8 @@ const styles = {
   dropdownButton: {
     display: 'inline-flex',
     alignItems: 'center',
-    gap: '0.5rem',
-    padding: '1rem 2rem',
+    justifyContent: 'center',
+    padding: '0.75rem 1.5rem',
     background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
     color: 'white',
     textDecoration: 'none',
@@ -3428,7 +3610,8 @@ const styles = {
   newBankingImage: {
     width: '100%',
     height: '400px',
-    objectFit: 'cover',
+    objectFit: 'contain',
+    objectPosition: 'center',
     transition: 'transform 0.3s ease'
   },
   newBankingImageContent: {
@@ -4038,15 +4221,6 @@ const styles = {
     fontWeight: '500',
     letterSpacing: '0.5px'
   },
-  adminDropdownRow: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: '100%',
-    padding: '0.75rem 1rem',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderTop: '1px solid rgba(255, 255, 255, 0.1)'
-  },
 
   // Mobile Navigation Row Styles
   mobileNavigationRow: {
@@ -4369,91 +4543,93 @@ const styles = {
     fontWeight: '500'
   },
 
-  // Login Page Styles
-  loginContainer: {
-    minHeight: '100vh',
+  // Request Enrollment Link Section
+  requestEnrollmentSection: {
+    padding: 'clamp(3rem, 6vw, 4rem) 0',
+    backgroundColor: '#f8fafc',
+    width: '100%'
+  },
+  requestEnrollmentCard: {
+    backgroundColor: 'white',
+    borderRadius: '16px',
+    padding: 'clamp(2rem, 4vw, 2.5rem)',
+    maxWidth: '600px',
+    margin: '0 auto',
+    border: '1px solid #e2e8f0',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
+    textAlign: 'center'
+  },
+  requestEnrollmentIcon: {
+    fontSize: '2.5rem',
+    marginBottom: '1rem'
+  },
+  requestEnrollmentTitle: {
+    fontSize: 'clamp(1.4rem, 3vw, 1.75rem)',
+    fontWeight: '700',
+    color: '#1e293b',
+    marginBottom: '0.75rem'
+  },
+  requestEnrollmentDescription: {
+    fontSize: '0.95rem',
+    color: '#64748b',
+    marginBottom: '1.5rem',
+    lineHeight: '1.5'
+  },
+  requestEnrollmentForm: {
     display: 'flex',
+    flexDirection: 'column',
+    gap: '0.75rem',
+    marginBottom: '1.5rem'
+  },
+  requestEnrollmentInput: {
+    width: '100%',
+    padding: '0.75rem 1rem',
+    fontSize: '0.95rem',
+    border: '1px solid #d1d5db',
+    borderRadius: '8px',
+    transition: 'all 0.3s ease',
+    outline: 'none'
+  },
+  requestEnrollmentButton: {
+    display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
-    background: 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)',
-    padding: '20px'
-  },
-  loginCard: {
-    background: 'white',
-    padding: '40px',
-    borderRadius: '16px',
-    boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
-    width: '100%',
-    maxWidth: '400px'
-  },
-  loginTitle: {
-    fontSize: '28px',
-    fontWeight: 'bold',
-    color: '#1e3c72',
-    margin: '0 0 10px 0',
-    textAlign: 'center'
-  },
-  loginSubtitle: {
-    fontSize: '14px',
-    color: '#666',
-    margin: '0 0 30px 0',
-    textAlign: 'center'
-  },
-  loginForm: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '20px'
-  },
-  inputGroup: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '8px'
-  },
-  label: {
-    fontSize: '14px',
-    fontWeight: '500',
-    color: '#333'
-  },
-  input: {
-    padding: '12px',
-    border: '2px solid #e0e0e0',
-    borderRadius: '8px',
-    fontSize: '16px',
-    transition: 'border-color 0.3s ease'
-  },
-  errorMessage: {
-    color: '#dc3545',
-    fontSize: '14px',
-    textAlign: 'center',
-    padding: '10px',
-    backgroundColor: '#fee2e2',
-    borderRadius: '8px'
-  },
-  loginButton: {
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    color: 'white',
-    border: 'none',
-    padding: '12px 24px',
-    borderRadius: '8px',
-    fontSize: '16px',
-    fontWeight: '600',
-    cursor: 'pointer',
-    transition: 'all 0.3s ease'
-  },
-  logoutButtonHeader: {
-    display: 'flex',
-    alignItems: 'center',
     gap: '0.5rem',
     padding: '0.75rem 1.5rem',
-    background: '#dc3545',
+    background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
     color: 'white',
     border: 'none',
-    borderRadius: '12px',
-    fontSize: '0.9rem',
+    borderRadius: '8px',
+    fontSize: '0.95rem',
     fontWeight: '600',
     cursor: 'pointer',
     transition: 'all 0.3s ease',
-    marginLeft: '1rem'
+    boxShadow: '0 4px 12px rgba(30, 64, 175, 0.3)',
+    width: '100%',
+    maxWidth: '100%'
+  },
+  requestEnrollmentMessage: {
+    fontSize: '0.9rem',
+    fontWeight: '600',
+    minHeight: '1.25rem',
+    lineHeight: '1.4'
+  },
+  requestEnrollmentHelp: {
+    backgroundColor: '#f8fafc',
+    padding: '1rem',
+    borderRadius: '8px',
+    border: '1px solid #e2e8f0'
+  },
+  requestEnrollmentHelpText: {
+    fontSize: '0.85rem',
+    color: '#64748b',
+    margin: 0,
+    lineHeight: '1.4'
+  },
+  requestEnrollmentHelpLink: {
+    color: '#1e40af',
+    textDecoration: 'none',
+    fontWeight: '600'
   },
 
   // Account Card styles
@@ -4815,7 +4991,7 @@ const styles = {
   mobileBankingFeature: {
     display: 'flex',
     alignItems: 'flex-start',
-    gap: '0.75rem'
+    gap: '1rem'
   },
   mobileBankingFeatureIcon: {
     fontSize: '1.5rem',
@@ -5149,7 +5325,7 @@ const styles = {
     border: 'none',
     cursor: 'pointer',
     transition: 'all 0.3s ease',
-    boxShadow: '0 4px 20px rgba(30, 64, 175, 0.3)'
+    boxShadow: '0 4px20px rgba(30, 64, 175, 0.3)'
   },
   ctaButtonSecondary: {
     display: 'inline-flex',
@@ -5189,9 +5365,22 @@ const styles = {
     width: '100%'
   },
 
-  };
+  // Add CSS animations to the document
+  // These should be defined in the global scope or loaded via a CSS file.
+  // For example, using styled-components:
+  // const SpinKeyframes = keyframes`
+  //   0% { transform: rotate(0deg); }
+  //   100% { transform: rotate(360deg); }
+  // `;
+  //
+  // const ProgressBarKeyframes = keyframes`
+  //   0% { transform: translateX(-100%); }
+  //   50% { transform: translateX(0%); }
+  //   100% { transform: translateX(100%); }
+  // `;
+};
 
-// Add hover effects for dropdown items  
+// Add hover effects for dropdown items
 if (typeof window !== 'undefined') {
   const existingStyle = document.querySelector('#dropdown-styles');
   if (!existingStyle) {
@@ -5260,13 +5449,13 @@ if (typeof document !== 'undefined') {
     }
 
     @keyframes dropdownSlideIn {
-      0% { 
-        opacity: 0; 
-        transform: translateY(-10px) scale(0.95); 
+      0% {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.95);
       }
-      100% { 
-        opacity: 1; 
-        transform: translateY(0) scale(1); 
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
       }
     }
 
@@ -5343,11 +5532,13 @@ if (typeof document !== 'undefined') {
 
     @keyframes slideInFromLeft {
       0% { transform: translateX(-100px); opacity: 0; }
+      60% { transform: translateX(5px); opacity: 0.8; }
       100% { transform: translateX(0); opacity: 1; }
     }
 
     @keyframes slideInFromRight {
       0% { transform: translateX(100px); opacity: 0; }
+      60% { transform: translateX(-5px); opacity: 0.8; }
       100% { transform: translateX(0); opacity: 1; }
     }
 
@@ -5361,7 +5552,6 @@ if (typeof document !== 'undefined') {
       60% { transform: translateX(5px); opacity: 0.8; }
       100% { transform: translateX(0); opacity: 1; }
     }
-
     @keyframes flipInY {
       0% { transform: scale(0.8) rotateY(90deg); opacity: 0; }
       50% { transform: scale(0.9) rotateY(0deg); opacity: 0.5; }
@@ -5472,6 +5662,20 @@ if (typeof document !== 'undefined') {
       box-shadow: 0 15px 35px rgba(4, 120, 87, 0.6);
     }
 
+    /* Request Enrollment Button Hover */
+    button[style*="requestEnrollmentButton"]:hover,
+    .requestEnrollmentButton:hover {
+      transform: translateY(-3px) !important;
+      box-shadow: 0 15px 35px rgba(30, 64, 175, 0.6) !important;
+    }
+
+    /* Request Enrollment Input Focus */
+    input[style*="requestEnrollmentInput"]:focus,
+    .requestEnrollmentInput:focus {
+      border-color: #1e40af !important;
+      box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1) !important;
+    }
+
     .secondaryButton:hover {
       background-color: rgba(255,255,255,0.2);
       transform: translateY(-3px);
@@ -5511,17 +5715,6 @@ if (typeof document !== 'undefined') {
     .facilityButtonSecondary:hover, .executiveButtonSecondary:hover {
       background-color: rgba(5, 150, 105, 0.1);
       transform: translateY(-3px);
-    }
-
-    @keyframes slideInUp {
-      from {
-        transform: translateY(100px);
-        opacity: 0;
-      }
-      to {
-        transform: translateY(0);
-        opacity: 1;
-      }
     }
   `;
   document.head.appendChild(styleSheet);

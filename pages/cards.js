@@ -1,984 +1,274 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import Link from 'next/link';
 import { supabase } from '../lib/supabaseClient';
-import { useAuth } from '../contexts/AuthContext';
-import ProtectedRoute from '../components/ProtectedRoute';
 
-function CardsContent() {
-  const { user } = useAuth();
-  const [userProfile, setUserProfile] = useState(null);
+export default function Cards() {
+  const [user, setUser] = useState(null);
   const [cards, setCards] = useState([]);
-  const [accounts, setAccounts] = useState([]);
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [flippedCards, setFlippedCards] = useState({});
-  const [visibleCardDetails, setVisibleCardDetails] = useState({});
-  const [pinModal, setPinModal] = useState({ open: false, cardId: null });
-  const [pinInput, setPinInput] = useState('');
-  const [pinError, setPinError] = useState('');
-  const [pinSuccess, setPinSuccess] = useState('');
+  const [showTransactions, setShowTransactions] = useState(false);
+  const [transactions, setTransactions] = useState([]);
   const router = useRouter();
 
   useEffect(() => {
-    if (user) {
-      loadUserData();
-    }
-  }, [user]);
+    checkAuth();
+  }, []);
 
-  const loadUserData = async () => {
-    setLoading(true);
+  const checkAuth = async () => {
     try {
-      // Fetch user profile
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('email', user.email)
-        .single();
-
-      if (profile) {
-        setUserProfile(profile);
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        router.push('/login');
+        return;
       }
+      setUser(session.user);
+      await fetchUserCards();
+    } catch (err) {
+      console.error('Auth check error:', err);
+      router.push('/login');
+    }
+  };
 
-      // Fetch accounts
-      const { data: accountsData } = await supabase
-        .from('accounts')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: true });
+  const fetchUserCards = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
 
-      setAccounts(accountsData || []);
-
-      // Fetch cards
-      const { data: cardsData } = await supabase
+      // Fetch cards with account info
+      const { data: cardsData, error: cardsError } = await supabase
         .from('cards')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+        .select(`*, accounts:account_id(id, account_number, account_type, balance)`)
+        .eq('user_id', session.user.id);
 
+      if (cardsError) throw cardsError;
       setCards(cardsData || []);
 
-      // Fetch card applications
-      const { data: appsData } = await supabase
+      // Fetch card applications with account info
+      const { data: appsData, error: appsError } = await supabase
         .from('card_applications')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+        .select(`*, accounts:account_id(id, account_number, account_type)`)
+        .eq('user_id', session.user.id);
 
+      if (appsError) throw appsError;
       setApplications(appsData || []);
-
-    } catch (error) {
-      console.error('Error fetching data:', error);
-      setError('Failed to load cards data. Please try again.');
+    } catch (err) {
+      console.error(err);
+      setError('Error loading cards/applications: ' + err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const toggleCardVisibility = (cardId) => {
-    setVisibleCardDetails(prev => ({
-      ...prev,
-      [cardId]: !prev[cardId]
-    }));
-  };
-
-  const openPinModal = (cardId) => {
-    setPinModal({ open: true, cardId });
-    setPinInput('');
-    setPinError('');
-    setPinSuccess('');
-  };
-
-  const closePinModal = () => {
-    setPinModal({ open: false, cardId: null });
-    setPinInput('');
-    setPinError('');
-    setPinSuccess('');
-  };
-
-  const handleSetPin = async () => {
-    setPinError('');
-    setPinSuccess('');
-
-    if (!/^\d{4,6}$/.test(pinInput)) {
-      setPinError('PIN must be 4-6 digits');
-      return;
-    }
-
+  const handleCardAction = async (cardId, action, additionalData = {}) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        setPinError('Please log in to set PIN');
-        return;
-      }
+      if (!session) return;
 
-      const response = await fetch('/api/cards/set-pin', {
-        method: 'POST',
+      const response = await fetch('/api/cards', {
+        method: 'PUT',
         headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
         },
-        body: JSON.stringify({
-          cardId: pinModal.cardId,
-          pin: pinInput
-        })
+        body: JSON.stringify({ cardId, action, ...additionalData })
       });
 
       const data = await response.json();
-
-      if (response.ok) {
-        setPinSuccess('PIN set successfully!');
-        setTimeout(() => {
-          closePinModal();
-          loadUserData();
-        }, 1500);
+      if (data.success) {
+        await fetchUserCards();
+        setError('');
       } else {
-        setPinError(data.error || 'Failed to set PIN');
+        setError(data.error || 'Failed to update card');
       }
-    } catch (error) {
-      console.error('Error setting PIN:', error);
-      setPinError('Error setting PIN. Please try again.');
+    } catch (err) {
+      console.error('Error updating card:', err);
+      setError('Error updating card');
     }
   };
 
-  const handleCardAction = async (cardId, action) => {
+  const fetchCardTransactions = async (cardId) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
 
-      const { error } = await supabase
-        .from('cards')
-        .update({
-          is_locked: action === 'lock',
-          status: action === 'deactivate' ? 'inactive' : 'active'
-        })
-        .eq('id', cardId);
+      const response = await fetch(`/api/card-transactions?cardId=${cardId}`, {
+        headers: { 'Authorization': `Bearer ${session.access_token}` }
+      });
 
-      if (error) throw error;
-
-      await loadUserData();
-    } catch (error) {
-      console.error('Error updating card:', error);
-      setError('Failed to update card. Please try again.');
+      const data = await response.json();
+      if (data.success) {
+        setTransactions(data.transactions || []);
+        setShowTransactions(true);
+      } else {
+        setError('Failed to fetch transactions');
+      }
+    } catch (err) {
+      console.error('Error fetching transactions:', err);
+      setError('Error loading transactions');
     }
   };
 
-  const getCardTypeColor = (cardType) => {
-    const colors = {
-      visa: 'linear-gradient(135deg, #1a1f71 0%, #0f7dc1 100%)',
-      mastercard: 'linear-gradient(135deg, #eb001b 0%, #f79e1b 100%)',
-      amex: 'linear-gradient(135deg, #006fcf 0%, #00a3e0 100%)'
-    };
-    return colors[cardType?.toLowerCase()] || 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)';
-  };
-
-  const getCardTypeLogo = (cardType) => {
-    const logos = {
-      visa: 'VISA',
-      mastercard: 'Mastercard',
-      amex: 'AMEX'
-    };
-    return logos[cardType?.toLowerCase()] || 'CARD';
-  };
-
-  const getUserDisplayName = () => {
-    if (userProfile) {
-      return `${userProfile.first_name || ''} ${userProfile.last_name || ''}`.trim().toUpperCase();
-    }
-    return user?.email?.split('@')[0]?.toUpperCase() || 'CARDHOLDER';
-  };
-
-  if (loading) {
-    return (
-      <div style={styles.loadingContainer}>
-        <div style={styles.loadingSpinner}></div>
-        <div style={styles.loadingText}>Loading your cards...</div>
-      </div>
-    );
-  }
+  if (loading) return <div style={styles.container}><div style={styles.loading}>Loading cards...</div></div>;
 
   return (
     <div style={styles.container}>
-      <header style={styles.header}>
+      <div style={styles.header}>
         <h1 style={styles.title}>💳 My Debit Cards</h1>
-        <div style={styles.headerActions}>
-          <Link href="/apply-card" style={styles.applyButton}>
-            + Apply for New Card
-          </Link>
-          <Link href="/dashboard" style={styles.backButton}>
-            ← Back to Dashboard
-          </Link>
-        </div>
-      </header>
+        <button onClick={() => router.push('/apply-card')} style={{ ...styles.applyButton, background: '#1e40af', fontWeight: 'bold', fontSize: '18px' }}>
+          + Apply for New Card
+        </button>
+      </div>
 
       {error && <div style={styles.error}>{error}</div>}
 
       {/* Card Applications */}
       {applications.length > 0 && (
-        <section style={styles.section}>
-          <h2 style={styles.sectionTitle}>📋 Pending Applications</h2>
+        <div style={styles.section}>
+          <h2 style={styles.sectionTitle}>📋 Card Applications</h2>
           <div style={styles.applicationsGrid}>
             {applications.map((app) => (
               <div key={app.id} style={styles.applicationCard}>
                 <div style={styles.applicationHeader}>
-                  <h3 style={styles.applicationTitle}>Card Application</h3>
+                  <h3>Card Application</h3>
                   <span style={{
                     ...styles.statusBadge,
-                    backgroundColor: app.status === 'pending' ? '#f59e0b' :
-                                   app.status === 'approved' ? '#10b981' : '#ef4444'
+                    backgroundColor: app.application_status === 'pending' ? '#fbbf24' : app.application_status === 'approved' ? '#10b981' : '#ef4444'
                   }}>
-                    {app.status?.toUpperCase()}
+                    {app.application_status || 'Unknown'}
                   </span>
                 </div>
                 <div style={styles.applicationDetails}>
-                  <p><strong>Type:</strong> {app.card_type || 'Debit Card'}</p>
-                  <p><strong>Applied:</strong> {new Date(app.created_at).toLocaleDateString()}</p>
+                  <p><strong>Type:</strong> {app.card_type || 'N/A'}</p>
+                  <p><strong>Applied:</strong> {app.requested_at ? new Date(app.requested_at).toLocaleDateString() : 'N/A'}</p>
+                  <p><strong>Account:</strong> {app.accounts?.account_number || 'N/A'} ({app.accounts?.account_type || 'N/A'})</p>
                 </div>
               </div>
             ))}
           </div>
-        </section>
+        </div>
       )}
 
       {/* Active Cards */}
-      <section style={styles.section}>
-        <h2 style={styles.sectionTitle}>💳 My Active Cards</h2>
+      <div style={styles.section}>
+        <h2 style={styles.sectionTitle}>💳 Active Cards</h2>
         {cards.length === 0 ? (
-          <div style={styles.emptyState}>
-            <span style={styles.emptyIcon}>💳</span>
-            <h3 style={styles.emptyTitle}>No cards yet</h3>
-            <p style={styles.emptyDesc}>Apply for your first debit card to get started with secure payments.</p>
-            <Link href="/apply-card" style={styles.primaryButton}>
+          <div style={styles.noCards}>
+            <h3>No cards found</h3>
+            <p>Apply for your first debit card to get started.</p>
+            <button onClick={() => router.push('/apply-card')} style={{ ...styles.primaryButton, fontWeight: 'bold', fontSize: '16px' }}>
               Apply for Card
-            </Link>
+            </button>
           </div>
         ) : (
           <div style={styles.cardsGrid}>
             {cards.map((card) => (
-              <div key={card.id} style={styles.cardWrapper}>
-                <div
-                  style={{
-                    ...styles.cardFlipContainer,
-                    transform: flippedCards[card.id] ? 'rotateY(180deg)' : 'rotateY(0deg)'
-                  }}
-                >
-                  {/* Card Front */}
-                  <div style={{
-                    ...styles.cardFace,
-                    ...styles.cardFront,
-                    background: getCardTypeColor(card.card_type)
-                  }}>
-                    <div style={styles.cardHeader}>
-                      <span style={styles.bankName}>OAKLINE BANK</span>
-                      <span style={styles.cardTypeLabel}>{getCardTypeLogo(card.card_type)}</span>
-                    </div>
-
-                    <div style={styles.chipSection}>
-                      <div style={styles.chip}></div>
-                      <div style={styles.contactless}>
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-                          <path d="M12 18C15.3137 18 18 15.3137 18 12C18 8.68629 15.3137 6 12 6" stroke="white" strokeWidth="2"/>
-                          <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2" stroke="white" strokeWidth="2"/>
-                          <path d="M12 14C13.1046 14 14 13.1046 14 12C14 10.8954 13.1046 10 12 10" stroke="white" strokeWidth="2"/>
-                        </svg>
-                      </div>
-                    </div>
-
-                    <div style={styles.cardNumber}>
-                      {visibleCardDetails[card.id]
-                        ? (card.card_number || '**** **** **** ****').replace(/(.{4})/g, '$1 ').trim()
-                        : `**** **** **** ${card.card_number?.slice(-4) || '****'}`
-                      }
-                    </div>
-
-                    <div style={styles.cardFooter}>
-                      <div>
-                        <div style={styles.cardLabel}>CARDHOLDER</div>
-                        <div style={styles.cardValue}>{getUserDisplayName()}</div>
-                      </div>
-                      <div>
-                        <div style={styles.cardLabel}>EXPIRES</div>
-                        <div style={styles.cardValue}>{card.expiry_date || 'MM/YY'}</div>
-                      </div>
-                      <div>
-                        <div style={styles.cardLabel}>CVV</div>
-                        <div style={styles.cardValue}>
-                          {visibleCardDetails[card.id] ? (card.cvv || '***') : '***'}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Card Back */}
-                  <div style={{
-                    ...styles.cardFace,
-                    ...styles.cardBack,
-                    background: getCardTypeColor(card.card_type)
-                  }}>
-                    <div style={styles.magneticStripe}></div>
-                    <div style={styles.cvvSection}>
-                      <div style={styles.cvvLabel}>CVV</div>
-                      <div style={styles.cvvBox}>
-                        {visibleCardDetails[card.id] ? (card.cvv || '***') : '***'}
-                      </div>
-                    </div>
-                    <div style={styles.cardBackInfo}>
-                      <p style={styles.cardBackText}>For customer service call 1-800-OAKLINE</p>
-                      <p style={styles.cardBackText}>This card is property of Oakline Bank</p>
-                    </div>
-                  </div>
+              <div key={card.id} style={styles.cardItem}>
+                <div style={styles.cardVisual}>
+                  <div style={styles.cardNumber}>{card.card_number || 'XXXX-XXXX-XXXX-XXXX'}</div>
+                  <div style={styles.cardHolder}>{user?.email || 'Unknown Name'}</div>
+                  <div style={styles.cardExpiry}>Expires: {card.expiry_date ? new Date(card.expiry_date).toLocaleDateString() : 'MM/YY'}</div>
+                  <div style={styles.cardType}>{(card.card_type || 'Debit').toUpperCase()}</div>
                 </div>
 
-                <div style={styles.cardControls}>
-                  <button
-                    onClick={() => toggleCardVisibility(card.id)}
-                    style={styles.controlButton}
-                  >
-                    {visibleCardDetails[card.id] ? '👁️ Hide Details' : '👁️ Show Details'}
-                  </button>
-                  <button
-                    onClick={() => setFlippedCards(prev => ({ ...prev, [card.id]: !prev[card.id] }))}
-                    style={styles.controlButton}
-                  >
-                    🔄 Flip Card
-                  </button>
+                <div style={styles.cardDetails}>
+                  <div style={styles.detailRow}>
+                    <span>Status:</span>
+                    <span style={{ color: card.status === 'active' ? '#10b981' : '#ef4444', fontWeight: 'bold' }}>
+                      {card.status || 'Unknown'} {card.is_locked ? '(Locked)' : ''}
+                    </span>
+                  </div>
+                  <div style={styles.detailRow}><span>Daily Limit:</span><span>${card.daily_limit?.toFixed(2) || '0.00'}</span></div>
+                  <div style={styles.detailRow}><span>Monthly Limit:</span><span>${card.monthly_limit?.toFixed(2) || '0.00'}</span></div>
+                  <div style={styles.detailRow}><span>Account:</span><span>{card.accounts?.account_number || 'N/A'} ({card.accounts?.account_type || 'N/A'})</span></div>
+                  <div style={styles.detailRow}><span>Balance:</span><span>${card.accounts?.balance?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'}</span></div>
                 </div>
 
-                <div style={styles.cardStatus}>
-                    <span style={{
-                      ...styles.badge,
-                      backgroundColor: card.is_locked ? '#ef4444' : '#10b981'
-                    }}>
-                      {card.is_locked ? '🔒 Locked' : '✓ Active'}
-                    </span>
-                    <span style={{
-                      ...styles.badge,
-                      backgroundColor: card.pin_set ? '#10b981' : '#f59e0b'
-                    }}>
-                      {card.pin_set ? '🔐 PIN Set' : '⚠️ PIN Not Set'}
-                    </span>
-                  </div>
-
-                  <div style={styles.comprehensiveFeatures}>
-                    <h4 style={styles.featuresTitle}>Card Features</h4>
-                    <div style={styles.featuresGrid}>
-                      <div style={styles.featureItem}>
-                        <span style={styles.featureIcon}>💰</span>
-                        <div style={styles.featureText}>
-                          <div style={styles.featureLabel}>Daily Limit</div>
-                          <div style={styles.featureValue}>${card.daily_limit || '2,000'}</div>
-                        </div>
-                      </div>
-                      <div style={styles.featureItem}>
-                        <span style={styles.featureIcon}>📅</span>
-                        <div style={styles.featureText}>
-                          <div style={styles.featureLabel}>Monthly Limit</div>
-                          <div style={styles.featureValue}>${card.monthly_limit || '10,000'}</div>
-                        </div>
-                      </div>
-                      <div style={styles.featureItem}>
-                        <span style={styles.featureIcon}>🌍</span>
-                        <div style={styles.featureText}>
-                          <div style={styles.featureLabel}>Acceptance</div>
-                          <div style={styles.featureValue}>Global</div>
-                        </div>
-                      </div>
-                      <div style={styles.featureItem}>
-                        <span style={styles.featureIcon}>🔒</span>
-                        <div style={styles.featureText}>
-                          <div style={styles.featureLabel}>Security</div>
-                          <div style={styles.featureValue}>EMV Chip</div>
-                        </div>
-                      </div>
-                      <div style={styles.featureItem}>
-                        <span style={styles.featureIcon}>📱</span>
-                        <div style={styles.featureText}>
-                          <div style={styles.featureLabel}>Payments</div>
-                          <div style={styles.featureValue}>Contactless</div>
-                        </div>
-                      </div>
-                      <div style={styles.featureItem}>
-                        <span style={styles.featureIcon}>🛡️</span>
-                        <div style={styles.featureText}>
-                          <div style={styles.featureLabel}>Protection</div>
-                          <div style={styles.featureValue}>24/7 Fraud</div>
-                        </div>
-                      </div>
-                      <div style={styles.featureItem}>
-                        <span style={styles.featureIcon}>🔔</span>
-                        <div style={styles.featureText}>
-                          <div style={styles.featureLabel}>Alerts</div>
-                          <div style={styles.featureValue}>Real-time</div>
-                        </div>
-                      </div>
-                      <div style={styles.featureItem}>
-                        <span style={styles.featureIcon}>💳</span>
-                        <div style={styles.featureText}>
-                          <div style={styles.featureLabel}>Type</div>
-                          <div style={styles.featureValue}>{card.card_type?.toUpperCase() || 'DEBIT'}</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div style={styles.actionButtons}>
-                  {!card.pin_set && (
-                    <button
-                      onClick={() => openPinModal(card.id)}
-                      style={styles.setPinButton}
-                    >
-                      Set PIN
-                    </button>
+                <div style={styles.cardActions}>
+                  <button onClick={() => fetchCardTransactions(card.id)} style={styles.actionButton}>📋 View Transactions</button>
+                  {card.is_locked ? (
+                    <button onClick={() => handleCardAction(card.id, 'unlock')} style={styles.unlockButton}>🔓 Unlock Card</button>
+                  ) : (
+                    <button onClick={() => handleCardAction(card.id, 'lock')} style={styles.lockButton}>🔒 Lock Card</button>
                   )}
-
-                  <button
-                    onClick={() => handleCardAction(card.id, card.is_locked ? 'unlock' : 'lock')}
-                    style={{
-                      ...styles.actionButton,
-                      backgroundColor: card.is_locked ? '#10b981' : '#f59e0b'
-                    }}
-                  >
-                    {card.is_locked ? '🔓 Unlock Card' : '🔒 Lock Card'}
-                  </button>
+                  {card.status === 'active' && <button onClick={() => handleCardAction(card.id, 'deactivate')} style={styles.deactivateButton}>❌ Deactivate</button>}
                 </div>
               </div>
             ))}
           </div>
         )}
-      </section>
+      </div>
 
-      {/* PIN Modal */}
-      {pinModal.open && (
-        <div style={styles.modalOverlay} onClick={closePinModal}>
+      {/* Transactions Modal */}
+      {showTransactions && (
+        <div style={styles.modal} onClick={() => setShowTransactions(false)}>
           <div style={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-            <h3 style={styles.modalTitle}>Set Card PIN</h3>
-            <p style={styles.modalDescription}>
-              Enter a 4-6 digit PIN for your card. This PIN will be required for certain transactions.
-            </p>
-
-            <div style={styles.pinInputGroup}>
-              <label style={styles.pinLabel}>Enter PIN (4-6 digits)</label>
-              <input
-                type="password"
-                maxLength="6"
-                value={pinInput}
-                onChange={(e) => setPinInput(e.target.value.replace(/\D/g, ''))}
-                style={styles.pinInput}
-                placeholder="••••"
-                autoFocus
-              />
+            <div style={styles.modalHeader}>
+              <h2>Card Transactions</h2>
+              <button onClick={() => setShowTransactions(false)} style={styles.closeButton}>✕</button>
             </div>
-
-            {pinError && (
-              <div style={styles.pinError}>{pinError}</div>
-            )}
-
-            {pinSuccess && (
-              <div style={styles.pinSuccess}>{pinSuccess}</div>
-            )}
-
-            <div style={styles.modalActions}>
-              <button onClick={handleSetPin} style={styles.modalConfirmButton}>
-                Set PIN
-              </button>
-              <button onClick={closePinModal} style={styles.modalCancelButton}>
-                Cancel
-              </button>
+            <div style={styles.transactionsList}>
+              {transactions.length === 0 ? <p>No transactions found.</p> :
+                transactions.map((t) => (
+                  <div key={t.id} style={styles.transactionItem}>
+                    <div style={styles.transactionInfo}><strong>{t.merchant || 'N/A'}</strong><span style={styles.transactionLocation}>{t.location || 'N/A'}</span></div>
+                    <div style={styles.transactionAmount}>-${t.amount?.toFixed(2) || '0.00'}</div>
+                    <div style={styles.transactionDate}>{t.created_at ? new Date(t.created_at).toLocaleDateString() : 'N/A'}</div>
+                  </div>
+                ))
+              }
             </div>
           </div>
         </div>
       )}
+
+      <div style={styles.navigation}>
+        <button onClick={() => router.push('/dashboard')} style={styles.navButton}>← Back to Dashboard</button>
+      </div>
     </div>
   );
 }
-
-export default function Cards() {
-  return (
-    <ProtectedRoute>
-      <CardsContent />
-    </ProtectedRoute>
-  );
-}
-
 const styles = {
-  container: {
-    minHeight: '100vh',
-    background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
-    padding: '2rem',
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-  },
-  loadingContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: '100vh',
-    background: 'linear-gradient(135deg, #1a365d 0%, #2d5a87 50%, #059669 100%)',
-    color: 'white'
-  },
-  loadingSpinner: {
-    width: '60px',
-    height: '60px',
-    border: '4px solid rgba(255,255,255,0.2)',
-    borderTop: '4px solid #059669',
-    borderRadius: '50%',
-    animation: 'spin 1s linear infinite',
-    marginBottom: '1rem'
-  },
-  loadingText: {
-    fontSize: '1.2rem',
-    fontWeight: '600'
-  },
-  header: {
-    background: 'white',
-    padding: '2rem',
-    borderRadius: '16px',
-    marginBottom: '2rem',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-    gap: '1rem'
-  },
-  title: {
-    fontSize: '2rem',
-    fontWeight: 'bold',
-    color: '#1e40af',
-    margin: 0
-  },
-  headerActions: {
-    display: 'flex',
-    gap: '1rem',
-    flexWrap: 'wrap'
-  },
-  applyButton: {
-    padding: '0.75rem 1.5rem',
-    backgroundColor: '#10b981',
-    color: 'white',
-    borderRadius: '12px',
-    textDecoration: 'none',
-    fontWeight: '600',
-    transition: 'all 0.3s',
-    border: 'none',
-    cursor: 'pointer'
-  },
-  backButton: {
-    padding: '0.75rem 1.5rem',
-    backgroundColor: '#6b7280',
-    color: 'white',
-    borderRadius: '12px',
-    textDecoration: 'none',
-    fontWeight: '600',
-    transition: 'all 0.3s'
-  },
-  error: {
-    background: '#fee2e2',
-    color: '#dc2626',
-    padding: '1rem',
-    borderRadius: '12px',
-    marginBottom: '1rem',
-    textAlign: 'center'
-  },
-  section: {
-    marginBottom: '2rem'
-  },
-  sectionTitle: {
-    fontSize: '1.5rem',
-    fontWeight: 'bold',
-    color: '#1e293b',
-    marginBottom: '1.5rem'
-  },
-  applicationsGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-    gap: '1.5rem'
-  },
-  applicationCard: {
-    background: 'white',
-    padding: '1.5rem',
-    borderRadius: '16px',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-    border: '2px solid #e2e8f0'
-  },
-  applicationHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '1rem'
-  },
-  applicationTitle: {
-    fontSize: '1.1rem',
-    fontWeight: 'bold',
-    color: '#1e293b',
-    margin: 0
-  },
-  statusBadge: {
-    padding: '0.5rem 1rem',
-    borderRadius: '20px',
-    fontSize: '0.75rem',
-    fontWeight: 'bold',
-    color: 'white'
-  },
-  applicationDetails: {
-    fontSize: '0.9rem',
-    color: '#64748b',
-    lineHeight: '1.8'
-  },
-  emptyState: {
-    background: 'white',
-    padding: '4rem 2rem',
-    borderRadius: '16px',
-    textAlign: 'center',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.08)'
-  },
-  emptyIcon: {
-    fontSize: '4rem',
-    marginBottom: '1rem',
-    display: 'block'
-  },
-  emptyTitle: {
-    fontSize: '1.5rem',
-    fontWeight: 'bold',
-    color: '#1e293b',
-    marginBottom: '0.5rem'
-  },
-  emptyDesc: {
-    fontSize: '1rem',
-    color: '#64748b',
-    marginBottom: '2rem'
-  },
-  primaryButton: {
-    display: 'inline-block',
-    padding: '0.75rem 2rem',
-    backgroundColor: '#1e40af',
-    color: 'white',
-    borderRadius: '12px',
-    textDecoration: 'none',
-    fontWeight: '600',
-    transition: 'all 0.3s'
-  },
-  cardsGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))',
-    gap: '2rem'
-  },
-  cardWrapper: {
-    background: 'white',
-    padding: '2rem',
-    borderRadius: '20px',
-    boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
-    border: '2px solid #e2e8f0'
-  },
-  cardFlipContainer: {
-    perspective: '1000px',
-    width: '100%',
-    maxWidth: '380px',
-    height: '240px',
-    position: 'relative',
-    transformStyle: 'preserve-3d',
-    transition: 'transform 0.6s',
-    margin: '0 auto 1.5rem'
-  },
-  cardFace: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-    backfaceVisibility: 'hidden',
-    borderRadius: '16px',
-    padding: '1.5rem',
-    color: 'white',
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'space-between',
-    boxShadow: '0 8px 32px rgba(30, 64, 175, 0.3)'
-  },
-  cardFront: {
-    zIndex: 2
-  },
-  cardBack: {
-    transform: 'rotateY(180deg)'
-  },
-  cardHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start'
-  },
-  bankName: {
-    fontSize: '1rem',
-    fontWeight: 'bold',
-    letterSpacing: '1px'
-  },
-  cardTypeLabel: {
-    fontSize: '0.875rem',
-    fontWeight: 'bold',
-    opacity: 0.9
-  },
-  chipSection: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '1rem',
-    margin: '0.5rem 0'
-  },
-  chip: {
-    width: '50px',
-    height: '40px',
-    background: 'linear-gradient(135deg, #ffd700 0%, #ffed4e 100%)',
-    borderRadius: '8px'
-  },
-  contactless: {
-    opacity: 0.8
-  },
-  cardNumber: {
-    fontSize: '1.4rem',
-    fontWeight: 'bold',
-    letterSpacing: '3px',
-    fontFamily: 'monospace',
-    textAlign: 'center',
-    margin: '0.5rem 0'
-  },
-  cardFooter: {
-    display: 'flex',
-    justifyContent: 'space-between'
-  },
-  cardLabel: {
-    fontSize: '0.7rem',
-    opacity: 0.8,
-    marginBottom: '4px'
-  },
-  cardValue: {
-    fontSize: '0.9rem',
-    fontWeight: 'bold'
-  },
-  magneticStripe: {
-    width: '100%',
-    height: '45px',
-    backgroundColor: '#000',
-    marginTop: '20px'
-  },
-  cvvSection: {
-    backgroundColor: 'white',
-    color: 'black',
-    padding: '1rem',
-    margin: '20px 0',
-    borderRadius: '8px',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center'
-  },
-  cvvLabel: {
-    fontSize: '0.9rem',
-    fontWeight: 'bold'
-  },
-  cvvBox: {
-    backgroundColor: '#f3f4f6',
-    padding: '6px 12px',
-    borderRadius: '6px',
-    fontFamily: 'monospace',
-    fontSize: '1.1rem',
-    fontWeight: 'bold'
-  },
-  cardBackInfo: {
-    fontSize: '0.7rem',
-    opacity: 0.8
-  },
-  cardBackText: {
-    margin: '4px 0'
-  },
-  cardControls: {
-    display: 'flex',
-    gap: '0.75rem',
-    marginBottom: '1rem',
-    justifyContent: 'center'
-  },
-  controlButton: {
-    padding: '0.5rem 1rem',
-    backgroundColor: '#3b82f6',
-    color: 'white',
-    border: 'none',
-    borderRadius: '8px',
-    fontSize: '0.85rem',
-    fontWeight: '600',
-    cursor: 'pointer',
-    transition: 'all 0.3s'
-  },
-  cardStatus: {
-    display: 'flex',
-    gap: '0.75rem',
-    marginBottom: '1rem',
-    justifyContent: 'center',
-    flexWrap: 'wrap'
-  },
-  badge: {
-    padding: '0.5rem 1rem',
-    borderRadius: '20px',
-    color: 'white',
-    fontSize: '0.85rem',
-    fontWeight: '600'
-  },
-  comprehensiveFeatures: {
-    marginBottom: '1.5rem',
-    color: '#1e40af',
-    padding: '1rem',
-    background: '#f0f9ff',
-    borderRadius: '12px',
-    border: '1px solid #dbeafe'
-  },
-  featuresTitle: {
-    fontSize: '1.1rem',
-    fontWeight: 'bold',
-    color: '#1e40af',
-    marginBottom: '1rem',
-    textAlign: 'center'
-  },
-  featuresGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-    gap: '1rem'
-  },
-  featureItem: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.75rem'
-  },
-  featureIcon: {
-    fontSize: '1.2rem'
-  },
-  featureText: {
-    flexGrow: 1
-  },
-  featureLabel: {
-    fontSize: '0.75rem',
-    fontWeight: '600',
-    color: '#60a5fa',
-    textTransform: 'uppercase',
-    marginBottom: '2px'
-  },
-  featureValue: {
-    fontSize: '0.9rem',
-    fontWeight: 'bold',
-    color: '#1e40af'
-  },
-  actionButtons: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.75rem'
-  },
-  setPinButton: {
-    width: '100%',
-    padding: '0.75rem',
-    backgroundColor: '#1e40af',
-    color: 'white',
-    border: 'none',
-    borderRadius: '12px',
-    fontSize: '1rem',
-    fontWeight: '600',
-    cursor: 'pointer',
-    transition: 'all 0.3s'
-  },
-  actionButton: {
-    width: '100%',
-    padding: '0.75rem',
-    color: 'white',
-    border: 'none',
-    borderRadius: '12px',
-    fontSize: '0.9rem',
-    fontWeight: '600',
-    cursor: 'pointer',
-    transition: 'all 0.3s'
-  },
-  modalOverlay: {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 1000
-  },
-  modalContent: {
-    backgroundColor: 'white',
-    borderRadius: '20px',
-    padding: '2rem',
-    maxWidth: '400px',
-    width: '90%',
-    boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
-  },
-  modalTitle: {
-    fontSize: '1.5rem',
-    fontWeight: 'bold',
-    color: '#1e293b',
-    marginBottom: '0.5rem'
-  },
-  modalDescription: {
-    fontSize: '0.9rem',
-    color: '#64748b',
-    marginBottom: '1.5rem'
-  },
-  pinInputGroup: {
-    marginBottom: '1rem'
-  },
-  pinLabel: {
-    display: 'block',
-    fontSize: '0.875rem',
-    fontWeight: '600',
-    color: '#374151',
-    marginBottom: '0.5rem'
-  },
-  pinInput: {
-    width: '100%',
-    padding: '0.75rem',
-    fontSize: '1.5rem',
-    letterSpacing: '0.5rem',
-    textAlign: 'center',
-    border: '2px solid #e2e8f0',
-    borderRadius: '12px',
-    fontFamily: 'monospace'
-  },
-  pinError: {
-    padding: '0.75rem',
-    backgroundColor: '#fee2e2',
-    color: '#dc2626',
-    borderRadius: '12px',
-    fontSize: '0.875rem',
-    marginBottom: '1rem'
-  },
-  pinSuccess: {
-    padding: '0.75rem',
-    backgroundColor: '#dcfce7',
-    color: '#166534',
-    borderRadius: '12px',
-    fontSize: '0.875rem',
-    marginBottom: '1rem'
-  },
-  modalActions: {
-    display: 'flex',
-    gap: '1rem',
-    marginTop: '1.5rem'
-  },
-  modalConfirmButton: {
-    flex: 1,
-    padding: '0.75rem',
-    backgroundColor: '#1e40af',
-    color: 'white',
-    border: 'none',
-    borderRadius: '12px',
-    fontSize: '1rem',
-    fontWeight: '600',
-    cursor: 'pointer'
-  },
-  modalCancelButton: {
-    flex: 1,
-    padding: '0.75rem',
-    backgroundColor: '#6b7280',
-    color: 'white',
-    border: 'none',
-    borderRadius: '12px',
-    fontSize: '1rem',
-    fontWeight: '600',
-    cursor: 'pointer'
-  }
+  container: { minHeight: '100vh', background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)', padding: '20px' },
+  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', background: 'white', padding: '20px', borderRadius: '12px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' },
+  title: { fontSize: '28px', fontWeight: 'bold', color: '#1e3c72', margin: 0 },
+  applyButton: { background: '#28a745', color: 'white', border: 'none', padding: '12px 24px', borderRadius: '8px', cursor: 'pointer', fontSize: '16px', fontWeight: '500' },
+  loading: { textAlign: 'center', padding: '40px', fontSize: '18px', color: '#666' },
+  error: { color: '#dc3545', background: '#f8d7da', padding: '15px', borderRadius: '8px', marginBottom: '20px', textAlign: 'center' },
+  section: { marginBottom: '30px' },
+  sectionTitle: { fontSize: '20px', fontWeight: 'bold', color: '#1e3c72', marginBottom: '15px' },
+  applicationsGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '20px', marginBottom: '30px' },
+  applicationCard: { background: 'white', padding: '20px', borderRadius: '12px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' },
+  applicationHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' },
+  statusBadge: { padding: '6px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: 'bold', color: 'white' },
+  applicationDetails: { fontSize: '14px', color: '#666' },
+  noCards: { background: 'white', padding: '40px', borderRadius: '12px', textAlign: 'center', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' },
+  primaryButton: { background: '#007bff', color: 'white', border: 'none', padding: '12px 24px', borderRadius: '8px', cursor: 'pointer', fontSize: '16px', fontWeight: '500', marginTop: '15px' },
+  cardsGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '20px' },
+  cardItem: { background: 'white', borderRadius: '12px', padding: '20px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' },
+  cardVisual: { background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white', padding: '20px', borderRadius: '12px', marginBottom: '20px', position: 'relative', minHeight: '120px' },
+  cardNumber: { fontSize: '18px', fontWeight: 'bold', letterSpacing: '2px', marginBottom: '10px' },
+  cardHolder: { fontSize: '14px', opacity: 0.9 },
+  cardExpiry: { fontSize: '12px', position: 'absolute', bottom: '20px', left: '20px', opacity: 0.8 },
+  cardType: { fontSize: '12px', position: 'absolute', bottom: '20px', right: '20px', fontWeight: 'bold' },
+  cardDetails: { marginBottom: '20px' },
+  detailRow: { display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #eee', fontSize: '14px' },
+  cardActions: { display: 'flex', gap: '10px', flexWrap: 'wrap' },
+  actionButton: { background: '#007bff', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer', fontSize: '14px', flex: '1', minWidth: '120px' },
+  lockButton: { background: '#ffc107', color: 'black', border: 'none', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer', fontSize: '14px', flex: '1', minWidth: '120px' },
+  unlockButton: { background: '#28a745', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer', fontSize: '14px', flex: '1', minWidth: '120px' },
+  deactivateButton: { background: '#dc3545', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer', fontSize: '14px', flex: '1', minWidth: '120px' },
+  modal: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 },
+  modalContent: { background: 'white', borderRadius: '12px', padding: '20px', maxWidth: '600px', width: '90%', maxHeight: '80vh', overflow: 'auto' },
+  modalHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' },
+  closeButton: { background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer' },
+  transactionsList: { maxHeight: '400px', overflowY: 'auto' },
+  transactionItem: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '15px', borderBottom: '1px solid #eee' },
+  transactionInfo: { display: 'flex', flexDirection: 'column', flex: 1 },
+  transactionLocation: { fontSize: '12px', color: '#666', marginTop: '4px' },
+  transactionAmount: { fontWeight: 'bold', color: '#dc3545', fontSize: '16px' },
+  transactionDate: { fontSize: '12px', color: '#666', marginLeft: '15px' },
+  navigation: { marginTop: '30px', textAlign: 'center' },
+  navButton: { background: '#6c757d', color: 'white', border: 'none', padding: '12px 24px', borderRadius: '8px', cursor: 'pointer', fontSize: '16px' }
 };

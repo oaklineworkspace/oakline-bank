@@ -44,40 +44,21 @@ export default function Profile() {
 
   const fetchUserProfile = async (userId) => {
     try {
-      // Fetch comprehensive profile data from profiles table
+      // Fetch from profiles table
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .single();
 
+      if (profileError) {
+        console.error('Error fetching profile:', profileError);
+        return;
+      }
+
       if (profileData) {
         setUserProfile(profileData);
         setEditData(profileData);
-      } else {
-        // Fallback: try to get user by email if id lookup fails
-        const { data: { user: authUser } } = await supabase.auth.getUser();
-        if (authUser?.email) {
-          const { data: profileByEmail, error: emailError } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('email', authUser.email)
-            .single();
-
-          if (profileByEmail) {
-            setUserProfile(profileByEmail);
-            setEditData(profileByEmail);
-          } else if (authUser?.user_metadata) {
-            // Last resort: use auth metadata
-            setUserProfile({
-              id: authUser.id,
-              email: authUser.email,
-              full_name: authUser.user_metadata.full_name,
-              created_at: authUser.created_at,
-              ...authUser.user_metadata
-            });
-          }
-        }
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
@@ -141,10 +122,6 @@ export default function Profile() {
 
   const fetchApplicationData = async (userId) => {
     try {
-      // Try to get application data through multiple methods
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      // Method 1: Through profile table
       const { data: profile } = await supabase
         .from('profiles')
         .select('application_id')
@@ -158,44 +135,10 @@ export default function Profile() {
           .eq('id', profile.application_id)
           .single();
 
-        if (appData) {
+        if (appData && !error) {
           setApplication(appData);
-          setEditData(appData);
-          return;
         }
       }
-
-      // Method 2: Direct email match
-      if (user?.email) {
-        const { data: appData, error } = await supabase
-          .from('applications')
-          .select('*')
-          .eq('email', user.email)
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .single();
-
-        if (appData) {
-          setApplication(appData);
-          setEditData(appData);
-          return;
-        }
-      }
-
-      // Method 3: Try user_id match if available
-      const { data: appDataById, error: errorById } = await supabase
-        .from('applications')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
-
-      if (appDataById) {
-        setApplication(appDataById);
-        setEditData(appDataById);
-      }
-
     } catch (error) {
       console.error('Error fetching application:', error);
     }
@@ -213,7 +156,7 @@ export default function Profile() {
         profilePictureUrl = await uploadProfilePicture();
       }
 
-      if (application?.id) {
+      if (userProfile?.id) {
         const updateData = {
           phone: editData.phone,
           address: editData.address,
@@ -228,13 +171,13 @@ export default function Profile() {
         }
 
         const { error } = await supabase
-          .from('applications')
+          .from('profiles')
           .update(updateData)
-          .eq('id', application.id);
+          .eq('id', userProfile.id);
 
         if (error) throw error;
         
-        setApplication({ ...application, ...editData, ...(profilePictureUrl && { profile_picture: profilePictureUrl }) });
+        setUserProfile({ ...userProfile, ...updateData });
         setEditMode(false);
         setProfilePicture(null);
         setMessage('Profile updated successfully!');
@@ -352,7 +295,7 @@ export default function Profile() {
       <div style={styles.card}>
         <div style={styles.cardHeader}>
           <h2 style={styles.cardTitle}>Personal Information</h2>
-          {!editMode && application && (
+          {!editMode && userProfile && (
             <button 
               style={styles.editButton}
               onClick={() => setEditMode(true)}
@@ -368,10 +311,10 @@ export default function Profile() {
               <div style={styles.formGroup}>
                 <label style={styles.label}>Profile Picture</label>
                 <div style={styles.profilePictureSection}>
-                  {(application?.profile_picture || profilePicture) && (
+                  {(userProfile?.profile_picture || profilePicture) && (
                     <div style={styles.currentPicture}>
                       <img 
-                        src={profilePicture ? URL.createObjectURL(profilePicture) : application.profile_picture} 
+                        src={profilePicture ? URL.createObjectURL(profilePicture) : userProfile.profile_picture} 
                         alt="Profile" 
                         style={styles.profileImage}
                       />
@@ -439,7 +382,8 @@ export default function Profile() {
                 style={styles.cancelButton}
                 onClick={() => {
                   setEditMode(false);
-                  setEditData(application || {});
+                  setEditData(userProfile || {});
+                  setProfilePicture(null);
                 }}
               >
                 Cancel
@@ -463,7 +407,7 @@ export default function Profile() {
             <div style={styles.infoItem}>
               <span style={styles.infoLabel}>Full Name</span>
               <span style={styles.infoValue}>
-                {userProfile ? `${userProfile.first_name || ''} ${userProfile.middle_name ? userProfile.middle_name + ' ' : ''}${userProfile.last_name || ''}`.trim() : application ? `${application.first_name} ${application.last_name}` : 'N/A'}
+                {userProfile ? `${userProfile.first_name || ''} ${userProfile.last_name || ''}`.trim() : 'N/A'}
               </span>
             </div>
             <div style={styles.infoItem}>
@@ -472,51 +416,39 @@ export default function Profile() {
             </div>
             <div style={styles.infoItem}>
               <span style={styles.infoLabel}>Phone</span>
-              <span style={styles.infoValue}>{userProfile?.phone || application?.phone || 'N/A'}</span>
+              <span style={styles.infoValue}>{userProfile?.phone || 'N/A'}</span>
             </div>
             <div style={styles.infoItem}>
               <span style={styles.infoLabel}>Date of Birth</span>
-              <span style={styles.infoValue}>{formatDate(userProfile?.date_of_birth || application?.date_of_birth)}</span>
+              <span style={styles.infoValue}>{formatDate(userProfile?.date_of_birth)}</span>
             </div>
             <div style={styles.infoItem}>
               <span style={styles.infoLabel}>Address</span>
               <span style={styles.infoValue}>
-                {(userProfile?.address || application?.address) ? 
-                  `${userProfile?.address || application?.address}, ${userProfile?.city || application?.city}, ${userProfile?.state || application?.state} ${userProfile?.zip_code || application?.zip_code}` : 
+                {userProfile?.address ? 
+                  `${userProfile.address}, ${userProfile.city}, ${userProfile.state} ${userProfile.zip_code}` : 
                   'N/A'
                 }
               </span>
             </div>
             <div style={styles.infoItem}>
               <span style={styles.infoLabel}>Member Since</span>
-              <span style={styles.infoValue}>{formatDate(userProfile?.created_at || application?.created_at)}</span>
+              <span style={styles.infoValue}>{formatDate(userProfile?.created_at)}</span>
             </div>
             <div style={styles.infoItem}>
-              <span style={styles.infoLabel}>Enrollment Status</span>
-              <span style={{...styles.infoValue, color: userProfile?.enrollment_completed ? '#10b981' : '#f59e0b'}}>
-                {userProfile?.enrollment_completed ? 'Completed' : 'Pending'}
+              <span style={styles.infoLabel}>Account Status</span>
+              <span style={{...styles.infoValue, color: userProfile?.status === 'active' ? '#10b981' : '#f59e0b'}}>
+                {userProfile?.status ? userProfile.status.charAt(0).toUpperCase() + userProfile.status.slice(1) : 'Pending'}
               </span>
             </div>
             <div style={styles.infoItem}>
               <span style={styles.infoLabel}>Country</span>
-              <span style={styles.infoValue}>{userProfile?.country || application?.country || 'N/A'}</span>
+              <span style={styles.infoValue}>{userProfile?.country || 'N/A'}</span>
             </div>
-            {(userProfile?.middle_name || application?.middle_name) && (
+            {userProfile?.middle_name && (
               <div style={styles.infoItem}>
                 <span style={styles.infoLabel}>Middle Name</span>
-                <span style={styles.infoValue}>{userProfile?.middle_name || application?.middle_name}</span>
-              </div>
-            )}
-            {userProfile?.employment_status && (
-              <div style={styles.infoItem}>
-                <span style={styles.infoLabel}>Employment Status</span>
-                <span style={styles.infoValue}>{userProfile.employment_status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
-              </div>
-            )}
-            {userProfile?.annual_income && (
-              <div style={styles.infoItem}>
-                <span style={styles.infoLabel}>Annual Income Range</span>
-                <span style={styles.infoValue}>{userProfile.annual_income.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
+                <span style={styles.infoValue}>{userProfile.middle_name}</span>
               </div>
             )}
           </div>
@@ -589,7 +521,7 @@ export default function Profile() {
         <div style={styles.securityGrid}>
           <button 
             style={styles.securityButton}
-            onClick={() => router.push('/reset-password')}
+            onClick={() => router.push('/security')}
           >
             🔐 Change Password
           </button>

@@ -131,7 +131,7 @@ export default function VerifyEmail() {
           </Link>
           
           <div style={styles.headerActions}>
-            <Link href="/login" style={styles.headerButton}>Sign In</Link>
+            <Link href="/sign-in" style={styles.headerButton}>Sign In</Link>
             <Link href="/dashboard" style={styles.headerButton}>Dashboard</Link>
           </div>
         </div>

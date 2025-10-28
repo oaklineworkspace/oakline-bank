@@ -499,6 +499,23 @@ export default function AccountDetails() {
                 </div>
                 <div style={styles.accountNumber}>
                   Account •••• {account.account_number?.slice(-4)}
+                  {account.status && (
+                    <span style={{
+                      marginLeft: '0.5rem',
+                      fontSize: '0.7rem',
+                      padding: '0.15rem 0.5rem',
+                      borderRadius: '12px',
+                      fontWeight: '600',
+                      backgroundColor: account.status === 'active' ? '#d1fae5' : 
+                                     account.status === 'pending' ? '#fef3c7' : 
+                                     account.status === 'closed' ? '#fee2e2' : '#f3f4f6',
+                      color: account.status === 'active' ? '#065f46' : 
+                             account.status === 'pending' ? '#92400e' : 
+                             account.status === 'closed' ? '#991b1b' : '#4b5563'
+                    }}>
+                      {account.status.charAt(0).toUpperCase() + account.status.slice(1)}
+                    </span>
+                  )}
                 </div>
                 <div style={styles.accountBalance}>
                   {formatCurrency(account.balance)}
@@ -539,7 +556,14 @@ export default function AccountDetails() {
                 </div>
                 <div style={styles.infoItem}>
                   <div style={styles.infoLabel}>Account Status</div>
-                  <div style={styles.infoValue} style={{ color: '#059669' }}>Active</div>
+                  <div style={{
+                    ...styles.infoValue,
+                    color: selectedAccount.status === 'active' ? '#059669' : 
+                           selectedAccount.status === 'pending' ? '#f59e0b' : 
+                           selectedAccount.status === 'closed' ? '#ef4444' : '#64748b'
+                  }}>
+                    {selectedAccount.status ? selectedAccount.status.charAt(0).toUpperCase() + selectedAccount.status.slice(1) : 'Unknown'}
+                  </div>
                 </div>
                 <div style={styles.infoItem}>
                   <div style={styles.infoLabel}>Opened Date</div>
@@ -556,32 +580,46 @@ export default function AccountDetails() {
               <div style={styles.transactionsSection}>
                 <h3 style={styles.transactionsTitle}>Recent Transactions</h3>
                 {transactions.length > 0 ? (
-                  transactions.map(tx => (
-                    <div key={tx.id} style={styles.transactionItem}>
-                      <div style={styles.transactionLeft}>
-                        <span style={styles.transactionIcon}>
-                          {getTransactionIcon(tx.transaction_type)}
-                        </span>
-                        <div style={styles.transactionInfo}>
-                          <div style={styles.transactionDescription}>
-                            {tx.description || tx.transaction_type?.replace(/_/g, ' ').toUpperCase()}
-                          </div>
-                          <div style={styles.transactionDate}>
-                            {formatDate(tx.created_at)}
+                  transactions.map(tx => {
+                    const txType = tx.transaction_type?.toLowerCase() || '';
+                    const amount = parseFloat(tx.amount) || 0;
+                    
+                    // Determine if it's a credit (money in) or debit (money out)
+                    let isCredit = false;
+                    if (txType.includes('deposit') || txType.includes('credit') || txType.includes('transfer_in') || txType.includes('interest')) {
+                      isCredit = true;
+                    } else if (txType.includes('debit') || txType.includes('withdrawal') || txType.includes('purchase') || txType.includes('transfer_out') || txType.includes('bill_payment') || txType.includes('fee')) {
+                      isCredit = false;
+                    } else {
+                      // Fallback: check if amount is positive or negative
+                      isCredit = amount >= 0;
+                    }
+                    
+                    return (
+                      <div key={tx.id} style={styles.transactionItem}>
+                        <div style={styles.transactionLeft}>
+                          <span style={styles.transactionIcon}>
+                            {getTransactionIcon(tx.transaction_type)}
+                          </span>
+                          <div style={styles.transactionInfo}>
+                            <div style={styles.transactionDescription}>
+                              {tx.description || tx.transaction_type?.replace(/_/g, ' ').toUpperCase()}
+                            </div>
+                            <div style={styles.transactionDate}>
+                              {formatDate(tx.created_at)}
+                            </div>
                           </div>
                         </div>
+                        <div style={{
+                          ...styles.transactionAmount,
+                          color: isCredit ? '#059669' : '#dc2626'
+                        }}>
+                          {isCredit ? '+' : '-'}
+                          {formatCurrency(Math.abs(amount))}
+                        </div>
                       </div>
-                      <div style={{
-                        ...styles.transactionAmount,
-                        color: tx.transaction_type?.includes('in') || tx.transaction_type === 'deposit' 
-                          ? '#059669' 
-                          : '#dc2626'
-                      }}>
-                        {tx.transaction_type?.includes('in') || tx.transaction_type === 'deposit' ? '+' : '-'}
-                        {formatCurrency(Math.abs(tx.amount))}
-                      </div>
-                    </div>
-                  ))
+                    );
+                  })
                 ) : (
                   <div style={{ textAlign: 'center', padding: '2rem', color: '#64748b' }}>
                     No transactions found for this account

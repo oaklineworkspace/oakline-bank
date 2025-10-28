@@ -62,8 +62,8 @@ export default function Zelle() {
       setAccounts(userAccounts || []);
 
       if (userAccounts?.length > 0) {
-        setSendForm(prev => ({ ...prev, account_id: userAccounts[0].id.toString() }));
-        setRequestForm(prev => ({ ...prev, account_id: userAccounts[0].id.toString() }));
+        setSendForm(prev => ({ ...prev, account_id: userAccounts[0].id }));
+        setRequestForm(prev => ({ ...prev, account_id: userAccounts[0].id }));
       }
 
     } catch (error) {
@@ -104,43 +104,27 @@ export default function Zelle() {
         return;
       }
 
-      // Check account balance
-      const selectedAccount = accounts.find(acc => acc.id.toString() === sendForm.account_id);
-      if (amount > parseFloat(selectedAccount?.balance || 0)) {
-        setMessage('Insufficient funds');
-        setLoading(false);
-        return;
-      }
-
-      // Create Zelle transaction
-      const { error } = await supabase
-        .from('zelle_transactions')
-        .insert([{
+      // Call the API to process the transaction
+      const response = await fetch('/api/zelle-transactions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           sender_id: user.id,
-          sender_account_id: parseInt(sendForm.account_id),
+          sender_account_id: sendForm.account_id,
           recipient_contact: sendForm.recipient,
           amount: amount,
           memo: sendForm.memo || 'Zelle Transfer',
-          transaction_type: 'send',
-          status: 'pending',
-          created_at: new Date().toISOString()
-        }]);
+          transaction_type: 'send'
+        })
+      });
 
-      if (error) throw error;
+      const result = await response.json();
 
-      // Create debit transaction
-      await supabase
-        .from('transactions')
-        .insert([{
-          user_id: user.id,
-          account_id: parseInt(sendForm.account_id),
-          amount: -amount,
-          type: 'zelle_send',
-          description: `Zelle to ${sendForm.recipient} - ${sendForm.memo || 'Transfer'}`,
-          status: 'completed',
-          category: 'transfer',
-          created_at: new Date().toISOString()
-        }]);
+      if (!response.ok) {
+        throw new Error(result.error || 'Transaction failed');
+      }
 
       setMessage('✅ Zelle payment sent successfully!');
       setSendForm({ recipient: '', amount: '', memo: '', account_id: sendForm.account_id });
@@ -180,21 +164,27 @@ export default function Zelle() {
         return;
       }
 
-      // Create Zelle request
-      const { error } = await supabase
-        .from('zelle_transactions')
-        .insert([{
+      // Call the API to process the request
+      const response = await fetch('/api/zelle-transactions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           sender_id: user.id,
-          sender_account_id: parseInt(requestForm.account_id),
+          sender_account_id: requestForm.account_id,
           recipient_contact: requestForm.recipient,
           amount: amount,
           memo: requestForm.memo || 'Zelle Request',
-          transaction_type: 'request',
-          status: 'pending',
-          created_at: new Date().toISOString()
-        }]);
+          transaction_type: 'request'
+        })
+      });
 
-      if (error) throw error;
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Request failed');
+      }
 
       setMessage('✅ Zelle request sent successfully!');
       setRequestForm({ recipient: '', amount: '', memo: '', account_id: requestForm.account_id });

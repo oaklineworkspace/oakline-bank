@@ -23,37 +23,13 @@ export default function EnrollPage() {
   const [applicationId, setApplicationId] = useState('');
   const [step, setStep] = useState('loading'); // 'loading', 'password', 'success', 'error'
   const [validToken, setValidToken] = useState(false); // To track if the token validation was successful
-  const [verificationInProgress, setVerificationInProgress] = useState(false); // Prevent duplicate calls
-  const [requestingNewLink, setRequestingNewLink] = useState(false);
+  const [showRequestModal, setShowRequestModal] = useState(false);
+  const [requestEmail, setRequestEmail] = useState('');
+  const [requestLoading, setRequestLoading] = useState(false);
+  const [requestMessage, setRequestMessage] = useState('');
 
   // Function to handle magic link authentication and user verification
   const verifyMagicLinkUser = async (user, applicationId) => {
-    // Check if we've already verified this session
-    const sessionKey = `enrollment_verified_${applicationId}_${user.email}`;
-    const alreadyVerified = sessionStorage.getItem(sessionKey);
-
-    if (alreadyVerified || verificationInProgress) {
-      console.log('Already verified or verification in progress, skipping...');
-      const cachedData = sessionStorage.getItem(`enrollment_data_${applicationId}`);
-      if (cachedData) {
-        try {
-          const data = JSON.parse(cachedData);
-          setApplicationInfo(data.application);
-          setAccounts(data.accounts || []);
-          setFormData(prev => ({ ...prev, email: user.email }));
-          setValidToken(true);
-          setStep('password');
-          setLoading(false);
-          return;
-        } catch (e) {
-          console.error('Error parsing cached data:', e);
-        }
-      }
-      return;
-    }
-
-    setVerificationInProgress(true);
-
     if (window.enrollmentTimeout) {
       clearTimeout(window.enrollmentTimeout);
       window.enrollmentTimeout = null;
@@ -79,79 +55,33 @@ export default function EnrollPage() {
 
       if (response.ok) {
         console.log('Magic link verification successful');
-
+        
         // Check if enrollment is already completed
         if (result.enrollment_completed) {
           setError('This enrollment has already been completed. Please use the login page.');
           setStep('error');
-          setLoading(false);
-          setVerificationInProgress(false);
           return;
         }
-
-        // Cache the verification data
-        sessionStorage.setItem(sessionKey, 'true');
-        sessionStorage.setItem(`enrollment_data_${applicationId}`, JSON.stringify({
-          application: result.application,
-          accounts: result.accounts || result.account_numbers || []
-        }));
-
+        
         setApplicationInfo(result.application);
         setAccounts(result.accounts || result.account_numbers || []);
         setFormData(prev => ({ ...prev, email: user.email }));
-        setValidToken(true); // Token (magic link) is implicitly valid
         setStep('password'); // Go straight to password setup
-        setLoading(false);
-        setVerificationInProgress(false);
+        setValidToken(true); // Token (magic link) is implicitly valid
+        setLoading(false); // Ensure loading is false
       } else {
         console.error('Magic link verification failed:', result);
         console.error('Response status:', response.status);
-
-        // Don't fail on click limit errors during initial load
-        if (result.error && result.error.includes('expired after 4 uses')) {
-          // This might be a refresh - try to proceed anyway if we have session
-          const { data: { session } } = await supabase.auth.getSession();
-          if (session?.user) {
-            // Try to get application data directly
-            try {
-              const appResponse = await fetch('/api/verify-magic-link-enrollment', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  userId: session.user.id,
-                  email: session.user.email,
-                  applicationId: applicationId,
-                  skipClickCount: true
-                })
-              });
-
-              const appResult = await appResponse.json();
-              if (appResponse.ok) {
-                setApplicationInfo(appResult.application);
-                setAccounts(appResult.accounts || []);
-                setFormData(prev => ({ ...prev, email: session.user.email }));
-                setValidToken(true);
-                setStep('password');
-                setLoading(false);
-                return;
-              }
-            } catch (retryError) {
-              console.error('Retry failed:', retryError);
-            }
-          }
-        }
-
         setError(result.error || 'Invalid enrollment link or session expired. Please contact support.');
         setStep('error');
         setLoading(false);
-        setVerificationVerificationInProgress(false);
       }
     } catch (error) {
       console.error('Magic link verification error:', error);
       setError('Error verifying enrollment link. Please try again.');
       setStep('error');
+    } finally {
       setLoading(false);
-      setVerificationInProgress(false);
     }
   };
 
@@ -183,19 +113,11 @@ export default function EnrollPage() {
         return;
       }
 
-      // Check if enrollment is expired (24 hours)
-      const tokenCreatedAt = new Date(enrollment.created_at);
-      const now = new Date();
-      const hoursSinceCreation = (now - tokenCreatedAt) / (1000 * 60 * 60);
-
-      if (hoursSinceCreation > 24) {
-        setError('This enrollment link has expired. Please request a new enrollment link.');
+      if (enrollment.is_used) {
+        setError('This enrollment link has already been used.');
         setLoading(false);
         return;
       }
-
-      // Note: We removed the is_used check here to allow users to access the page multiple times
-      // The backend will check is_used when they try to submit their password
 
       // Check if application_id matches (if provided in enrollment)
       if (enrollment.application_id && enrollment.application_id !== applicationId) {
@@ -282,48 +204,83 @@ export default function EnrollPage() {
         // Check for auth errors first
         if (authError) {
           console.error('Auth error in URL:', authError, error_description);
-          setError(`Authentication error: ${error_description || authError}`);
+          setError(`Authentication error: ${error_description || authError}. The link may have expired or been used already.`);
           setStep('error');
           setAuthCreationLoading(false);
           setLoading(false);
           return;
         }
 
+        // Wait a bit for session to be established if this is a magic link
+        if (type === 'magiclink' || type === 'magic_link') {
+          console.log('Magic link detected, waiting for session...');
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+
         const { data: { session } } = await supabase.auth.getSession();
         console.log('Current session:', !!session, 'User:', session?.user?.email);
         console.log('Session metadata:', session?.user?.user_metadata);
+        console.log('URL application_id:', application_id);
 
         // Check if user is authenticated (from magic link)
         if (session?.user) {
           const userAppId = session.user.user_metadata?.application_id || application_id;
-
+          
           if (userAppId) {
             console.log('User authenticated via magic link with app ID:', userAppId);
             setApplicationId(userAppId);
-            // Don't set step yet - let verifyMagicLinkUser do it
             await verifyMagicLinkUser(session.user, userAppId);
           } else {
             console.log('No application ID found in session or query');
-            setError('Application ID not found. Please use the link from your email.');
+            setError('Application ID not found. Please use the link from your email or request a new enrollment link.');
             setStep('error');
+            setAuthCreationLoading(false);
+            setLoading(false);
           }
-        } else if (token && application_id) {
-          console.log('Using token-based enrollment');
-          setEnrollmentToken(token);
-          setApplicationId(application_id);
-          await validateToken(token, application_id);
+        } else if (application_id) {
+          // If we have application_id but no session
+          if (token) {
+            // Token-based enrollment (legacy/backup method)
+            console.log('Using token-based enrollment');
+            setEnrollmentToken(token);
+            setApplicationId(application_id);
+            await validateToken(token, application_id);
+            setStep('password');
+          } else {
+            // Magic link but session not ready yet - wait longer
+            console.log('Magic link without session, waiting longer...');
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            // Check session again
+            const { data: { session: retrySession } } = await supabase.auth.getSession();
+            if (retrySession?.user) {
+              console.log('Session established after retry');
+              const userAppId = retrySession.user.user_metadata?.application_id || application_id;
+              setApplicationId(userAppId);
+              await verifyMagicLinkUser(retrySession.user, userAppId);
+            } else {
+              console.log('No session after retry, link may be invalid');
+              setError('The enrollment link appears to be invalid or expired. Please request a new enrollment link from your email.');
+              setStep('error');
+              setAuthCreationLoading(false);
+              setLoading(false);
+            }
+          }
         } else {
-          console.log('Invalid enrollment link - missing required parameters');
-          setError('Invalid enrollment link. Please check your email for the correct link or request a new one.');
+          console.log('Invalid enrollment link - missing application_id');
+          setError('Invalid enrollment link. Please use the link from your enrollment email or request a new one.');
           setStep('error');
+          setAuthCreationLoading(false);
+          setLoading(false);
         }
       } catch (error) {
         console.error('Error initializing enrollment:', error);
-        setError('Error loading enrollment. Please try again.');
+        setError('Error loading enrollment. Please try again or request a new enrollment link.');
         setStep('error');
-      } finally {
         setAuthCreationLoading(false);
         setLoading(false);
+      } finally {
+        setAuthCreationLoading(false);
       }
     };
 
@@ -340,44 +297,35 @@ export default function EnrollPage() {
     }));
   };
 
-  const handleRequestNewLink = async () => {
-    setRequestingNewLink(true);
-    setError('');
-
-    // Get email from various possible sources
-    const userEmail = formData.email || applicationInfo?.email || router.query.email;
-
-    if (!userEmail) {
-      setError('Unable to determine your email address. Please contact support directly.');
-      setRequestingNewLink(false);
-      return;
-    }
-
-    // Detect current site URL
-    const siteUrl = window.location.origin;
+  const handleRequestNewLink = async (e) => {
+    e.preventDefault();
+    setRequestLoading(true);
+    setRequestMessage('');
 
     try {
-      const response = await fetch('/api/request-enrollment-link', {
+      const response = await fetch('/api/user-request-enrollment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: userEmail,
-          applicationId: applicationId || router.query.application_id
-        })
+        body: JSON.stringify({ email: requestEmail })
       });
 
       const result = await response.json();
 
       if (response.ok) {
-        setMessage('A new enrollment link has been sent to your email. Please check your inbox and click the new link.');
+        setRequestMessage(result.message);
+        setTimeout(() => {
+          setShowRequestModal(false);
+          setRequestEmail('');
+          setRequestMessage('');
+        }, 5000);
       } else {
-        setError(result.error || 'Failed to send new enrollment link. Please contact support.');
+        setRequestMessage(result.error || 'Failed to send enrollment link');
       }
     } catch (error) {
-      console.error('Error requesting new link:', error);
-      setError('An error occurred. Please contact support at support@theoaklinebank.com');
+      console.error('Error requesting enrollment link:', error);
+      setRequestMessage('An error occurred. Please try again.');
     } finally {
-      setRequestingNewLink(false);
+      setRequestLoading(false);
     }
   };
 
@@ -469,7 +417,8 @@ export default function EnrollPage() {
         setMessage('Enrollment completed successfully! Redirecting to login...');
         setStep('success');
         setTimeout(() => {
-          window.location.href = 'https://theoaklinebank.com/login';
+          const loginUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
+          window.location.href = `${loginUrl}/login`;
         }, 2000);
       } else {
         setError(`Error: ${result.error}`);
@@ -497,49 +446,201 @@ export default function EnrollPage() {
   if (step === 'error') {
      return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', backgroundColor: '#f9fafb' }}>
-        <div style={{ textAlign: 'center', maxWidth: '500px', padding: '2rem', backgroundColor: 'white', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
+        <div style={{ textAlign: 'center', maxWidth: '600px', padding: '2rem', backgroundColor: 'white', borderRadius: '12px', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}>
           <div style={{ fontSize: '48px', marginBottom: '1rem' }}>⚠️</div>
-          <h2 style={{ color: '#dc2626', marginBottom: '1rem' }}>Enrollment Error</h2>
+          <h2 style={{ color: '#dc2626', marginBottom: '1rem', fontSize: '24px', fontWeight: 'bold' }}>Enrollment Link Issue</h2>
           {error && (
-            <p style={{ marginBottom: '1.5rem', color: '#374151', lineHeight: '1.6', fontSize: '16px' }}>{error}</p>
+            <p style={{ marginBottom: '1.5rem', color: '#374151', fontSize: '16px', lineHeight: '1.6' }}>{error}</p>
           )}
           {message && (
-            <p style={{ marginBottom: '1.5rem', color: '#059669', lineHeight: '1.6', fontSize: '16px', fontWeight: '600' }}>{message}</p>
+            <p style={{ marginBottom: '1.5rem', color: '#374151', fontSize: '16px', lineHeight: '1.6' }}>{message}</p>
           )}
-          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap', marginTop: '2rem' }}>
+          
+          <div style={{ backgroundColor: '#f0f9ff', padding: '1.5rem', borderRadius: '8px', marginBottom: '2rem', textAlign: 'left' }}>
+            <h3 style={{ color: '#1e40af', marginBottom: '0.75rem', fontSize: '16px', fontWeight: '600' }}>What to do next:</h3>
+            <ul style={{ color: '#374151', fontSize: '14px', lineHeight: '1.8', margin: 0, paddingLeft: '1.5rem' }}>
+              <li>Check your email for the most recent enrollment link</li>
+              <li>Make sure you're using the complete link from the email</li>
+              <li>Request a new enrollment link if yours has expired</li>
+              <li>Contact support if you continue to have issues</li>
+            </ul>
+          </div>
+
+          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
             <button
-              onClick={handleRequestNewLink}
-              disabled={requestingNewLink}
+              onClick={() => setShowRequestModal(true)}
               style={{
                 padding: '16px 32px',
-                backgroundColor: requestingNewLink ? '#9ca3af' : '#1e40af',
+                background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '12px',
+                cursor: 'pointer',
+                fontSize: '18px',
+                fontWeight: '700',
+                boxShadow: '0 6px 20px rgba(30, 64, 175, 0.5)',
+                transition: 'all 0.3s ease',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.transform = 'translateY(-2px)';
+                e.target.style.boxShadow = '0 10px 30px rgba(30, 64, 175, 0.6)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.transform = 'translateY(0)';
+                e.target.style.boxShadow = '0 6px 20px rgba(30, 64, 175, 0.5)';
+              }}
+            >
+              <span style={{ fontSize: '20px' }}>📧</span>
+              Request New Link
+            </button>
+            <button
+              onClick={() => router.push('/')}
+              style={{
+                padding: '14px 28px',
+                backgroundColor: '#6b7280',
                 color: 'white',
                 border: 'none',
                 borderRadius: '8px',
-                cursor: requestingNewLink ? 'not-allowed' : 'pointer',
+                cursor: 'pointer',
                 fontSize: '16px',
-                fontWeight: '600',
-                boxShadow: '0 2px 8px rgba(30, 64, 175, 0.3)',
-                transition: 'all 0.2s'
-              }}
-              onMouseOver={(e) => {
-                if (!requestingNewLink) {
-                  e.target.style.backgroundColor = '#1e3a8a';
-                  e.target.style.transform = 'translateY(-2px)';
-                }
-              }}
-              onMouseOut={(e) => {
-                if (!requestingNewLink) {
-                  e.target.style.backgroundColor = '#1e40af';
-                  e.target.style.transform = 'translateY(0)';
-                }
+                fontWeight: '600'
               }}
             >
-              {requestingNewLink ? '📧 Sending...' : '📧 Request New Enrollment Link'}
+              Go to Homepage
             </button>
           </div>
+
+          {/* Request New Link Modal */}
+          {showRequestModal && (
+            <div style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              zIndex: 1000,
+              padding: '1rem'
+            }}>
+              <div style={{
+                backgroundColor: 'white',
+                padding: '2rem',
+                borderRadius: '12px',
+                maxWidth: '500px',
+                width: '100%',
+                boxShadow: '0 10px 40px rgba(0, 0, 0, 0.2)'
+              }}>
+                <h2 style={{ marginBottom: '1rem', color: '#1e40af', fontSize: '24px' }}>Request New Enrollment Link</h2>
+                <p style={{ marginBottom: '1.5rem', color: '#374151', lineHeight: '1.6' }}>
+                  Enter the email address you used when applying for your account. We'll send you a fresh enrollment link.
+                </p>
+
+                <form onSubmit={handleRequestNewLink}>
+                  <div style={{ marginBottom: '1rem' }}>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#374151' }}>
+                      Email Address:
+                    </label>
+                    <input
+                      type="email"
+                      value={requestEmail}
+                      onChange={(e) => setRequestEmail(e.target.value)}
+                      required
+                      placeholder="your.email@example.com"
+                      style={{
+                        width: '100%',
+                        padding: '12px',
+                        border: '2px solid #d1d5db',
+                        borderRadius: '6px',
+                        fontSize: '16px'
+                      }}
+                    />
+                  </div>
+
+                  {requestMessage && (
+                    <div style={{
+                      padding: '12px',
+                      borderRadius: '6px',
+                      marginBottom: '1rem',
+                      backgroundColor: requestMessage.includes('error') || requestMessage.includes('Failed') || requestMessage.includes('No application') ? '#fee2e2' : '#d1fae5',
+                      color: requestMessage.includes('error') || requestMessage.includes('Failed') || requestMessage.includes('No application') ? '#dc2626' : '#059669',
+                      fontSize: '14px'
+                    }}>
+                      {requestMessage}
+                    </div>
+                  )}
+
+                  <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowRequestModal(false);
+                        setRequestEmail('');
+                        setRequestMessage('');
+                      }}
+                      disabled={requestLoading}
+                      style={{
+                        padding: '14px 28px',
+                        backgroundColor: '#6b7280',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '8px',
+                        cursor: requestLoading ? 'not-allowed' : 'pointer',
+                        fontSize: '16px',
+                        fontWeight: '600',
+                        opacity: requestLoading ? 0.6 : 1,
+                        transition: 'all 0.3s ease'
+                      }}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={requestLoading}
+                      style={{
+                        padding: '16px 32px',
+                        background: requestLoading ? '#9ca3af' : 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '12px',
+                        cursor: requestLoading ? 'not-allowed' : 'pointer',
+                        fontSize: '18px',
+                        fontWeight: '700',
+                        boxShadow: requestLoading ? 'none' : '0 6px 20px rgba(30, 64, 175, 0.5)',
+                        transition: 'all 0.3s ease',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem'
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!requestLoading) {
+                          e.target.style.transform = 'translateY(-2px)';
+                          e.target.style.boxShadow = '0 10px 30px rgba(30, 64, 175, 0.6)';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!requestLoading) {
+                          e.target.style.transform = 'translateY(0)';
+                          e.target.style.boxShadow = '0 6px 20px rgba(30, 64, 175, 0.5)';
+                        }
+                      }}
+                    >
+                      <span style={{ fontSize: '20px' }}>📧</span>
+                      {requestLoading ? 'Sending...' : 'Send New Link'}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
           <p style={{ marginTop: '2rem', fontSize: '14px', color: '#6b7280' }}>
-            Need help? Contact support at <a href="mailto:support@theoaklinebank.com" style={{ color: '#1e40af', textDecoration: 'underline' }}>support@theoaklinebank.com</a>
+            Need immediate help? Contact us at <strong>support@theoaklinebank.com</strong>
           </p>
         </div>
       </div>
@@ -551,13 +652,7 @@ export default function EnrollPage() {
     <div style={{ maxWidth: '500px', margin: '2rem auto', padding: '2rem', backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
       <h1 style={{ textAlign: 'center', marginBottom: '2rem', color: '#1e40af' }}>Complete Your Enrollment</h1>
 
-      {!validToken && step !== 'password' && (
-        <div style={{ textAlign: 'center', padding: '2rem', color: '#6b7280' }}>
-          Invalid or expired enrollment link. Please check your email or request a new link.
-        </div>
-      )}
-
-      {(validToken || step === 'password') && step === 'password' && (
+      {step === 'password' && (
         <>
           {applicationInfo && (
             <div style={{ backgroundColor: '#f0f9ff', padding: '1rem', borderRadius: '6px', marginBottom: '2rem' }}>
@@ -715,15 +810,12 @@ export default function EnrollPage() {
               style={{
                 width: '100%',
                 padding: '12px',
-                background: loading ? '#9ca3af' : 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                backgroundColor: loading ? '#9ca3af' : '#1e40af',
                 color: 'white',
                 border: 'none',
                 borderRadius: '6px',
                 fontSize: '16px',
-                fontWeight: '600',
-                cursor: loading ? 'not-allowed' : 'pointer',
-                boxShadow: loading ? 'none' : '0 4px 12px rgba(16, 185, 129, 0.3)',
-                transition: 'all 0.3s ease'
+                cursor: loading ? 'not-allowed' : 'pointer'
               }}
             >
               {loading ? 'Completing Enrollment...' : 'Complete Enrollment'}

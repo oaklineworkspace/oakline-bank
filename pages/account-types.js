@@ -831,10 +831,11 @@ const styles = {
     transition: 'all 0.2s'
   },
   heroSection: {
-    background: 'linear-gradient(135deg, #1a365d 0%, #2c5282 100%)',
+    background: 'linear-gradient(135deg, #1A3E6F 0%, #2A5490 100%)',
     padding: '4rem 2rem',
     textAlign: 'center',
-    color: 'white'
+    color: 'white',
+    position: 'relative'
   },
   heroContent: {
     maxWidth: '800px',
@@ -913,15 +914,16 @@ const styles = {
     gap: '2rem'
   },
   accountCard: {
-    backgroundColor: 'white',
+    backgroundColor: '#ffffff',
     borderRadius: '16px',
     padding: '2rem',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-    border: '1px solid #e2e8f0',
+    boxShadow: '0 6px 20px rgba(0,0,0,0.12)',
+    border: '2px solid #e2e8f0',
     transition: 'all 0.3s ease',
     position: 'relative',
     overflow: 'visible',
-    margin: '1rem 0'
+    margin: '1rem 0',
+    zIndex: 1
   },
   accountHeader: {
     display: 'flex',
@@ -955,18 +957,21 @@ const styles = {
     marginLeft: 'auto'
   },
   accountDescription: {
-    color: '#64748b',
-    lineHeight: '1.6',
-    marginBottom: '1.5rem'
+    color: '#374151',
+    lineHeight: '1.7',
+    marginBottom: '1.5rem',
+    fontSize: '1rem',
+    fontWeight: '400'
   },
   accountDetails: {
     display: 'grid',
     gridTemplateColumns: '1fr 1fr',
     gap: '1rem',
     marginBottom: '1.5rem',
-    padding: '1rem',
-    backgroundColor: '#f8fafc',
-    borderRadius: '8px'
+    padding: '1.5rem',
+    backgroundColor: '#f1f5f9',
+    borderRadius: '12px',
+    border: '1px solid #e2e8f0'
   },
   detailItem: {
     display: 'flex',
@@ -1040,13 +1045,17 @@ const styles = {
     display: 'block',
     width: '100%',
     textAlign: 'center',
-    padding: '1rem',
-    backgroundColor: '#1a365d',
+    padding: '1.25rem',
+    backgroundColor: '#1A3E6F',
     color: 'white',
     textDecoration: 'none',
-    borderRadius: '8px',
-    fontWeight: '600',
-    transition: 'all 0.2s'
+    borderRadius: '12px',
+    fontWeight: '700',
+    fontSize: '1.1rem',
+    transition: 'all 0.3s ease',
+    boxShadow: '0 4px 12px rgba(26, 62, 111, 0.3)',
+    border: 'none',
+    cursor: 'pointer'
   },
   ctaSection: {
     backgroundColor: '#1a365d',

@@ -92,7 +92,7 @@ const STATES_BY_COUNTRY = {
   ],
   BR: [
     'Acre', 'Alagoas', 'Amapá', 'Amazonas', 'Bahia', 'Ceará', 'Distrito Federal', 'Espírito Santo',
-    'Goiás', 'Maranhão', 'Mato Grosso', 'Mato Grosso do Sul', 'Minas Gerais', 'Pará', 'Paraíba',
+    'Goiás', 'Maranhão', 'Mato Grosso', 'Mato Grosso do Sul', 'Minas Gerais', 'Para', 'Paraíba',
     'Paraná', 'Pernambuco', 'Piauí', 'Rio de Janeiro', 'Rio Grande do Norte', 'Rio Grande do Sul',
     'Rondônia', 'Roraima', 'Santa Catarina', 'São Paulo', 'Sergipe', 'Tocantins'
   ]
@@ -110,7 +110,7 @@ const MAJOR_CITIES_BY_STATE = {
 
 export default function Apply() {
   const router = useRouter();
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const [showManualCountry, setShowManualCountry] = useState(false);
@@ -118,6 +118,13 @@ export default function Apply() {
   const [showManualCity, setShowManualCity] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  const [verificationEmail, setVerificationEmail] = useState('');
+  const [verificationCode, setVerificationCode] = useState('');
+  const [isEmailVerified, setIsEmailVerified] = useState(false);
+  const [codeSent, setCodeSent] = useState(false);
+  const [resendTimer, setResendTimer] = useState(0);
+  const [verifiedEmailAddress, setVerifiedEmailAddress] = useState('');
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -151,11 +158,19 @@ export default function Apply() {
   };
 
   const getEffectiveState = () => {
-    return showManualState ? formData.manualState : formData.state;
+    // Return manual state if manual entry is being used, otherwise return selected state
+    if (showManualState || shouldShowManualState()) {
+      return formData.manualState;
+    }
+    return formData.state;
   };
 
   const getEffectiveCity = () => {
-    return showManualCity ? formData.manualCity : formData.city;
+    // Return manual city if manual entry is being used, otherwise return selected city
+    if (showManualCity || shouldShowManualCity()) {
+      return formData.manualCity;
+    }
+    return formData.city;
   };
 
   const getAvailableStates = () => {
@@ -177,6 +192,98 @@ export default function Apply() {
     const state = getEffectiveState();
     return !MAJOR_CITIES_BY_STATE[state] || showManualCity;
   };
+
+  const handleSendVerificationCode = async () => {
+    if (!verificationEmail.trim()) {
+      setErrors({ verificationEmail: 'Email is required' });
+      return;
+    }
+
+    if (!validateEmail(verificationEmail)) {
+      setErrors({ verificationEmail: 'Invalid email format' });
+      return;
+    }
+
+    setLoading(true);
+    setErrors({});
+
+    try {
+      const response = await fetch('/api/send-verification-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: verificationEmail.trim().toLowerCase() })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setErrors({ verificationEmail: data.error || 'Failed to send verification code' });
+        setLoading(false);
+        return;
+      }
+
+      setCodeSent(true);
+      setResendTimer(60);
+      setErrors({});
+
+    } catch (error) {
+      console.error('Error sending verification code:', error);
+      setErrors({ verificationEmail: 'Failed to send verification code. Please try again.' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyEmail = async () => {
+    if (!verificationCode.trim()) {
+      setErrors({ verificationCode: 'Verification code is required' });
+      return;
+    }
+
+    setLoading(true);
+    setErrors({});
+
+    try {
+      console.log('Verifying email:', verificationEmail.trim().toLowerCase());
+      const response = await fetch('/api/verify-email-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: verificationEmail.trim().toLowerCase(),
+          code: verificationCode.trim()
+        })
+      });
+
+      const data = await response.json();
+      console.log('Verification response:', data);
+
+      if (!response.ok) {
+        setErrors({ verificationCode: data.error || 'Invalid verification code' });
+        setLoading(false);
+        return;
+      }
+
+      console.log('✅ Email verified successfully');
+      setIsEmailVerified(true);
+      setVerifiedEmailAddress(verificationEmail.trim().toLowerCase());
+      setFormData(prev => ({ ...prev, email: verificationEmail.trim().toLowerCase() }));
+      setCurrentStep(1);
+      setErrors({});
+
+    } catch (error) {
+      console.error('Error verifying email:', error);
+      setErrors({ verificationCode: 'Failed to verify email. Please try again.' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (resendTimer > 0) {
+      const timer = setTimeout(() => setResendTimer(resendTimer - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [resendTimer]);
 
   const validateStep = (step) => {
     const newErrors = {};
@@ -207,8 +314,12 @@ export default function Apply() {
 
     if (step === 2) {
       if (!formData.address.trim()) newErrors.address = 'Address is required';
-      if (!getEffectiveCity()) newErrors.city = 'City is required';
-      if (!getEffectiveState()) newErrors.state = 'State/Province is required';
+
+      const effectiveCity = getEffectiveCity();
+      const effectiveState = getEffectiveState();
+
+      if (!effectiveCity || !effectiveCity.trim()) newErrors.city = 'City is required';
+      if (!effectiveState || !effectiveState.trim()) newErrors.state = 'State/Province is required';
       if (!formData.zipCode.trim()) newErrors.zipCode = 'ZIP/Postal code is required';
     }
 
@@ -289,10 +400,49 @@ export default function Apply() {
   const handleSubmit = async () => {
     if (!validateStep(3)) return;
 
+    // Ensure the email hasn't been changed from the verified one
+    if (!isEmailVerified || formData.email.trim().toLowerCase() !== verifiedEmailAddress) {
+      setErrors({ submit: 'Please use the verified email address or verify your new email first.' });
+      return;
+    }
+
     setLoading(true);
     setErrors({});
 
     try {
+      const normalizedEmail = formData.email.trim().toLowerCase();
+      
+      // CRITICAL: Double-check email verification status in database BEFORE attempting insert
+      console.log('Checking email verification status before submission...');
+      const verifyResponse = await fetch('/api/check-email-verification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: normalizedEmail })
+      });
+
+      const verifyResult = await verifyResponse.json();
+
+      if (!verifyResponse.ok || !verifyResult.verified) {
+        console.error('Email verification check failed:', verifyResult);
+        setErrors({ submit: 'Email verification has expired or is invalid. Please go back to Step 1 and verify your email again.' });
+        setLoading(false);
+        return;
+      }
+
+      console.log('✅ Email verification confirmed:', verifyResult);
+
+      // Debug: Check the actual database state
+      const debugResponse = await fetch('/api/debug-email-verification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: normalizedEmail })
+      });
+      const debugData = await debugResponse.json();
+      console.log('📊 Database state before insert:', debugData);
+
+      // Wait a moment to ensure database trigger can see the verification
+      await new Promise(resolve => setTimeout(resolve, 500));
+
       const effectiveCountry = getEffectiveCountry();
       const effectiveState = getEffectiveState();
       const effectiveCity = getEffectiveCity();
@@ -337,276 +487,55 @@ export default function Apply() {
         .single();
 
       if (existingApp) {
-        setErrors({ submit: 'An account with this email already exists. Please try another email or log in.' });
+        setErrors({ submit: 'An application with this email already exists. Please try another email or contact support.' });
         setLoading(false);
         return;
       }
 
-      // STEP 1: First insert the application to get the application ID
-      let applicationId = null;
-      
-      try {
-        const { data: applicationData, error: applicationError } = await supabase
-          .from('applications')
-          .insert([{
-            first_name: formData.firstName.trim(),
-            middle_name: formData.middleName.trim() || null,
-            last_name: formData.lastName.trim(),
-            mothers_maiden_name: formData.mothersMaidenName.trim() || null,
-            email: formData.email.trim().toLowerCase(),
-            phone: formData.phone.trim(),
-            date_of_birth: formData.dateOfBirth,
-            country: effectiveCountry,
-            ssn: effectiveCountry === 'US' ? formData.ssn.trim() : null,
-            id_number: effectiveCountry !== 'US' ? formData.idNumber.trim() : null,
-            address: formData.address.trim(),
-            city: effectiveCity,
-            state: effectiveState,
-            zip_code: formData.zipCode.trim(),
-            employment_status: formData.employmentStatus,
-            annual_income: formData.annualIncome,
-            account_types: mappedAccountTypes,
-            agree_to_terms: formData.agreeToTerms,
-            application_status: 'pending',
-            submitted_at: new Date().toISOString()
-          }])
-          .select()
-          .single();
-
-        if (applicationError) {
-          console.error('Application creation error:', applicationError);
-          
-          if (applicationError.code === '23505') {
-            setErrors({ submit: 'An account with this email already exists. Please try another email or log in.' });
-            setLoading(false);
-            return;
-          }
-          
-          throw new Error('Failed to create application: ' + applicationError.message);
-        }
-
-        applicationId = applicationData.id;
-        console.log('Application created successfully:', applicationId);
-      } catch (appError) {
-        console.error('Application creation failed:', appError);
-        setErrors({ submit: appError.message || 'Failed to create application. Please try again.' });
-        setLoading(false);
-        return;
-      }
-
-      // STEP 2: Create Supabase Auth user
-      console.log('Creating auth user for email:', formData.email.trim().toLowerCase());
-      let userId = null;
-
-      try {
-        const authResponse = await fetch('/api/create-auth-user', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: formData.email.trim().toLowerCase(),
-            application_id: applicationId
-          })
-        });
-
-        const authResult = await authResponse.json();
-
-        if (!authResponse.ok) {
-          console.error('Failed to create auth user:', authResult);
-          
-          // If auth creation failed, clean up the application record
-          await supabase
-            .from('applications')
-            .delete()
-            .eq('id', applicationId);
-          
-          throw new Error(authResult.error || 'Failed to create user account');
-        }
-
-        userId = authResult.user.auth_id;
-        console.log('Auth user created successfully:', userId);
-        
-        // Update application with user_id
-        const { error: appUpdateError } = await supabase
-          .from('applications')
-          .update({ user_id: userId })
-          .eq('id', applicationId);
-        
-        if (appUpdateError) {
-          console.error('Error updating application with user_id:', appUpdateError);
-        }
-          
-      } catch (authError) {
-        console.error('Auth user creation error:', authError);
-        setErrors({ submit: 'Failed to create user account: ' + authError.message });
-        setLoading(false);
-        return;
-      }
-
-      // Profile will be created during enrollment process
-      console.log('Skipping profile creation - will be handled during enrollment');
-
-      // Helper function to generate unique account number
-      const generateAccountNumber = () => {
-        // Generate a random 10-digit number (ensuring it doesn't start with 0)
-        return (Math.floor(Math.random() * 9000000000) + 1000000000).toString();
-      };
-
-      // Create accounts for each selected account type
-      const accountNumbers = [];
-      const accountTypes = [];
-      const createdAccounts = [];
-
-      for (const accountTypeId of formData.accountTypes) {
-        const accountType = ACCOUNT_TYPES.find(at => at.id === accountTypeId);
-        let accountNumber = generateAccountNumber();
-        
-        // Keep generating until we get a unique one
-        let isUnique = false;
-        let attempts = 0;
-        while (!isUnique && attempts < 100) {
-          const { data: existing } = await supabase
-            .from('accounts')
-            .select('account_number')
-            .eq('account_number', accountNumber)
-            .single();
-          
-          if (!existing) {
-            isUnique = true;
-          } else {
-            accountNumber = generateAccountNumber();
-            attempts++;
-          }
-        }
-
-        if (attempts >= 100) {
-          throw new Error('Could not generate unique account number');
-        }
-
-        const dbAccountType = enumMapping[accountType.name] || accountType.name.toLowerCase().replace(/\s+/g, '_');
-
-        const { data: newAccount, error: accountError } = await supabase
-          .from('accounts')
-          .insert([{
-            user_id: userId,
-            application_id: applicationId,
-            account_number: accountNumber,
-            account_type: dbAccountType,
-            balance: 0.00,
-            routing_number: '075915826',
-            status: 'pending'
-          }])
-          .select()
-          .single();
-
-        if (accountError) {
-          console.error('Account creation error:', accountError);
-          throw accountError;
-        } else {
-          accountNumbers.push(accountNumber);
-          accountTypes.push(accountType.name);
-          createdAccounts.push(newAccount);
-        }
-      }
-
-      // Generate enrollment token
-      const enrollmentToken = `enroll_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
-
-      // Create enrollment record with proper error handling
-      let enrollmentRecord = null;
-      let enrollmentError = null;
-
-      console.log('Creating enrollment record for:', formData.email);
-
-      // First, check if enrollment already exists
-      const { data: existingEnrollment } = await supabase
-        .from('enrollments')
-        .select('*')
-        .eq('email', formData.email.trim().toLowerCase())
-        .eq('application_id', applicationId)
+      // Insert the application with user_id = NULL (admin will create user later)
+      console.log('Creating application without user_id for email:', normalizedEmail);
+      const { data: applicationData, error: applicationError } = await supabase
+        .from('applications')
+        .insert([{
+          user_id: null, // User will be created by admin during approval
+          first_name: formData.firstName.trim(),
+          middle_name: formData.middleName.trim() || null,
+          last_name: formData.lastName.trim(),
+          mothers_maiden_name: formData.mothersMaidenName.trim() || null,
+          email: normalizedEmail, // Use the verified email
+          phone: formData.phone.trim(),
+          date_of_birth: formData.dateOfBirth,
+          country: effectiveCountry,
+          ssn: effectiveCountry === 'US' ? formData.ssn.trim() : null,
+          id_number: effectiveCountry !== 'US' ? formData.idNumber.trim() : null,
+          address: formData.address.trim(),
+          city: effectiveCity,
+          state: effectiveState,
+          zip_code: formData.zipCode.trim(),
+          employment_status: formData.employmentStatus,
+          annual_income: formData.annualIncome,
+          account_types: mappedAccountTypes,
+          agree_to_terms: formData.agreeToTerms,
+          application_status: 'pending',
+          submitted_at: new Date().toISOString()
+        }])
+        .select()
         .single();
 
-      if (existingEnrollment) {
-        // Update existing enrollment with new token
-        const { data: updatedEnrollment, error: updateError } = await supabase
-          .from('enrollments')
-          .update({
-            token: enrollmentToken,
-            is_used: false,
-            user_id: userId,
-            created_at: new Date().toISOString()
-          })
-          .eq('email', formData.email.trim().toLowerCase())
-          .eq('application_id', applicationId)
-          .select()
-          .single();
+      if (applicationError) {
+        console.error('Application creation error:', applicationError);
 
-        if (updateError) {
-          console.error('Error updating enrollment record:', updateError);
-          enrollmentError = updateError;
-        } else {
-          enrollmentRecord = updatedEnrollment;
-          console.log('Updated existing enrollment record');
+        if (applicationError.code === '23505') {
+          setErrors({ submit: 'An application with this email already exists. Please try another email or contact support.' });
+          setLoading(false);
+          return;
         }
-      } else {
-        // Create new enrollment record
-        const { data: newEnrollmentData, error: insertError } = await supabase
-          .from('enrollments')
-          .insert([{
-            email: formData.email.trim().toLowerCase(),
-            token: enrollmentToken,
-            is_used: false,
-            application_id: applicationId,
-            user_id: userId
-          }])
-          .select()
-          .single();
 
-        if (insertError) {
-          console.error('Error creating enrollment record:', insertError);
-          enrollmentError = insertError;
-        } else {
-          enrollmentRecord = newEnrollmentData;
-          console.log('Created new enrollment record with application_id:', applicationId);
-        }
+        throw new Error('Failed to create application: ' + applicationError.message);
       }
 
-      // Auth user and accounts were created - enrollment will handle profile creation
-
-      // Send welcome email with enrollment link using resend-enrollment API
-      try {
-        // Detect current site URL dynamically
-        const siteUrl = window.location.origin;
-        
-        console.log('Sending welcome email to:', formData.email.trim().toLowerCase());
-        console.log('Application ID:', applicationId);
-        
-        const emailResponse = await fetch('/api/resend-enrollment', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            applicationId: applicationId,
-            email: formData.email.trim().toLowerCase(),
-            firstName: formData.firstName.trim(),
-            middleName: formData.middleName.trim() || '',
-            lastName: formData.lastName.trim(),
-            country: effectiveCountry
-          })
-        });
-
-        const emailResult = await emailResponse.json();
-        
-        if (!emailResponse.ok) {
-          console.error('Failed to send welcome email:', emailResult);
-          // Log error but don't fail the application
-          console.warn('⚠️ Email failed but application was successful');
-        } else {
-          console.log('✅ Welcome email sent successfully:', emailResult);
-        }
-      } catch (emailError) {
-        console.error('Email sending error:', emailError);
-        // Don't fail the entire process for email issues
-        console.warn('⚠️ Email error but application was successful');
-      }
+      console.log('✅ Application created successfully:', applicationData.id);
+      console.log('Application will be reviewed by admin who will create user account and send credentials');
 
       // Show success screen
       setSubmitSuccess(true);
@@ -614,25 +543,24 @@ export default function Apply() {
 
     } catch (error) {
       console.error('Application submission error:', error);
-      
+
       // Enhanced error handling with specific messages
       let errorMessage = 'Failed to submit application. Please try again.';
-      
+
       if (error.message) {
-        if (error.message.includes('duplicate key value violates unique constraint "enrollments_email_key"') ||
-            error.message.includes('duplicate key value violates unique constraint "applications_email_key"')) {
-          errorMessage = 'An account with this email already exists. Please try another email or log in.';
+        if (error.message.includes('duplicate key value violates unique constraint')) {
+          errorMessage = 'An application with this email already exists. Please try another email or contact support.';
         } else if (error.message.includes('invalid input syntax')) {
           errorMessage = 'Invalid data format. Please check all fields and try again.';
-        } else if (error.message.includes('foreign key constraint')) {
-          errorMessage = 'Database constraint error. Please contact support.';
+        } else if (error.message.includes('Email must be verified')) {
+          errorMessage = 'Email verification is required. Please verify your email first.';
         } else if (error.message.includes('network') || error.message.includes('fetch')) {
           errorMessage = 'Network error. Please check your connection and try again.';
         } else {
           errorMessage = `Error: ${error.message}`;
         }
       }
-      
+
       setErrors({ submit: errorMessage });
     } finally {
       setLoading(false);
@@ -674,8 +602,7 @@ export default function Apply() {
     logoImage: {
       height: '50px',
       width: 'auto',
-      objectFit: 'contain',
-      filter: 'brightness(0) invert(1)'
+      objectFit: 'contain'
     },
     bankName: {
       fontSize: '1.5rem',
@@ -969,17 +896,24 @@ export default function Apply() {
       border: '2px solid #e2e8f0',
       marginTop: '1.5rem',
       position: 'relative',
-      zIndex: 10
+      zIndex: 1,
+      backgroundColor: 'white'
     },
     checkbox: {
       width: '20px',
       height: '20px',
+      minWidth: '20px',
+      minHeight: '20px',
       marginTop: '2px',
       cursor: 'pointer',
       accentColor: '#1A3E6F',
-      transform: 'scale(1.2)',
+      transform: 'scale(1.3)',
       position: 'relative',
-      zIndex: 11
+      zIndex: 11,
+      flexShrink: 0,
+      appearance: 'auto',
+      WebkitAppearance: 'checkbox',
+      MozAppearance: 'checkbox'
     },
     checkboxLabel: {
       fontSize: '15px',
@@ -1061,8 +995,8 @@ export default function Apply() {
       marginTop: '1rem'
     },
     errorAlertText: {
-      color: '#dc2626',
-      fontSize: '14px',
+      color: '#ef4444',
+      fontSize: '13px',
       fontWeight: '500'
     },
     successAlert: {
@@ -1116,7 +1050,8 @@ export default function Apply() {
     },
     footerLogoImg: {
       height: '40px',
-      width: 'auto'
+      width: 'auto',
+      objectFit: 'contain'
     },
     footerBankName: {
       fontSize: '1.2rem',
@@ -1238,10 +1173,10 @@ export default function Apply() {
         <header style={styles.header}>
           <div style={styles.headerContent}>
             <Link href="/" style={styles.logo}>
-              <img src="/images/logo-primary.png" alt="Oakline Bank" style={styles.logoImage} />
+              <img src="/images/Oakline_Bank_logo_design_c1b04ae0.png" alt="Oakline Bank" style={styles.logoImage} />
               <div>
                 <div style={styles.bankName}>Oakline Bank</div>
-                <div style={styles.bankTagline}>Open Your Account Today</div>
+                <div style={styles.bankTagline}>Your Financial Partner</div>
               </div>
             </Link>
 
@@ -1272,11 +1207,11 @@ export default function Apply() {
             </div>
           </div>
 
-          {/* Scrolling Text for Account Opening */}
+          {/* Scrolling Welcome Message */}
           <div style={styles.scrollingAccountContainer}>
-            <span style={styles.scrollingAccountText}>
-              Open your Oakline Bank account online in minutes! Enjoy seamless banking, competitive rates, and personalized service. Start your financial journey today.
-            </span>
+            <div style={styles.scrollingAccountText}>
+              Welcome to Oakline Bank - Your trusted financial partner since 1995 • Explore all 23 account types with detailed benefits • Join over 500,000+ satisfied customers • Award-winning mobile app • FDIC Insured up to $250,000 • Rated #1 Customer Service
+            </div>
           </div>
 
           {/* Progress Indicator */}
@@ -1284,10 +1219,27 @@ export default function Apply() {
             <div style={styles.progressBar}>
               <div style={{
                 ...styles.progressFill,
-                width: currentStep === 1 ? '33%' : currentStep === 2 ? '66%' : '100%'
+                width: currentStep === 0 ? '25%' : currentStep === 1 ? '50%' : currentStep === 2 ? '75%' : currentStep === 4 ? '100%' : '0%'
               }}></div>
             </div>
             <div style={styles.progressSteps}>
+              <div style={{...styles.progressStep, ...(currentStep >= 0 ? styles.progressStepActive : {})}}>
+                <div style={{
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '50%',
+                  backgroundColor: currentStep >= 0 ? '#FFC857' : 'rgba(255, 200, 87, 0.3)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontWeight: '700',
+                  fontSize: '18px',
+                  color: currentStep >= 0 ? '#1A3E6F' : 'rgba(255, 255, 255, 0.7)',
+                  border: currentStep >= 0 ? '3px solid #FFC857' : '3px solid rgba(255, 200, 87, 0.3)',
+                  transition: 'all 0.3s ease'
+                }}>✉</div>
+                <span style={{fontWeight: currentStep === 0 ? '700' : '500'}}>Verify Email</span>
+              </div>
               <div style={{...styles.progressStep, ...(currentStep >= 1 ? styles.progressStepActive : {})}}>
                 <div style={{
                   width: '40px',
@@ -1302,7 +1254,7 @@ export default function Apply() {
                   color: currentStep >= 1 ? '#1A3E6F' : 'rgba(255, 255, 255, 0.7)',
                   border: currentStep >= 1 ? '3px solid #FFC857' : '3px solid rgba(255, 200, 87, 0.3)',
                   transition: 'all 0.3s ease'
-                }}>1</div>
+                }}>👤</div>
                 <span style={{fontWeight: currentStep === 1 ? '700' : '500'}}>Personal Info</span>
               </div>
               <div style={{...styles.progressStep, ...(currentStep >= 2 ? styles.progressStepActive : {})}}>
@@ -1319,8 +1271,8 @@ export default function Apply() {
                   color: currentStep >= 2 ? '#1A3E6F' : 'rgba(255, 255, 255, 0.7)',
                   border: currentStep >= 2 ? '3px solid #FFC857' : '3px solid rgba(255, 200, 87, 0.3)',
                   transition: 'all 0.3s ease'
-                }}>2</div>
-                <span style={{fontWeight: currentStep === 2 ? '700' : '500'}}>Address Details</span>
+                }}>🏠</div>
+                <span style={{fontWeight: currentStep === 2 ? '700' : '500'}}>Address</span>
               </div>
               <div style={{...styles.progressStep, ...(currentStep >= 3 ? styles.progressStepActive : {})}}>
                 <div style={{
@@ -1336,8 +1288,8 @@ export default function Apply() {
                   color: currentStep >= 3 ? '#1A3E6F' : 'rgba(255, 255, 255, 0.7)',
                   border: currentStep >= 3 ? '3px solid #FFC857' : '3px solid rgba(255, 200, 87, 0.3)',
                   transition: 'all 0.3s ease'
-                }}>3</div>
-                <span style={{fontWeight: currentStep === 3 ? '700' : '500'}}>Review & Submit</span>
+                }}>💼</div>
+                <span style={{fontWeight: currentStep === 3 ? '700' : '500'}}>Review</span>
               </div>
             </div>
           </div>
@@ -1346,6 +1298,11 @@ export default function Apply() {
         {/* Form Card */}
         <div style={styles.formCard}>
           <h2 style={styles.sectionTitle}>
+            {currentStep === 0 && (
+              <>
+                <span>✉️</span> Email Verification
+              </>
+            )}
             {currentStep === 1 && (
               <>
                 <span>👤</span> Personal Information
@@ -1361,7 +1318,188 @@ export default function Apply() {
                 <span>💼</span> Account & Employment
               </>
             )}
+            {currentStep === 4 && (
+              <>
+                <span>🎉</span> Application Submitted
+              </>
+            )}
           </h2>
+
+          {/* Step 0: Email Verification */}
+          {currentStep === 0 && (
+            <div style={{
+              maxWidth: '500px',
+              margin: '0 auto',
+              padding: '2rem 0'
+            }}>
+              <p style={{
+                textAlign: 'center',
+                color: '#666',
+                fontSize: '16px',
+                marginBottom: '2rem',
+                lineHeight: '1.6'
+              }}>
+                To ensure the security of your application, please verify your email address. We'll send you a verification code that you'll need to enter below.
+              </p>
+
+              {!codeSent ? (
+                <div style={styles.formGrid}>
+                  <div style={styles.inputGroup}>
+                    <label style={styles.label}>
+                      Email Address <span style={styles.required}>*</span>
+                    </label>
+                    <input
+                      type="email"
+                      value={verificationEmail}
+                      onChange={(e) => {
+                        setVerificationEmail(e.target.value);
+                        if (errors.verificationEmail) {
+                          setErrors({});
+                        }
+                      }}
+                      style={{
+                        ...styles.input,
+                        ...(errors.verificationEmail ? styles.inputError : {})
+                      }}
+                      placeholder="your.email@example.com"
+                      disabled={loading}
+                    />
+                    {errors.verificationEmail && (
+                      <div style={styles.errorMessage}>⚠️ {errors.verificationEmail}</div>
+                    )}
+                  </div>
+
+                  <button
+                    onClick={handleSendVerificationCode}
+                    disabled={loading}
+                    style={{
+                      ...styles.button,
+                      ...styles.primaryButton,
+                      ...(loading ? styles.buttonDisabled : {})
+                    }}
+                  >
+                    {loading ? 'Sending...' : '📧 Send Verification Code'}
+                  </button>
+                </div>
+              ) : (
+                <div style={styles.formGrid}>
+                  <div style={{
+                    backgroundColor: '#f0fdf4',
+                    border: '2px solid #86efac',
+                    borderRadius: '12px',
+                    padding: '1rem',
+                    marginBottom: '1.5rem',
+                    textAlign: 'center'
+                  }}>
+                    <div style={{
+                      fontSize: '14px',
+                      color: '#16a34a',
+                      fontWeight: '600'
+                    }}>
+                      ✅ Verification code sent to:
+                    </div>
+                    <div style={{
+                      fontSize: '16px',
+                      color: '#15803d',
+                      fontWeight: '700',
+                      marginTop: '0.5rem'
+                    }}>
+                      {verificationEmail}
+                    </div>
+                  </div>
+
+                  <div style={styles.inputGroup}>
+                    <label style={styles.label}>
+                      Verification Code <span style={styles.required}>*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={verificationCode}
+                      onChange={(e) => {
+                        setVerificationCode(e.target.value);
+                        if (errors.verificationCode) {
+                          setErrors({});
+                        }
+                      }}
+                      style={{
+                        ...styles.input,
+                        ...(errors.verificationCode ? styles.inputError : {}),
+                        fontSize: '24px',
+                        textAlign: 'center',
+                        letterSpacing: '0.5rem',
+                        fontFamily: 'monospace'
+                      }}
+                      placeholder="000000"
+                      maxLength="6"
+                      disabled={loading}
+                    />
+                    {errors.verificationCode && (
+                      <div style={styles.errorMessage}>⚠️ {errors.verificationCode}</div>
+                    )}
+                    <p style={{
+                      fontSize: '13px',
+                      color: '#666',
+                      marginTop: '0.5rem',
+                      textAlign: 'center'
+                    }}>
+                      Please check your email and enter the 6-digit code we sent you.
+                    </p>
+                  </div>
+
+                  <div style={{
+                    display: 'flex',
+                    gap: '1rem',
+                    flexDirection: 'column'
+                  }}>
+                    <button
+                      onClick={handleVerifyEmail}
+                      disabled={loading || !verificationCode}
+                      style={{
+                        ...styles.button,
+                        ...styles.primaryButton,
+                        ...(loading || !verificationCode ? styles.buttonDisabled : {})
+                      }}
+                    >
+                      {loading ? 'Verifying...' : '✓ Verify Email'}
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        if (resendTimer === 0) {
+                          handleSendVerificationCode();
+                        }
+                      }}
+                      disabled={loading || resendTimer > 0}
+                      style={{
+                        ...styles.button,
+                        ...styles.secondaryButton,
+                        ...(loading || resendTimer > 0 ? styles.buttonDisabled : {})
+                      }}
+                    >
+                      {resendTimer > 0 ? `Resend Code (${resendTimer}s)` : '🔄 Resend Code'}
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setCodeSent(false);
+                        setVerificationCode('');
+                        setVerificationEmail('');
+                        setErrors({});
+                      }}
+                      disabled={loading}
+                      style={{
+                        ...styles.button,
+                        ...styles.outlineButton,
+                        ...(loading ? styles.buttonDisabled : {})
+                      }}
+                    >
+                      ✏️ Change Email Address
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Step 1: Personal Information */}
           {currentStep === 1 && (
@@ -1443,12 +1581,27 @@ export default function Apply() {
                   name="email"
                   value={formData.email}
                   onChange={handleInputChange}
+                  readOnly={isEmailVerified}
                   style={{
                     ...styles.input,
-                    ...(errors.email ? styles.inputError : {})
+                    ...(errors.email ? styles.inputError : {}),
+                    ...(isEmailVerified ? { backgroundColor: '#f0fdf4', cursor: 'not-allowed' } : {})
                   }}
                   placeholder="Enter your email address"
                 />
+                {isEmailVerified && (
+                  <div style={{
+                    fontSize: '13px',
+                    color: '#16a34a',
+                    fontWeight: '600',
+                    marginTop: '4px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}>
+                    ✅ Email verified
+                  </div>
+                )}
                 {errors.email && (
                   <div style={styles.errorMessage}>⚠️ {errors.email}</div>
                 )}
@@ -1586,8 +1739,13 @@ export default function Apply() {
                     <input
                       type="text"
                       name="manualCity"
-                      value={formData.manualCity}
-                      onChange={handleInputChange}
+                      value={formData.manualCity || ''}
+                      onChange={(e) => {
+                        handleInputChange(e);
+                        if (errors.city) {
+                          setErrors(prev => ({ ...prev, city: '' }));
+                        }
+                      }}
                       style={{
                         ...styles.input,
                         ...(errors.city ? styles.inputError : {})
@@ -1597,8 +1755,13 @@ export default function Apply() {
                   ) : (
                     <select
                       name="city"
-                      value={formData.city}
-                      onChange={handleInputChange}
+                      value={formData.city || ''}
+                      onChange={(e) => {
+                        handleInputChange(e);
+                        if (errors.city) {
+                          setErrors(prev => ({ ...prev, city: '' }));
+                        }
+                      }}
                       style={{
                         ...styles.select,
                         ...(errors.city ? styles.inputError : {})
@@ -1616,6 +1779,7 @@ export default function Apply() {
                       onClick={() => {
                         setShowManualCity(!showManualCity);
                         setFormData(prev => ({ ...prev, city: '', manualCity: '' }));
+                        setErrors(prev => ({ ...prev, city: '' }));
                       }}
                       style={styles.toggleButton}
                     >
@@ -1635,8 +1799,13 @@ export default function Apply() {
                     <input
                       type="text"
                       name="manualState"
-                      value={formData.manualState}
-                      onChange={handleInputChange}
+                      value={formData.manualState || ''}
+                      onChange={(e) => {
+                        handleInputChange(e);
+                        if (errors.state) {
+                          setErrors(prev => ({ ...prev, state: '' }));
+                        }
+                      }}
                       style={{
                         ...styles.input,
                         ...(errors.state ? styles.inputError : {})
@@ -1646,8 +1815,13 @@ export default function Apply() {
                   ) : (
                     <select
                       name="state"
-                      value={formData.state}
-                      onChange={handleInputChange}
+                      value={formData.state || ''}
+                      onChange={(e) => {
+                        handleInputChange(e);
+                        if (errors.state) {
+                          setErrors(prev => ({ ...prev, state: '' }));
+                        }
+                      }}
                       style={{
                         ...styles.select,
                         ...(errors.state ? styles.inputError : {})
@@ -1666,6 +1840,7 @@ export default function Apply() {
                         setShowManualState(!showManualState);
                         setFormData(prev => ({ ...prev, state: '', manualState: '', city: '', manualCity: '' }));
                         setShowManualCity(false);
+                        setErrors(prev => ({ ...prev, state: '', city: '' }));
                       }}
                       style={styles.toggleButton}
                     >
@@ -1708,7 +1883,7 @@ export default function Apply() {
               background: 'white',
               borderRadius: '20px',
               overflow: 'hidden',
-              animation: 'fadeInScale 0.6s ease'
+              animation: 'fadeInUp 0.6s ease'
             }}>
               {/* Header Section with Oakline Branding */}
               <div style={{
@@ -1736,13 +1911,13 @@ export default function Apply() {
                     Oakline Bank
                   </div>
                 </div>
-                
+
                 <div style={{
                   fontSize: '80px',
                   marginBottom: '1rem',
                   animation: 'bounce 1s ease'
                 }}>✅</div>
-                
+
                 <h2 style={{
                   fontSize: 'clamp(28px, 5vw, 36px)',
                   marginBottom: '1rem',
@@ -1750,7 +1925,7 @@ export default function Apply() {
                 }}>
                   Application Submitted Successfully!
                 </h2>
-                
+
                 <p style={{
                   fontSize: 'clamp(16px, 3vw, 18px)',
                   marginBottom: '0',
@@ -1776,7 +1951,7 @@ export default function Apply() {
                     marginBottom: '1.5rem',
                     fontWeight: '700'
                   }}>📧 What Happens Next?</h3>
-                  
+
                   <div style={{
                     textAlign: 'left',
                     maxWidth: '600px',
@@ -1804,13 +1979,13 @@ export default function Apply() {
                         flexShrink: 0
                       }}>1</div>
                       <div>
-                        <strong style={{ color: '#1A3E6F', fontSize: '18px' }}>Check Your Email</strong>
+                        <strong style={{ color: '#1A3E6F', fontSize: '18px' }}>Application Review</strong>
                         <p style={{ margin: '0.5rem 0 0 0', color: '#64748b', fontSize: '15px', lineHeight: '1.6' }}>
-                          We've sent enrollment instructions to <strong style={{ color: '#1A3E6F' }}>{formData.email}</strong>
+                          Our team will review your application within 24-48 hours
                         </p>
                       </div>
                     </div>
-                    
+
                     <div style={{
                       display: 'flex',
                       alignItems: 'flex-start',
@@ -1833,13 +2008,13 @@ export default function Apply() {
                         flexShrink: 0
                       }}>2</div>
                       <div>
-                        <strong style={{ color: '#1A3E6F', fontSize: '18px' }}>Complete Enrollment</strong>
+                        <strong style={{ color: '#1A3E6F', fontSize: '18px' }}>Approval Email</strong>
                         <p style={{ margin: '0.5rem 0 0 0', color: '#64748b', fontSize: '15px', lineHeight: '1.6' }}>
-                          Click the secure link to set up your password and verify your identity
+                          Once approved, you'll receive an email at <strong style={{ color: '#1A3E6F' }}>{formData.email}</strong> with your login credentials
                         </p>
                       </div>
                     </div>
-                    
+
                     <div style={{
                       display: 'flex',
                       alignItems: 'flex-start',
@@ -1863,7 +2038,7 @@ export default function Apply() {
                       <div>
                         <strong style={{ color: '#1A3E6F', fontSize: '18px' }}>Start Banking</strong>
                         <p style={{ margin: '0.5rem 0 0 0', color: '#64748b', fontSize: '15px', lineHeight: '1.6' }}>
-                          Access your accounts, apply for debit cards, and enjoy premium banking services
+                          Log in with your credentials and start enjoying your new banking accounts
                         </p>
                       </div>
                     </div>
@@ -1884,8 +2059,7 @@ export default function Apply() {
                     fontSize: '15px',
                     lineHeight: '1.6'
                   }}>
-                    <strong>⏰ Important:</strong> Your enrollment link will expire in 24 hours for security purposes. 
-                    If you don't see the email, please check your spam or junk folder.
+                    <strong>⏰ Important:</strong> Please allow 24-48 hours for application review. You will receive an email notification once your application has been processed.
                   </p>
                 </div>
 
@@ -1920,7 +2094,7 @@ export default function Apply() {
                   >
                     🏠 Return to Home
                   </button>
-                  
+
                   <button
                     onClick={() => router.push('/login')}
                     style={{
@@ -2010,7 +2184,8 @@ export default function Apply() {
                       <div style={styles.accountHeader}>
                         <div style={{
                           ...styles.accountIcon,
-                          backgroundColor: formData.accountTypes.includes(account.id) ? '#FFC857' : '#f1f5f9'
+                          backgroundColor: formData.accountTypes.includes(account.id) ? '#3b82f6' : '#f1f5f9',
+                          color: formData.accountTypes.includes(account.id) ? 'white' : 'inherit'
                         }}>
                           {account.icon}
                         </div>
@@ -2117,11 +2292,11 @@ export default function Apply() {
                   onClick={() => handleInputChange({target: {name: 'agreeToTerms', type: 'checkbox', checked: !formData.agreeToTerms}})}
                 >
                   I agree to the{' '}
-                  <Link href="/terms" style={styles.link}>
+                  <Link href="/terms" target="_blank" rel="noopener noreferrer" style={styles.link}>
                     Terms of Service
                   </Link>{' '}
                   and{' '}
-                  <Link href="/privacy" style={styles.link}>
+                  <Link href="/privacy" target="_blank" rel="noopener noreferrer" style={styles.link}>
                     Privacy Policy
                   </Link>{' '}
                   <span style={styles.required}>*</span>
@@ -2151,7 +2326,7 @@ export default function Apply() {
 
           {/* Navigation Buttons */}
           <div style={styles.buttonContainer}>
-            {currentStep > 1 && (
+            {currentStep > 0 && currentStep < 4 && (
               <button
                 onClick={handleBack}
                 style={{...styles.button, ...styles.outlineButton}}
@@ -2160,7 +2335,7 @@ export default function Apply() {
               </button>
             )}
 
-            <div style={{marginLeft: currentStep === 1 ? 'auto' : '0'}}>
+            <div style={{marginLeft: currentStep === 1 ? 'auto' : currentStep === 0 ? 'auto' : '0'}}>
               {currentStep < 3 ? (
                 <button
                   onClick={handleNext}
@@ -2168,7 +2343,7 @@ export default function Apply() {
                 >
                   Next Step →
                 </button>
-              ) : (
+              ) : currentStep === 3 ? (
                 <button
                   onClick={handleSubmit}
                   disabled={loading || !formData.agreeToTerms}
@@ -2196,7 +2371,7 @@ export default function Apply() {
                     </>
                   )}
                 </button>
-              )}
+              ) : null}
             </div>
           </div>
         </div>
@@ -2214,10 +2389,10 @@ export default function Apply() {
           <div style={styles.footerGrid}>
             <div style={styles.footerColumn}>
               <div style={styles.footerLogo}>
-                <img src="/images/logo-primary.png" alt="Oakline Bank" style={styles.footerLogoImg} />
+                <img src="/images/Oakline_Bank_logo_design_c1b04ae0.png" alt="Oakline Bank" style={styles.footerLogoImg} />
                 <div style={styles.footerBankName}>Oakline Bank</div>
               </div>
-              <div style={styles.footerTagline}>Your trusted partner in financial growth.</div>
+              <div style={styles.footerTagline}>Your Financial Partner</div>
               <div style={styles.footerDescription}>
                 We are committed to providing exceptional banking services tailored to your needs. From everyday accounts to strategic investments, we're here to help you achieve your financial goals.
               </div>
@@ -2256,7 +2431,6 @@ export default function Apply() {
           </div>
           <div style={styles.footerBottom}>
             <div style={styles.footerBottomLeft}>
-              <div style={styles.routingText}>Routing Number: 075915826</div>
               <div style={styles.memberText}>Member FDIC | Equal Housing Lender</div>
             </div>
             <div style={styles.footerBottomRight}>
