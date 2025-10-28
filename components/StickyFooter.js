@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
@@ -10,6 +9,18 @@ export default function StickyFooter() {
   const [showFeatures, setShowFeatures] = useState(false);
   const router = useRouter();
 
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (!e.target.closest('.features-dropdown-container')) {
+        setShowFeatures(false);
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
+
+
   // Hide footer on certain pages
   useEffect(() => {
     const handleRouteChange = () => {
@@ -19,7 +30,7 @@ export default function StickyFooter() {
     };
 
     handleRouteChange();
-    
+
     const handleRouteChangeComplete = () => handleRouteChange();
     router.events.on('routeChangeComplete', handleRouteChangeComplete);
 
@@ -44,29 +55,26 @@ export default function StickyFooter() {
 
   if (!isVisible || loading) return null;
 
-  // Define navigation links based on user authentication status
-  const navigation = user ? [
-    { name: 'Home', href: '/', icon: '🏠', gradient: 'from-blue-500 to-blue-600' },
-    { name: 'Dashboard', href: '/dashboard', icon: '📊', gradient: 'from-green-500 to-green-600' },
-    { name: 'Transfer', href: '/transfer', icon: '💸', gradient: 'from-purple-500 to-purple-600' },
-    { name: 'Menu', href: '/main-menu', icon: '☰', gradient: 'from-gray-500 to-gray-600' }
-  ] : [
-    { name: 'Home', href: '/', icon: '🏠', gradient: 'from-blue-500 to-blue-600' },
-    { name: 'Apply', href: '/apply', icon: '📝', gradient: 'from-green-500 to-green-600' },
-    { name: 'Sign In', href: '/sign-in', icon: '🔑', gradient: 'from-indigo-500 to-indigo-600' },
-    { name: 'About', href: '/about', icon: 'ℹ️', gradient: 'from-teal-500 to-teal-600' }
+  // Define navigation links - Admin-focused navigation
+  const navigation = [
+    { name: 'Admin Hub', href: '/admin', icon: '🏦', gradient: 'from-blue-500 to-blue-600' },
+    { name: 'Dashboard', href: '/admin/admin-dashboard', icon: '📊', gradient: 'from-green-500 to-green-600' },
+    { name: 'Users', href: '/admin/manage-all-users', icon: '👥', gradient: 'from-purple-500 to-purple-600' },
+    { name: 'Applications', href: '/admin/approve-applications', icon: '✅', gradient: 'from-orange-500 to-orange-600' },
+    { name: 'Cards', href: '/admin/admin-card-applications', icon: '💳', gradient: 'from-indigo-500 to-indigo-600' },
+    { name: 'Transactions', href: '/admin/admin-transactions', icon: '💸', gradient: 'from-red-500 to-red-600' }
   ];
 
-  // Premium income-generating features for dropdown
+  // Premium features data for dropdown
   const premiumFeatures = [
-    { name: 'Investment Portfolio', href: '/investments', icon: '📈', desc: 'High-yield investments', color: '#10B981' },
-    { name: 'Premium Loans', href: '/loans', icon: '🏠', desc: 'Competitive rates', color: '#3B82F6' },
-    { name: 'Crypto Trading', href: '/crypto', icon: '₿', desc: 'Digital asset trading', color: '#F59E0B' },
-    { name: 'Wealth Management', href: '/investments', icon: '💎', desc: 'Private banking', color: '#8B5CF6' },
-    { name: 'Business Banking', href: '/account-types', icon: '🏢', desc: 'Commercial services', color: '#EF4444' },
-    { name: 'Financial Advisory', href: '/financial-advisory', icon: '🎯', desc: 'Expert consultation', color: '#06B6D4' },
-    { name: 'International Banking', href: '/internationalization', icon: '🌍', desc: 'Global services', color: '#84CC16' },
-    { name: 'Trust Services', href: '/about', icon: '🛡️', desc: 'Estate planning', color: '#F97316' }
+    { name: 'Create User', href: '/admin/create-user', icon: '➕', desc: 'Add new accounts', color: '#10B981' },
+    { name: 'Approve Accounts', href: '/admin/approve-accounts', icon: '✔️', desc: 'Account approvals', color: '#3B82F6' },
+    { name: 'Issue Cards', href: '/admin/issue-debit-card', icon: '🎫', desc: 'Issue debit cards', color: '#F59E0B' },
+    { name: 'Manual Transactions', href: '/admin/manual-transactions', icon: '✍️', desc: 'Create transactions', color: '#8B5CF6' },
+    { name: 'Bulk Transactions', href: '/admin/bulk-transactions', icon: '📦', desc: 'Batch processing', color: '#EF4444' },
+    { name: 'User Enrollment', href: '/admin/manage-user-enrollment', icon: '🔑', desc: 'Enrollment setup', color: '#06B6D4' },
+    { name: 'Delete Users', href: '/admin/delete-user-by-id', icon: '🗑️', desc: 'Remove accounts', color: '#DC2626' },
+    { name: 'System Logs', href: '/admin/admin-logs', icon: '📜', desc: 'View activity logs', color: '#6366F1' },
   ];
 
   return (
@@ -89,26 +97,26 @@ export default function StickyFooter() {
                 <span style={styles.navText}>{navItem.name}</span>
               </Link>
             ))}
-            
+
             {/* Features Dropdown Button - Centered */}
             <div style={styles.featuresContainer}>
               <button
                 onClick={handleFeatureClick}
                 style={styles.featuresButton}
               >
-                <span style={styles.navIcon}>💰</span>
-                <span style={styles.navText}>Banking+</span>
+                <span style={styles.navIcon}>🔧</span>
+                <span style={styles.navText}>Tools+</span>
               </button>
-              
+
               {showFeatures && (
                 <>
                   <div style={styles.backdrop} onClick={() => setShowFeatures(false)}></div>
                   <div style={styles.featuresDropdown}>
                     <div style={styles.dropdownHeader}>
-                      <h4 style={styles.dropdownTitle}>Premium Banking Services</h4>
-                      <p style={styles.dropdownSubtitle}>High-income generating banking solutions</p>
+                      <h4 style={styles.dropdownTitle}>Admin Management Tools</h4>
+                      <p style={styles.dropdownSubtitle}>Quick access to administrative functions</p>
                     </div>
-                    
+
                     <div style={styles.featuresGrid}>
                       {premiumFeatures.map((feature) => (
                         <button
@@ -134,16 +142,16 @@ export default function StickyFooter() {
                         </button>
                       ))}
                     </div>
-                    
+
                     <div style={styles.dropdownFooter}>
                       <button 
                         onClick={() => {
                           setShowFeatures(false);
-                          router.push("/account-types");
+                          router.push("/admin");
                         }}
                         style={styles.viewAllButton}
                       >
-                        Explore All Premium Services
+                        View All Admin Pages
                       </button>
                     </div>
                   </div>
@@ -165,21 +173,6 @@ export default function StickyFooter() {
                 <span style={styles.navText}>{navItem.name}</span>
               </Link>
             ))}
-
-            {/* Sign Out Button for Authenticated Users */}
-            {user && (
-              <button
-                onClick={handleSignOut}
-                style={{
-                  ...styles.navButton,
-                  background: '#ffffff',
-                  border: '1px solid #e5e7eb'
-                }}
-              >
-                <span style={styles.navIcon}>🔐</span>
-                <span style={styles.navText}>Sign Out</span>
-              </button>
-            )}
           </div>
         </div>
       </div>
@@ -399,5 +392,137 @@ const styles = {
     textAlign: 'center',
     lineHeight: '1',
     color: 'inherit'
-  }
-};
+  },
+  footerNav: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+    width: '100%',
+    padding: '0.5rem 0',
+    flexWrap: 'nowrap',
+    position: 'relative',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: '#ffffff',
+    boxShadow: '0 -4px 20px rgba(0, 0, 0, 0.08)',
+    backdropFilter: 'blur(10px)',
+    zIndex: 1000,
+    borderTop: '2px solid #e2e8f0'
+  },
+  footerButton: {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '8px 4px',
+    background: 'transparent',
+    border: 'none',
+    color: '#FFFFFF',
+    textDecoration: 'none',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+  },
+  footerIcon: {
+    fontSize: '1.3rem',
+    marginBottom: '0.3rem',
+    display: 'inline-block',
+  },
+  footerLabel: {
+    fontSize: '0.7rem',
+    fontWeight: '600',
+    lineHeight: '1',
+    marginTop: '2px',
+  },
+  adminHubBackdrop: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    zIndex: 9998,
+  },
+  adminHubDropdown: {
+    position: 'fixed',
+    bottom: '70px',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    backgroundColor: 'white',
+    borderRadius: '16px 16px 0 0',
+    boxShadow: '0 -4px 20px rgba(0,0,0,0.3)',
+    width: '95%',
+    maxWidth: '600px',
+    maxHeight: '70vh',
+    overflowY: 'auto',
+    zIndex: 9999,
+    animation: 'slideUp 0.3s ease-out',
+  },
+  adminDropdownHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '1rem 1.25rem',
+    borderBottom: '2px solid #e2e8f0',
+    position: 'sticky',
+    top: 0,
+    backgroundColor: 'white',
+    zIndex: 1,
+  },
+  adminDropdownTitle: {
+    fontSize: '1.25rem',
+    fontWeight: 'bold',
+    color: '#1e293b',
+    margin: 0,
+  },
+  closeButton: {
+    background: 'transparent',
+    border: 'none',
+    fontSize: '1.5rem',
+    color: '#64748b',
+    cursor: 'pointer',
+    padding: '0.25rem',
+    lineHeight: 1,
+  },
+  adminDropdownContent: {
+    padding: '1rem',
+  },
+  adminSection: {
+    marginBottom: '1.25rem',
+  },
+  adminSectionTitle: {
+    fontSize: '0.9rem',
+    fontWeight: 'bold',
+    color: '#1e40af',
+    margin: '0 0 0.75rem 0',
+    paddingBottom: '0.5rem',
+    borderBottom: '1px solid #e2e8f0',
+  },
+  adminLinkList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.25rem',
+  },
+  adminLink: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.75rem',
+    padding: '0.75rem',
+    color: '#374151',
+    textDecoration: 'none',
+    borderRadius: '8px',
+    fontSize: '0.95rem',
+    transition: 'all 0.2s ease',
+    backgroundColor: '#f8fafc',
+  },
+  adminLinkIcon: {
+    fontSize: '1.25rem',
+    width: '28px',
+    textAlign: 'center',
+  },
+  adminLinkText: {
+    flex: 1,
+    fontWeight: '500',
+  },
+  };
