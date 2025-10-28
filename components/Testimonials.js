@@ -1,7 +1,7 @@
+// components/Testimonials.js
 import Image from 'next/image';
-import { memo } from 'react';
 
-const Testimonials = memo(function Testimonials() {
+export default function Testimonials() {
   const testimonials = [
     { 
       name: 'John Davidson',
@@ -110,9 +110,7 @@ const Testimonials = memo(function Testimonials() {
       </div>
     </section>
   );
-});
-
-export default Testimonials;
+}
 
 const styles = {
   testimonialsSection: {
